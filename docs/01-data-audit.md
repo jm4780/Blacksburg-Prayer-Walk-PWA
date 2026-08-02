@@ -148,14 +148,15 @@ ODbL share-alike complexity (see §4).
   profile. Public domain.
 - **Blacksburg context numbers** (for sanity-checking our household estimates):
   ~44,800 population (2020), ~13,800 households, 19.77 sq mi land area.
-- **Critical caveat:** Blacksburg is a university town. Virginia Tech dormitories
-  are **group quarters**, not households — census household counts already exclude
-  them, but address-point and building-footprint layers include dorms. Household
-  estimation must exclude group-quarters buildings or the "households prayed for"
-  metric will be inflated on and near campus.
-- **Role for us:** calibration target ("do our deduplicated address-point-derived
-  household counts, summed town-wide, land near ~13.8k?") and a distribution
-  fallback where unit-level address data is weak.
+- **Critical caveat:** Blacksburg is a university town. Virginia Tech dormitories are
+  **group quarters**, so the ~13,800 census household figure *excludes* roughly
+  10,000 on-campus students. Per **decision D1**, campus is in scope and dorms are
+  counted via a separate room-based estimate — so the census figure calibrates the
+  off-campus layer only, and campus households are added on top from a curated
+  residence-hall table. Do not calibrate the combined total against 13,800.
+- **Role for us:** calibration target for `household_type = RESIDENTIAL` ("do our
+  deduplicated address-point-derived household counts, summed town-wide, land near
+  ~13.8k?") and a distribution fallback where unit-level address data is weak.
 
 ### 2.6 VDOT / road classification
 
@@ -192,9 +193,17 @@ points** — the best case:
    from normalized full address).
 2. **Residential filter:** classify points as residential using Montgomery County
    parcel land-use codes (spatial join point→parcel), assisted by town zoning and
-   building footprints. Exclude commercial, institutional, and **group-quarters
-   (VT dorms, Greek housing, care facilities)** — maintain an explicit exclusion
-   list for the campus area.
+   building footprints. Exclude commercial and institutional points. Group quarters
+   (VT residence halls, Oak Lane, care facilities) are excluded *from this layer*
+   because address points represent them poorly — one point per building for
+   hundreds of residents — and are instead handled by step 2b.
+2b. **Student residences (per D1):** a curated table of ~47 VT residence halls —
+   name, building footprint, published bed count, estimated rooms (`beds ÷ 2`,
+   refined per hall where suite/single configurations are published). Each hall
+   contributes `estimated_units = rooms` as `household_type = STUDENT_RESIDENCE`
+   with `confidence = LOW`. Source: VT Housing & Residence Life capacities joined to
+   footprints. Expect ~4,700–5,300 units. Off-campus student apartments are ordinary
+   address points and need none of this.
 3. **Multi-unit handling:** if address points are unit-level (the state 911
    standard supports it — ⚠️ verify locally), count points. Where a single point
    represents a multi-unit building, use `estimated_units` from parcel data or
@@ -205,9 +214,12 @@ points** — the best case:
    street name, which makes corner-lot assignment much more reliable than pure
    geometry). Store as `SegmentHousehold` rows with `relationship_type` and
    `confidence`; households are deduplicated town-wide by household ID, satisfying
-   §20.
-5. **Calibration:** compare town-wide totals against Census 2020 (~13.8k
+   §20. Residence halls associate to the nearest REQUIRED **pedestrian way** as
+   often as to a road — which is exactly why D1b makes campus paths REQUIRED.
+5. **Calibration:** compare the `RESIDENTIAL` total against Census 2020 (~13.8k
    households) and document the delta and chosen adjustment in the pipeline output.
+   `STUDENT_RESIDENCE` is reported separately and reviewed against VT's published
+   on-campus population (~9,300–10,500 students) rather than against the census.
 
 All public displays say "estimated," per spec.
 
@@ -247,11 +259,15 @@ effort:
    parcels, dead-end stubs into commercial parcels) → human review pass over a map
    (Jacob + local knowledge) before launch. Spec §4.3 roles (`REQUIRED` /
    `OPTIONAL_CONNECTOR` / `EXCLUDED`) are assigned here.
-2. **Virginia Tech campus** — a policy decision, not just a data one. Campus roads
-   and paths are state (VT) property inside town limits; dorms are group quarters.
-   **Recommendation:** mark campus internal roads/paths `OPTIONAL_CONNECTOR`
-   (walkable, never required, never counted), and exclude campus buildings from
-   household estimates. Flagged as an open decision in the technical plan.
+2. **Virginia Tech campus** — **resolved: campus is included** (decision D1). The
+   curation work this creates: (a) hand-draw a **campus core polygon** separating the
+   academic/residential/athletics core from the agricultural research land, airport,
+   and golf course, which stay out; (b) select which campus **pedestrian ways** are
+   REQUIRED — on campus the footpath network *is* the network, so the town-wide
+   "sidewalks are absorbed into streets" rule is deliberately inverted here (D1b);
+   (c) build the ~47-row residence-hall capacity table for household estimation
+   (D1c). Campus is ~4.1 of the town's 19.77 sq mi, so these boundaries move the
+   headline metric materially — see D1 for the reasoning and expected effects.
 3. **Trail curation** — per spec §17, hand-pick which Paths-to-the-Future features
    count as REQUIRED trails (Huckleberry Trail inside town limits is the obvious
    anchor) vs. connector-only sidewalk/path geometry. Sidewalks parallel to streets
@@ -259,8 +275,10 @@ effort:
    coverage (spec §4.2: either sidewalk counts).
 4. **Boundary edge cases** — segments straddling the town line need splitting at
    the boundary with the outside portion marked `OUT_OF_AREA_CONNECTOR`.
-5. **Group-quarters exclusion list** — enumerate VT dorms/Greek houses from
-   footprints + campus map; exclude from household counts.
+5. **Residence-hall capacity table** — enumerate VT dorms, Oak Lane, and Greek
+   housing from footprints + campus map; attach published bed counts and room
+   estimates (D1c). Care facilities and other true group quarters are still excluded
+   from household counts.
 6. **Unsafe crossings / unpleasant arterials** — seeded from road class, refined
    from pilot feedback via admin flags.
 7. **Missing pedestrian connectors** — cul-de-sac cut-throughs and neighborhood

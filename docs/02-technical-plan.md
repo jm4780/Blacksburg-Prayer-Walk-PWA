@@ -169,8 +169,19 @@ Automatic rules (first pass):
 | Name matches alley/service patterns | flag |
 | Curated trail list | `TRAIL`, role `REQUIRED` |
 | Other Paths-to-the-Future geometry | `PEDESTRIAN_CONNECTOR`, role `OPTIONAL_CONNECTOR` |
-| VT campus polygon | role `OPTIONAL_CONNECTOR` (see open decision D1) |
+| Inside **campus core polygon**: named campus streets | `STREET`, role `REQUIRED` |
+| Inside campus core: curated major pedestrian ways | `PEDESTRIAN_CONNECTOR`, role **`REQUIRED`** (D1b) |
+| Inside campus core: service drives, lot connections | role `EXCLUDED` |
+| VT land outside the campus core (farms, airport, golf) | role `OPTIONAL_CONNECTOR` |
 | Everything else inside town | `STREET`, role `REQUIRED` |
+
+Note the campus rows deliberately invert §2.3's rule that pedestrian geometry is
+absorbed rather than required. On campus the footpath network *is* the network —
+students live along paths, not roads — so a road-only campus model would route people
+around the outside of the residential quads and declare campus finished. See
+[decision D1](03-decisions.md#d1--virginia-tech-campus-included-) for the full
+reasoning; the campus core polygon and the "major pedestrian way" selection are both
+hand-curated Phase 2c artifacts.
 
 Then: **a human review pass over every flagged segment plus a full visual sweep**, in
 the admin curation tool, before launch. The audit expects a meaningful number of
@@ -185,19 +196,28 @@ refreshes; it must never be a hand-edit of pipeline output.
 
 ### 2.5 households
 
-Implements audit §3 and spec §20. Address points → residential filter (parcel land
-use + zoning) → group-quarters exclusion (VT dorms, Greek housing, care facilities) →
-unit-count resolution → nearest-required-segment association within ~75 m, tie-broken
-by street-name match against `normalized_name`.
+Implements audit §3 and spec §20. Two layers:
+
+- **`RESIDENTIAL`** — address points → residential filter (parcel land use + zoning)
+  → unit-count resolution → nearest-required-segment association within ~75 m,
+  tie-broken by street-name match against `normalized_name`.
+- **`STUDENT_RESIDENCE`** — a curated ~47-row residence-hall table (name, footprint,
+  published beds, estimated rooms) contributing `estimated_units = rooms` at
+  `confidence = LOW`, associated to the nearest REQUIRED segment (frequently a
+  pedestrian way, per D1b). Address points represent dorms poorly — one point for
+  hundreds of residents — so they are excluded from the first layer and handled here.
 
 Corner-lot double-counting is prevented structurally: **a household has exactly one
 `primary_segment_id`** and only that link counts toward metrics. `SegmentHousehold`
 may hold secondary associations with a `relationship_type` for admin inspection and
 future refinement, but town-wide and per-route counts always dedupe by household ID.
 
-Calibration gate: town-wide residential household total should land near the Census
-2020 figure (~13,800). The build report prints the delta; a large gap means the
-residential filter is wrong and must be fixed before proceeding.
+Calibration gate: the `RESIDENTIAL` total should land near the Census 2020 figure
+(~13,800). The build report prints the delta; a large gap means the residential
+filter is wrong and must be fixed before proceeding. `STUDENT_RESIDENCE` is reported
+separately and checked against VT's published on-campus population — it must **not**
+be folded into the census comparison, since census households exclude group quarters
+by definition. Expected combined total ≈ 18,800.
 
 ### 2.6 identify — stable IDs and the migration process (spec §11)
 
@@ -272,6 +292,7 @@ curation_override(coverage_area_id, segment_id, field, value, reason,
                   set_by, set_at)      -- survives rebuilds (§2.4, spec §33)
 
 household_estimate(id, centroid geometry(Point,4326), source, estimated_units,
+                   household_type,      -- RESIDENTIAL|STUDENT_RESIDENCE (D1c)
                    confidence, primary_segment_id NULL, source_updated_at)
 segment_household(segment_id, household_estimate_id, relationship_type, confidence)
 
@@ -304,6 +325,10 @@ Three deliberate details:
 - **`network_segment.id` is a human-readable TEXT key.** Admin work, bug reports, and
   curation spreadsheets all involve humans reading and typing segment IDs.
   `SEG-004217` is a better artifact than a UUID.
+- **`household_estimate.household_type`** keeps the campus/off-campus split
+  recoverable. Dorm counting is a judgment call (D1c chose rooms over beds); storing
+  the type means the convention can be re-cut later with a query instead of a
+  network rebuild.
 
 ### 3.1 Identity handling (§5)
 
@@ -598,7 +623,7 @@ Screens exactly as §26. Implementation notes worth fixing now:
 | 1 | Data audit + this plan | ✅ done |
 | 2a | Schema inspection report; resolve ⚠️ items | 1–2 days |
 | 2b | Pipeline: fetch → split → classify → households → IDs → load | 1.5–2 weeks |
-| 2c | **Human curation pass** (public/private, trails, campus) | 1–2 days of Jacob's time + tooling |
+| 2c | **Human curation pass** (public/private, trails, campus core polygon, campus paths, residence-hall table) | 2–3 days of Jacob's time + tooling |
 | 3 | Router prototype + scenario harness + tuning | 2–3 weeks |
 | 4 | Backend API, admin, metrics | 1–1.5 weeks |
 | 5 | PWA | 2–3 weeks |
@@ -619,7 +644,9 @@ both a strong data-quality check and the moment the project becomes real to peop
 |---|---|
 | Private/apartment drives misclassified as REQUIRED → town can never hit 100% | Human curation pass (2c); admin can reclassify any segment at any time and metrics recompute |
 | Routes are technically good but unpleasant → people stop using it | Separate walk-quality score with a hard floor; 18-scenario visual harness; pilot tuning |
-| Household estimate wrong on campus (dorms as households) | Explicit group-quarters exclusion; Census calibration gate in the build report |
+| Dorm household estimate distorts the headline number (campus ≈ 26% of the total) | `household_type` split, `confidence = LOW`, separate calibration against VT capacity; Jacob approves the computed number before launch (D1c) |
+| Campus modeled from roads only → dorm quads never actually prayed for | Campus pedestrian ways are REQUIRED, not connectors (D1b) |
+| Blanket campus inclusion loads the denominator with farm roads | Hand-drawn campus core polygon; agricultural land, airport, golf course stay out (D1a) |
 | Data refresh silently breaks completion history | Snapshot-based builds, ID matcher with lineage, halt-on-ambiguity, human-reviewed build diff |
 | Two walkers get the same streets | Soft reservations; deliberately not hard locks (§21) — a duplicate prayer walk is a far smaller failure than "no routes available" |
 | Nesting requirement makes variants low-quality at the extremes | Prune-from-Extended construction; per-variant re-optimization; warn rather than force a band |
@@ -629,26 +656,15 @@ both a strong data-quality check and the moment the project becomes real to peop
 
 ## 10. Open decisions
 
-These need Jacob's call; they change data and product behavior, not code structure, so
-Phase 2 can begin now — but D1 and D2 must be answered before the curation pass (2c).
+Tracked in [`03-decisions.md`](03-decisions.md). Summary of current state:
 
-- **D1 — Virginia Tech campus.** Recommendation: campus internal roads and paths are
-  `OPTIONAL_CONNECTOR` (walkable, not required, not counted) and campus buildings are
-  excluded from household estimates. Rationale: it's state property, dorms are group
-  quarters not households, and including ~2,600 acres of campus would distort both the
-  denominator and the household number. **Counter-argument worth weighing: praying for
-  students is plausibly a core motivation for this project**, in which case campus
-  should be REQUIRED and dorms counted with a documented per-building resident
-  estimate. This is a ministry decision, not a technical one.
-- **D2 — Which trails count (§17).** Recommendation: the Huckleberry Trail inside town
-  limits is REQUIRED; everything else in Paths-to-the-Future is connector-only until
-  specifically added. Needs a reviewed list.
-- **D3 — Out-of-town connector allowance.** How far outside the boundary may a route
-  wander to close a loop? Suggested default: 0.5 mi, penalized.
-- **D4 — Data refresh cadence.** Suggested: quarterly, plus on demand when the town
-  publishes significant updates. Each refresh is a reviewed build promotion, not
-  automatic.
-- **D5 — Admin access.** How many admins, and password vs. magic link? Affects a small
-  amount of Phase 4 work.
-- **D6 — Hosting budget.** Confirms the Fly.io/Render + Cloudflare Pages
-  recommendation; expect roughly $20–40/month.
+- **D1 — Virginia Tech campus. ✅ Resolved: included**, with dorms counted as rooms
+  (~5,000 estimated households). Creates three Phase 2c curation artifacts: the
+  campus core polygon, the required-pedestrian-way selection, and the residence-hall
+  capacity table. See D1 for reasoning and the expected metric effects.
+- **D2 — Which trails count (§17).** Open, and **blocks the Phase 2c curation pass.**
+  Recommendation: the Huckleberry Trail inside town limits is REQUIRED; everything
+  else in Paths-to-the-Future is connector-only until specifically added.
+- **D3–D6** — out-of-town connector allowance, refresh cadence, admin access, hosting
+  budget. All have workable defaults; none block Phase 2.
+- **D7 — GitHub write access.** Open; blocks pushing work, not doing it.

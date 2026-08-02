@@ -27,6 +27,8 @@ streets covered. Watch the town gradually fill in.
   build sequence.
 - [`docs/00-product-spec.md`](docs/00-product-spec.md) — the V1 product and routing
   specification this project implements.
+- [`docs/03-decisions.md`](docs/03-decisions.md) — decision log. Notably **D1: the
+  Virginia Tech campus is included**, with dorms counted as rooms.
 
 ## Guiding principle
 
