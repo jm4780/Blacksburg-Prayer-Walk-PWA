@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Environment
+.env
+.env.local
+*.local
+
+# Pipeline artifacts — raw GIS snapshots are large; store via git-lfs or object
+# storage and keep only the sidecar metadata in git.
+pipeline/snapshots/**/*.geojson
+pipeline/snapshots/**/*.zip
+pipeline/build_output/
+!pipeline/snapshots/**/*.meta.json
+
+# OS
+.DS_Store
