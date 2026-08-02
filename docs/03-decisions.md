@@ -118,11 +118,73 @@ off-campus chapter houses are ordinary address points.
 
 ---
 
-## Open decisions
+## D2 — Which trails count: **Huckleberry confirmed**, rest recommended ⏳
 
-- **D2 — Which trails count (spec §17).** Recommendation: Huckleberry Trail inside
-  town limits is REQUIRED; everything else in Paths-to-the-Future is connector-only
-  until specifically added. **Needs a reviewed list.** Blocks the Phase 2c curation pass.
+**Decided (partial):** 2026-08-02. Huckleberry Trail confirmed by Jacob. The
+recommendations below await a yes/no.
+
+### The test
+
+A trail earns `REQUIRED` if it **passes households** or **functions as a neighborhood
+connector people walk for transportation**. Being pleasant woods is not sufficient.
+
+Note what this test is *not* based on. For the campus (D1a) the argument against
+blanket inclusion was denominator bloat. That argument is weak here: Blacksburg's
+required street network will be on the order of 200–250 miles, so even six miles of
+Huckleberry is ~3%, and a few extra trails would barely move the percentage. The real
+reasons to keep wooded trails out are different and better:
+
+1. **No households** — a wooded loop generates no ministry value under the project's
+   own stated goal.
+2. **Route quality** — a required dirt trail with serious elevation is a genuine
+   router problem. Gateway Trail is 3.7 mi with **869 ft of gain**; as a REQUIRED
+   segment it would sit incomplete indefinitely, and then the aging bonus (D-plan
+   §4.3, Stage 3) would eventually force a mountain hike into somebody's "Extended"
+   prayer walk. That is a bad experience produced by a correct algorithm.
+3. **Practicality** — these are destination hikes, not the 30–60 minute walk from your
+   front door that this app is built around.
+
+### Recommendation
+
+**`REQUIRED`:**
+
+- **Huckleberry Trail**, in-town portion including **Huckleberry North** — confirmed.
+  The town's spine: paved, passes neighborhoods and commercial areas, genuinely used
+  for transportation.
+- **Deerfield Trail** (Toms Creek Rd at Deerfield Dr) and **Shenandoah Bike Trail**
+  (off Toms Creek Rd / Patrick Henry Dr) — short paved neighborhood trails embedded in
+  residential areas north of town. These are effectively streets without cars, and
+  they pass homes. ⚠️ *Verify against GIS: confirm length and that they front
+  households rather than running behind fences.*
+
+**`OPTIONAL_CONNECTOR`** (walkable, never counted, usable to close loops):
+
+- **Heritage Community Park & Natural Area** paved walkways and **Gateway Park** paths
+  — in town and worth walking, but park interiors with no adjacent homes. Valuable to
+  the router for making loops; should not inflate the denominator.
+- **Gateway Trail** (Jefferson NF, 3.7 mi, dirt, 869 ft gain) and onward to Poverty
+  Creek / Pandapas Pond — see reason 2 above.
+
+**Out of the coverage area entirely** (available as `OUT_OF_AREA_CONNECTOR`):
+
+- **Coal Mining Heritage Park loop** (1.5 mi, county park at 751 Merrimac Rd) and the
+  **Huckleberry south of the town line** — outside Blacksburg, so out of scope for the
+  town project. Natural candidates for a future Montgomery County coverage area.
+
+### Two implementation notes
+
+- **Surface and grade gate trail eligibility.** Spec §17 already asks trails to carry
+  surface and accessibility attributes; the classifier should use them, so "paved and
+  flat enough to pray on" is a data property rather than a case-by-case judgment.
+- **Walking the full Huckleberry to Christiansburg already works correctly.** Only the
+  in-town portion counts toward coverage, but spec §6.2 counts the whole walked
+  distance — including out-of-town portions — toward "total miles walked." Someone who
+  walks the full 15 miles gets credit for 15 miles walked and coverage for the ~6
+  in-town. No special handling needed; worth explaining in the UI once.
+
+---
+
+## Open decisions
 - **D3 — Out-of-town connector allowance.** How far past the boundary may a route
   wander to close a loop? Suggested default: 0.5 mi, penalized.
 - **D4 — Data refresh cadence.** Suggested: quarterly plus on demand, each refresh a

@@ -662,9 +662,11 @@ Tracked in [`03-decisions.md`](03-decisions.md). Summary of current state:
   (~5,000 estimated households). Creates three Phase 2c curation artifacts: the
   campus core polygon, the required-pedestrian-way selection, and the residence-hall
   capacity table. See D1 for reasoning and the expected metric effects.
-- **D2 — Which trails count (§17).** Open, and **blocks the Phase 2c curation pass.**
-  Recommendation: the Huckleberry Trail inside town limits is REQUIRED; everything
-  else in Paths-to-the-Future is connector-only until specifically added.
+- **D2 — Which trails count (§17). ✅ Huckleberry confirmed**; Deerfield and
+  Shenandoah recommended as REQUIRED, park interiors and Gateway Trail as
+  connector-only, Coal Mining Heritage and the Huckleberry south of the town line out
+  of area. Awaiting a yes/no on the recommendations. Trail eligibility should key off
+  surface and grade attributes rather than case-by-case judgment.
 - **D3–D6** — out-of-town connector allowance, refresh cadence, admin access, hosting
   budget. All have workable defaults; none block Phase 2.
 - **D7 — GitHub write access.** Open; blocks pushing work, not doing it.
