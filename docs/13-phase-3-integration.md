@@ -264,7 +264,7 @@ warning naming G1. `/api/health` and the admin deployment screen both publish th
 | UI components | `web/src/components/__tests__/ui.test.tsx` | 10 |
 | End-to-end, mobile viewport | `web/e2e/slice.mjs` | 41 assertions |
 
-**82 passed, 1 skipped** (household coordinates are stripped when `households.json` is
+**103 backend tests** (household coordinates are stripped when `households.json` is
 written, so there is nothing to test for), plus 10 frontend and 41 e2e. Run:
 
 ```bash

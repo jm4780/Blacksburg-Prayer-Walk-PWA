@@ -9,6 +9,9 @@ deliberate test rather than as ordinary walking.
 Deployment steps, backups and rollback live in
 [`docs/15-pilot-deployment.md`](15-pilot-deployment.md).
 
+**Tests:** 103 backend · 10 component · 41 end-to-end on a Pixel 7 · 12
+admin-interface checks. All green.
+
 ---
 
 ## 1. G1 is now deployment configuration

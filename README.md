@@ -47,7 +47,7 @@ python3 -m api.routing.freeze
 Tests:
 
 ```bash
-python3 -m pytest                                  # 101 backend tests
+python3 -m pytest                                  # 103 backend tests
 cd web && npm test                                 # 10 component tests
 cd web && node e2e/slice.mjs                       # 41 end-to-end assertions
 cd web && node e2e/admin.mjs <admin-token>         # 12 admin-interface checks
