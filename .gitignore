@@ -1,28 +1,39 @@
-# Python
+# ---------------------------------------------------------------------------
+# Source GIS data and derived geometry are NOT committed.
+#
+# This repository is PUBLIC. Committing verbatim Town of Blacksburg GIS data, or
+# geometry derived from it, is redistribution — and no town dataset grants any reuse
+# right (copyrightText is empty on every layer). See docs/05-licensing-status.md,
+# release gate G1.
+#
+# Separately, households.json and unassociated-households.json contain ~18,000
+# individual residential street addresses. Those must not be published regardless of
+# how the licensing question is answered.
+#
+# What IS committed: the pipeline code, the snapshot sidecars (metadata about the
+# data — field names, counts, URLs, edit dates), the build report, and the aggregate
+# review files. Anyone with network access can reproduce the rest in a few minutes:
+#
+#   python3 -m pipeline.sources.fetch
+#   python3 -m pipeline.build.run
+#   python3 -m pipeline.build.campus_report
+#   python3 -m pipeline.build.map_export
+# ---------------------------------------------------------------------------
+
+# Raw source snapshots — verbatim town GIS data.
+pipeline/snapshots/**/*.geojson
+
+# Derived geometry.
+pipeline/out/**/*.geojson
+pipeline/out/**/network-map.html
+
+# Address-level records — privacy, not just licensing.
+pipeline/out/**/households.json
+pipeline/out/**/review/unassociated-households.json
+
+# ---------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 .venv/
 venv/
-.pytest_cache/
-.ruff_cache/
-.mypy_cache/
-
-# Node
-node_modules/
-dist/
-.vite/
-
-# Environment
-.env
-.env.local
-*.local
-
-# Pipeline artifacts — raw GIS snapshots are large; store via git-lfs or object
-# storage and keep only the sidecar metadata in git.
-pipeline/snapshots/**/*.geojson
-pipeline/snapshots/**/*.zip
-pipeline/build_output/
-!pipeline/snapshots/**/*.meta.json
-
-# OS
 .DS_Store

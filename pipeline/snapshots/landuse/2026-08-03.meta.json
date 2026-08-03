@@ -1,0 +1,34 @@
+{
+  "dataset": "landuse",
+  "title": "Town of Blacksburg \u2014 Current Land Use",
+  "publisher": "Town of Blacksburg",
+  "role": "Residential filter (replaces county parcels)",
+  "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Comprehensive_Plan/FeatureServer/8",
+  "retrieved_at": "2026-08-03T00:38:14.645899+00:00",
+  "source_updated_at": "2026-01-29T12:03:30.400000+00:00",
+  "source_schema_updated_at": "2023-05-04T12:02:16.644000+00:00",
+  "feature_count": 11398,
+  "server_reported_count": 11398,
+  "geometry_type": "esriGeometryPolygon",
+  "source_srs": {
+    "wkid": 102747,
+    "latestWkid": 2284
+  },
+  "snapshot_srs": "EPSG:4326",
+  "service_capabilities": "Query,Sync",
+  "max_record_count": 2000,
+  "license_text": "",
+  "license_status": "NONE_PUBLISHED",
+  "source_id_field": "OBJECTID",
+  "stable_id_field": "GlobalID",
+  "field_names": [
+    "OBJECTID",
+    "ST_Level_1",
+    "ST_Level_2",
+    "ST_Level_3",
+    "Land_Use",
+    "GlobalID",
+    "Shape__Area",
+    "Shape__Length"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "dataset": "boundary",
+  "title": "Town of Blacksburg \u2014 Town Corporate Limits",
+  "publisher": "Town of Blacksburg",
+  "role": "Coverage area boundary",
+  "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Administrative_Reference_Boundaries/FeatureServer/4",
+  "retrieved_at": "2026-08-03T00:38:05.170608+00:00",
+  "source_updated_at": "2026-01-31T12:04:17.422000+00:00",
+  "source_schema_updated_at": "2024-06-18T12:03:26.998000+00:00",
+  "feature_count": 1,
+  "server_reported_count": 1,
+  "geometry_type": "esriGeometryPolygon",
+  "source_srs": {
+    "wkid": 102747,
+    "latestWkid": 2284
+  },
+  "snapshot_srs": "EPSG:4326",
+  "service_capabilities": "Query,Sync",
+  "max_record_count": 2000,
+  "license_text": "",
+  "license_status": "NONE_PUBLISHED",
+  "source_id_field": "OBJECTID",
+  "stable_id_field": "GlobalID",
+  "field_names": [
+    "OBJECTID",
+    "GlobalID",
+    "Acres",
+    "Square_Miles",
+    "Shape__Area",
+    "Shape__Length"
+  ]
+}

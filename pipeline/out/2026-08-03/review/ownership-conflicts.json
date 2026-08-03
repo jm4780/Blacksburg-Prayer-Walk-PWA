@@ -1,0 +1,290 @@
+[
+  {
+    "source_id": 225,
+    "label": "WELLESLEY CT NW",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 226,
+    "label": "NEWTON CT NW",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 231,
+    "label": "FOXHUNT LN",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 232,
+    "label": "CHELSEA CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 270,
+    "label": "HERITAGE LN",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 274,
+    "label": "HERITAGE LN",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 307,
+    "label": "FOXTRAIL LN",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 309,
+    "label": "FOXRIDGE LN",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 319,
+    "label": "WELLESLEY CT NW",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 326,
+    "label": "BLUE RIDGE DR",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 335,
+    "label": "YORKSHIRE CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 349,
+    "label": "SHERWOOD CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 352,
+    "label": "SOUTHAMPTON CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 374,
+    "label": "RICHMOND LN",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 376,
+    "label": "CARDINAL CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 377,
+    "label": "NEWTON CT NW",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 381,
+    "label": "HEATHER DR",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 384,
+    "label": "CHELSEA CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 385,
+    "label": "COLONIAL DR",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 390,
+    "label": "HEATHER DR",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 394,
+    "label": "COPPER CROFT RUN",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 394,
+    "label": "COPPER CROFT RUN",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 396,
+    "label": "HOUNDSCHASE LN",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 398,
+    "label": "COPPER CROFT RUN",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 402,
+    "label": "CHOWNING PL",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 408,
+    "label": "HEATHER DR",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 503,
+    "label": "LANCELOT CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 513,
+    "label": "CAMELOT CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 524,
+    "label": "NOTTINGHAM CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 528,
+    "label": "CANTERBURY CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 548,
+    "label": "BRIGHTWOOD MANOR DR",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 1299,
+    "label": "QUINCY CT",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 1485,
+    "label": "HUNTERS MILL RD",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 1485,
+    "label": "HUNTERS MILL RD",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 22341,
+    "label": "CLOVER VALLEY CIR",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  },
+  {
+    "source_id": 22342,
+    "label": "CLOVER VALLEY CIR",
+    "RD_MAINT": "Private",
+    "ROAD_CLASS": "Local",
+    "resolved_to": "PRIVATE",
+    "rule": "RD_MAINT is primary (instruction); ROAD_CLASS recorded only"
+  }
+]

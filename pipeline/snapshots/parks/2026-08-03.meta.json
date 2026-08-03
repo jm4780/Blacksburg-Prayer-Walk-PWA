@@ -1,0 +1,34 @@
+{
+  "dataset": "parks",
+  "title": "Town of Blacksburg \u2014 Parks",
+  "publisher": "Town of Blacksburg",
+  "role": "Named park context for trail curation",
+  "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Parks_and_Open_Space/FeatureServer/0",
+  "retrieved_at": "2026-08-03T00:38:19.397624+00:00",
+  "source_updated_at": "2026-03-14T12:03:48.632000+00:00",
+  "source_schema_updated_at": "2023-05-02T18:42:44.063000+00:00",
+  "feature_count": 44,
+  "server_reported_count": 44,
+  "geometry_type": "esriGeometryPolygon",
+  "source_srs": {
+    "wkid": 102747,
+    "latestWkid": 2284
+  },
+  "snapshot_srs": "EPSG:4326",
+  "service_capabilities": "Query,Sync",
+  "max_record_count": 2000,
+  "license_text": "",
+  "license_status": "NONE_PUBLISHED",
+  "source_id_field": "OBJECTID",
+  "stable_id_field": "GlobalID",
+  "field_names": [
+    "OBJECTID",
+    "Name",
+    "Address",
+    "acreage",
+    "Status",
+    "GlobalID",
+    "Shape__Area",
+    "Shape__Length"
+  ]
+}

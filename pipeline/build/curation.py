@@ -1,0 +1,93 @@
+"""Curation configuration: the decisions D1 and D2 encode, expressed as data.
+
+Anything in here is a human judgment, not a data property. It is kept separate from
+the classifier so the classifier stays auditable and so a change of mind is a one-line
+diff rather than a code change.
+
+`status` on each entry distinguishes decisions that are settled from ones still
+awaiting Jacob's yes/no. Provisional entries are applied but reported separately in
+the build report so nothing settled-looking is actually pending.
+"""
+
+# ---------------------------------------------------------------------------
+# D2 — which trails count (docs/03-decisions.md#d2)
+# Keys are normalized trail names as produced by build/names.py. Matching is on
+# normalized_name, so "Deerfield" (the data's spelling) has already become
+# "deerfield trl" via NAME_FIXES by the time it reaches here.
+# ---------------------------------------------------------------------------
+TRAIL_ROLES = {
+    # Confirmed by Jacob 2026-08-02.
+    "huckleberry trl": dict(role="REQUIRED", status="CONFIRMED",
+                            note="Town spine; paved; passes neighborhoods. D2."),
+    # Recommended, awaiting yes/no. Applied provisionally.
+    "deerfield trl": dict(role="REQUIRED", status="PROVISIONAL",
+                          note="D2 recommendation pending confirmation."),
+    "shenandoah trl": dict(role="REQUIRED", status="PROVISIONAL",
+                           note="D2 recommendation pending confirmation."),
+    # Explicitly connector-only per D2.
+    "gateway trl": dict(role="OPTIONAL_CONNECTOR", status="CONFIRMED",
+                        note="3.7 mi dirt, 869 ft gain; destination hike, not a "
+                             "neighborhood walk. D2 reason 2."),
+    "heritage trl": dict(role="OPTIONAL_CONNECTOR", status="CONFIRMED",
+                         note="Park interior, no adjacent homes. D2."),
+}
+
+# Spur/underpass/tunnel features inherit their parent trail's role. Keyed on the
+# normalized parent name; the classifier matches by prefix.
+TRAIL_SPUR_INHERITS = True
+
+# Everything else with Type=Trail lands here until reviewed. Deliberately not
+# REQUIRED — an unreviewed trail must never inflate the denominator.
+TRAIL_DEFAULT_ROLE = "OPTIONAL_CONNECTOR"
+TRAIL_DEFAULT_STATUS = "NEEDS_REVIEW"
+
+# ---------------------------------------------------------------------------
+# D1 — Virginia Tech campus (docs/03-decisions.md#d1)
+# ---------------------------------------------------------------------------
+# The town's single UNIV zoning polygon is the first draft of D1a's campus core.
+# It is a starting point for curation, not a finished boundary: it excludes some
+# campus land and includes some non-residential parcels. Flagged accordingly.
+CAMPUS_CORE_SOURCE = dict(
+    layer="zoning",
+    where=("Labels", "UNIV"),
+    status="DRAFT",
+    note="Town UNIV zoning polygon, 1.38 sq mi. D1a asks for a hand-drawn core; "
+         "this is the starting point, not the answer.",
+)
+
+# Campus pedestrian ways are REQUIRED per D1b — but only ones a human has approved.
+# The schema inspection found campus paths in Paths to the Future tagged Owner=VT;
+# they are classified NEEDS_REVIEW, not auto-REQUIRED, because D1b asks for a
+# *selection* of major ways, not blanket inclusion.
+CAMPUS_PATH_DEFAULT_ROLE = "OPTIONAL_CONNECTOR"
+CAMPUS_PATH_DEFAULT_STATUS = "NEEDS_REVIEW"
+
+# ---------------------------------------------------------------------------
+# Hard exclusions — limited-access facilities nobody walks.
+# ---------------------------------------------------------------------------
+EXCLUDE_ROAD_CLASS = {
+    "Ramp": "Limited-access ramp; not walkable.",
+    "Primary": "US-460 bypass; limited access, no pedestrian facility.",
+}
+
+# ---------------------------------------------------------------------------
+# Household association
+# ---------------------------------------------------------------------------
+# Nominal association cap. Units beyond this distance from any eligible segment are
+# not silently attached to the nearest one — they are reported as unassociated.
+ASSOCIATION_CAP_M = 75.0
+
+# A named complex whose internal circulation is not modelled by any eligible segment
+# gets held for review rather than dumped onto its frontage street. See
+# docs/06-household-methodology.md.
+COMPLEX_MIN_UNITS_FOR_REVIEW = 25
+
+# Complexes a human has named for review regardless of what the automatic test says.
+# Matched case-insensitively as a substring of PlaceName. These three were called out
+# in the Phase 2a instruction; the heuristic clears two of them, and a named human
+# instruction outranks a heuristic.
+ALWAYS_REVIEW_COMPLEXES = [
+    "The Mill",
+    "Hunters Ridge",
+    "Terrace View",
+]

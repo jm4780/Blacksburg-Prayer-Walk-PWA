@@ -1,0 +1,33 @@
+{
+  "dataset": "zoning",
+  "title": "Town of Blacksburg \u2014 Town Zoning",
+  "publisher": "Town of Blacksburg",
+  "role": "UNIV polygon = campus core draft; district context",
+  "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Zoning_and_Landuse/FeatureServer/9",
+  "retrieved_at": "2026-08-03T00:38:16.394158+00:00",
+  "source_updated_at": "2023-01-09T18:58:24.857000+00:00",
+  "source_schema_updated_at": "2023-01-09T18:58:24.857000+00:00",
+  "feature_count": 112,
+  "server_reported_count": 112,
+  "geometry_type": "esriGeometryPolygon",
+  "source_srs": {
+    "wkid": 102747,
+    "latestWkid": 2284
+  },
+  "snapshot_srs": "EPSG:4326",
+  "service_capabilities": "Query,Extract,Sync",
+  "max_record_count": 2000,
+  "license_text": "",
+  "license_status": "NONE_PUBLISHED",
+  "source_id_field": "OBJECTID",
+  "stable_id_field": "GlobalID",
+  "field_names": [
+    "OBJECTID",
+    "Zoning",
+    "Color",
+    "Labels",
+    "GlobalID",
+    "Shape__Area",
+    "Shape__Length"
+  ]
+}

@@ -1,0 +1,707 @@
+{
+  "snapshot_date": "2026-08-03",
+  "built_at": "2026-08-03T00:48:26.211194+00:00",
+  "sources": {
+    "roads": {
+      "dataset": "roads",
+      "title": "Town of Blacksburg \u2014 Roads",
+      "publisher": "Town of Blacksburg",
+      "role": "Primary street network",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Address_Road_Building/FeatureServer/1",
+      "retrieved_at": "2026-08-03T00:37:31.070073+00:00",
+      "source_updated_at": "2026-04-07T12:03:59.988000+00:00",
+      "source_schema_updated_at": "2025-02-04T14:54:03.768000+00:00",
+      "feature_count": 1547,
+      "server_reported_count": 1547,
+      "geometry_type": "esriGeometryPolyline",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "PRE_TYPE",
+        "PREMOD",
+        "PREDIR",
+        "NAME",
+        "TYPE",
+        "SUFFIX",
+        "ESN_L",
+        "ESN_R",
+        "COMM_L",
+        "COMM_R",
+        "L_F_ADD",
+        "L_T_ADD",
+        "R_F_ADD",
+        "R_T_ADD",
+        "MSAG_L",
+        "MSAG_R",
+        "ROUTE",
+        "CHGDATE",
+        "ALTNAME",
+        "SOURCE",
+        "RD_MAINT",
+        "MILES",
+        "LABEL",
+        "BLOCK_RANG",
+        "STREETMAP_",
+        "ONE_WAY",
+        "ROAD_CLASS",
+        "SHAPE_LENG",
+        "GlobalID",
+        "postal_code_left",
+        "postal_code_right",
+        "Parity_L",
+        "Parity_R",
+        "State_L",
+        "State_R",
+        "County_L",
+        "County_R",
+        "NbrhdCom_L",
+        "NbrhdCom_R",
+        "SpeedLimit",
+        "Shape__Length"
+      ]
+    },
+    "paths": {
+      "dataset": "paths",
+      "title": "Town of Blacksburg \u2014 Paths to the Future (Existing)",
+      "publisher": "Town of Blacksburg",
+      "role": "Trails, sidewalks, bike infrastructure",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Paths_to_the_Future/FeatureServer/0",
+      "retrieved_at": "2026-08-03T00:38:07.092544+00:00",
+      "source_updated_at": "2025-11-07T19:46:28.881000+00:00",
+      "source_schema_updated_at": "2025-11-07T19:46:28.881000+00:00",
+      "feature_count": 1069,
+      "server_reported_count": 1069,
+      "geometry_type": "esriGeometryPolyline",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "Id",
+        "Road",
+        "From_",
+        "To_",
+        "Type",
+        "Route",
+        "F5ftReg",
+        "Status",
+        "Level_",
+        "Width",
+        "Material",
+        "Slope",
+        "Maintenanc",
+        "Alt_Type_1",
+        "Alt_Type_2",
+        "Priority",
+        "Owner",
+        "GlobalID",
+        "Subtype",
+        "Notes",
+        "Shape__Length"
+      ]
+    },
+    "boundary": {
+      "dataset": "boundary",
+      "title": "Town of Blacksburg \u2014 Town Corporate Limits",
+      "publisher": "Town of Blacksburg",
+      "role": "Coverage area boundary",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Administrative_Reference_Boundaries/FeatureServer/4",
+      "retrieved_at": "2026-08-03T00:38:05.170608+00:00",
+      "source_updated_at": "2026-01-31T12:04:17.422000+00:00",
+      "source_schema_updated_at": "2024-06-18T12:03:26.998000+00:00",
+      "feature_count": 1,
+      "server_reported_count": 1,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "GlobalID",
+        "Acres",
+        "Square_Miles",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    },
+    "zoning": {
+      "dataset": "zoning",
+      "title": "Town of Blacksburg \u2014 Town Zoning",
+      "publisher": "Town of Blacksburg",
+      "role": "UNIV polygon = campus core draft; district context",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Zoning_and_Landuse/FeatureServer/9",
+      "retrieved_at": "2026-08-03T00:38:16.394158+00:00",
+      "source_updated_at": "2023-01-09T18:58:24.857000+00:00",
+      "source_schema_updated_at": "2023-01-09T18:58:24.857000+00:00",
+      "feature_count": 112,
+      "server_reported_count": 112,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Extract,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "Zoning",
+        "Color",
+        "Labels",
+        "GlobalID",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    },
+    "address": {
+      "dataset": "address",
+      "title": "Town of Blacksburg \u2014 Address",
+      "publisher": "Town of Blacksburg",
+      "role": "Household base layer (unit-level)",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Address_Road_Building/FeatureServer/0",
+      "retrieved_at": "2026-08-03T00:37:40.864665+00:00",
+      "source_updated_at": "2026-04-07T12:03:59.988000+00:00",
+      "source_schema_updated_at": "2023-10-17T16:13:43.371000+00:00",
+      "feature_count": 19773,
+      "server_reported_count": 19773,
+      "geometry_type": "esriGeometryPoint",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 8000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "STNUM",
+        "STREET_PRE_DIR",
+        "STREET_NAME",
+        "STREET_TYPE",
+        "STREET_POST_DIR",
+        "COMMUNITY",
+        "ESN",
+        "ADD_CHECK",
+        "LAT",
+        "LON",
+        "unit",
+        "unit_designator",
+        "postal_code",
+        "E",
+        "ADDR",
+        "GlobalID",
+        "Addtl_Loc",
+        "Floor",
+        "Placement",
+        "LandmkName",
+        "PlaceName",
+        "DateUpdate",
+        "LocalType",
+        "Elev",
+        "Nbrhd_Comm",
+        "Inc_Muni",
+        "County",
+        "State"
+      ]
+    },
+    "landuse": {
+      "dataset": "landuse",
+      "title": "Town of Blacksburg \u2014 Current Land Use",
+      "publisher": "Town of Blacksburg",
+      "role": "Residential filter (replaces county parcels)",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Comprehensive_Plan/FeatureServer/8",
+      "retrieved_at": "2026-08-03T00:38:14.645899+00:00",
+      "source_updated_at": "2026-01-29T12:03:30.400000+00:00",
+      "source_schema_updated_at": "2023-05-04T12:02:16.644000+00:00",
+      "feature_count": 11398,
+      "server_reported_count": 11398,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "ST_Level_1",
+        "ST_Level_2",
+        "ST_Level_3",
+        "Land_Use",
+        "GlobalID",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    },
+    "openspace": {
+      "dataset": "openspace",
+      "title": "Town of Blacksburg \u2014 Open Space",
+      "publisher": "Town of Blacksburg",
+      "role": "HOA / privately-owned polygons: private-drive corroboration",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Parks_and_Open_Space/FeatureServer/1",
+      "retrieved_at": "2026-08-03T00:38:18.084315+00:00",
+      "source_updated_at": "2026-03-14T12:03:48.632000+00:00",
+      "source_schema_updated_at": "2023-05-02T18:42:44.063000+00:00",
+      "feature_count": 375,
+      "server_reported_count": 375,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "Type",
+        "Color",
+        "GlobalID",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    },
+    "building": {
+      "dataset": "building",
+      "title": "Town of Blacksburg \u2014 Building",
+      "publisher": "Town of Blacksburg",
+      "role": "Household sanity check; complex footprints",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Address_Road_Building/FeatureServer/2",
+      "retrieved_at": "2026-08-03T00:37:51.154114+00:00",
+      "source_updated_at": "2026-03-31T12:04:33.656000+00:00",
+      "source_schema_updated_at": "2023-10-17T16:13:43.371000+00:00",
+      "feature_count": 10156,
+      "server_reported_count": 10156,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "GlobalID",
+        "SourceType",
+        "STNUM",
+        "STREET_PRE",
+        "STREET_NAM",
+        "STREET_TYP",
+        "STREET_SUF",
+        "LOT_APT",
+        "COMMUNITY",
+        "COMMON_NAME",
+        "PlaceName",
+        "PlaceType",
+        "BLDG_NUM",
+        "DATE_UPDATED",
+        "DATA_SOURCE",
+        "CO_DATE",
+        "notes",
+        "baseElev",
+        "height_ft",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    },
+    "parks": {
+      "dataset": "parks",
+      "title": "Town of Blacksburg \u2014 Parks",
+      "publisher": "Town of Blacksburg",
+      "role": "Named park context for trail curation",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Parks_and_Open_Space/FeatureServer/0",
+      "retrieved_at": "2026-08-03T00:38:19.397624+00:00",
+      "source_updated_at": "2026-03-14T12:03:48.632000+00:00",
+      "source_schema_updated_at": "2023-05-02T18:42:44.063000+00:00",
+      "feature_count": 44,
+      "server_reported_count": 44,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "Name",
+        "Address",
+        "acreage",
+        "Status",
+        "GlobalID",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    }
+  },
+  "absorption": {
+    "bike_facility": 53,
+    "bike_facility_unmatched": 32,
+    "sidewalk": 410
+  },
+  "split": {
+    "inputs": 2551,
+    "split": 412,
+    "outputs": 3168,
+    "nodes": 2579,
+    "snaps_over_threshold": 49,
+    "duplicate_geometry_dropped": 170
+  },
+  "connect": {
+    "components_before": 267,
+    "connectors": 426,
+    "components_joined": 246,
+    "components_unreachable": 20,
+    "unreachable": [
+      {
+        "component": 3,
+        "nodes": 8,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 51,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 52,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 53,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 54,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 55,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 56,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 57,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 58,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 59,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 60,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 62,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 63,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 64,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      }
+    ],
+    "components_after": 65,
+    "stopped_reason": "component count stopped falling; remaining components have nothing within 25 m in a larger component",
+    "passes": [
+      {
+        "pass": 1,
+        "components_before": 267,
+        "connectors": 246,
+        "unreachable": 20
+      },
+      {
+        "pass": 2,
+        "components_before": 90,
+        "connectors": 75,
+        "unreachable": 14
+      },
+      {
+        "pass": 3,
+        "components_before": 70,
+        "connectors": 55,
+        "unreachable": 14
+      },
+      {
+        "pass": 4,
+        "components_before": 65,
+        "connectors": 50,
+        "unreachable": 14
+      },
+      {
+        "pass": 5,
+        "components_before": 65,
+        "connectors": 50,
+        "unreachable": 14
+      }
+    ]
+  },
+  "totals": {
+    "OPTIONAL_CONNECTOR": {
+      "segments": 1023,
+      "miles": 69.98
+    },
+    "OPTIONAL_CONNECTOR::OUT_OF_AREA_CONNECTOR": {
+      "segments": 4,
+      "miles": 4.215
+    },
+    "REQUIRED": {
+      "segments": 1515,
+      "miles": 135.271
+    },
+    "REQUIRED::STREET": {
+      "segments": 1456,
+      "miles": 124.848
+    },
+    "EXCLUDED": {
+      "segments": 460,
+      "miles": 48.278
+    },
+    "EXCLUDED::STREET": {
+      "segments": 412,
+      "miles": 44.314
+    },
+    "OPTIONAL_CONNECTOR::TRAIL": {
+      "segments": 369,
+      "miles": 34.434
+    },
+    "OPTIONAL_CONNECTOR::PEDESTRIAN_CONNECTOR": {
+      "segments": 650,
+      "miles": 31.33
+    },
+    "REQUIRED::TRAIL": {
+      "segments": 59,
+      "miles": 10.423
+    },
+    "EXCLUDED::TRAIL": {
+      "segments": 48,
+      "miles": 3.965
+    },
+    "ALL": {
+      "segments": 2998,
+      "miles": 253.529
+    },
+    "ELIGIBLE_MILEAGE": 135.271
+  },
+  "households": {
+    "residential_address_points": 18022,
+    "estimated_housing_units": 17963,
+    "housing_units_associated_to_network": 9725,
+    "estimated_occupied_households": 9044,
+    "occupancy_rate": 0.93,
+    "occupancy_rate_source": "ACS 5-year occupancy rate for Blacksburg town (placeholder \u2014 confirm against the current table before launch)",
+    "occupancy_confidence": "LOW",
+    "public_label": "Estimated households prayed for",
+    "public_label_maps_to": "estimated_occupied_households",
+    "translation": "residential address points -> drop non-dwellings (vacant/demolished/construction) and duplicate address keys -> estimated housing units -> associate one-to-one with an eligible segment (unresolved complexes held back) -> multiply by occupancy rate -> estimated occupied households"
+  },
+  "household_stats": {
+    "address_points_total": 19773,
+    "non_residential": 1751,
+    "residential_address_points": 18022,
+    "excluded_not_a_dwelling": 59,
+    "estimated_housing_units": 17963,
+    "unit_level_points": 9854,
+    "building_level_points": 8109,
+    "distinct_buildings": 9002
+  },
+  "association_stats": {
+    "confidence_low": 1241,
+    "beyond_cap": 528,
+    "confidence_high": 6697,
+    "confidence_medium": 1787,
+    "held_unresolved_complex": 7710,
+    "associated": 9725,
+    "unassociated": 8238
+  },
+  "dedup_rules": {
+    "apartment_units": "Each address point is one dwelling unit. Unit-level points (APT/UNIT/LOT/BLDG) are counted individually and never also counted as their parent building address.",
+    "duplicate_addresses": "Households are keyed on a normalized composite address (number + directional + street + type + post-dir + unit). Collisions are dropped and reported.",
+    "corner_properties": "A household has exactly one primary_segment_id. Secondary associations are recorded for admin inspection but never counted.",
+    "buildings_multiple_segments": "Association is one-to-one from the household side, so a building fronting two streets contributes to one segment only.",
+    "repeated_route_segments": "Route-level totals sum distinct household ids, not per-segment counts, so revisiting a segment cannot double-count it."
+  },
+  "ownership_conflicts": {
+    "count": 36,
+    "rule": "RD_MAINT primary",
+    "file": "review/ownership-conflicts.json"
+  },
+  "complexes": {
+    "profiled": 103,
+    "unresolved": 58,
+    "file": "review/apartment-complexes.json"
+  },
+  "review_queue": {
+    "NEEDS_REVIEW": 1104,
+    "reason::Trail not on the D2 curated list; connector until reviewed.": 375,
+    "reason::SYNTHETIC: derived connector stitching a disconnected pedestrian compo": 262,
+    "reason::Sidewalk with no matching street segment \u2014 may be a genuine connector ": 283,
+    "reason::Public per RD_MAINT but midpoint falls inside an HOA/privately-owned o": 4,
+    "reason::RD_MAINT=Private conflicts with ROAD_CLASS=Local": 36,
+    "reason::Campus path: D1b requires a curated selection, not blanket inclusion. ": 39,
+    "reason::Campus walkway, unmatched to any street. D1b candidate; held for revie": 75,
+    "reason::Path Type='Alley' not covered by an automatic rule.": 30,
+    "PROVISIONAL": 24,
+    "reason::D2 recommendation pending confirmation.": 10,
+    "reason::D2 recommendation pending confirmation. (inherited by spur/related fea": 14
+  },
+  "corrections": {
+    "name_fixes": 24,
+    "value_fixes": 2,
+    "anomalies": 32,
+    "file": "review/corrections.json"
+  },
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "no_zero_length_segments",
+        "passed": true,
+        "fatal": true,
+        "detail": "0 segments <= 5 cm"
+      },
+      {
+        "name": "segment_ids_unique",
+        "passed": true,
+        "fatal": true,
+        "detail": "2998 ids, 2998 distinct"
+      },
+      {
+        "name": "household_keys_unique",
+        "passed": true,
+        "fatal": true,
+        "detail": "17963 households, 17963 distinct keys"
+      },
+      {
+        "name": "one_primary_segment_per_household",
+        "passed": true,
+        "fatal": true,
+        "detail": "9725 links, 9725 distinct households"
+      },
+      {
+        "name": "required_segments_connected",
+        "passed": false,
+        "fatal": false,
+        "detail": "41 REQUIRED segments off the main component (89 components total)"
+      },
+      {
+        "name": "housing_units_plausible",
+        "passed": true,
+        "fatal": false,
+        "detail": "17963 estimated housing units (plausible band 12,000-24,000; compared against housing units, not the ~13,800 occupied-household figure)"
+      },
+      {
+        "name": "association_rate",
+        "passed": false,
+        "fatal": false,
+        "detail": "45.9% of housing units unassociated"
+      }
+    ],
+    "stranded_components": 88
+  },
+  "blocked_sources": [
+    {
+      "url": "https://services5.arcgis.com/IZ8QFYP84iubFqmi/arcgis/rest/services/Parcels_Open_Data/FeatureServer/0",
+      "title": "Montgomery County \u2014 Parcels Open Data",
+      "publisher": "Montgomery County, VA",
+      "role": "Residential cross-check; EX_CLASSD property class",
+      "blocked_host": "services5.arcgis.com",
+      "license_status": "DISCLAIMER_ONLY",
+      "note": "egress policy denied this host from the build environment; no data retrieved, no schema inferred"
+    },
+    {
+      "url": "https://vginmaps.vdem.virginia.gov/arcgis/rest/services/VA_Base_Layers/VBMP_RCL/FeatureServer",
+      "title": "VGIN \u2014 Virginia Road Centerlines (RCL)",
+      "publisher": "Virginia Geographic Information Network",
+      "role": "VT campus street candidate source; statewide cross-check",
+      "blocked_host": "vginmaps.vdem.virginia.gov",
+      "license_status": "DISCLAIMER_ONLY",
+      "note": "egress policy denied this host from the build environment; no data retrieved, no schema inferred"
+    },
+    {
+      "url": "https://vginmaps.vdem.virginia.gov/arcgis/rest/services/VA_Base_Layers/VA_Address_Points/FeatureServer",
+      "title": "VGIN \u2014 Virginia Address Points",
+      "publisher": "Virginia Geographic Information Network",
+      "role": "Address cross-check; campus address candidate source",
+      "blocked_host": "vginmaps.vdem.virginia.gov",
+      "license_status": "DISCLAIMER_ONLY",
+      "note": "egress policy denied this host from the build environment; no data retrieved, no schema inferred"
+    }
+  ]
+}

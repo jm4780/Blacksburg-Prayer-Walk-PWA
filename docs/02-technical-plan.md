@@ -28,12 +28,15 @@ roughly **3,000–6,000 network segments** and **~14,000 household points**. The
 graph fits comfortably in memory in a single process. We do not need distributed
 anything, a tile server, or a routing cluster.
 
-> 📋 **2026-08-03 — revised down.** Measured inputs: **1,547** road segments
-> (169.16 mi total; ~124.9 mi public and plausibly walkable) and **289** trail-family
-> path features (53.0 mi). After planarizing and adding pedestrian connectors, expect
-> **~2,000–3,000 segments** — smaller than estimated, which only helps the router.
-> Household points are **19,773** total / **18,022** residential — larger than the
+> 📋 **2026-08-03 — measured, not estimated.** The canonical build produced
+> **2,998 segments / 253.53 miles**, of which **1,515 segments / 135.27 miles** are
+> REQUIRED (124.85 mi street + 10.42 mi trail). **2,579 nodes.** Household layer:
+> **17,963 estimated housing units** from 19,773 address points — larger than the
 > ~14,000 assumed, because the address layer is unit-level (see §2.5).
+>
+> The graph is smaller than the 3,000–6,000 estimate and roughly **half** the
+> 200–250 mi of required street the decision docs assumed. The router's job is easier
+> than planned. See [`08-phase-2a-review-package.md`](08-phase-2a-review-package.md).
 
 ---
 
@@ -141,14 +144,22 @@ decisions below are contingent on that report.
 
 ### 2.2 normalize
 
-- Reproject everything to **EPSG:6595** (NAD83(2011) / Virginia South, meters) for all
-  geometry math. Store in PostGIS as EPSG:4326 with a computed geography column, or
-  store 6595 and transform on output — either is fine, but **all length and distance
-  math happens in a projected CRS.** Degrees are not a unit of length.
-  > 📋 **2026-08-03.** Source CRS is **EPSG:2284** (NAD83 / Virginia South, **survey
-  > feet**) on every town layer. `Shape__Length` on Paths is in survey feet; Roads
-  > carries its own `MILES` field. Convert deliberately — a ft/m mix-up here is a
-  > 3.28× error that would sail through every validation gate.
+- Reproject everything to **~~EPSG:6595~~ EPSG:6594** (NAD83(2011) / Virginia South,
+  **metres**) for all geometry math. Store in PostGIS as EPSG:4326 with a computed
+  geography column, or store 6594 and transform on output — either is fine, but **all
+  length and distance math happens in a projected CRS.** Degrees are not a unit of
+  length.
+  > 🔴 **2026-08-03 — this section had a bug and the build hit it.** **EPSG:6595 is
+  > NAD83(2011) / Virginia South (ftUS)** — US survey feet. The metre-based code for
+  > this zone is **EPSG:6594**. The first canonical build ran on 6595 and reported
+  > **443 miles** of required network instead of 135: every length 3.28× too large, and
+  > every tolerance silently shrunk to a third of its intended size (1 m endpoint
+  > snapping became 0.3 m, the 75 m household cap became 23 m). It looked plausible.
+  >
+  > The pipeline now calls `geo.assert_metric()` at startup and refuses to run if the
+  > configured CRS is not metre-based. Do not "fix" this back to 6595.
+  > 📋 Source CRS is **EPSG:2284** (NAD83 / Virginia South, survey feet) on every town
+  > layer. `Shape__Length` on Paths is in survey feet; Roads carries its own `MILES`.
 - Normalize street names into two fields: `display_name` ("N Main St") and
   `normalized_name` (`main st n` — lowercased, USPS-style suffix and directional
   normalization, punctuation stripped). `normalized_name` is what groups segments
@@ -388,6 +399,37 @@ by definition. Expected combined total ≈ 18,800.
 > and the split by `LocalType` — so a human judges rather than a threshold. Keep the
 > hard failure for the shapes that really are wrong: a residential total below the
 > household count, or a sudden double-digit swing between builds.
+
+### 2.5a connect — stitching the pedestrian layer onto the streets
+
+> 📋 **Added 2026-08-03.** The stage list at the top of §2 names `connect` but no
+> section described it. The build found out why it matters.
+
+**Paths to the Future and Roads were digitised independently and share no nodes.**
+Sidewalk and trail geometry sits offset from road centerlines, so after noding, the
+pedestrian network floated free of the streets: **267 disconnected components**. A
+router could never have stepped from a street onto the Huckleberry Trail.
+
+The connect stage finds components disconnected from the main network and adds short
+synthetic connector edges to the nearest reachable geometry:
+
+- **Maximum reach 25 m.** Beyond that the gap is a genuine missing link in the source
+  data, not a digitising offset, and inventing an edge would assert a crossing that may
+  not exist.
+- **Each pass joins only to a strictly larger component**, so two stranded fragments
+  cannot pair off and stay stranded. Chains take several passes; iterate until the
+  component count stops falling.
+- **Every connector is synthetic and says so** — `source.dataset = "DERIVED"`,
+  `role_status = NEEDS_REVIEW`, and a `derived_from` block naming what it stitched
+  between. A human confirms the crossing each one implies.
+
+Result: **267 components → 65** over 5 passes, using **426 connectors** (262 surviving
+dedup, 1.08 mi total). 14 components have nothing within 25 m in a larger component and
+are reported rather than force-joined.
+
+**The router must treat `DERIVED` edges as provisional** — either exclude them from
+prototype routes or surface them in the output, and never silently route between
+disconnected components.
 
 ### 2.6 identify — stable IDs and the migration process (spec §11)
 
@@ -792,7 +834,8 @@ Screens exactly as §26. Implementation notes worth fixing now:
 |---|---|---|
 | 1 | Data audit + this plan | ✅ done |
 | 2a | Schema inspection report; resolve ⚠️ items | ✅ done ([`04`](04-schema-inspection.md)) |
-| 2a′ | **Source campus streets + residence-hall footprints** (§2.4a); get network policy widened; get licence answer from Town GIS | blocks part of 2b |
+| 2a | **Canonical network build** — pipeline, 2,998 segments, 135.27 mi required | ✅ done ([`08`](08-phase-2a-review-package.md)) |
+| 2a′ | **Blocked/pending:** network policy for VGIN + VT GIS; licence answer from Town GIS; D1b + D2 rulings; residence-hall table | blocks parts of 2b and all of release |
 | 2b | Pipeline: fetch → split → classify → households → IDs → load | 1.5–2 weeks |
 | 2c | **Human curation pass** (public/private, trails, campus core polygon, campus paths, residence-hall table) | 2–3 days of Jacob's time + tooling |
 | 3 | Router prototype + scenario harness + tuning | 2–3 weeks |

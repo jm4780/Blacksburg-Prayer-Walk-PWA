@@ -1,0 +1,1815 @@
+{
+  "generated_at": "2026-08-03T00:49:27.181416+00:00",
+  "snapshot_date": "2026-08-03",
+  "campus_polygon": {
+    "source": "Town Zoning, Labels='UNIV' (single polygon)",
+    "area_sq_mi": 1.384,
+    "status": "DRAFT",
+    "caveat": "This is the town's zoning district, not a curated campus core. D1a asks for a hand-drawn boundary that excludes agricultural research land, the airport and the golf course; those are largely outside this polygon already, but the polygon has not been reviewed feature by feature."
+  },
+  "town_roads_inside_campus": {
+    "features": 30,
+    "miles": 3.761,
+    "by_name": {
+      "WB 460 BYPASS": 1.5078,
+      "PRICES FORK RD": 1.4129,
+      "WB 460 BYPASS RAMP": 0.4334,
+      "KENT ST": 0.093,
+      "COLLEGE AVE": 0.0928,
+      "TURNER ST NW": 0.0914,
+      "N MAIN ST": 0.0783,
+      "ALUMNI MALL": 0.0115,
+      "MCBRYDE LN": 0.0077,
+      "UNIVERSITY CITY BLVD": 0.0076,
+      "TOMS CREEK RD": 0.0075,
+      "WOODLAND DR": 0.0073,
+      "STANGER ST": 0.0056,
+      "W CAMPUS DR": 0.0045
+    }
+  },
+  "street_name_probes": [
+    {
+      "probe": "drillfield",
+      "features": 0,
+      "miles": 0.0,
+      "labels": [],
+      "verdict": "ABSENT"
+    },
+    {
+      "probe": "duck pond",
+      "features": 0,
+      "miles": 0.0,
+      "labels": [],
+      "verdict": "ABSENT"
+    },
+    {
+      "probe": "perry",
+      "features": 0,
+      "miles": 0.0,
+      "labels": [],
+      "verdict": "ABSENT"
+    },
+    {
+      "probe": "old turner",
+      "features": 0,
+      "miles": 0.0,
+      "labels": [],
+      "verdict": "ABSENT"
+    },
+    {
+      "probe": "beamer",
+      "features": 0,
+      "miles": 0.0,
+      "labels": [],
+      "verdict": "ABSENT"
+    },
+    {
+      "probe": "spring",
+      "features": 5,
+      "miles": 0.793,
+      "labels": [
+        "BOLD SPRINGS CIR",
+        "GARDENSPRING DR",
+        "SPRING HOLLOW LN"
+      ],
+      "verdict": "PRESENT"
+    },
+    {
+      "probe": "tech center",
+      "features": 0,
+      "miles": 0.0,
+      "labels": [],
+      "verdict": "ABSENT"
+    },
+    {
+      "probe": "stadium",
+      "features": 0,
+      "miles": 0.0,
+      "labels": [],
+      "verdict": "ABSENT"
+    },
+    {
+      "probe": "coliseum",
+      "features": 0,
+      "miles": 0.0,
+      "labels": [],
+      "verdict": "ABSENT"
+    },
+    {
+      "probe": "oak lane",
+      "features": 0,
+      "miles": 0.0,
+      "labels": [],
+      "verdict": "ABSENT"
+    },
+    {
+      "probe": "west campus",
+      "features": 0,
+      "miles": 0.0,
+      "labels": [],
+      "verdict": "ABSENT"
+    },
+    {
+      "probe": "w campus",
+      "features": 1,
+      "miles": 0.005,
+      "labels": [
+        "W CAMPUS DR"
+      ],
+      "verdict": "STUB_ONLY"
+    },
+    {
+      "probe": "alumni",
+      "features": 2,
+      "miles": 0.011,
+      "labels": [
+        "ALUMNI MALL"
+      ],
+      "verdict": "STUB_ONLY"
+    },
+    {
+      "probe": "stanger",
+      "features": 1,
+      "miles": 0.006,
+      "labels": [
+        "STANGER ST"
+      ],
+      "verdict": "STUB_ONLY"
+    },
+    {
+      "probe": "burruss",
+      "features": 1,
+      "miles": 0.214,
+      "labels": [
+        "BURRUSS DR"
+      ],
+      "verdict": "PRESENT"
+    },
+    {
+      "probe": "mcbryde",
+      "features": 12,
+      "miles": 0.739,
+      "labels": [
+        "MCBRYDE DR",
+        "MCBRYDE LN"
+      ],
+      "verdict": "PRESENT"
+    },
+    {
+      "probe": "washington",
+      "features": 9,
+      "miles": 0.813,
+      "labels": [
+        "WASHINGTON ST SE",
+        "WASHINGTON ST SW"
+      ],
+      "verdict": "PRESENT"
+    },
+    {
+      "probe": "southgate",
+      "features": 3,
+      "miles": 0.386,
+      "labels": [
+        "SOUTHGATE DR"
+      ],
+      "verdict": "PRESENT"
+    },
+    {
+      "probe": "kent",
+      "features": 11,
+      "miles": 1.01,
+      "labels": [
+        "KENT ST",
+        "KENTWOOD DR",
+        "NEW KENT RD"
+      ],
+      "verdict": "PRESENT"
+    },
+    {
+      "probe": "turner",
+      "features": 18,
+      "miles": 1.153,
+      "labels": [
+        "TURNER ST NE",
+        "TURNER ST NW"
+      ],
+      "verdict": "PRESENT"
+    },
+    {
+      "probe": "prices fork",
+      "features": 44,
+      "miles": 6.024,
+      "labels": [
+        "PRICES FORK RD"
+      ],
+      "verdict": "PRESENT"
+    }
+  ],
+  "missing_campus_streets": [
+    "drillfield",
+    "duck pond",
+    "perry",
+    "old turner",
+    "beamer",
+    "tech center",
+    "stadium",
+    "coliseum",
+    "oak lane",
+    "west campus"
+  ],
+  "stub_only_campus_streets": [
+    "w campus",
+    "alumni",
+    "stanger"
+  ],
+  "campus_paths_in_source": {
+    "features": 97,
+    "miles": 16.717,
+    "by_type": {
+      "Sidewalk": {
+        "features": 60,
+        "miles": 9.152
+      },
+      "Trail": {
+        "features": 28,
+        "miles": 5.076
+      },
+      "Bike Lane": {
+        "features": 7,
+        "miles": 2.098
+      },
+      "Share the Road": {
+        "features": 1,
+        "miles": 0.365
+      },
+      "Trail Tunnel": {
+        "features": 1,
+        "miles": 0.026
+      }
+    },
+    "by_owner": {
+      "VT": {
+        "features": 79,
+        "miles": 14.018
+      },
+      "(blank)": {
+        "features": 18,
+        "miles": 2.699
+      }
+    },
+    "named_features": {
+      "Prices Fork Road": 1.2163,
+      "West Campus Drive": 1.1457,
+      "Stanger Street": 0.9268,
+      "Oak Lane Trail": 0.7705,
+      "Prices Fork Road Trail": 0.6599,
+      "Turner Street": 0.6465,
+      "Perry Street": 0.607,
+      "Drillfield Drive": 0.5863,
+      "Smithfield Road Trail": 0.4801,
+      "West Campus Drive Trail": 0.4768,
+      "Duck Pond Trail": 0.3932,
+      "Duck Pond Drive Trail": 0.3878,
+      "Beamer Way": 0.357,
+      "Southgate Drive": 0.2279,
+      "Washington Street": 0.2021,
+      "North Main Street": 0.1694,
+      "Life Science Circle": 0.1534,
+      "College Avenue": 0.1525,
+      "Duck Pond Drive": 0.0979,
+      "Kent Street": 0.0881,
+      "Smithfield Road Trail Underpass": 0.0255
+    }
+  },
+  "campus_in_canonical_network": {
+    "OPTIONAL_CONNECTOR::PEDESTRIAN_CONNECTOR": {
+      "features": 75,
+      "miles": 8.323
+    },
+    "OPTIONAL_CONNECTOR::TRAIL": {
+      "features": 39,
+      "miles": 5.08
+    }
+  },
+  "campus_segments": [
+    {
+      "id": "SEG-001141",
+      "name": "Oak Lane Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.7705,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000861",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.3966,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001106",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.3945,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000960",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.3581,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000791",
+      "name": "Beamer Way",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.357,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000916",
+      "name": "Duck Pond Drive Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.3006,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001029",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2972,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000656",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2951,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000855",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2915,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001433",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2869,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001211",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2816,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001710",
+      "name": "Turner St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": null,
+      "miles": 0.2814,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Paths Owner blank on 83% of the layer; ownership unknown."
+      ]
+    },
+    {
+      "id": "SEG-001150",
+      "name": "Duck Pond Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.27,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000872",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2597,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000971",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2584,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000761",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2367,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000730",
+      "name": "Smithfield Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.2357,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001387",
+      "name": "Drillfield Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2347,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001358",
+      "name": "W Campus Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.2331,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001185",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2321,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000871",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2292,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000681",
+      "name": "Southgate Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.2246,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001431",
+      "name": "Prices Fork Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Asphalt",
+      "owner": null,
+      "miles": 0.214,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Paths Owner blank on 83% of the layer; ownership unknown."
+      ]
+    },
+    {
+      "id": "SEG-001619",
+      "name": "Perry St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.2001,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001597",
+      "name": "Prices Fork Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": null,
+      "miles": 0.1996,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Paths Owner blank on 83% of the layer; ownership unknown."
+      ]
+    },
+    {
+      "id": "SEG-001719",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1958,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001214",
+      "name": "Drillfield Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1927,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001528",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1898,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001285",
+      "name": "W Campus Drive Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.1879,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001632",
+      "name": "Prices Fork Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.1823,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000941",
+      "name": "Life Science Cir",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.1534,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001070",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1469,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000953",
+      "name": "Smithfield Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.1456,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001437",
+      "name": "W Campus Drive Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.1414,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001306",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1364,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001551",
+      "name": "Stanger St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.1344,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000790",
+      "name": "Washington St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.1289,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001614",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1279,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001341",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1268,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001268",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1256,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001673",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1247,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000832",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1237,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001160",
+      "name": "Duck Pond Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.1232,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001675",
+      "name": "Stanger St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.1169,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001620",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1123,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001656",
+      "name": "Perry St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.1107,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001538",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1099,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001583",
+      "name": "W Campus Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.1085,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001518",
+      "name": "Perry St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.1061,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001034",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.1033,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001533",
+      "name": "Perry St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.1007,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001427",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0957,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001402",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0888,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001493",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0837,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001234",
+      "name": "Drillfield Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0834,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001557",
+      "name": "W Campus Drive Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.0821,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001585",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0788,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001582",
+      "name": "Perry St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0771,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001379",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0767,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000884",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0763,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000800",
+      "name": "Washington St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0727,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001303",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0716,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001038",
+      "name": "Duck Pond Drive Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.0703,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001003",
+      "name": "Smithfield Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.0696,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000860",
+      "name": "Duck Pond Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0687,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001729",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0664,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001314",
+      "name": "Drillfield Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0653,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001536",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0615,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000975",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0579,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001252",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0578,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001301",
+      "name": "Prices Fork Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Asphalt",
+      "owner": null,
+      "miles": 0.0561,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Paths Owner blank on 83% of the layer; ownership unknown."
+      ]
+    },
+    {
+      "id": "SEG-000789",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0559,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000834",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0549,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001325",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0532,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001099",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0519,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001680",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0501,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000757",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.046,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001188",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0454,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001720",
+      "name": "Stanger St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0454,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001068",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0432,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001199",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0422,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001747",
+      "name": "Stanger St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0418,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001592",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0395,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001600",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0346,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001608",
+      "name": "W Campus Drive Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.0335,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001501",
+      "name": "W Campus Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0329,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001629",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0328,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001296",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0325,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001609",
+      "name": "W Campus Drive Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.032,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001168",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0302,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001633",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0297,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000842",
+      "name": "Duck Pond Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0285,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001529",
+      "name": "Prices Fork Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": null,
+      "miles": 0.0277,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Paths Owner blank on 83% of the layer; ownership unknown."
+      ]
+    },
+    {
+      "id": "SEG-001028",
+      "name": "Smithfield Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.0256,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001654",
+      "name": "Prices Fork Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.0182,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001021",
+      "name": "Duck Pond Drive Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.0126,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001566",
+      "name": "Perry St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0123,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001625",
+      "name": "Prices Fork Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.0113,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001471",
+      "name": "Drillfield Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0102,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001703",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0098,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001705",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0093,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000840",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0088,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001454",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0072,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000660",
+      "name": "Smithfield Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": null,
+      "miles": 0.0071,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Paths Owner blank on 83% of the layer; ownership unknown."
+      ]
+    },
+    {
+      "id": "SEG-001651",
+      "name": "Prices Fork Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0068,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001708",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.005,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001240",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0043,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001032",
+      "name": "Duck Pond Drive Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.0042,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-000686",
+      "name": null,
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": null,
+      "owner": "VT",
+      "miles": 0.0036,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001041",
+      "name": "Smithfield Road Trl",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "TRAIL",
+      "surface": "Asphalt",
+      "owner": "VT",
+      "miles": 0.0036,
+      "reasons": [
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+      ]
+    },
+    {
+      "id": "SEG-001488",
+      "name": "W Campus Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0015,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-001607",
+      "name": "Stanger St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0009,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000822",
+      "name": "Duck Pond Dr",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0007,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    },
+    {
+      "id": "SEG-000818",
+      "name": "Washington St",
+      "role": "OPTIONAL_CONNECTOR",
+      "role_status": "NEEDS_REVIEW",
+      "segment_type": "PEDESTRIAN_CONNECTOR",
+      "surface": "Concrete",
+      "owner": "VT",
+      "miles": 0.0005,
+      "reasons": [
+        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+      ]
+    }
+  ],
+  "source_priority_evaluation": [
+    {
+      "rank": 1,
+      "source": "VGIN Virginia Road Centerlines (RCL)",
+      "host": "vginmaps.vdem.virginia.gov",
+      "status": "NOT_EVALUATED",
+      "reason": "Host denied by the build environment's egress policy (403 at the gateway on every attempt). The Hub site vgin.vdem.virginia.gov is reachable but publishes RCL only as a 112 MB File Geodatabase download served from the blocked host. No schema and no geometry were retrieved; nothing about RCL's campus coverage is asserted here."
+    },
+    {
+      "rank": 2,
+      "source": "Virginia Tech public GIS / campus map / building data",
+      "host": "gis.vt.edu, www.vt.edu",
+      "status": "NOT_EVALUATED",
+      "reason": "Both hosts denied by the egress policy. VT's ArcGIS organisation, if it has a public open-data endpoint, was never reached."
+    },
+    {
+      "rank": 3,
+      "source": "OpenStreetMap",
+      "host": "overpass-api.de",
+      "status": "NOT_EVALUATED",
+      "reason": "Host denied by the egress policy. Separately, OSM would require the ODbL analysis in data-audit \u00a72.4 before any geometry entered the canonical network; it remains a documented comparison option, not a merge candidate."
+    },
+    {
+      "rank": 4,
+      "source": "Manual digitisation",
+      "host": "n/a",
+      "status": "RECOMMENDED_FALLBACK",
+      "reason": "Recommended only for what remains missing after 1-3 are evaluated. Scope is small: roughly 5 miles of drivable campus street. Keeps the canonical network licence-clean, which is the property audit \u00a72.4 was designed to protect."
+    }
+  ],
+  "classification_policy": "Campus paths are NOT auto-REQUIRED. D1b asks for a curated selection of major pedestrian ways, so every campus path enters the network as OPTIONAL_CONNECTOR with role_status=NEEDS_REVIEW and is listed here for a human to promote or leave as a connector."
+}

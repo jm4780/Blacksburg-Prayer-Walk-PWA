@@ -1,0 +1,1774 @@
+[
+  {
+    "place_name": "Foxridge Apartments",
+    "units": 1719,
+    "footprint_acres": 118.28,
+    "internal_network_miles": 0.891,
+    "internal_network_m": 1433.9,
+    "internal_segment_count": 13,
+    "units_beyond_cap": 861,
+    "share_beyond_cap": 0.501,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "861 of 1719 units (50%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Terrace View Apartments",
+    "units": 558,
+    "footprint_acres": 50.85,
+    "internal_network_miles": 1.367,
+    "internal_network_m": 2200.3,
+    "internal_segment_count": 14,
+    "units_beyond_cap": 72,
+    "share_beyond_cap": 0.129,
+    "status": "UNRESOLVED",
+    "trigger": "INSTRUCTION_ONLY",
+    "reasons": [
+      "named for review in the Phase 2a instruction; the automatic test clears it (2200 m internal network, 13% of units beyond cap) but a human instruction outranks the heuristic"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Hub Blacksburg",
+    "units": 499,
+    "footprint_acres": 15.1,
+    "internal_network_miles": 0.274,
+    "internal_network_m": 441.1,
+    "internal_segment_count": 4,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Union",
+    "units": 440,
+    "footprint_acres": 12.97,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 125,
+    "share_beyond_cap": 0.284,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "125 of 440 units (28%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Maple Ridge Townhomes",
+    "units": 314,
+    "footprint_acres": 25.18,
+    "internal_network_miles": 0.155,
+    "internal_network_m": 250.1,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 210,
+    "share_beyond_cap": 0.669,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "210 of 314 units (67%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Windsor Hills",
+    "units": 300,
+    "footprint_acres": 20.21,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 242,
+    "share_beyond_cap": 0.807,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "242 of 300 units (81%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Alight Blacksburg",
+    "units": 289,
+    "footprint_acres": 21.52,
+    "internal_network_miles": 0.584,
+    "internal_network_m": 939.6,
+    "internal_segment_count": 5,
+    "units_beyond_cap": 53,
+    "share_beyond_cap": 0.183,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Smith's Landing Apartments",
+    "units": 284,
+    "footprint_acres": 6.65,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Chasewood Downs Apartments",
+    "units": 276,
+    "footprint_acres": 19.54,
+    "internal_network_miles": 0.342,
+    "internal_network_m": 551.1,
+    "internal_segment_count": 5,
+    "units_beyond_cap": 58,
+    "share_beyond_cap": 0.21,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Edge Apartments",
+    "units": 258,
+    "footprint_acres": 13.14,
+    "internal_network_miles": 0.093,
+    "internal_network_m": 150.3,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 37,
+    "share_beyond_cap": 0.143,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Jefferson Apartments",
+    "units": 239,
+    "footprint_acres": 26.64,
+    "internal_network_miles": 0.99,
+    "internal_network_m": 1593.3,
+    "internal_segment_count": 12,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Northside Park Subdivision",
+    "units": 211,
+    "footprint_acres": 122.77,
+    "internal_network_miles": 3.763,
+    "internal_network_m": 6056.1,
+    "internal_segment_count": 41,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Collegiate Suites",
+    "units": 210,
+    "footprint_acres": 16.28,
+    "internal_network_miles": 0.005,
+    "internal_network_m": 7.5,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 64,
+    "share_beyond_cap": 0.305,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (8 m of eligible segment inside the site footprint)",
+      "64 of 210 units (30%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Village at Toms Creek",
+    "units": 209,
+    "footprint_acres": 103.68,
+    "internal_network_miles": 3.46,
+    "internal_network_m": 5567.9,
+    "internal_segment_count": 40,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Vue at CRC",
+    "units": 206,
+    "footprint_acres": 5.86,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 166,
+    "share_beyond_cap": 0.806,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "166 of 206 units (81%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "The Retreat at Blacksburg",
+    "units": 204,
+    "footprint_acres": 23.59,
+    "internal_network_miles": 0.891,
+    "internal_network_m": 1434.3,
+    "internal_segment_count": 3,
+    "units_beyond_cap": 47,
+    "share_beyond_cap": 0.23,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Woodbine Subdivision",
+    "units": 171,
+    "footprint_acres": 77.56,
+    "internal_network_miles": 3.469,
+    "internal_network_m": 5582.2,
+    "internal_segment_count": 49,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Pheasant Run Townhomes",
+    "units": 165,
+    "footprint_acres": 19.03,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 53,
+    "share_beyond_cap": 0.321,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "53 of 165 units (32%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "The Mill at Blacksburg",
+    "units": 162,
+    "footprint_acres": 7.97,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 65,
+    "share_beyond_cap": 0.401,
+    "status": "UNRESOLVED",
+    "trigger": "INSTRUCTION_AND_AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "65 of 162 units (40%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Shawnee Apartments",
+    "units": 152,
+    "footprint_acres": 8.2,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 84,
+    "share_beyond_cap": 0.553,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "84 of 152 units (55%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Fieldstone",
+    "units": 145,
+    "footprint_acres": 11.37,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 115,
+    "share_beyond_cap": 0.793,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "115 of 145 units (79%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Hollins Estates",
+    "units": 139,
+    "footprint_acres": 22.32,
+    "internal_network_miles": 0.147,
+    "internal_network_m": 237.2,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 71,
+    "share_beyond_cap": 0.511,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "71 of 139 units (51%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Roanoke Street Apartments",
+    "units": 135,
+    "footprint_acres": 7.5,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 26,
+    "share_beyond_cap": 0.193,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Haymarket Square Townhomes",
+    "units": 134,
+    "footprint_acres": 18.01,
+    "internal_network_miles": 0.798,
+    "internal_network_m": 1284.1,
+    "internal_segment_count": 22,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "University Terrace",
+    "units": 132,
+    "footprint_acres": 8.93,
+    "internal_network_miles": 0.209,
+    "internal_network_m": 336.1,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 78,
+    "share_beyond_cap": 0.591,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "78 of 132 units (59%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Piedmont Condominiums",
+    "units": 131,
+    "footprint_acres": 10.31,
+    "internal_network_miles": 0.19,
+    "internal_network_m": 305.1,
+    "internal_segment_count": 4,
+    "units_beyond_cap": 21,
+    "share_beyond_cap": 0.16,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Baker One Apartments",
+    "units": 126,
+    "footprint_acres": 5.3,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Lantern Ridge Apartments",
+    "units": 121,
+    "footprint_acres": 9.57,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 27,
+    "share_beyond_cap": 0.223,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Ridgewood Village Apartments",
+    "units": 120,
+    "footprint_acres": 8.18,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 78,
+    "share_beyond_cap": 0.65,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "78 of 120 units (65%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Cascade Pointe",
+    "units": 120,
+    "footprint_acres": 7.26,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 55,
+    "share_beyond_cap": 0.458,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "55 of 120 units (46%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "University Place Condominiums",
+    "units": 120,
+    "footprint_acres": 6.2,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 68,
+    "share_beyond_cap": 0.567,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "68 of 120 units (57%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Oak Manor Townhomes",
+    "units": 116,
+    "footprint_acres": 16.46,
+    "internal_network_miles": 0.278,
+    "internal_network_m": 447.8,
+    "internal_segment_count": 8,
+    "units_beyond_cap": 7,
+    "share_beyond_cap": 0.06,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Cedarfield Apartments",
+    "units": 114,
+    "footprint_acres": 7.76,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 95,
+    "share_beyond_cap": 0.833,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "95 of 114 units (83%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Hearthstone Apartments",
+    "units": 112,
+    "footprint_acres": 4.07,
+    "internal_network_miles": 0.15,
+    "internal_network_m": 241.6,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Knollwood The Reserve",
+    "units": 111,
+    "footprint_acres": 4.12,
+    "internal_network_miles": 0.092,
+    "internal_network_m": 147.6,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 15,
+    "share_beyond_cap": 0.135,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Cedar Run Overlook",
+    "units": 110,
+    "footprint_acres": 1.41,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 110,
+    "share_beyond_cap": 1.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "110 of 110 units (100%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Hunters Ridge",
+    "units": 108,
+    "footprint_acres": 4.78,
+    "internal_network_miles": 0.091,
+    "internal_network_m": 146.9,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 3,
+    "share_beyond_cap": 0.028,
+    "status": "UNRESOLVED",
+    "trigger": "INSTRUCTION_ONLY",
+    "reasons": [
+      "named for review in the Phase 2a instruction; the automatic test clears it (147 m internal network, 3% of units beyond cap) but a human instruction outranks the heuristic"
+    ],
+    "recommendation": {
+      "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "detail": "Large complex with no internal walkable network in any town layer. Frontage-street association would silently claim these units are prayed for by someone who never enters the site. Source internal walkways from an authoritative provider, or digitise them, before counting these units.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Wyatt Farm Subdivision",
+    "units": 100,
+    "footprint_acres": 71.86,
+    "internal_network_miles": 2.622,
+    "internal_network_m": 4219.4,
+    "internal_segment_count": 50,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Sundance Ridge Condominiums",
+    "units": 100,
+    "footprint_acres": 3.07,
+    "internal_network_miles": 0.107,
+    "internal_network_m": 172.2,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Apartment Heights",
+    "units": 99,
+    "footprint_acres": 6.38,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 31,
+    "share_beyond_cap": 0.313,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "31 of 99 units (31%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ASSOCIATE_WITH_FRONTAGE_STREETS",
+      "detail": "Moderate complex spanning more than the association cap. Assign buildings to the frontage street they actually face, by hand, rather than nearest-neighbour.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Meadowbrook Mobile Home Park",
+    "units": 98,
+    "footprint_acres": 26.13,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 86,
+    "share_beyond_cap": 0.878,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "86 of 98 units (88%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ASSOCIATE_WITH_FRONTAGE_STREETS",
+      "detail": "Moderate complex spanning more than the association cap. Assign buildings to the frontage street they actually face, by hand, rather than nearest-neighbour.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Shenandoah Subdivision",
+    "units": 95,
+    "footprint_acres": 42.27,
+    "internal_network_miles": 1.759,
+    "internal_network_m": 2830.9,
+    "internal_segment_count": 30,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Westover Hills Subdivision",
+    "units": 94,
+    "footprint_acres": 52.88,
+    "internal_network_miles": 1.312,
+    "internal_network_m": 2110.7,
+    "internal_segment_count": 12,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Stonegate & Carlton Scott Apartments",
+    "units": 92,
+    "footprint_acres": 7.84,
+    "internal_network_miles": 0.113,
+    "internal_network_m": 182.3,
+    "internal_segment_count": 2,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Knollwood Apartment Homes",
+    "units": 91,
+    "footprint_acres": 5.56,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 4,
+    "share_beyond_cap": 0.044,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "ASSOCIATE_WITH_FRONTAGE_STREETS",
+      "detail": "Moderate complex spanning more than the association cap. Assign buildings to the frontage street they actually face, by hand, rather than nearest-neighbour.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Park 37",
+    "units": 77,
+    "footprint_acres": 1.79,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "OBHS Townhomes",
+    "units": 73,
+    "footprint_acres": 9.64,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 64,
+    "share_beyond_cap": 0.877,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "64 of 73 units (88%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "ASSOCIATE_WITH_FRONTAGE_STREETS",
+      "detail": "Moderate complex spanning more than the association cap. Assign buildings to the frontage street they actually face, by hand, rather than nearest-neighbour.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Pheasant Run Crossing Townhomes",
+    "units": 72,
+    "footprint_acres": 6.57,
+    "internal_network_miles": 0.086,
+    "internal_network_m": 138.1,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 15,
+    "share_beyond_cap": 0.208,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Cascades",
+    "units": 72,
+    "footprint_acres": 3.27,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Midtown Townhomes",
+    "units": 67,
+    "footprint_acres": 4.62,
+    "internal_network_miles": 0.246,
+    "internal_network_m": 395.9,
+    "internal_segment_count": 7,
+    "units_beyond_cap": 1,
+    "share_beyond_cap": 0.015,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Sundance Village Condominiums",
+    "units": 65,
+    "footprint_acres": 1.83,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 12,
+    "share_beyond_cap": 0.185,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Ivy Gardens",
+    "units": 65,
+    "footprint_acres": 0.74,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Shenandoah Townhomes",
+    "units": 61,
+    "footprint_acres": 6.3,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 10,
+    "share_beyond_cap": 0.164,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "ASSOCIATE_WITH_FRONTAGE_STREETS",
+      "detail": "Moderate complex spanning more than the association cap. Assign buildings to the frontage street they actually face, by hand, rather than nearest-neighbour.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Maple Ridge Village 3",
+    "units": 61,
+    "footprint_acres": 15.13,
+    "internal_network_miles": 0.58,
+    "internal_network_m": 934.1,
+    "internal_segment_count": 10,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Echols Village",
+    "units": 60,
+    "footprint_acres": 12.81,
+    "internal_network_miles": 0.46,
+    "internal_network_m": 740.2,
+    "internal_segment_count": 8,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Maple Ridge Village 4",
+    "units": 60,
+    "footprint_acres": 30.66,
+    "internal_network_miles": 0.659,
+    "internal_network_m": 1059.9,
+    "internal_segment_count": 7,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Farm",
+    "units": 59,
+    "footprint_acres": 3.46,
+    "internal_network_miles": 0.096,
+    "internal_network_m": 155.2,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Kipps Farm Subdivision",
+    "units": 59,
+    "footprint_acres": 23.62,
+    "internal_network_miles": 0.606,
+    "internal_network_m": 974.8,
+    "internal_segment_count": 6,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Shawnee II Apartments",
+    "units": 56,
+    "footprint_acres": 3.8,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 10,
+    "share_beyond_cap": 0.179,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Legacy on Main",
+    "units": 56,
+    "footprint_acres": 1.58,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 7,
+    "share_beyond_cap": 0.125,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Northview Apartments",
+    "units": 54,
+    "footprint_acres": 2.64,
+    "internal_network_miles": 0.086,
+    "internal_network_m": 139.1,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "1435 Toms Creek Rd Apartments",
+    "units": 53,
+    "footprint_acres": 1.06,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 53,
+    "share_beyond_cap": 1.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "53 of 53 units (100%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Rutherford Townhomes",
+    "units": 50,
+    "footprint_acres": 4.86,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 16,
+    "share_beyond_cap": 0.32,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "16 of 50 units (32%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Clover Valley Townhomes",
+    "units": 50,
+    "footprint_acres": 3.68,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 37,
+    "share_beyond_cap": 0.74,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "37 of 50 units (74%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Mount Tabor Meadows",
+    "units": 49,
+    "footprint_acres": 18.52,
+    "internal_network_miles": 1.313,
+    "internal_network_m": 2112.6,
+    "internal_segment_count": 24,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Ramble Ridge Townhomes",
+    "units": 48,
+    "footprint_acres": 4.82,
+    "internal_network_miles": 0.19,
+    "internal_network_m": 305.7,
+    "internal_segment_count": 3,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Berryfield Condominiums",
+    "units": 48,
+    "footprint_acres": 2.13,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 23,
+    "share_beyond_cap": 0.479,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "23 of 48 units (48%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Tech Terrace Apartments",
+    "units": 48,
+    "footprint_acres": 1.92,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "The Crossing at Knollwood",
+    "units": 48,
+    "footprint_acres": 1.89,
+    "internal_network_miles": 0.065,
+    "internal_network_m": 104.8,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Chase Apartments",
+    "units": 48,
+    "footprint_acres": 2.14,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 15,
+    "share_beyond_cap": 0.312,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "15 of 48 units (31%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Stroubles Ridge",
+    "units": 46,
+    "footprint_acres": 12.89,
+    "internal_network_miles": 0.297,
+    "internal_network_m": 477.6,
+    "internal_segment_count": 4,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Summit at Uptown",
+    "units": 44,
+    "footprint_acres": 5.42,
+    "internal_network_miles": 0.068,
+    "internal_network_m": 109.2,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 3,
+    "share_beyond_cap": 0.068,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Brookfield Village",
+    "units": 42,
+    "footprint_acres": 10.19,
+    "internal_network_miles": 0.317,
+    "internal_network_m": 510.5,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Countryside Estates Subdivision",
+    "units": 42,
+    "footprint_acres": 20.54,
+    "internal_network_miles": 0.554,
+    "internal_network_m": 892.0,
+    "internal_segment_count": 6,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Townhomes at Knollwood",
+    "units": 42,
+    "footprint_acres": 4.02,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 42,
+    "share_beyond_cap": 1.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "42 of 42 units (100%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Cambridge Square Apartments",
+    "units": 40,
+    "footprint_acres": 3.43,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 2,
+    "share_beyond_cap": 0.05,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Carriage Hill Townhomes",
+    "units": 40,
+    "footprint_acres": 3.44,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Carriage Square",
+    "units": 39,
+    "footprint_acres": 3.55,
+    "internal_network_miles": 0.172,
+    "internal_network_m": 277.5,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Stonegate of Blacksburg Subdivision",
+    "units": 38,
+    "footprint_acres": 15.08,
+    "internal_network_miles": 0.353,
+    "internal_network_m": 567.6,
+    "internal_segment_count": 3,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Vistas",
+    "units": 38,
+    "footprint_acres": 7.03,
+    "internal_network_miles": 0.162,
+    "internal_network_m": 260.4,
+    "internal_segment_count": 3,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Mount Tabor Village",
+    "units": 38,
+    "footprint_acres": 4.87,
+    "internal_network_miles": 0.125,
+    "internal_network_m": 201.8,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Landing at Stonegate",
+    "units": 38,
+    "footprint_acres": 4.19,
+    "internal_network_miles": 0.147,
+    "internal_network_m": 237.1,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Park Place Apartments",
+    "units": 37,
+    "footprint_acres": 1.44,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 14,
+    "share_beyond_cap": 0.378,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "14 of 37 units (38%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "McDonald St. Apartments",
+    "units": 37,
+    "footprint_acres": 1.33,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "North Main Street Apartments",
+    "units": 37,
+    "footprint_acres": 1.45,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 3,
+    "share_beyond_cap": 0.081,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Park Place Condominiums",
+    "units": 36,
+    "footprint_acres": 0.96,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Tee Street Apartments",
+    "units": 36,
+    "footprint_acres": 2.23,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Brightwood Manor Condominiums",
+    "units": 36,
+    "footprint_acres": 1.66,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 35,
+    "share_beyond_cap": 0.972,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "35 of 36 units (97%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Villas on North Main",
+    "units": 35,
+    "footprint_acres": 10.34,
+    "internal_network_miles": 0.282,
+    "internal_network_m": 454.4,
+    "internal_segment_count": 3,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Shadowlake Village Subdivision",
+    "units": 33,
+    "footprint_acres": 4.88,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 29,
+    "share_beyond_cap": 0.879,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "29 of 33 units (88%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Meadow Run Subdivision",
+    "units": 32,
+    "footprint_acres": 11.8,
+    "internal_network_miles": 0.331,
+    "internal_network_m": 532.2,
+    "internal_segment_count": 5,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Clay Court",
+    "units": 32,
+    "footprint_acres": 1.2,
+    "internal_network_miles": 0.092,
+    "internal_network_m": 148.5,
+    "internal_segment_count": 2,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "1709 & 1711 Whipple Dr Townhomes",
+    "units": 31,
+    "footprint_acres": 1.98,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Trillium Place",
+    "units": 31,
+    "footprint_acres": 22.55,
+    "internal_network_miles": 0.804,
+    "internal_network_m": 1294.1,
+    "internal_segment_count": 5,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Collegiate Court",
+    "units": 30,
+    "footprint_acres": 1.59,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Little River Apartments",
+    "units": 30,
+    "footprint_acres": 1.08,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Carriage Hill II Townhomes",
+    "units": 30,
+    "footprint_acres": 2.85,
+    "internal_network_miles": 0.19,
+    "internal_network_m": 305.6,
+    "internal_segment_count": 1,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "The Flats",
+    "units": 28,
+    "footprint_acres": 0.6,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Tech Village Center",
+    "units": 27,
+    "footprint_acres": 1.34,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Tremont Estates",
+    "units": 27,
+    "footprint_acres": 1.54,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 16,
+    "share_beyond_cap": 0.593,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "16 of 27 units (59%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Shealor Apartments - Patrick Henry Drive",
+    "units": 27,
+    "footprint_acres": 0.77,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  },
+  {
+    "place_name": "Blacksburg Duplexes",
+    "units": 26,
+    "footprint_acres": 5.3,
+    "internal_network_miles": 0.337,
+    "internal_network_m": 542.8,
+    "internal_segment_count": 2,
+    "units_beyond_cap": 0,
+    "share_beyond_cap": 0.0,
+    "status": "OK",
+    "trigger": null,
+    "reasons": []
+  },
+  {
+    "place_name": "Uptown Village",
+    "units": 26,
+    "footprint_acres": 3.27,
+    "internal_network_miles": 0.0,
+    "internal_network_m": 0.0,
+    "internal_segment_count": 0,
+    "units_beyond_cap": 12,
+    "share_beyond_cap": 0.462,
+    "status": "UNRESOLVED",
+    "trigger": "AUTOMATIC",
+    "reasons": [
+      "no internal walkable network (0 m of eligible segment inside the site footprint)",
+      "12 of 26 units (46%) are further than 75 m from any eligible segment"
+    ],
+    "recommendation": {
+      "action": "TREAT_AS_UNRESOLVED",
+      "detail": "Small footprint; likely resolvable by raising the cap after review.",
+      "interim": "EXCLUDE_FROM_ESTIMATE"
+    }
+  }
+]
