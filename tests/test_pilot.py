@@ -7,10 +7,11 @@ with a seed, a start node and a network version is a bug report.
 from __future__ import annotations
 
 import importlib
+from contextlib import contextmanager
 
 import pytest
 
-from .conftest import DOWNTOWN, auth, make_admin, register
+from .conftest import DOWNTOWN, auth, make_admin, network_version, register
 
 
 @pytest.fixture(scope="module")
@@ -52,7 +53,7 @@ def test_feedback_is_reproducible(client, h):
     assert r.status_code == 200, r.text
     rep = r.json()["reproduce"]
     assert rep["seed"] == g["seed"]
-    assert rep["network_version"] == "v1.2"
+    assert rep["network_version"] == network_version()
     assert rep["engine_version"]
     assert rep["band"] == w["band"]
     assert rep["start_node"] is not None
@@ -129,7 +130,7 @@ def test_pilot_summary_reports_what_a_pilot_needs(client, h, admin_h):
     assert s["feedback"]["responses"] >= 1
     assert s["feedback"]["average_rating"] is not None
     assert s["walks"]["completion_rate"] is not None
-    assert s["network"]["version"] == "v1.2"
+    assert s["network"]["version"] == network_version()
 
 
 def test_pilot_summary_never_names_a_walker_against_a_route(client, admin_h):
@@ -175,42 +176,57 @@ def test_connector_candidates_are_exposed_to_admin(client, admin_h):
 
 
 # --------------------------------------------------------------- access modes
+@contextmanager
+def access_mode(mode: str, **extra):
+    """Run a block under a different deployment access mode, then put it back.
+
+    Restoring to whatever the mode *was* rather than to a literal: Phase 3.5 moved
+    the default from `authenticated` to `open_read`, and a test that restored to a
+    hard-coded mode silently reconfigured every test that ran after it.
+    """
+    from api.app import config
+    cfg = config.settings()
+    previous = {k: getattr(cfg, k) for k in ("access_mode", *extra)}
+    object.__setattr__(cfg, "access_mode", mode)
+    for k, v in extra.items():
+        object.__setattr__(cfg, k, v)
+    try:
+        yield cfg
+    finally:
+        for k, v in previous.items():
+            object.__setattr__(cfg, k, v)
+
+
 def test_access_mode_controls_anonymous_geometry(client):
     """G1 is deployment configuration: one setting, no API change."""
-    from api.app import config, deps
+    from api.app import config
 
-    cfg = config.settings()
-    assert cfg.access_mode == "authenticated"
-    assert client.get("/api/progress/map").status_code == 403
+    # Phase 3.5 default: the dashboard and the progress map are readable before
+    # anybody signs up (Priority 2).
+    assert config.settings().access_mode == "open_read"
+    assert client.get("/api/progress/map").status_code == 200
 
-    object.__setattr__(cfg, "access_mode", "public")
-    try:
+    with access_mode("authenticated") as cfg:
+        assert cfg.geometry_is_public is False
+        assert client.get("/api/progress/map").status_code == 403
+
+    with access_mode("public") as cfg:
         assert cfg.geometry_is_public is True
         assert client.get("/api/progress/map").status_code == 200
-    finally:
-        object.__setattr__(cfg, "access_mode", "authenticated")
-    assert client.get("/api/progress/map").status_code == 403
+
+    assert client.get("/api/progress/map").status_code == 200
 
 
 def test_public_access_mode_still_hides_residential_data(client):
     """Making geometry public must not make anything else public."""
-    from api.app import config
-    cfg = config.settings()
-    object.__setattr__(cfg, "access_mode", "public")
-    try:
+    with access_mode("public"):
         body = client.get("/api/progress/map").text
         assert "household" not in body.lower().split('"excludes"')[0]
         assert "participant" not in body.lower().split('"excludes"')[0]
-    finally:
-        object.__setattr__(cfg, "access_mode", "authenticated")
 
 
 def test_invite_mode_gates_registration(client):
-    from api.app import config
-    cfg = config.settings()
-    object.__setattr__(cfg, "access_mode", "invite")
-    object.__setattr__(cfg, "invite_code", "walk-with-us")
-    try:
+    with access_mode("invite", invite_code="walk-with-us"):
         bad = client.post("/api/identity/register",
                           json=dict(first_name="No", last_name="Code",
                                     email="nocode@example.com"))
@@ -224,9 +240,6 @@ def test_invite_mode_gates_registration(client):
         assert ok.status_code == 200
         # Identity model is unchanged by the gate: still name, email, opaque token.
         assert ok.json()["token"]
-    finally:
-        object.__setattr__(cfg, "access_mode", "authenticated")
-        object.__setattr__(cfg, "invite_code", "")
 
 
 def test_deployment_check_warns_on_invite_without_a_code():

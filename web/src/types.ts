@@ -127,6 +127,69 @@ export interface ProgressMap {
   excludes: string[]
 }
 
+/**
+ * A mission: the walk we recommend, described in mission terms.
+ *
+ * Note what is NOT here — route score, walk quality, coverage gain, efficiency,
+ * cluster identifiers, seed. Those are real and they are how the route was chosen,
+ * but they are the optimiser's business, not the walker's (Priority 8). They stay on
+ * the server and remain visible through the admin endpoints.
+ */
+export interface Mission {
+  id: string
+  title: string
+  households_line: string
+  has_households: boolean
+  households: number
+  completes_area: boolean
+  area: string | null
+  areas: string[]
+  estimated_minutes: number
+  distance_miles: number
+  start: {
+    lat: number
+    lon: number
+    description: string
+    streets: string[]
+  }
+  geometry: LineString
+  segment_ids: string[]
+  required_segment_ids: string[]
+  network_version: string
+  engine_version: string
+  directions?: DirectionsLinks
+}
+
+export interface DirectionsLinks { apple: string; google: string; geo: string }
+
+export interface MissionAlternative {
+  id: string
+  title: string
+  estimated_minutes: number
+  distance_miles: number
+  households: number
+}
+
+export interface MissionResponse {
+  available: boolean
+  minutes: number
+  requested_minutes?: number
+  reason?: string
+  mission: Mission | null
+  alternatives: MissionAlternative[]
+  slate_size?: number
+  network_version: string
+}
+
+export interface MissionOptions {
+  min_minutes: number
+  max_minutes: number
+  step_minutes: number
+  default_minutes: number
+  pace_mph: number
+  pace_note: string
+}
+
 export interface AdminOverview {
   metrics: Metrics
   components: Record<string, any>

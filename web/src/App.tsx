@@ -1,20 +1,25 @@
 /**
  * Shell and routing.
  *
- * A hash router rather than a library: the whole app is seven screens, and an
+ * A hash router rather than a library: the whole app is a handful of screens, and an
  * installed PWA opened from the home screen has to resume on a real route without a
  * server round trip. Hash routes do that with no configuration.
+ *
+ * Identity is no longer a wall in front of the app (Priority 2). `me` may be null on
+ * every screen. The screens that genuinely need a person — an active walk, the
+ * confirmation, admin — say so when they are reached; the ones that do not, don't ask.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { api, getToken, setToken } from './api'
 import type { ParticipantOut, Walk } from './types'
+import IdentityGate from './components/IdentityGate'
 import ActiveWalk from './screens/ActiveWalk'
 import Admin from './screens/Admin'
 import Confirm from './screens/Confirm'
+import Dashboard from './screens/Dashboard'
 import Generate from './screens/Generate'
-import Home from './screens/Home'
+import Mission from './screens/Mission'
 import Progress from './screens/Progress'
-import Register from './screens/Register'
 
 export type Nav = (route: string) => void
 
@@ -36,6 +41,7 @@ export default function App() {
   const [loading, setLoading] = useState(true)
 
   const refreshWalk = useCallback(async () => {
+    if (!getToken()) { setWalk(null); return }
     try { setWalk(await api.current()) } catch { setWalk(null) }
   }, [])
 
@@ -47,11 +53,14 @@ export default function App() {
         await refreshWalk()
       } catch {
         // A token the server does not recognise is worse than no token: it produces
-        // 401s on every screen. Drop it and start over.
+        // 401s on every screen. Drop it and carry on anonymously.
         setToken(null)
       } finally { setLoading(false) }
     })()
   }, [refreshWalk])
+
+  const adopt = useCallback((p: ParticipantOut) => { setMe(p); refreshWalk() },
+    [refreshWalk])
 
   function switchPerson() {
     // Drops the opaque token only. The participant record, and everything walked
@@ -62,22 +71,39 @@ export default function App() {
 
   if (loading) return <div className="screen"><p className="muted">Loading…</p></div>
 
-  if (!me) return <Register onDone={(p) => { setMe(p); nav('/') }} />
+  /** Screens that record something against a person. Reached without one, they ask. */
+  const gate = (reason: string) => (
+    <div className="screen">
+      <IdentityGate reason={reason} onDone={adopt} onCancel={() => nav('/')} />
+    </div>
+  )
 
   const screen = (() => {
+    if (route.startsWith('/mission')) {
+      return <Mission nav={nav} me={me} onIdentity={adopt} onWalk={setWalk} />
+    }
     if (route.startsWith('/generate')) {
-      return <Generate nav={nav} onWalk={setWalk} />
+      return me
+        ? <Generate nav={nav} onWalk={setWalk} />
+        : gate('Finding a walk from where you are standing records a route request, '
+               + 'so we ask who you are first.')
     }
     if (route.startsWith('/walk/')) {
-      return <ActiveWalk nav={nav} walkId={route.split('/')[2]} onWalk={setWalk} />
+      return me
+        ? <ActiveWalk nav={nav} walkId={route.split('/')[2]} onWalk={setWalk} />
+        : gate('This walk belongs to somebody. Sign in to open it.')
     }
     if (route.startsWith('/confirm/')) {
-      return <Confirm nav={nav} walkId={route.split('/')[2]}
-                      onDone={() => { setWalk(null); refreshWalk() }} />
+      return me
+        ? <Confirm nav={nav} walkId={route.split('/')[2]}
+                   onDone={() => { setWalk(null); refreshWalk() }} />
+        : gate('This walk belongs to somebody. Sign in to record it.')
     }
     if (route.startsWith('/progress')) return <Progress />
-    if (route.startsWith('/admin')) return <Admin me={me} />
-    return <Home nav={nav} me={me} walk={walk} />
+    if (route.startsWith('/admin')) {
+      return me ? <Admin me={me} /> : gate('Administration requires an account.')
+    }
+    return <Dashboard nav={nav} me={me} walk={walk} />
   })()
 
   return (
@@ -86,15 +112,18 @@ export default function App() {
         <button className="brand" onClick={() => nav('/')}>Blacksburg Prayer Walk</button>
         <nav>
           <button onClick={() => nav('/progress')}>Progress</button>
-          {me.is_admin && <button onClick={() => nav('/admin')}>Admin</button>}
+          {me?.is_admin && <button onClick={() => nav('/admin')}>Admin</button>}
         </nav>
       </header>
       {/* §5: a returning walker should see who the app thinks they are, and be able
-          to say it is not them — this is a shared-phone situation as often as not. */}
-      <div className="whoami">
-        <span>Walking as <strong>{me.first_name} {me.last_name}</strong></span>
-        <button className="link" onClick={switchPerson}>Not you? Switch person</button>
-      </div>
+          to say it is not them — this is a shared-phone situation as often as not.
+          Anonymous visitors get no such bar; there is nothing to correct. */}
+      {me && (
+        <div className="whoami">
+          <span>Walking as <strong>{me.first_name} {me.last_name}</strong></span>
+          <button className="link" onClick={switchPerson}>Not you? Switch person</button>
+        </div>
+      )}
       <main>{screen}</main>
     </div>
   )

@@ -7,7 +7,8 @@
  * nothing but the link back to your own history.
  */
 import type {
-  AdminOverview, Metrics, ParticipantOut, ProgressMap, RouteResponse, Walk,
+  AdminOverview, Metrics, MissionOptions, MissionResponse, ParticipantOut, ProgressMap,
+  RouteResponse, Walk,
 } from './types'
 
 const TOKEN_KEY = 'bpw.token'
@@ -51,6 +52,24 @@ export const api = {
     }),
 
   me: () => req<ParticipantOut>('/api/identity/me'),
+
+  // --- missions (Priority 3) ------------------------------------------------
+  // `options` and `recommend` are anonymous-friendly by design: somebody who has just
+  // opened the app sees a real suggested walk before being asked who they are.
+  // `acceptMission` is the first call that needs identity, because it is the first
+  // one that records a walk against a person and holds streets against everyone else.
+  missionOptions: () => req<MissionOptions>('/api/missions/options'),
+
+  recommend: (minutes: number) =>
+    req<MissionResponse>(`/api/missions/recommend?minutes=${minutes}`),
+
+  mission: (id: string, minutes: number) =>
+    req<MissionResponse>(`/api/missions/${id}?minutes=${minutes}`),
+
+  acceptMission: (id: string, minutes: number) =>
+    req<{ walk_id: string; mission_id: string; distance_miles: number;
+          estimated_minutes: number }>(
+      `/api/missions/${id}/accept?minutes=${minutes}`, { method: 'POST' }),
 
   generate: (lat: number, lon: number, start_source: 'DEVICE_LOCATION' | 'MAP') =>
     req<RouteResponse>('/api/routes/generate', {

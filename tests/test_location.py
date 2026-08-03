@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from .conftest import CRC, DOWNTOWN, auth, register
+from .conftest import CRC, DOWNTOWN, auth, network_version, register
 
 BANDS = ("Quick", "Short", "Medium", "Long", "Extended")
 
@@ -131,6 +131,6 @@ def test_requested_family_narrows_the_response(client, h):
 def test_variants_carry_the_versions_that_produced_them(client, h):
     r = generate(client, h, DOWNTOWN["lat"], DOWNTOWN["lon"]).json()
     for v in r["variants"]:
-        assert v["network_version"] == "v1.2"
+        assert v["network_version"] == network_version()
         assert v["engine_version"] == r["engine_version"]
         assert v["seed"] == r["seed"]

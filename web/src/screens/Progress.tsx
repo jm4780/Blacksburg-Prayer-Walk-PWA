@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from 'react'
 import { api, ApiError } from '../api'
-import MapCanvas, { type MapLine } from '../components/MapCanvas'
+import MapView, { type SegmentFeature } from '../components/MapView'
 import type { Metrics, ProgressMap } from '../types'
 
 export default function Progress() {
@@ -22,11 +22,10 @@ export default function Progress() {
     })
   }, [])
 
-  const lines: MapLine[] = (map?.features ?? []).map((f) => ({
+  const lines: SegmentFeature[] = (map?.features ?? []).map((f) => ({
     id: f.properties.id,
-    coords: f.geometry.coordinates,
-    className: f.properties.done ? 'ln-done'
-      : f.properties.held ? 'ln-held' : 'ln-todo',
+    coordinates: f.geometry.coordinates,
+    state: f.properties.done ? 'done' : f.properties.held ? 'held' : 'todo',
   }))
 
   const done = map?.features.filter((f) => f.properties.done).length ?? 0
@@ -52,13 +51,12 @@ export default function Progress() {
 
       {map && (
         <>
-          <MapCanvas lines={lines} boundary={map.boundary} height={460}
-                     ariaLabel={`Progress map: ${done} of ${map.features.length} required streets prayed for`} />
+          <MapView segments={lines} height={460}
+                   ariaLabel={`Progress map: ${done} of ${map.features.length} required streets prayed for`} />
           <div className="legend">
             <span><i className="sw done" /> Prayed for</span>
             <span><i className="sw todo" /> Not yet</span>
             <span><i className="sw held" /> Someone is walking it now</span>
-            {map.boundary && <span><i className="sw boundary" /> Town boundary</span>}
           </div>
           <details className="fine">
             <summary>What this map does not show</summary>

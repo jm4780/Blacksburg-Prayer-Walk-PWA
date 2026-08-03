@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from .conftest import CRC, DOWNTOWN, auth, register
+from .conftest import CRC, DOWNTOWN, auth, network_version, register
 
 STATES = {"ROUTE_AVAILABLE", "LIMITED_LOCAL_COVERAGE", "LONGER_ROUTE_REQUIRED",
           "NO_USEFUL_ROUTE_NEAR_START", "SELECT_DIFFERENT_START_AREA"}
@@ -144,8 +144,8 @@ def test_response_names_the_network_and_engine(client, downtown):
     produced it, so a stored route stays traceable.
     """
     from api.routing.engine import ENGINE_VERSION
-    assert downtown["network_version"] == "v1.2"
-    assert downtown["network_id"].startswith("bbg-net-v1.2-")
+    assert downtown["network_version"] == network_version()
+    assert downtown["network_id"].startswith(f"bbg-net-{network_version()}-")
     assert downtown["engine_version"] == ENGINE_VERSION
 
 

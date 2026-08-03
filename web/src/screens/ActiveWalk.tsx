@@ -15,7 +15,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
 import FeedbackForm from '../components/FeedbackForm'
-import MapCanvas from '../components/MapCanvas'
+import MapView from '../components/MapView'
 import type { Walk } from '../types'
 import type { Nav } from '../App'
 
@@ -57,17 +57,17 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
       <div className="card">
         {/* The marker is the walk's fixed start and end point, computed once when
             the route was generated. It is not the walker — it never moves. */}
-        <MapCanvas lines={[]} focus={walk.geometry} height={320}
-                   marker={walk.start_point
-                     ? { lon: walk.start_point[0], lat: walk.start_point[1] } : null}
-                   ariaLabel={`Planned route, ${walk.distance_miles} miles`} />
+        <MapView route={walk.geometry} height={360}
+                 start={walk.start_point
+                   ? { lon: walk.start_point[0], lat: walk.start_point[1] } : null}
+                 ariaLabel={`Planned route, ${walk.distance_miles} miles`} />
         <p className="fine centered">Starts and ends at the same point.</p>
-        <dl className="facts">
-          <div><dt>Distance</dt><dd>{walk.distance_miles} mi</dd></div>
-          <div><dt>About</dt><dd>{walk.estimated_minutes} min</dd></div>
-          <div><dt>Streets</dt><dd>{walk.required_segment_count}</dd></div>
-          <div><dt>Households</dt><dd>~{(walk.households ?? 0).toLocaleString()}</dd></div>
-        </dl>
+        {/* Priority 8: what a walker needs to know about today's walk, and nothing
+            that describes the optimiser. Segment counts moved to the admin views. */}
+        <p className="mission-line">
+          About {walk.estimated_minutes} minutes · {walk.distance_miles} miles
+          {walk.households ? ` · approximately ${walk.households.toLocaleString()} households` : ''}
+        </p>
       </div>
 
       {/* Phrased as a statement about the screen, not as a denial of surveillance.

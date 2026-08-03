@@ -31,7 +31,9 @@ class Settings(BaseSettings):
     # WHO MAY SEE ROUTE AND MAP GEOMETRY. This is the G1 control, and it is a
     # deployment setting rather than a product decision baked into the API:
     #
-    #   authenticated  any signed-up participant. The pilot default.
+    #   authenticated  any signed-up participant.
+    #   open_read      anyone may read the dashboard, progress map and a suggested
+    #                  walk; identity is required to accept one. The pilot default.
     #   invite         signing up additionally requires BPW_INVITE_CODE.
     #   public         anyone, no sign-up. Set this once G1 is resolved.
     #
@@ -39,7 +41,14 @@ class Settings(BaseSettings):
     # `deps.may_see_geometry` is the single place the mode is consulted. The identity
     # model is unaffected in all three: name, email, remembered device. There is no
     # password and no account system to build.
-    access_mode: str = "authenticated"
+    #
+    # Default changed at Phase 3.5 to `open_read`: the product requires that the
+    # dashboard, the progress map and a preliminary mission are visible before anyone
+    # is asked for a name (Priority 2). `open_read` serves geometry to anonymous
+    # readers while still requiring identity to *accept* a walk. G1 has not moved —
+    # this is an operator decision about a pilot deployment, and it is stated in the
+    # startup warnings and on /api/health rather than being silent.
+    access_mode: str = "open_read"
     invite_code: str = ""
 
     # sqlite for the vertical slice; set BPW_DATABASE_URL to a postgresql+psycopg URL
@@ -74,7 +83,8 @@ class Settings(BaseSettings):
     @property
     def geometry_is_public(self) -> bool:
         """The single question `deps.may_see_geometry` asks."""
-        return self.access_mode == "public" or self.public_geometry_enabled
+        return (self.access_mode in ("open_read", "public")
+                or self.public_geometry_enabled)
 
     def check(self) -> list[str]:
         """Deployment warnings, surfaced at startup and by /health."""
@@ -84,9 +94,9 @@ class Settings(BaseSettings):
         if self.tier != "development" and not self.token_pepper:
             out.append("BPW_TOKEN_PEPPER is unset outside development — participant "
                        "tokens are hashed without a pepper")
-        if self.access_mode not in ("authenticated", "invite", "public"):
+        if self.access_mode not in ("authenticated", "open_read", "invite", "public"):
             out.append(f"BPW_ACCESS_MODE={self.access_mode!r} is not one of "
-                       f"authenticated | invite | public")
+                       f"authenticated | open_read | invite | public")
         if self.access_mode == "invite" and not self.invite_code:
             out.append("BPW_ACCESS_MODE=invite but BPW_INVITE_CODE is unset — "
                        "registration would be open to anyone")
@@ -94,10 +104,11 @@ class Settings(BaseSettings):
             out.append("tier=public but access_mode is not public — geometry "
                        "endpoints require authentication (licensing gate G1)")
         if self.geometry_is_public:
-            out.append("public_geometry_enabled=true — source-derived geometry is "
-                       "being served without authentication. This is redistribution "
-                       "of Town of Blacksburg GIS data. Confirm licensing gate G1 is "
-                       "resolved (docs/05-licensing-status.md).")
+            out.append(f"access_mode={self.access_mode} — source-derived geometry is "
+                       "served to anonymous readers. This is redistribution of Town of "
+                       "Blacksburg GIS data; licensing gate G1 is unresolved. Set "
+                       "BPW_ACCESS_MODE=authenticated to require sign-in "
+                       "(docs/05-licensing-status.md).")
         if self.database_url.startswith("sqlite") and self.tier == "public":
             out.append("sqlite database on a public tier")
         return out

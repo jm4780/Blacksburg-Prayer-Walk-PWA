@@ -22,7 +22,7 @@ from fastapi.staticfiles import StaticFiles
 from ..routing.engine import ENGINE_VERSION
 from .config import settings
 from .db import init_db
-from .routers import admin, identity, progress, routes
+from .routers import admin, identity, missions, progress, routes
 from .schemas import HealthOut
 from .services.network_state import network_service
 
@@ -50,6 +50,7 @@ app.add_middleware(CORSMiddleware, allow_origins=settings().origins,
 
 app.include_router(identity.router)
 app.include_router(routes.router)
+app.include_router(missions.router)
 app.include_router(progress.router)
 app.include_router(admin.router)
 

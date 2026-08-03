@@ -21,7 +21,7 @@ from shapely.geometry import Point
 from shapely.strtree import STRtree
 
 from . import (campus_normalize, classify, connect, connector_review, curation,
-               geo, households as hh)
+               geo, households as hh, neighborhoods)
 from .names import address_name, normalize, road_name
 
 OUT_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "out")
@@ -194,6 +194,10 @@ def main():
             cls["surface"] = None
             cls["grade_pct"] = None
             cls["grade_source"] = "NOT_APPLICABLE"
+            # Neighbourhood name, for mission descriptions. A label, not a routing
+            # input — see pipeline/build/neighborhoods.py.
+            cls["neighborhood"] = neighborhoods.for_road(attrs)
+            cls["neighborhood_boundary"] = neighborhoods.is_boundary(attrs)
             source_id, global_id = attrs.get("OBJECTID"), attrs.get("GlobalID")
         else:
             display, norm = normalize(attrs.get("Road"), log["name_fixes"])
@@ -202,6 +206,11 @@ def main():
             cls["has_sidewalk"] = False
             cls["has_bike_facility"] = False
             cls["in_campus_core"] = in_campus
+            # Campus ways carry no neighbourhood because the Roads layer has no campus
+            # streets. Naming them beats leaving a recognisable part of town blank.
+            cls["neighborhood"] = (neighborhoods.CAMPUS_NEIGHBORHOOD if in_campus
+                                   else None)
+            cls["neighborhood_boundary"] = False
             source_id, global_id = attrs.get("OBJECTID"), attrs.get("GlobalID")
 
         mid = g.interpolate(0.5, normalized=True)

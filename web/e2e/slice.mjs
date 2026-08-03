@@ -1,24 +1,43 @@
 /**
- * End-to-end walk of the vertical slice, on a phone-sized viewport.
+ * End-to-end walk of the Phase 3.5 flow, on a phone-sized viewport.
  *
- * Drives the twelve steps in order: arrive -> sign up -> dashboard -> generate ->
- * grant location -> see sizes -> change size -> preview -> start -> finish ->
- * confirm -> see the dashboard move. Also checks the two things §13 and §16 forbid:
- * no live-tracking language on the active-walk screen, and no residential data in any
- * network response.
+ * Drives the required flow in order:
+ *
+ *   open the app with no account -> see the town's progress -> ask for a walk ->
+ *   move the time slider -> get a specific recommendation -> read it on a real map ->
+ *   see how to get to the start -> accept -> give a name -> start -> finish ->
+ *   confirm -> see the town total move
+ *
+ * Alongside the flow it checks the things that are meant to be true *because someone
+ * decided they should be*, and would otherwise rot quietly:
+ *
+ *   - the dashboard works signed out (Priority 2)
+ *   - no location is requested for the default recommendation (Priority 5)
+ *   - the map is a real map: pannable, zoomable, and tappable with a thumb (Priority 1)
+ *   - no parking language anywhere (Priority 5)
+ *   - no engineering metrics on any walker-facing screen (Priority 8)
+ *   - no tracking language and no continuous location, ever (§13, §18)
+ *   - no residential data in any API payload (§18)
  *
  *   node e2e/slice.mjs [baseUrl]
  */
 import { chromium, devices } from 'playwright'
-import assert from 'node:assert/strict'
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1:8000'
 const START = { latitude: 37.2296, longitude: -80.4139 }   // downtown Blacksburg
 
-// §13: the active-walk screen must not imply the phone is following the walker.
-const FORBIDDEN_ON_ACTIVE_WALK = [
+// §13: no screen may imply the phone is following the walker.
+const FORBIDDEN_TRACKING = [
   /\btracking\b/i, /\btracked\b/i, /\brecording your\b/i, /\bgps\b/i,
   /\blive location\b/i, /\bfollowing you\b/i,
+]
+// Priority 5: never tell somebody where to leave a car. "Parkway" and "Park Street"
+// are real Blacksburg street names, so this matches "park" as a word only.
+const FORBIDDEN_PARKING = [/\bpark\b/i, /\bparking\b/i, /\bparked\b/i]
+// Priority 8: the optimiser's vocabulary stays on the server.
+const FORBIDDEN_ENGINEERING = [
+  /\bcoverage gain\b/i, /\bwalk quality\b/i, /\broute score\b/i, /\befficiency\b/i,
+  /\bcluster\b/i, /\bseed\b/i, /\bband\b/i,
 ]
 // §18 / §16: nothing residential may cross the wire.
 const FORBIDDEN_IN_PAYLOADS = [
@@ -31,6 +50,12 @@ let failures = 0
 function check(name, cond, detail = '') {
   if (cond) log(`  PASS  ${name}`)
   else { failures++; log(`  FAIL  ${name} ${detail}`) }
+}
+function checkNone(label, patterns, text) {
+  for (const re of patterns) {
+    const m = text.match(re)
+    check(`${label}: no match for ${re}`, !m, m ? `"${m[0]}"` : '')
+  }
 }
 
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
@@ -55,26 +80,30 @@ await page.addInitScript(() => {
   g.getCurrentPosition = (...a) => { window.__getCurrentPositionCalls++; return once(...a) }
 })
 
-// Capture every API payload for the privacy assertion.
 const payloads = []
 page.on('response', async (r) => {
   if (!r.url().includes('/api/')) return
   try { payloads.push({ url: r.url(), body: await r.text() }) } catch { /* streamed */ }
 })
 
-log('\n1-2  arrive and sign up')
-await page.goto('/')
-await page.getByLabel('First name').fill('Ada')
-await page.getByLabel('Last name').fill('Walker')
-await page.getByLabel('Email').fill(`ada+${Date.now()}@example.com`)
-await page.getByRole('button', { name: 'Start walking' }).click()
-await page.getByRole('heading', { name: /Hello, Ada/ }).waitFor({ timeout: 15000 })
-check('registered and landed on the dashboard', true)
-const who = await page.locator('.whoami').innerText()
-check('shows "Walking as [Name]"', /Walking as\s+Ada Walker/.test(who), who)
-check('offers a way to switch person', /Not you\?|Switch person/.test(who), who)
+/** The map is ready when MapLibre says its style has loaded. */
+async function mapReady(timeout = 30000) {
+  await page.locator('.maplibre[data-ready="true"]').first().waitFor({ timeout })
+  await page.waitForFunction(
+    () => window.__bpwMap && window.__bpwMap.isStyleLoaded(), null, { timeout })
+}
 
-log('\n3    home dashboard')
+// ---------------------------------------------------------------------------
+log('\n1    arrive with no account')
+await page.goto('/')
+await page.getByRole('heading', { name: 'Blacksburg Prayer Walk' }).waitFor({ timeout: 15000 })
+check('no sign-up wall — the app opens on the dashboard',
+  await page.getByLabel('First name').count() === 0)
+check('no "walking as" bar before there is anybody to name',
+  await page.locator('.whoami').count() === 0)
+
+log('\n2    the town dashboard, signed out')
+await page.locator('.metric').first().waitFor({ timeout: 20000 })
 const metricLabels = await page.locator('.metric-label').allTextContents()
 check('three metrics present', metricLabels.length === 3, metricLabels.join(' | '))
 check('households metric says "estimated"',
@@ -82,134 +111,235 @@ check('households metric says "estimated"',
 await page.locator('.metric').first().getByRole('button').click()
 check('metric definition is available',
   (await page.locator('.definition').first().innerText()).length > 60)
+const startPct = Number((await page.locator('.metric-value').first().innerText()).replace('%', ''))
 
-log('\n4-5  generate, one-time location')
-await page.getByRole('button', { name: 'Generate a Prayer Walk' }).click()
-const explain = await page.locator('.card .lede').innerText()
-check('location purpose explained before the prompt',
-  /once/i.test(explain) && /not saved/i.test(explain), explain)
-check('explanation disclaims tracking', /do not track you/i.test(explain))
-await page.getByRole('button', { name: 'Use my location' }).click()
-
-const geo = await page.evaluate(
+log('\n3    ask for a walk — still no account')
+await page.getByRole('button', { name: 'Find my next walk' }).click()
+await page.locator('.mission h2').waitFor({ timeout: 90000 })
+const geoAtRecommend = await page.evaluate(
   () => ({ once: window.__getCurrentPositionCalls, watches: window.__watchIds.length }))
-check('location requested exactly once', geo.once === 1, JSON.stringify(geo))
-check('no continuous location watch was started', geo.watches === 0, JSON.stringify(geo))
+check('no location requested for the default recommendation (Priority 5)',
+  geoAtRecommend.once === 0, JSON.stringify(geoAtRecommend))
+check('still signed out', await page.locator('.whoami').count() === 0)
 
-log('\n6-7  sizes offered, and changing size updates everything')
-await page.locator('.sizes').waitFor({ timeout: 60000 })
-const ticks = page.locator('.tick')
-const tickCount = await ticks.count()
-check('five size bands rendered', tickCount === 5, `saw ${tickCount}`)
-const disabled = await page.locator('.tick.off').count()
-check('unavailable sizes are shown but not selectable',
-  disabled === (await page.locator('.tick[aria-disabled="true"]').count()))
+log('\n4    the time slider (Priority 4)')
+const slider = page.locator('.timeslider')
+check('a single continuous time control', await slider.count() === 1)
+const bounds = await slider.evaluate(
+  (el) => ({ min: el.min, max: el.max, step: el.step, value: el.value }))
+check('runs 20 to 90 in steps of 5',
+  bounds.min === '20' && bounds.max === '90' && bounds.step === '5',
+  JSON.stringify(bounds))
+check('opens at a sensible default', bounds.value === '45', bounds.value)
 
-const readFacts = async () => (await page.locator('.facts dd').allTextContents()).join(' / ')
-await page.locator('.tick', { hasText: 'Medium' }).click()
-const medium = await readFacts()
-await page.locator('.tick', { hasText: 'Long' }).click()
-const long = await readFacts()
-check('changing size updates distance, time, coverage and households',
-  medium !== long, `${medium} vs ${long}`)
-check('route line is drawn', await page.locator('path.ln-route').count() > 0)
-
-log('\n8-9  preview and start')
-await page.locator('.tick', { hasText: 'Medium' }).click()
-await page.getByRole('button', { name: 'Preview this walk' }).click()
-await page.getByRole('heading', { name: 'Preview your walk' }).waitFor({ timeout: 20000 })
-check('directions listed', await page.locator('.directions li').count() > 0)
-await page.getByRole('button', { name: 'Start this walk' }).click()
-await page.getByRole('heading', { name: 'Your walk' }).waitFor({ timeout: 15000 })
-
-log('\n     active-walk screen language (§13)')
-const activeText = await page.locator('main').innerText()
-for (const re of FORBIDDEN_ON_ACTIVE_WALK) {
-  check(`no match for ${re}`, !re.test(activeText),
-    (activeText.match(re) || []).join())
+const firstTitle = await page.locator('.mission h2').innerText()
+const firstMiles = await page.locator('.mission .mission-line').nth(1).innerText()
+/** Move the slider and wait for the recommendation that answers it. */
+async function setMinutes(m) {
+  const landed = page.waitForResponse(
+    (r) => r.url().includes(`/api/missions/recommend?minutes=${m}`) && r.status() === 200,
+    { timeout: 120000 })
+  await slider.fill(String(m))
+  await page.locator('.timevalue').getByText(`${m} minutes`).waitFor({ timeout: 5000 })
+  await landed
+  // The card dims while a newer recommendation is in flight, then settles.
+  await page.waitForFunction(
+    () => !document.querySelector('.mission.stale'), null, { timeout: 30000 })
 }
-// §13 requires the start/end location to be SHOWN, and forbids a live-location
-// indicator or a moving user marker. So the assertion is not "no marker" — an
-// earlier version asserted that and was simply wrong — it is that the only marker
-// is the route's fixed start/end, and that it does not move.
-const markerKinds = await page.locator('.marker').evaluateAll(
-  (els) => els.map((e) => e.getAttribute('data-kind')))
-check('start/end location is shown',
-  markerKinds.length === 1 && markerKinds[0] === 'route-start-end',
-  JSON.stringify(markerKinds))
-const pos1 = await page.locator('.marker circle').getAttribute('cx')
-await page.waitForTimeout(1200)
-const pos2 = await page.locator('.marker circle').getAttribute('cx')
-check('the marker does not move', pos1 === pos2, `${pos1} -> ${pos2}`)
-check('no geolocation watch is active',
-  await page.evaluate(() => !window.__watchIds || window.__watchIds.length === 0))
 
-log('\n10-11 finish and confirm')
+await setMinutes(80)
+check('the reading follows the slider immediately', true)
+const longerMiles = await page.locator('.mission .mission-line').nth(1).innerText()
+check('a longer time budget produces a longer walk',
+  firstMiles !== longerMiles, `${firstMiles} vs ${longerMiles}`)
+await setMinutes(45)
+
+log('\n5    the recommendation reads as a mission, not a configuration')
+const missionText = await page.locator('.mission').innerText()
+check('the walk has a title naming somewhere real',
+  /\b(through|around|in|corridors)\b/i.test(firstTitle) && firstTitle.length > 12,
+  firstTitle)
+check('says roughly how many households', /households|no homes/i.test(missionText),
+  missionText.split('\n')[1])
+check('says roughly how long', /About \d+ minutes/i.test(missionText))
+checkNone('mission card', FORBIDDEN_PARKING, missionText)
+checkNone('mission card', FORBIDDEN_ENGINEERING, missionText)
+checkNone('mission card', FORBIDDEN_TRACKING, missionText)
+
+log('\n6    a real map (Priority 1)')
+await mapReady()
+const drawn = await page.evaluate(
+  () => window.__bpwMap.queryRenderedFeatures({ layers: ['route-line'] }).length)
+check('the route is drawn on the map', drawn > 0, `${drawn} features`)
+
+const before = await page.evaluate(() => {
+  const m = window.__bpwMap
+  return { z: m.getZoom(), c: [m.getCenter().lng, m.getCenter().lat] }
+})
+// Pan by dragging, the way a thumb does.
+const box = await page.locator('.maplibre').first().boundingBox()
+await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+await page.mouse.down()
+await page.mouse.move(box.x + box.width / 2 - 90, box.y + box.height / 2 - 60, { steps: 12 })
+await page.mouse.up()
+await page.waitForTimeout(600)
+const panned = await page.evaluate(() => {
+  const m = window.__bpwMap
+  return [m.getCenter().lng, m.getCenter().lat]
+})
+check('the map pans', Math.abs(panned[0] - before.c[0]) > 1e-4,
+  `${before.c} -> ${panned}`)
+
+await page.locator('.maplibregl-ctrl-zoom-in').first().click()
+await page.waitForTimeout(800)
+const zoomed = await page.evaluate(() => window.__bpwMap.getZoom())
+check('the map zooms', zoomed > before.z, `${before.z} -> ${zoomed}`)
+
+await page.getByRole('button', { name: 'Recenter route' }).click()
+await page.waitForTimeout(900)
+const recentred = await page.evaluate(() => {
+  const m = window.__bpwMap
+  return [m.getCenter().lng, m.getCenter().lat]
+})
+check('recenter puts the route back',
+  Math.abs(recentred[0] - before.c[0]) < 5e-3, `${recentred} vs ${before.c}`)
+
+log('\n7    getting to the start (Priority 6)')
+const startBox = await page.locator('.startbox').innerText()
+check('the start is named as a place', startBox.length > 12, startBox)
+checkNone('start box', FORBIDDEN_PARKING, startBox)
+const dirs = await page.locator('.dirlinks a').evaluateAll(
+  (els) => els.map((e) => e.getAttribute('href')))
+check('directions to the start are offered', dirs.length >= 2, JSON.stringify(dirs))
+const startLatLon = await page.evaluate(() => {
+  const s = window.__bpwMap.getSource('startpt')
+  return s && s.serialize().data.features[0].geometry.coordinates
+})
+check('every directions link points at the start point, not the route',
+  dirs.every((d) => d.includes(startLatLon[1].toFixed(6))
+                 && d.includes(startLatLon[0].toFixed(6))),
+  JSON.stringify({ dirs, startLatLon }))
+
+log('\n8    "find a walk near me" is preserved, as a secondary way in (Priority 7)')
+check('offered below the recommendation',
+  await page.getByRole('button', { name: /Find a walk near me/i }).count() === 1)
+
+log('\n9    accept — identity asked for here and not before (Priority 2)')
+await page.getByRole('button', { name: 'Walk this' }).click()
+await page.locator('.identity').waitFor({ timeout: 10000 })
+const why = await page.locator('.identity .lede').innerText()
+check('says why it is asking now', /hold|held|nobody else|counts/i.test(why), why)
+await page.getByLabel('First name').fill('Ada')
+await page.getByLabel('Last name').fill('Walker')
+await page.getByLabel('Email').fill(`ada+${Date.now()}@example.com`)
+await page.getByRole('button', { name: 'Save and start' }).click()
+await page.getByRole('heading', { name: 'Preview your walk' }).waitFor({ timeout: 60000 })
+check('accepting after signing up goes straight to the walk', true)
+const who = await page.locator('.whoami').innerText()
+check('now shows "Walking as [Name]"', /Walking as\s+Ada Walker/.test(who), who)
+
+log('\n10   preview and start')
+check('directions listed', await page.locator('.directions li').count() > 0)
+await mapReady()
+await page.getByRole('button', { name: 'Start this walk' }).click()
+await page.getByRole('heading', { name: 'Your walk' }).waitFor({ timeout: 20000 })
+
+log('\n     active-walk screen (§13, Priority 8)')
+const activeText = await page.locator('main').innerText()
+checkNone('active walk', FORBIDDEN_TRACKING, activeText)
+checkNone('active walk', FORBIDDEN_PARKING, activeText)
+checkNone('active walk', FORBIDDEN_ENGINEERING, activeText)
+check('no geolocation watch is active',
+  await page.evaluate(() => window.__watchIds.length === 0))
+// §13 requires the start/end point to be SHOWN and forbids a moving user marker.
+const dot1 = await page.evaluate(() => {
+  const s = window.__bpwMap.getSource('startpt')
+  return s.serialize().data.features.length
+})
+check('the fixed start/end point is shown', dot1 === 1, String(dot1))
+await page.waitForTimeout(1500)
+const dot2 = await page.evaluate(() => {
+  const s = window.__bpwMap.getSource('startpt')
+  return JSON.stringify(s.serialize().data.features[0].geometry.coordinates)
+})
+await page.waitForTimeout(1500)
+const dot3 = await page.evaluate(() => {
+  const s = window.__bpwMap.getSource('startpt')
+  return JSON.stringify(s.serialize().data.features[0].geometry.coordinates)
+})
+check('the point does not move', dot2 === dot3, `${dot2} -> ${dot3}`)
+
+log('\n11   finish and confirm')
 await page.getByRole('button', { name: 'Finish Walk' }).click()
 await page.getByRole('heading', { name: /Did you complete the route as shown/ }).waitFor()
 check('three confirmation paths offered', await page.locator('.choice').count() === 3)
-const choices = (await page.locator('.choice strong').allTextContents()).join(' | ')
-check('offers mark-complete, review-and-edit, and did-not-complete',
-  /mark it complete/i.test(choices) && /Review and edit/i.test(choices)
-  && /didn.t complete it/i.test(choices), choices)
 
-// Review-and-edit must start from the plan and update the contribution live.
+// Review-and-edit must start from the plan and be operable with a thumb.
 await page.locator('.choice', { hasText: 'Review and edit' }).click()
-await page.locator('.map path.ln-picked').first().waitFor({ timeout: 15000 })
-const beforeEdit = await page.locator('.facts dd').allTextContents()
-// Click the invisible hit target for one specific street. Clicking the drawn line
-// itself would land wherever its bounding-box centre happens to be, which is often a
-// different street — the drawn paths carry pointer-events: none for that reason.
-const pickedId = await page.locator('.map path.ln-picked').first()
-  .evaluate((el) => el.getAttribute('d'))
-const targetId = await page.evaluate(() => {
-  const drawn = document.querySelector('.map path.ln-picked')
-  const d = drawn && drawn.getAttribute('d')
-  const hit = [...document.querySelectorAll('.map path.hit')]
-    .find((h) => h.getAttribute('d') === d)
-  return hit ? hit.getAttribute('data-id') : null
+await mapReady()
+await page.waitForFunction(
+  () => window.__bpwMap.querySourceFeatures('segments').length > 0, null, { timeout: 30000 })
+const summaryBefore = await page.locator('.card .mission-line').innerText()
+
+// The editing map sits below the fold on a phone. Scroll it into view before aiming
+// at it, or the tap lands on nothing and the failure looks like a hit-testing bug.
+await page.locator('.maplibre').first().scrollIntoViewIfNeeded()
+await page.waitForTimeout(400)
+
+// Tap a street the way a finger does: on the drawn line, at a point taken from the
+// route itself. The invisible 24px hit layer is what makes this land.
+const tapped = await page.evaluate(() => {
+  const m = window.__bpwMap
+  const data = m.getSource('segments').serialize().data
+  // A planned street, currently counting, that is on screen. Its midpoint is the
+  // least ambiguous place on it to aim a finger.
+  const bounds = m.getBounds()
+  for (const f of data.features) {
+    if (f.properties.state !== 'selected') continue
+    const c = f.geometry.coordinates[Math.floor(f.geometry.coordinates.length / 2)]
+    if (!bounds.contains(c)) continue
+    const p = m.project(c)
+    return { x: p.x, y: p.y, id: f.properties.id }
+  }
+  return null
 })
-check('every selectable street has a tap target', targetId !== null, String(pickedId))
-await page.locator(`.map path.hit[data-id="${targetId}"]`).click({ force: true })
-const afterEdit = await page.locator('.facts dd').allTextContents()
-check('editing updates the adjusted contribution',
-  beforeEdit.join() !== afterEdit.join(), `${beforeEdit} vs ${afterEdit}`)
+check('a planned street is visible on the editing map', tapped !== null)
+const mapBox = await page.locator('.maplibre').first().boundingBox()
+await page.mouse.click(mapBox.x + tapped.x, mapBox.y + tapped.y)
+await page.waitForTimeout(600)
+const summaryAfter = await page.locator('.card .mission-line').innerText()
+check('a street can be selected by tapping the map',
+  summaryBefore !== summaryAfter, `${summaryBefore} -> ${summaryAfter}`)
 check('freehand drawing is not offered',
-  await page.locator('canvas, [contenteditable="true"]').count() === 0)
+  await page.locator('[contenteditable="true"]').count() === 0)
 
 await page.locator('.choice', { hasText: 'mark it complete' }).click()
 await page.getByRole('button', { name: 'Submit contribution' }).click()
-await page.getByRole('heading', { name: 'Thank you' }).waitFor({ timeout: 20000 })
+await page.getByRole('heading', { name: 'Thank you' }).waitFor({ timeout: 30000 })
 check('completion confirmed', true)
 
 log('\n     pilot feedback (Phase 3.1 §5)')
-const fbCard = page.locator('.feedback')
-check('feedback offered after submission', await fbCard.count() === 1)
+check('feedback offered after submission', await page.locator('.feedback').count() === 1)
 await page.locator('.feedback .star').nth(3).click()
 await page.locator('.feedback .yesno button').first().click()
-await page.locator('.feedback .check input').check()
-await page.locator('.feedback textarea').first()
-  .fill('the route crossed Prices Fork Rd where there is no crosswalk')
 await page.getByRole('button', { name: 'Send feedback' }).click()
-await page.getByText(/Thank you — that helps/).waitFor({ timeout: 15000 })
+await page.getByText(/Thank you — that helps/).waitFor({ timeout: 20000 })
 check('feedback accepted and acknowledged', true)
-check('reproduction is promised, not just thanks',
-  /regenerate this exact route/i.test(await page.locator('.note.ok').innerText()))
 
-log('\n12   dashboard reflects the walk')
+log('\n12   the town total moves')
 await page.getByRole('button', { name: 'Back to home' }).click()
-await page.getByRole('heading', { name: /Hello, Ada/ }).waitFor()
-const pct = Number((await page.locator('.metric-value').first().innerText()).replace('%', ''))
-check('percentage prayed for is above zero', pct > 0, `${pct}%`)
+await page.getByRole('heading', { name: /Hello, Ada/ }).waitFor({ timeout: 20000 })
+await page.locator('.metric-value').first().waitFor()
+const endPct = Number((await page.locator('.metric-value').first().innerText()).replace('%', ''))
+check('percentage prayed for went up', endPct > startPct, `${startPct}% -> ${endPct}%`)
 
 log('\n     progress map (§16)')
 await page.getByRole('button', { name: 'Progress', exact: true }).click()
-await page.locator('.legend').waitFor({ timeout: 30000 })
-check('progress map renders required geometry',
-  await page.locator('.map path').count() > 100)
-check('map states what it excludes',
-  await page.locator('details.fine').count() === 1)
-check('town boundary drawn', await page.locator('path.ln-boundary').count() > 0)
+await mapReady()
+const required = await page.evaluate(
+  () => window.__bpwMap.querySourceFeatures('segments').length)
+check('progress map renders required geometry', required > 100, `${required} features`)
+check('map states what it excludes', await page.locator('details.fine').count() === 1)
 const legend = await page.locator('.legend').innerText()
 check('legend explains the colours',
   /Prayed for/i.test(legend) && /Not yet/i.test(legend), legend)
@@ -233,6 +363,9 @@ for (const re of FORBIDDEN_IN_PAYLOADS) {
   check(`no match for ${re}`, !hit, hit ? hit.url : '')
 }
 log(`     (${payloads.length} API responses inspected)`)
+
+const finalGeo = await page.evaluate(() => window.__watchIds.length)
+check('no continuous location watch was ever started', finalGeo === 0, String(finalGeo))
 
 await browser.close()
 log(`\n${failures === 0 ? 'ALL CHECKS PASSED' : `${failures} CHECK(S) FAILED`}`)

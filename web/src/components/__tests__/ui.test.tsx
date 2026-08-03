@@ -1,17 +1,188 @@
 /**
- * Component tests for the two pieces of UI logic that are easy to get quietly wrong:
- * which sizes the slider will let you pick, and how the map projects lon/lat.
+ * Component tests for the pieces of UI logic that are easy to get quietly wrong.
  *
- * The screen flows are covered end to end in e2e/slice.mjs against the real API;
- * these cover the arithmetic and the disabled-state rules that a browser test would
- * only catch by accident.
+ * The screen flows are covered end to end in e2e/slice.mjs and e2e/mission.mjs
+ * against the real API; these cover rules a browser test would only catch by
+ * accident — which sizes the slider will let you pick, and the map's three
+ * functional contracts (tap targets, fit-vs-user, degrading without a basemap).
+ *
+ * MapLibre needs WebGL, which jsdom does not have, so the map is tested against a
+ * mock of the library. That is the right seam: what matters here is what MapView
+ * *asks MapLibre for*, not how MapLibre draws it. Whether the basemap actually
+ * renders is a browser question and is answered in e2e/screenshots.mjs.
  */
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
-import MapCanvas from '../MapCanvas'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+// MapView's state changes originate in MapLibre's own event callbacks, not in React
+// event handlers. `act()` traps those updates and never flushes them, so these tests
+// drive the mock directly and wait a tick — and turn off the act warning that would
+// otherwise fire on every one of them.
+
 import SizeSlider from '../SizeSlider'
 import type { Variant } from '../../types'
 
+// --------------------------------------------------------------- maplibre mock
+const handlers = new Map<string, (e: any) => void>()
+const layers = new Map<string, any>()
+const sources = new Map<string, any>()
+const fitBounds = vi.fn()
+const setStyle = vi.fn()
+const disableRotation = vi.fn()
+let queryResult: any[] = []
+let styleLoaded = true
+
+class FakeMap {
+  constructor(public opts: any) { setTimeout(() => handlers.get('load')?.({}), 0) }
+  on(ev: string, fn: any) { handlers.set(ev, fn) }
+  off() {}
+  addControl() {}
+  remove() {}
+  isStyleLoaded() { return styleLoaded }
+  setStyle = setStyle
+  getSource(id: string) { return sources.get(id) }
+  addSource(id: string, s: any) { sources.set(id, { ...s, setData: vi.fn() }) }
+  getLayer(id: string) { return layers.get(id) }
+  addLayer(l: any) { layers.set(l.id, l) }
+  queryRenderedFeatures() { return queryResult }
+  fitBounds = fitBounds
+  touchZoomRotate = { disableRotation }
+}
+
+vi.mock('maplibre-gl', () => ({
+  Map: FakeMap,
+  config: {},
+  NavigationControl: class {},
+  LngLatBounds: class {
+    pts: any[] = []
+    constructor(a: any) { this.pts.push(a) }
+    extend(p: any) { this.pts.push(p); return this }
+  },
+}))
+vi.mock('maplibre-gl/dist/maplibre-gl.css', () => ({}))
+// Vite resolves `?worker&url` at build time; under vitest it is just a string.
+vi.mock('maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url',
+        () => ({ default: '/assets/maplibre-gl-worker.js' }))
+
+const MapView = (await import('../MapView')).default
+
+const ROUTE = {
+  type: 'LineString' as const,
+  coordinates: [[-80.42, 37.22], [-80.41, 37.23], [-80.40, 37.22]] as [number, number][],
+}
+
+/** Renders, then lets the mocked 'load' event fire and the layer effect settle. */
+async function mount(ui: React.ReactElement) {
+  const r = render(ui)
+  await settle()
+  return r
+}
+
+/** Enough turns for: the mocked 'load', the re-render it causes, and the effect. */
+async function settle() {
+  for (let i = 0; i < 4; i++) await new Promise((res) => setTimeout(res, 1))
+}
+
+beforeEach(() => {
+  // Set here rather than at module scope: @testing-library/react turns it back on
+  // when it loads, and it is read at update time.
+  ;(globalThis as any).IS_REACT_ACT_ENVIRONMENT = false
+  handlers.clear(); layers.clear(); sources.clear()
+  fitBounds.mockClear(); setStyle.mockClear(); disableRotation.mockClear()
+  queryResult = []; styleLoaded = true
+})
+
+describe('MapView', () => {
+  it('draws the route on a real map, not a fixed picture', async () => {
+    await mount(<MapView route={ROUTE} ariaLabel="route" />)
+    expect(layers.get('route-line')).toBeTruthy()
+    expect(sources.has('route')).toBe(true)
+  })
+
+  it('gives segments a tap target far wider than the drawn line', async () => {
+    // The functional requirement behind Priority 1: at town zoom a thumb covers a
+    // dozen streets, so selection has to query something much wider than 2.5px.
+    await mount(
+      <MapView segments={[{ id: 'SEG-1', coordinates: ROUTE.coordinates, state: 'todo' }]}
+               onSegmentTap={() => {}} ariaLabel="edit" />)
+    const hit = layers.get('segments-hit')
+    const line = layers.get('segments-line')
+    expect(hit.paint['line-width']).toBeGreaterThanOrEqual(20)
+    expect(hit.paint['line-opacity']).toBe(0)
+    expect(hit.paint['line-width']).toBeGreaterThan(line.paint['line-width'][3] ?? 3)
+  })
+
+  it('reports the tapped segment id, not the nearest coordinate', async () => {
+    const onSegmentTap = vi.fn()
+    await mount(
+      <MapView segments={[{ id: 'SEG-42', coordinates: ROUTE.coordinates, state: 'todo' }]}
+               onSegmentTap={onSegmentTap} ariaLabel="edit" />)
+    queryResult = [{ properties: { id: 'SEG-42' } }]
+    handlers.get('click')!({ point: [10, 10], lngLat: { lat: 37.22, lng: -80.41 } })
+    expect(onSegmentTap).toHaveBeenCalledWith('SEG-42')
+  })
+
+  it('falls back to a bare map tap when nothing was hit', async () => {
+    const onMapTap = vi.fn()
+    await mount(<MapView onMapTap={onMapTap} ariaLabel="pick" />)
+    handlers.get('click')!({ point: [1, 1], lngLat: { lat: 37.25, lng: -80.4 } })
+    expect(onMapTap).toHaveBeenCalledWith({ lat: 37.25, lon: -80.4 })
+  })
+
+  it('zooms closer when editing, because streets must be separable by thumb', async () => {
+    await mount(<MapView route={ROUTE} ariaLabel="m" />)
+    const browsing = fitBounds.mock.calls[fitBounds.mock.calls.length - 1][1].maxZoom
+    fitBounds.mockClear()
+    await mount(<MapView route={ROUTE} editing ariaLabel="m" />)
+    const editing = fitBounds.mock.calls[fitBounds.mock.calls.length - 1][1].maxZoom
+    expect(editing).toBeGreaterThan(browsing)
+  })
+
+  it('stops auto-fitting once the user has moved the map', async () => {
+    const { rerender } = await mount(<MapView route={ROUTE} ariaLabel="m" />)
+    expect(fitBounds).toHaveBeenCalledTimes(1)
+
+    handlers.get('dragstart')!({})               // the user takes the viewport
+    await settle()
+    fitBounds.mockClear()
+
+    const other = { ...ROUTE, coordinates: [...ROUTE.coordinates, [-80.39, 37.24]] as any }
+    rerender(<MapView route={other} ariaLabel="m" />)
+    await settle()
+    expect(fitBounds).not.toHaveBeenCalled()
+  })
+
+  it('recenters on request, deliberately', async () => {
+    await mount(<MapView route={ROUTE} ariaLabel="m" />)
+    handlers.get('dragstart')!({})
+    await settle()
+    fitBounds.mockClear()
+    fireEvent.click(screen.getByRole('button', { name: /recenter/i }))
+    expect(fitBounds).toHaveBeenCalledTimes(1)
+  })
+
+  it('disables rotation — a rotated street map helps nobody on foot', async () => {
+    await mount(<MapView route={ROUTE} ariaLabel="m" />)
+    expect(disableRotation).toHaveBeenCalled()
+  })
+
+  it('still shows the route when the basemap cannot be reached', async () => {
+    styleLoaded = false
+    await mount(<MapView route={ROUTE} ariaLabel="m" />)
+    handlers.get('error')!({ error: { status: 502 } })
+    await settle()
+    expect(setStyle).toHaveBeenCalled()
+    expect(await screen.findByRole('status')).toHaveProperty(
+      'textContent', expect.stringContaining('route is still shown'))
+  })
+
+  it('carries the aria label onto the map itself', async () => {
+    await mount(<MapView route={ROUTE} ariaLabel="Progress map" />)
+    expect(screen.getByRole('application', { name: 'Progress map' })).toBeTruthy()
+  })
+})
+
+// ------------------------------------------------------------------ size slider
 function variant(band: string, available: boolean, miles = 1): Variant {
   return {
     band, target_miles: miles, available,
@@ -26,7 +197,7 @@ function variant(band: string, available: boolean, miles = 1): Variant {
     score_components: {}, campus_credited_miles: 0, suggested_band: null,
     nearest_incomplete_miles: null, segment_ids: [], required_segment_ids: [],
     connector_segment_ids: [], start_point: null, end_point: null, route_score: 1,
-    seed: 1, network_version: 'v1.2', engine_version: '2.1.0',
+    seed: 1, network_version: 'v1.3', engine_version: '2.1.1',
     geometry: null,
   }
 }
@@ -38,11 +209,16 @@ describe('SizeSlider', () => {
     variant('Extended', false, 7.5),
   ]
 
-  it('renders every band, including the unavailable ones', () => {
+  it('labels available sizes by time, not by band name', () => {
+    // Priority 4: what somebody is choosing between is how long they will be out.
     render(<SizeSlider variants={variants} selected="Medium" onSelect={() => {}} />)
-    for (const b of ['Quick', 'Short', 'Medium', 'Long', 'Extended']) {
-      expect(screen.getByText(b)).toBeTruthy()
-    }
+    expect(screen.getByText('40 min')).toBeTruthy()   // Short, 2 mi
+    expect(screen.getByText('70 min')).toBeTruthy()   // Medium, 3.5 mi
+  })
+
+  it('still renders the unavailable sizes rather than hiding them', () => {
+    render(<SizeSlider variants={variants} selected="Medium" onSelect={() => {}} />)
+    for (const b of ['Quick', 'Extended']) expect(screen.getByText(b)).toBeTruthy()
   })
 
   it('never lets an unavailable band be selected', () => {
@@ -61,8 +237,6 @@ describe('SizeSlider', () => {
   it('snaps the range to available bands only', () => {
     const onSelect = vi.fn()
     render(<SizeSlider variants={variants} selected="Short" onSelect={onSelect} />)
-    // getByLabelText('Route size') is ambiguous — the group and the input share
-    // that label by design, so query by role.
     const range = screen.getByRole('slider') as HTMLInputElement
     // Three available bands -> indices 0..2, not 0..4.
     expect(range.max).toBe('2')
@@ -73,57 +247,5 @@ describe('SizeSlider', () => {
     render(<SizeSlider variants={variants.map((v) => ({ ...v, available: false }))}
                        selected={null} onSelect={() => {}} />)
     expect(screen.getByText(/No route size is available/)).toBeTruthy()
-  })
-})
-
-describe('MapCanvas', () => {
-  const line = {
-    coords: [[-80.42, 37.22], [-80.41, 37.23], [-80.40, 37.22]] as [number, number][],
-    className: 'ln-todo',
-  }
-
-  it('draws one path per line', () => {
-    const { container } = render(<MapCanvas lines={[line]} ariaLabel="test map" />)
-    expect(container.querySelectorAll('path.ln-todo').length).toBe(1)
-  })
-
-  it('corrects for longitude compression so routes are not squashed', () => {
-    // A square in degrees is wider than it is tall on the ground at this latitude,
-    // so the projected width must come out smaller than the projected height.
-    const square: [number, number][] = [
-      [-80.42, 37.22], [-80.41, 37.22], [-80.41, 37.23], [-80.42, 37.23],
-    ]
-    const { container } = render(
-      <MapCanvas lines={[{ coords: square, className: 'ln-todo' }]} ariaLabel="m" />)
-    const d = container.querySelector('path')!.getAttribute('d')!
-    const pts = d.slice(1).split(/[ML]/).map((p) => p.trim().split(' ').map(Number))
-    const w = Math.max(...pts.map((p) => p[0])) - Math.min(...pts.map((p) => p[0]))
-    const h = Math.max(...pts.map((p) => p[1])) - Math.min(...pts.map((p) => p[1]))
-    expect(w).toBeLessThan(h)
-    expect(w / h).toBeCloseTo(Math.cos((37.23 * Math.PI) / 180), 1)
-  })
-
-  it('is only tappable when a pick handler is supplied', () => {
-    const { container: a } = render(<MapCanvas lines={[line]} ariaLabel="m" />)
-    expect(a.querySelector('svg')!.dataset.pickable).toBe('false')
-    const { container: b } = render(
-      <MapCanvas lines={[line]} ariaLabel="m" onPick={() => {}} />)
-    expect(b.querySelector('svg')!.dataset.pickable).toBe('true')
-  })
-
-  it('renders no marker unless one is given', () => {
-    const { container } = render(<MapCanvas lines={[line]} ariaLabel="m" />)
-    expect(container.querySelector('.marker')).toBeNull()
-  })
-
-  it('draws the town boundary behind the network', () => {
-    const ring: [number, number][] = [
-      [-80.46, 37.19], [-80.38, 37.19], [-80.38, 37.27], [-80.46, 37.27], [-80.46, 37.19],
-    ]
-    const { container } = render(
-      <MapCanvas lines={[line]} boundary={{ coordinates: [ring] }} ariaLabel="m" />)
-    const paths = [...container.querySelectorAll('path')]
-    expect(paths[0].getAttribute('class')).toBe('ln-boundary')
-    expect(container.querySelectorAll('path.ln-boundary').length).toBe(1)
   })
 })

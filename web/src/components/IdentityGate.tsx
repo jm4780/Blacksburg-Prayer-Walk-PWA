@@ -1,12 +1,30 @@
 /**
- * Lightweight identity (§5). First name, last name, email. Nothing else is asked for
- * and nothing else is stored.
+ * Identity, asked for at the moment it starts to mean something (Priority 2).
+ *
+ * This was the first screen of the app. It is now a gate that appears when somebody
+ * accepts a walk, because that is the first action with a consequence for anyone else:
+ * a walk is recorded against a person, and the streets in it are held so two people do
+ * not pray the same block on the same morning.
+ *
+ * Everything before that — the shared progress, the recommendation, the map, the route
+ * itself — works without knowing who is looking.
+ *
+ * Still first name, last name, email (§5). Nothing else is asked for or stored, and the
+ * browser keeps only an opaque token.
  */
 import { useState } from 'react'
 import { api, setToken } from '../api'
 import type { ParticipantOut } from '../types'
 
-export default function Register({ onDone }: { onDone: (p: ParticipantOut) => void }) {
+interface Props {
+  onDone: (p: ParticipantOut) => void
+  onCancel?: () => void
+  /** Why we are asking, phrased for the thing the walker just tried to do. */
+  reason?: string
+  cta?: string
+}
+
+export default function IdentityGate({ onDone, onCancel, reason, cta }: Props) {
   const [first, setFirst] = useState('')
   const [last, setLast] = useState('')
   const [email, setEmail] = useState('')
@@ -31,11 +49,10 @@ export default function Register({ onDone }: { onDone: (p: ParticipantOut) => vo
   }
 
   return (
-    <div className="screen narrow">
-      <h1>Blacksburg Prayer Walk</h1>
+    <div className="card identity">
+      <h2>Who is walking?</h2>
       <p className="lede">
-        Walk a route through Blacksburg and pray for the homes you pass. Tell us who
-        you are so your walks count toward the town total.
+        {reason ?? 'Tell us who you are so this walk counts toward the town total.'}
       </p>
       <form onSubmit={submit}>
         <label>
@@ -61,9 +78,14 @@ export default function Register({ onDone }: { onDone: (p: ParticipantOut) => vo
           </label>
         )}
         {error && <p className="error" role="alert">{error}</p>}
-        <button className="primary" disabled={busy || !first || !last || !email}>
-          {busy ? 'Signing you up…' : 'Start walking'}
+        <button className="primary big" disabled={busy || !first || !last || !email}>
+          {busy ? 'Just a moment…' : (cta ?? 'Start walking')}
         </button>
+        {onCancel && (
+          <button type="button" className="secondary" onClick={onCancel}>
+            Not yet
+          </button>
+        )}
       </form>
       <p className="fine">
         We store your name and email so that walking on a new phone still finds your

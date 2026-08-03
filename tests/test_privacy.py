@@ -99,10 +99,31 @@ def test_map_excludes_non_required_geometry(client, h, ns):
         assert ns.net.segments[ns.idx_of_id[sid]].required
 
 
-def test_map_requires_authentication_by_default(client):
-    r = client.get("/api/progress/map")
-    assert r.status_code == 403
-    assert "licensing gate G1" in r.json()["detail"]
+def test_the_geometry_gate_is_a_deployment_setting_that_still_works(client):
+    """G1 is deployment configuration, not architecture (Phase 3.1 §1).
+
+    Phase 3.5 changed the *default* to `open_read`, because a dashboard nobody can
+    see before signing up is not a dashboard (Priority 2). What must not change is
+    that the gate still closes when a deployment asks it to, and that it closes at
+    exactly one place — `deps.may_see_geometry`.
+    """
+    from api.app import config, deps
+
+    assert client.get("/api/progress/map").status_code == 200, \
+        "open_read is the Phase 3.5 default and should serve the map anonymously"
+
+    original = config.settings.cache_clear
+    try:
+        os.environ["BPW_ACCESS_MODE"] = "authenticated"
+        config.settings.cache_clear()
+        r = client.get("/api/progress/map")
+        assert r.status_code == 403
+        assert "licensing gate G1" in r.json()["detail"]
+        assert deps.may_see_geometry(None) is False
+    finally:
+        os.environ["BPW_ACCESS_MODE"] = "open_read"
+        original()
+    assert client.get("/api/progress/map").status_code == 200
 
 
 def test_metrics_are_public_and_carry_no_geometry(client):

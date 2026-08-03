@@ -17,7 +17,7 @@
  */
 import { useEffect, useState } from 'react'
 import { api, requestLocationOnce } from '../api'
-import MapCanvas, { type MapLine } from '../components/MapCanvas'
+import MapView, { type SegmentFeature } from '../components/MapView'
 import SizeSlider from '../components/SizeSlider'
 import type { ProgressMap, RouteResponse, Variant, Walk } from '../types'
 import type { Nav } from '../App'
@@ -79,10 +79,10 @@ export default function Generate({ nav, onWalk }: {
     } finally { setBusy(false) }
   }
 
-  const lines: MapLine[] = (base?.features ?? []).map((f) => ({
+  const lines: SegmentFeature[] = (base?.features ?? []).map((f) => ({
     id: f.properties.id,
-    coords: f.geometry.coordinates,
-    className: f.properties.done ? 'ln-done' : 'ln-todo',
+    coordinates: f.geometry.coordinates,
+    state: f.properties.done ? 'done' : 'todo',
   }))
 
   const selected: Variant | undefined =
@@ -95,7 +95,12 @@ export default function Generate({ nav, onWalk }: {
 
   return (
     <div className="screen">
-      <h1>Generate a Prayer Walk</h1>
+      <h1>Find a walk near me</h1>
+      <p className="lede">
+        Start from where you are standing. If you would rather be given a walk without
+        sharing a location, <button className="link" onClick={() => nav('/mission')}>
+        go back to the recommendation</button>.
+      </p>
 
       {phase === 'ASK' && (
         <div className="card">
@@ -112,10 +117,10 @@ export default function Generate({ nav, onWalk }: {
       {phase === 'PICKING' && (
         <div className="card">
           {error && <p className="error" role="alert">{error}</p>}
-          <p>Tap where you would like to start.</p>
-          <MapCanvas lines={lines} boundary={base?.boundary} marker={start} height={380}
-                     ariaLabel="Blacksburg required streets. Tap to choose a start point."
-                     onPick={(p) => { setStart(p); run(p.lat, p.lon, 'MAP') }} />
+          <p>Pan and zoom to where you would like to start, then tap.</p>
+          <MapView segments={lines} start={start} height={400}
+                   ariaLabel="Blacksburg required streets. Tap to choose a start point."
+                   onMapTap={(p) => { setStart(p); run(p.lat, p.lon, 'MAP') }} />
           <button className="secondary" onClick={useMyLocation}>
             Use my location instead
           </button>
@@ -161,15 +166,15 @@ export default function Generate({ nav, onWalk }: {
 
               {selected?.available && (
                 <div className="card">
-                  <MapCanvas lines={lines} focus={selected.geometry} marker={start}
-                             height={320}
-                             ariaLabel={`${selected.band} route, ${selected.distance_miles} miles`} />
-                  <dl className="facts">
-                    <div><dt>Distance</dt><dd>{selected.distance_miles} mi</dd></div>
-                    <div><dt>About</dt><dd>{selected.estimated_minutes} min</dd></div>
-                    <div><dt>New streets</dt><dd>{selected.new_required_miles} mi</dd></div>
-                    <div><dt>Households</dt><dd>~{selected.households?.toLocaleString()}</dd></div>
-                  </dl>
+                  <MapView route={selected.geometry} start={start} height={340}
+                           ariaLabel={`${selected.band} route, ${selected.distance_miles} miles`} />
+                  {/* Priority 8: what the walk is, not how it scored. */}
+                  <p className="mission-line">
+                    About {selected.estimated_minutes} minutes · {selected.distance_miles} miles
+                    {selected.households
+                      ? ` · approximately ${selected.households.toLocaleString()} households`
+                      : ''}
+                  </p>
                   {selected.campus_credited_miles ? (
                     <p className="fine">
                       {selected.campus_credited_miles} mi of this is a campus corridor

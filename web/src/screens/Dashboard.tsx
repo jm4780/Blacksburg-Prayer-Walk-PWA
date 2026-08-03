@@ -1,10 +1,17 @@
 /**
- * Home dashboard (§4).
+ * The landing screen (Priority 2).
  *
- * Three numbers, each with the definition available behind a disclosure. The
- * definitions are not decoration: "42% of Blacksburg prayed for" is a claim about a
- * denominator two phases of work went into establishing, and a number that cannot be
- * questioned cannot be trusted.
+ * This is what somebody sees when they open the app, signed in or not. It answers
+ * "what is this and how is it going?" before it asks anything of them. Three numbers,
+ * the shared progress, and one clear way in.
+ *
+ * The three numbers each carry their own definition behind a disclosure. That is not
+ * decoration: "42% of Blacksburg prayed for" is a claim about a denominator two phases
+ * of work went into establishing, and a number that cannot be questioned cannot be
+ * trusted.
+ *
+ * Nothing here requires an identity. A visitor sees the same figures a walker does,
+ * because the point of the number is that it belongs to the town.
  */
 import { useEffect, useState } from 'react'
 import { api } from '../api'
@@ -28,8 +35,8 @@ function Metric({ label, value, unit, definition, extra }: {
   )
 }
 
-export default function Home({ nav, me, walk }: {
-  nav: Nav; me: ParticipantOut; walk: Walk | null
+export default function Dashboard({ nav, me, walk }: {
+  nav: Nav; me: ParticipantOut | null; walk: Walk | null
 }) {
   const [m, setM] = useState<Metrics | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -40,19 +47,23 @@ export default function Home({ nav, me, walk }: {
 
   return (
     <div className="screen">
-      <h1>Hello, {me.first_name}</h1>
+      <h1>{me ? `Hello, ${me.first_name}` : 'Blacksburg Prayer Walk'}</h1>
+      <p className="lede">
+        {me
+          ? 'Here is how far the town has come.'
+          : 'Walk a route through Blacksburg and pray for the homes you pass. '
+            + 'Here is how far the town has come.'}
+      </p>
 
       {walk && (
         <div className="banner">
           <div>
             <strong>You have a walk in progress</strong>
             <div className="muted">
-              {walk.band} · {walk.distance_miles} mi · about {walk.estimated_minutes} min
+              About {walk.estimated_minutes} min · {walk.distance_miles} mi
             </div>
           </div>
-          <button className="primary"
-                  onClick={() => nav(walk.status === 'ACTIVE'
-                    ? `/walk/${walk.id}` : `/walk/${walk.id}`)}>
+          <button className="primary" onClick={() => nav(`/walk/${walk.id}`)}>
             Resume
           </button>
         </div>
@@ -81,13 +92,22 @@ export default function Home({ nav, me, walk }: {
           </section>
 
           <div className="actions">
-            <button className="primary big" onClick={() => nav('/generate')}>
-              Generate a Prayer Walk
+            {/* One primary way in. It leads to a recommendation, not a form. */}
+            <button className="primary big" onClick={() => nav('/mission')}>
+              Find my next walk
             </button>
             <button className="secondary big" onClick={() => nav('/progress')}>
-              View Progress Map
+              See the progress map
             </button>
           </div>
+
+          {!me && (
+            <p className="fine">
+              You can look around without signing in. We ask who you are when you
+              accept a walk, so it counts toward the total and the streets are held
+              for you.
+            </p>
+          )}
 
           <p className="fine">
             Network {m.network_version} · {m.required_segments_complete.toLocaleString()} of{' '}

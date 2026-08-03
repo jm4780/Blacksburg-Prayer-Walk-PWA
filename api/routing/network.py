@@ -23,13 +23,16 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 OUT_ROOT = os.path.join(REPO, "pipeline", "out")
 M_PER_MILE = 1609.344
 
+#   1.3  Phase 3.5: neighbourhood names carried on every segment, from the Town's own
+#        NbrhdCom_L/R fields. A label for mission descriptions, never a routing input —
+#        the router still works on segments, clusters and completion state.
 #   1.2  Phase 3: campus canonical corridors promoted REQUIRED (D1b) with parallel
 #        walkways crediting them instead of duplicating the obligation; Deerfield and
 #        Shenandoah trails PROVISIONAL -> CONFIRMED; CRC crossings catalogued for
 #        review and still held out of the graph; Smart Road still EXCLUDED.
 #   1.1  Phase 2b.1: Smart Road reclassified REQUIRED -> EXCLUDED.
 #   1.0  Phase 2a.1 candidate freeze.
-NETWORK_VERSION = "1.2"
+NETWORK_VERSION = "1.3"
 
 # --- routing-graph membership (Phase 2b Step 2) -----------------------------
 #
@@ -86,6 +89,9 @@ class Segment:
     campus_obligation: str | None
     campus_corridor: str | None
     connector_class: str | None
+    # Town neighbourhood this segment sits in. Presentation only — see
+    # pipeline/build/neighborhoods.py and docs/17 §7.
+    neighborhood: str | None
     is_derived: bool
     coords: list  # WGS84 [[lon,lat],...] for visualisation only
     # [(canonical segment id, fraction of it this walkway runs alongside)]. Non-empty
@@ -197,6 +203,7 @@ def load(date: str = "2026-08-03", quiet: bool = False) -> Network:
             campus_obligation=p.get("campus_obligation"),
             campus_corridor=p.get("campus_corridor"),
             connector_class=p.get("connector_class"),
+            neighborhood=p.get("neighborhood"),
             is_derived=p["source"]["dataset"] == "DERIVED",
             coords=g["coordinates"] if g["type"] == "LineString" else [],
             satisfies=list(p.get("satisfies") or []),
@@ -260,6 +267,7 @@ def load(date: str = "2026-08-03", quiet: bool = False) -> Network:
         campus_alternatives_with_credit=len(alt_credit),
         campus_credit_links_dropped=dangling,
         routable_miles=mi(segments),
+        neighborhoods=sorted({s.neighborhood for s in req if s.neighborhood}),
         # From the canonical build, for the record — excluded mileage is not routable.
         excluded_miles=totals["EXCLUDED"]["miles"],
         canonical_total_miles=totals["ALL"]["miles"],
@@ -332,6 +340,7 @@ def freeze_manifest(net: Network) -> dict:
                      "it runs alongside, additively, once the covered fractions reach "
                      "satisfy_share. One obligation per corridor (spec §4.2)."),
         },
+        "neighborhoods": net.stats["neighborhoods"],
         "counts": {
             "routing_segments": net.stats["routing_segments"],
             "routing_nodes": net.stats["routing_nodes"],

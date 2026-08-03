@@ -3,8 +3,9 @@
 A mobile-first Progressive Web App that helps people systematically prayer-walk every
 eligible public street and major trail in the Town of Blacksburg, Virginia.
 
-**Core experience:** Open the app. Generate a route. Pray while walking. Confirm the
-streets covered. Watch the town gradually fill in.
+**Core experience:** Open the app and see how far the town has come. Say how much time
+you have. Get a specific walk, on a real map, with directions to where it starts. Pray
+while walking. Confirm the streets covered. Watch the town gradually fill in.
 
 ## Project status
 
@@ -17,9 +18,14 @@ streets covered. Watch the town gradually fill in.
 | 2b.1 | Routing corrections + integration readiness | ✅ Complete |
 | 3 | Functional PWA integration (vertical slice) | ✅ Complete |
 | 3.1 | Pilot deployment + campus validation | ✅ Complete |
+| 3.5 | Product realignment: real map, time slider, mission recommendations | ✅ Complete |
 | 4 | Pilot (3–5 people) | **GO** — **public release still blocked on licensing gate G1** |
 
-**Canonical network `v1.2` · `bbg-net-v1.2-e1284e6001ff54f5` · routing engine `2.1.1`**
+**Canonical network `v1.3` · `bbg-net-v1.3-e1284e6001ff54f5` · routing engine `2.1.1`**
+
+v1.3 adds Town neighbourhood names to required segments. The content checksum is
+unchanged from v1.2 because neighbourhood is presentation only — no geometry, no
+obligation and no denominator moved, and v1.2 routes still replay.
 
 145.588 required miles (123.807 street · 10.423 trail · 11.359 campus) across 9 valid
 routing components, with 11,024 households associated to required coverage.
@@ -52,19 +58,25 @@ python3 -m api.routing.freeze
 Tests:
 
 ```bash
-python3 -m pytest                                  # 103 backend tests
-cd web && npm test                                 # 10 component tests
-cd web && node e2e/slice.mjs                       # 41 end-to-end assertions
+python3 -m pytest                                  # 132 backend tests
+cd web && npm test                                 # 16 component tests
+cd web && node e2e/slice.mjs                       # 87 end-to-end assertions
 cd web && node e2e/admin.mjs <admin-token>         # 12 admin-interface checks
+
+# The admin token cannot be granted over HTTP by design. Mint one before starting
+# the server, against the same database it will use:
+python3 web/e2e/seed_admin.py
 ```
 
 ## Layout
 
 ```
 pipeline/    fetch -> normalize -> split -> classify -> connect -> households -> report
-api/routing/ the frozen routing engine (cluster-first -> GRASP -> local search)
-api/app/     FastAPI: identity, route generation, walks, reservations, progress, admin
-web/         React + TypeScript + Vite PWA, mobile-first
+api/routing/ the routing engine (cluster-first -> GRASP -> local search) and
+             mission discovery, both domain-neutral — no prayer concepts below here
+api/app/     FastAPI: identity, missions, route generation, walks, reservations,
+             progress, admin. Every prayer-specific word in the product lives here.
+web/         React + TypeScript + Vite PWA, mobile-first, MapLibre GL
 docs/        every decision, with the evidence for it
 ```
 
@@ -82,18 +94,25 @@ docs/        every decision, with the evidence for it
 - [`docs/10-routing-approach-evaluation.md`](docs/10-routing-approach-evaluation.md) — ten algorithms scored before any was built.
 - [`docs/12-phase-2b1-corrections.md`](docs/12-phase-2b1-corrections.md) — repeat penalty, multi-component routing.
 - [`docs/13-phase-3-integration.md`](docs/13-phase-3-integration.md) — network v1.2, the vertical slice, privacy, deployment tiers.
-- [`docs/14-phase-3-1-pilot.md`](docs/14-phase-3-1-pilot.md) — **current**: campus validation, connector review, pilot plan, go/no-go.
+- [`docs/14-phase-3-1-pilot.md`](docs/14-phase-3-1-pilot.md) — campus validation, connector review, pilot plan, go/no-go.
 - [`docs/15-pilot-deployment.md`](docs/15-pilot-deployment.md) — the deployment runbook: environment, migrations, health checks, backup, rollback.
 - [`docs/16-try-it-on-your-phone.md`](docs/16-try-it-on-your-phone.md) — no-experience-needed guide to trying it on a phone via GitHub Codespaces.
+- [`docs/17-mission-planning-review.md`](docs/17-mission-planning-review.md) — engineering review of the mission-planning realignment.
+- [`docs/18-phase-3-5-mission-build.md`](docs/18-phase-3-5-mission-build.md) — **current**: the real map, the time slider, mission recommendations, before/after screenshots, known limitations.
 
 ## Two things to know before deploying
 
 **Licensing.** No Town of Blacksburg dataset publishes any reuse licence, so route and
 map geometry is served only to authenticated participants. This is *deployment
-configuration*, not architecture: `BPW_ACCESS_MODE` takes `authenticated` (default),
-`invite`, or `public`, and `api/app/deps.may_see_geometry` is the only place it is
-read. Moving to public participant access once G1 is resolved is one environment
-variable and a restart — no API, schema or client change.
+configuration*, not architecture: `BPW_ACCESS_MODE` takes `open_read` (default since
+Phase 3.5), `authenticated`, `invite`, or `public`, and `api/app/deps.may_see_geometry`
+is the only place it is read. Changing modes is one environment variable and a restart
+— no API, schema or client change.
+
+The Phase 3.5 default serves the progress map to anonymous readers so the dashboard
+works before anybody signs up. **That is publication under G1.** For a public launch
+before G1 is resolved, set `BPW_ACCESS_MODE=authenticated`. The server logs a warning
+at startup whenever geometry is anonymously readable.
 
 **GIS data is an internal dependency, not a redistributable asset.** Source snapshots,
 derived geometry and address data are fetched and built by the pipeline and are never

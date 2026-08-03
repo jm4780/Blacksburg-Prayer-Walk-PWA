@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from .conftest import DOWNTOWN, auth, register
+from .conftest import DOWNTOWN, auth, network_version, register
 
 
 @pytest.fixture(scope="module")
@@ -326,7 +326,7 @@ def test_denominator_matches_the_frozen_network(client, ns):
     m = client.get("/api/progress/metrics").json()
     assert m["percent_prayed_for"]["denominator_miles"] == \
         pytest.approx(ns.required_denominator_miles, abs=0.01)
-    assert m["network_version"] == "v1.2"
+    assert m["network_version"] == network_version()
 
 
 def test_percentage_never_exceeds_one_hundred(client):

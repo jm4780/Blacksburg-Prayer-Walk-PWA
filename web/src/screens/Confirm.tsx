@@ -18,7 +18,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api } from '../api'
 import FeedbackForm from '../components/FeedbackForm'
-import MapCanvas, { type MapLine } from '../components/MapCanvas'
+import MapView, { type SegmentFeature } from '../components/MapView'
 import type { ProgressMap, Walk } from '../types'
 import type { Nav } from '../App'
 
@@ -129,15 +129,14 @@ export default function Confirm({ nav, walkId, onDone }: {
     )
   }
 
-  const selectable: MapLine[] = (base?.features ?? []).map((f) => ({
+  const selectable: SegmentFeature[] = (base?.features ?? []).map((f) => ({
     id: f.properties.id,
-    coords: f.geometry.coordinates,
-    className: picked.has(f.properties.id)
-      ? 'ln-picked'
+    coordinates: f.geometry.coordinates,
+    state: picked.has(f.properties.id)
+      ? 'selected'
       : planned.has(f.properties.id)
-        ? 'ln-dropped'
-        : f.properties.done ? 'ln-done' : 'ln-todo',
-    onClick: () => toggle(f.properties.id),
+        ? 'removed'
+        : f.properties.done ? 'done' : 'todo',
   }))
 
   return (
@@ -164,8 +163,8 @@ export default function Confirm({ nav, walkId, onDone }: {
 
       {outcome === 'AS_PLANNED' && walk.geometry && (
         <div className="card">
-          <MapCanvas lines={[]} focus={walk.geometry} height={280}
-                     ariaLabel="The route you planned" />
+          <MapView route={walk.geometry} height={300}
+                   ariaLabel="The route you planned" />
         </div>
       )}
 
@@ -173,21 +172,25 @@ export default function Confirm({ nav, walkId, onDone }: {
         <div className="card">
           <p className="muted">
             Tap a street to add or remove it. Your planned route is selected to start
-            with.
+            with. Pinch to zoom out if you walked somewhere further off.
           </p>
-          <MapCanvas lines={selectable} height={400}
-                     ariaLabel="Select the streets you covered" />
+          {/* `editing` opens closer and widens the tap target, and `fitTo` frames the
+              walk rather than the whole town — the streets the walker might have
+              swapped in are the ones next to where they were. */}
+          <MapView segments={selectable} height={420} editing
+                   fitTo={walk.geometry}
+                   onSegmentTap={toggle}
+                   ariaLabel="Select the streets you covered" />
           <div className="legend">
             <span><i className="sw picked" /> Counting</span>
             <span><i className="sw dropped" /> Planned, skipped</span>
             <span><i className="sw todo" /> Not yet prayed for</span>
           </div>
-          <dl className="facts">
-            <div><dt>Streets</dt><dd>{adjusted.count}</dd></div>
-            <div><dt>Coverage</dt><dd>{adjusted.miles.toFixed(2)} mi</dd></div>
-            <div><dt>Added</dt><dd>{adjusted.added}</dd></div>
-            <div><dt>Skipped</dt><dd>{adjusted.removed}</dd></div>
-          </dl>
+          <p className="mission-line">
+            {adjusted.count} streets · {adjusted.miles.toFixed(2)} miles
+            {adjusted.added > 0 && ` · ${adjusted.added} added`}
+            {adjusted.removed > 0 && ` · ${adjusted.removed} skipped`}
+          </p>
         </div>
       )}
 

@@ -96,26 +96,35 @@ browser buttons, just the app.
 
 ## What to actually try
 
-- **Generate a Prayer Walk**, then **Use my location**. Your phone will ask permission
-  — that's expected, and it's asked once, only at this moment.
-- **Slide between the five sizes.** Watch the distance, the time, the household count
-  and the route on the map all change together.
-- **Preview**, then **Start this walk.** Look at the turn-by-turn list.
-- **Finish Walk** → **Review and edit**, and tap individual streets on the map to add
-  or remove them. This is the fiddliest thing to do with a thumb — it's the bit I most
-  want you to be rude about.
+- **Look around before signing up.** The first screen is the town's progress, and it
+  works with no account at all.
+- **Find my next walk**, then **move the time slider.** Anywhere from 20 to 90 minutes.
+  The app suggests a specific walk for however long you have — no location needed.
+- **Pinch, drag and zoom the map.** This is new, and it is the thing I most want you
+  to be rude about. Can you actually read where the walk goes? Can you tell which
+  street is which?
+- **Apple Maps / Google Maps** takes you to where the walk starts. The route itself
+  stays in the app.
+- **Walk this** — that's when it asks who you are, because that's when it starts
+  holding those streets for you.
+- **Start this walk**, look at the turn-by-turn list, then **Finish Walk** →
+  **Review and edit**, and tap individual streets on the map to add or remove them.
+  That's the fiddliest thing to do with a thumb.
 - Give it a **rating** at the end.
-- Go back to the home screen and see the percentage move.
+- Go back to the first screen and see the percentage move.
 
-### One thing that will look like a bug and isn't
+### Two things that will look like bugs and aren't
 
-If you're **not in Blacksburg** when you tap "Use my location", you'll get:
+**"Map background unavailable."** If you see that banner, the app cannot reach the
+service that draws streets and labels underneath the route. The route itself still
+draws. Tell me if you see it — it means either your connection or that service is
+having a bad day, and I want to know which.
 
-> that start point is outside the Blacksburg area
-
-That's correct — it's refusing to plan a walk somewhere it has no map for. To try it
-from your sofa, use **"Choose a starting point on the map instead"** and tap anywhere
-in town.
+**"That start point is outside the Blacksburg area."** You'll only see this from the
+secondary **"Find a walk near me instead"** path, and only if you're not in Blacksburg
+at the time. It's correct — the app is refusing to plan a walk somewhere it has no map
+for. The main **Find my next walk** flow never asks where you are, so it works from
+your sofa in another state.
 
 ### If you want to see the administrator screens
 
@@ -147,7 +156,7 @@ review.
 the Town's map servers, they were briefly unreachable — in the terminal, type
 `bash .devcontainer/setup.sh` to try again.
 
-**The app loads but "Generate a Prayer Walk" fails.** The map data probably didn't
+**The app loads but "Find my next walk" fails.** The map data probably didn't
 download. Same fix as above.
 
 **The link works on the computer but not the phone.** Almost always the port-visibility

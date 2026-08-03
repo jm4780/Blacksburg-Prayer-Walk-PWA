@@ -34,6 +34,9 @@ export default defineConfig({
       devOptions: { enabled: false },
     }),
   ],
+  // MapLibre's GeoJSON parsing runs in a module worker (see MapView.tsx). Vite's
+  // default worker output is an IIFE, which cannot be loaded with {type:'module'}.
+  worker: { format: 'es' },
   server: {
     port: 5173,
     proxy: { '/api': 'http://127.0.0.1:8000' },

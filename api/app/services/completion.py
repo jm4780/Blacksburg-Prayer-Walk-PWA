@@ -145,6 +145,10 @@ def record(db: Session, ns: NetworkService, walk: Walk, outcome: str,
     walk.final_distance_miles = final_distance
     db.commit()
 
+    # The town has moved, so any cached mission slate is stale.
+    from . import mission_service
+    mission_service.invalidate()
+
     return dict(
         walk_id=walk.id,
         outcome=outcome,

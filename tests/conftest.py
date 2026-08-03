@@ -38,10 +38,14 @@ def client(request):
     importlib.reload(db_mod)
     from api.app import deps, models
     importlib.reload(deps)
-    from api.app.routers import admin, identity, progress
+    from api.app.routers import admin, identity, missions, progress
     from api.app.routers import routes as routes_router
-    for m in (identity, routes_router, progress, admin):
+    for m in (identity, routes_router, missions, progress, admin):
         importlib.reload(m)
+    # Slates are cached across requests; a fresh database must start from a fresh
+    # cache or one module's completions leak into another's recommendation.
+    from api.app.services import mission_service
+    mission_service.invalidate()
     from api.app import main as main_mod
     importlib.reload(main_mod)
 
@@ -57,6 +61,18 @@ def client(request):
 def ns():
     from api.app.services.network_state import network_service
     return network_service()
+
+
+def network_version() -> str:
+    """The canonical network version, from the manifest rather than a literal.
+
+    Pinning "v1.2" into a dozen assertions made publishing v1.3 look like a dozen
+    regressions. What these tests are actually for is that a response names the
+    network that produced it, so a stored route stays traceable — not that the
+    number never moves.
+    """
+    from api.app.services.network_state import network_service
+    return f"v{network_service().net.version}"
 
 
 def register(client, email="walker@example.com", first="Test", last="Walker"):

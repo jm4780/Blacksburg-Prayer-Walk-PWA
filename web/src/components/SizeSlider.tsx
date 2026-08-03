@@ -60,7 +60,13 @@ export default function SizeSlider({ variants, selected, onSelect, disabled }: P
                 : v.reason}
               onClick={() => isAvailable && onSelect(v.band)}
             >
-              <span className="band">{v.band}</span>
+              {/* Time first. "Quick / Medium / Long" are engine bands, and the thing
+                  a walker is actually choosing between is how long they will be out
+                  (Priority 4). The band name stays as the smaller line so the label
+                  still matches what the server called it. */}
+              <span className="band">
+                {isAvailable ? `${v.estimated_minutes} min` : v.band}
+              </span>
               <span className="mi">
                 {isAvailable ? `${v.distance_miles} mi` : 'unavailable'}
               </span>

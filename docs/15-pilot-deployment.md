@@ -15,7 +15,7 @@ your platform's secret store. Never a committed `.env`.
 | Variable | Pilot value | Notes |
 |---|---|---|
 | `BPW_TIER` | `pilot` | Development / pilot / public. Controls startup warnings. |
-| `BPW_ACCESS_MODE` | `authenticated` or `invite` | **The G1 control.** Who may see route and map geometry. |
+| `BPW_ACCESS_MODE` | `authenticated` or `invite` | **The G1 control.** Who may see route and map geometry. The code default is `open_read`; a pilot should set this explicitly. |
 | `BPW_INVITE_CODE` | *(a phrase)* | Required only when `BPW_ACCESS_MODE=invite`. |
 | `BPW_TOKEN_PEPPER` | *(48-byte secret)* | **Required.** Mixed into every participant token hash. |
 | `BPW_DATABASE_URL` | `postgresql+psycopg://…` | SQLite works but is not recommended beyond one host. |
@@ -43,8 +43,21 @@ BPW_ACCESS_MODE=public        # restart
 ```
 
 No route handler, schema, client build or database change. The identity model is
-identical in all three modes — name, email, remembered device, no password. Startup
-prints a warning naming G1 whenever geometry is public, so the state is never silent.
+identical in all four modes — name, email, remembered device, no password. Startup
+prints a warning naming G1 whenever geometry is anonymously readable, so the state is
+never silent.
+
+| Mode | Anonymous readers get geometry | Registration |
+|---|---|---|
+| `authenticated` | no | open |
+| `invite` | no | needs `BPW_INVITE_CODE` |
+| `open_read` *(code default since Phase 3.5)* | **yes** | open |
+| `public` | **yes** | open |
+
+`open_read` is the default because the dashboard, the progress map and a real walk
+recommendation are meant to work before anybody signs up (Phase 3.5, Priority 2).
+**For a pilot with a real URL, set `BPW_ACCESS_MODE=authenticated` until G1 is
+resolved** — anonymous geometry is publication, and G1 is still open.
 
 ---
 
@@ -119,8 +132,8 @@ Green looks like:
 | Field | Expected |
 |---|---|
 | `status` | `ok` |
-| `network_version` | `v1.2` |
-| `network_id` | `bbg-net-v1.2-e1284e6001ff54f5` |
+| `network_version` | `v1.3` |
+| `network_id` | `bbg-net-v1.3-e1284e6001ff54f5` |
 | `engine_version` | `2.1.1` |
 | `warnings` | `[]` |
 | `public_geometry_enabled` | `false` |
@@ -133,6 +146,8 @@ Then, end to end:
 ```bash
 curl -s https://HOST/api/progress/metrics | python3 -m json.tool   # 200, aggregate only
 curl -s -o /dev/null -w '%{http_code}\n' https://HOST/api/progress/map   # expect 403
+                                                                         # (200 under
+                                                                         #  open_read)
 ```
 
 A `200` on that last line while `BPW_ACCESS_MODE=authenticated` means the gate is not
