@@ -1,0 +1,30 @@
+# Runtime dependencies.
+#
+# Lower bounds rather than exact pins: this is a small application with no
+# adversarial dependency surface, and pinning exactly would make it rot the first
+# time a security patch lands. The versions below are the ones every result in
+# docs/ was produced with.
+#
+#   pip install -r requirements.txt
+
+# --- web application ---------------------------------------------------------
+fastapi>=0.141
+uvicorn[standard]>=0.52
+pydantic>=2.13
+pydantic-settings>=2.14
+
+# --- persistence -------------------------------------------------------------
+SQLAlchemy>=2.0.51
+alembic>=1.18
+# Uncomment for PostgreSQL. SQLite needs nothing extra and is the default.
+# psycopg[binary]>=3.2
+
+# --- geometry and routing ----------------------------------------------------
+# The canonical network build and the routing engine. shapely and pyproj carry
+# native libraries (GEOS and PROJ); the wheels bundle them, so no system packages
+# are required.
+shapely>=2.1
+pyproj>=3.7
+numpy>=2.0
+networkx>=3.4
+scipy>=1.14

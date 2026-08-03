@@ -4,7 +4,7 @@
   "publisher": "Town of Blacksburg",
   "role": "Residential filter (replaces county parcels)",
   "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Comprehensive_Plan/FeatureServer/8",
-  "retrieved_at": "2026-08-03T00:38:14.645899+00:00",
+  "retrieved_at": "2026-08-03T04:15:51.170954+00:00",
   "source_updated_at": "2026-01-29T12:03:30.400000+00:00",
   "source_schema_updated_at": "2023-05-04T12:02:16.644000+00:00",
   "feature_count": 11398,

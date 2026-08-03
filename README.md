@@ -24,7 +24,12 @@ streets covered. Watch the town gradually fill in.
 145.588 required miles (123.807 street · 10.423 trail · 11.359 campus) across 9 valid
 routing components, with 11,024 households associated to required coverage.
 
-## Running it
+## Trying it on a phone
+
+No setup, nothing to install: **[docs/16-try-it-on-your-phone.md](docs/16-try-it-on-your-phone.md)**.
+Click a button on GitHub, wait five minutes, open the link on your phone.
+
+## Running it locally
 
 ```bash
 cp .env.example .env          # fill in BPW_TOKEN_PEPPER
@@ -79,6 +84,7 @@ docs/        every decision, with the evidence for it
 - [`docs/13-phase-3-integration.md`](docs/13-phase-3-integration.md) — network v1.2, the vertical slice, privacy, deployment tiers.
 - [`docs/14-phase-3-1-pilot.md`](docs/14-phase-3-1-pilot.md) — **current**: campus validation, connector review, pilot plan, go/no-go.
 - [`docs/15-pilot-deployment.md`](docs/15-pilot-deployment.md) — the deployment runbook: environment, migrations, health checks, backup, rollback.
+- [`docs/16-try-it-on-your-phone.md`](docs/16-try-it-on-your-phone.md) — no-experience-needed guide to trying it on a phone via GitHub Codespaces.
 
 ## Two things to know before deploying
 

@@ -66,3 +66,6 @@ web/dev-dist/
 .pytest_cache/
 .vitest/
 *.tsbuildinfo
+
+# Codespace-generated secrets. Created by .devcontainer/setup.sh, never committed.
+.codespace-env

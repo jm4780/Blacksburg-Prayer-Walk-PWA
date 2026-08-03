@@ -1,0 +1,39 @@
+{
+  "name": "Blacksburg Prayer Walk",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // Runs once, when the Codespace is first created. Installs everything, downloads
+  // the Blacksburg map data and builds the network. Takes a few minutes.
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+
+  // Runs every time you open the Codespace. Starts the app and makes its address
+  // reachable from a phone.
+  "postAttachCommand": "bash .devcontainer/start.sh",
+
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "Prayer Walk app",
+      "onAutoForward": "openBrowser",
+      // Public so a phone can reach it. A phone is not signed in to this Codespace,
+      // so a private port would just show it a login page.
+      //
+      // Public means: anyone with the address can open it. The address is a long
+      // random one, it disappears when the Codespace does, and the app still asks
+      // for a name and email before it will do anything. Fine for trying it out;
+      // not how the real pilot should run — see docs/15-pilot-deployment.md.
+      "visibility": "public"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "dbaeumer.vscode-eslint"]
+    }
+  }
+}
