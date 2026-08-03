@@ -2,7 +2,14 @@
 
 **Date:** 2026-08-02
 **Companion documents:** [`00-product-spec.md`](00-product-spec.md) (requirements, §
-numbers referenced throughout) · [`01-data-audit.md`](01-data-audit.md) (Phase 1 data audit)
+numbers referenced throughout) · [`01-data-audit.md`](01-data-audit.md) (Phase 1 data
+audit) · [`04-schema-inspection.md`](04-schema-inspection.md) (Phase 2a, live data)
+
+> **Amended 2026-08-03** after the Phase 2a schema inspection. Sections carrying a
+> `> 📋 2026-08-03` note were written against assumptions the data has since corrected.
+> The one that matters most: **the town's Roads, Address, and Building layers do not
+> cover the Virginia Tech campus**, which leaves decision D1 without a road or household
+> source. See §2.4a.
 
 ---
 
@@ -20,6 +27,13 @@ The good news is that the problem is small. Blacksburg is ~20 square miles; expe
 roughly **3,000–6,000 network segments** and **~14,000 household points**. The entire
 graph fits comfortably in memory in a single process. We do not need distributed
 anything, a tile server, or a routing cluster.
+
+> 📋 **2026-08-03 — revised down.** Measured inputs: **1,547** road segments
+> (169.16 mi total; ~124.9 mi public and plausibly walkable) and **289** trail-family
+> path features (53.0 mi). After planarizing and adding pedestrian connectors, expect
+> **~2,000–3,000 segments** — smaller than estimated, which only helps the router.
+> Household points are **19,773** total / **18,022** residential — larger than the
+> ~14,000 assumed, because the address layer is unit-level (see §2.5).
 
 ---
 
@@ -102,14 +116,28 @@ recording `{source, source_url, license_text, retrieved_at, source_updated_at, f
 months later, and route quality regressions must be attributable to either a code
 change or a data change — never to "the town edited a road on Tuesday."
 
-> ⚠️ The remote sandbox used for the Phase 1 audit blocks `*.arcgis.com`. Phase 2
-> needs an environment that allows `services1.arcgis.com`,
-> `data-montva-gis.opendata.arcgis.com`, and `vgin.vdem.virginia.gov`.
+> 📋 **2026-08-03.** Those three hosts are now allowed and all respond — but **two of
+> them are Hub sites, not data hosts**. Montgomery County's features are on
+> `services5.arcgis.com` and VGIN's are on `vginmaps.vdem.virginia.gov`; both are still
+> blocked, as are `hub.arcgis.com` (every Hub download redirects there) and
+> `www.arcgis.com`. **Add those four** before 2b, or the VGIN cross-check and the
+> parcel spatial join stay untestable.
+>
+> Two constraints for the fetchers:
+> - The town's services advertise `capabilities = Query,Sync` — **no `Extract`** —
+>   on every layer we need except Zoning. Use paged `query` + `resultOffset`; do not
+>   depend on `f=geojson` bulk export or Hub Download. `maxRecordCount` is 8,000
+>   (Address), 4,000 (Paths), 2,000 (Roads/Building/boundaries), 5,000 (Comp Plan).
+> - The actual layer names are **not** what the audit guessed: Roads, Address and
+>   Building are layers 1/0/2 of one service `Address_Road_Building`, and the boundary
+>   is `Administrative_Reference_Boundaries/4 — Town Corporate Limits`.
 
 **First task of Phase 2 is a schema inspection report** — dump field names and value
 distributions for every ⚠️ item in the data audit (especially any road
 ownership/class attribute), then update the audit with what's actually there. Several
 decisions below are contingent on that report.
+
+> ✅ **Done — 2026-08-03:** [`04-schema-inspection.md`](04-schema-inspection.md).
 
 ### 2.2 normalize
 
@@ -117,14 +145,45 @@ decisions below are contingent on that report.
   geometry math. Store in PostGIS as EPSG:4326 with a computed geography column, or
   store 6595 and transform on output — either is fine, but **all length and distance
   math happens in a projected CRS.** Degrees are not a unit of length.
+  > 📋 **2026-08-03.** Source CRS is **EPSG:2284** (NAD83 / Virginia South, **survey
+  > feet**) on every town layer. `Shape__Length` on Paths is in survey feet; Roads
+  > carries its own `MILES` field. Convert deliberately — a ft/m mix-up here is a
+  > 3.28× error that would sail through every validation gate.
 - Normalize street names into two fields: `display_name` ("N Main St") and
   `normalized_name` (`main st n` — lowercased, USPS-style suffix and directional
   normalization, punctuation stripped). `normalized_name` is what groups segments
   into named streets for §12 and the partial-street bonus in §13.
 - Drop PII at import — parcel owner names in particular. We need land use and unit
   counts, not people's names.
+  > 📋 **2026-08-03.** Montgomery County already excludes owner names from Parcels Open
+  > Data — there is no owner field to drop. Still drop `DEEDBOOK`/`DEEDPAGE`/`SALE_*`
+  > and the assessed-value fields; we don't need them. And note that the field the audit
+  > expected to classify land use, `LANDUSE_VA`, is **a dollar amount**, not a code —
+  > the real classifier is `EX_CLASSD`. Better still, use the town's own
+  > `Comprehensive_Plan/8 — Current Land Use` (see §2.5).
+- Normalise known source misspellings and domain drift, **logging every correction and
+  never silently fixing**: `Aspahlt` → `Asphalt`, `Bilke Lane` → `Bike Lane`,
+  `Bicenntennial` → `Bicentennial`, `Deerfield` → `Deerfield Trail`,
+  `S MAIN STS` → `S MAIN ST`. Validate coded fields against **observed** values, not
+  the declared ArcGIS domain — `ROAD_CLASS` uses `Collector` and `Arterial`, neither of
+  which is in its domain, and `LocalType` uses `Office/Business`, `University` and
+  `Religious`, none of which are in its domain.
 
 ### 2.3 split — building the graph
+
+> 📋 **2026-08-03 — two of these steps got easier and one got smaller.**
+> - **Step 1's boundary split is nearly a no-op.** The town layers are already clipped
+>   to the corporate limits (Roads 1,546/1,547 intersect, Address 19,771/19,773,
+>   Building 10,156/10,156, Paths 1,068/1,069). The real consequence runs the other
+>   way: **out-of-town connectors don't exist in this data at all**, including the
+>   Huckleberry south of the town line.
+> - **Step 5's sidewalk absorption is a name join, not a geometry job.** 648 of 688
+>   sidewalk features carry the parallel street's name in `Road`, plus `From_`/`To_`
+>   cross-streets. Match on name first; reserve geometry for the 40 unnamed ones.
+> - **Step 6's degree-2 merge will do real work.** Roads' median segment is 0.076 mi
+>   (~400 ft), but 48 segments are under 53 ft and 105 under 0.02 mi — mostly
+>   intersection stubs. The layer is already roughly intersection-to-intersection,
+>   which is the unit we want, but the slivers need collapsing.
 
 1. Node the network: split every line at every intersection with another line
    (planarize), and at the town boundary.
@@ -158,22 +217,34 @@ This assigns each segment its `segment_type`, `access_type`, and per-area `role`
 (`REQUIRED` / `OPTIONAL_CONNECTOR` / `EXCLUDED`) per §4.3. It is **rules + human
 review**, and the human review is not optional.
 
-Automatic rules (first pass):
+Automatic rules — **revised 2026-08-03 to use the fields that actually exist**:
 
 | Signal | Action |
 |---|---|
-| Outside town boundary | `OUT_OF_AREA_CONNECTOR`, role `OPTIONAL_CONNECTOR` |
-| Town road-class attribute says private / service / driveway | role `EXCLUDED` (candidate) |
-| Segment lies wholly within a single non-ROW parcel | flag as private candidate |
-| Segment inside a parcel with apartment/commercial land use | flag as internal drive candidate |
-| Name matches alley/service patterns | flag |
-| Curated trail list | `TRAIL`, role `REQUIRED` |
+| `RD_MAINT = 'Private'` (232 segs, 20.57 mi) | `access_type = PRIVATE`, role `EXCLUDED` |
+| `ROAD_CLASS = 'Ramp'` (49 segs, 8.87 mi) | role `EXCLUDED` — limited access |
+| `ROAD_CLASS = 'Primary'` (33 segs, 14.88 mi — exclusively the US-460 bypass) | role `EXCLUDED` |
+| `RD_MAINT ∈ {Blacksburg, State}` otherwise | `access_type = PUBLIC`, `STREET`, role `REQUIRED` (~124.9 mi) |
+| `RD_MAINT` and `ROAD_CLASS` disagree (**34 segs**, all `Private`/`Local`) | flag for human review; **`RD_MAINT` wins by default** |
+| Segment inside an `HOA Active` / `HOA Inactive` / `Privately Owned` polygon from `Parks_and_Open_Space/1` | flag as private candidate |
+| `SpeedLimit` (populated on all 1,547) | seeds `walk_stress` directly |
+| Curated trail list, keyed on Paths `Road` **as spelled in the data** | `TRAIL`, role `REQUIRED` |
+| Paths `Type = Sidewalk` with a matching `Road` name | absorb into that street (§2.3) |
 | Other Paths-to-the-Future geometry | `PEDESTRIAN_CONNECTOR`, role `OPTIONAL_CONNECTOR` |
-| Inside **campus core polygon**: named campus streets | `STREET`, role `REQUIRED` |
-| Inside campus core: curated major pedestrian ways | `PEDESTRIAN_CONNECTOR`, role **`REQUIRED`** (D1b) |
+| Paths `Owner = 'PRIV'` (27 features, 3.96 mi, all trails) | flag as private candidate |
+| Inside **campus core polygon**: named campus streets | `STREET`, role `REQUIRED` — ⚠️ **no source, see §2.4a** |
+| Inside campus core: curated major pedestrian ways | `PEDESTRIAN_CONNECTOR`, role **`REQUIRED`** (D1b) — ✅ sourced from Paths, `Owner = VT` |
 | Inside campus core: service drives, lot connections | role `EXCLUDED` |
 | VT land outside the campus core (farms, airport, golf) | role `OPTIONAL_CONNECTOR` |
 | Everything else inside town | `STREET`, role `REQUIRED` |
+
+Dropped from the original table: *"Segment lies wholly within a single non-ROW parcel"*
+and *"Segment inside a parcel with apartment/commercial land use"* — both were proxies
+for an ownership attribute we assumed didn't exist. `RD_MAINT` does the job directly
+and better, and neither proxy is worth a county-parcel spatial join we can't currently
+test. *"Name matches alley/service patterns"* is also dropped: `TYPE = ALY` appears on
+only 10 segments, and the Village at Toms Creek alleys it would catch are already
+flagged `Private`.
 
 Note the campus rows deliberately invert §2.3's rule that pedestrian geometry is
 absorbed rather than required. On campus the footpath network *is* the network —
@@ -184,11 +255,60 @@ reasoning; the campus core polygon and the "major pedestrian way" selection are 
 hand-curated Phase 2c artifacts.
 
 Then: **a human review pass over every flagged segment plus a full visual sweep**, in
-the admin curation tool, before launch. The audit expects a meaningful number of
-student-housing internal drives that look exactly like public streets in a 911 layer.
-Budget real hours for this — an hour of local knowledge here is worth more than any
-amount of algorithm tuning, because a wrong REQUIRED segment means the town can never
-reach 100%, and a wrong EXCLUDED segment means a street never gets prayed for.
+the admin curation tool, before launch. An hour of local knowledge here is worth more
+than any amount of algorithm tuning, because a wrong REQUIRED segment means the town can
+never reach 100%, and a wrong EXCLUDED segment means a street never gets prayed for.
+
+> 📋 **2026-08-03 — this shrank a lot.** The audit predicted public/private
+> classification would be "the single biggest curation task." It isn't. `RD_MAINT` is
+> populated on 100% of features and spot-checks land correctly: Foxridge (Copper Croft
+> Run, Foxhunt Ln, Houndschase Ln, Heather Dr…), The Retreat (Carpenter Blvd, Crisp Rd,
+> Gustafson Ave…), Pheasant Run, Maple Ridge, Windsor Hills, Collegiate Suites and the
+> Village at Toms Creek alleys are all correctly `Private`. **The review list is ~232
+> auto-excluded segments to confirm plus 34 disagreements to adjudicate** — hours, not
+> days. The full visual sweep still happens.
+>
+> ⚠️ **The opposite problem is real, though.** Several large complexes have **no
+> internal drives in Roads at all** — The Mill at Blacksburg (164 units), Hunters Ridge
+> (110), Terrace View (559), most of Chasewood Downs — because their circulation is
+> surface parking, which a 911 street file doesn't model. Absence from Roads does not
+> mean absence of households. That lands on §2.5, not here.
+
+### 2.4a ⚠️ Campus streets have no data source (blocks D1)
+
+**Decide this before starting 2b.** The schema inspection found that the town's Roads,
+Address and Building layers **stop at the Virginia Tech campus line**:
+
+- **Roads:** Drillfield Dr, Duck Pond Dr, Perry St, Old Turner St, Beamer Way, Spring Rd,
+  Tech Center Dr and Oak Lane return **zero** features. W Campus Dr, Alumni Mall and
+  Stanger St appear only as ~0.01-mile stubs at the town-street junction. The three
+  features tagged `STREETMAP_ = 'VA TECH'` total **0.017 miles**.
+- **Address:** no residence-hall addresses. The 90 points typed `LocalType='University'`
+  are VT-leased offices *off* campus.
+- **Building:** **zero** VT residence halls among all 10,156 footprints.
+- **Paths to the Future:** ✅ **106 features / 20.5 mi in the campus core**, 79 tagged
+  `Owner = VT`. Campus pedestrian infrastructure is well covered.
+
+So **D1b is buildable now and the rest of D1 is not.** The classify table's campus-street
+row has nothing to classify. Options, in the order I'd try them:
+
+1. **VGIN RCL** — statewide, likely includes campus. Requires
+   `vginmaps.vdem.virginia.gov` on the network allowlist (§2.1). Untested.
+2. **VT Facilities GIS** — VT publishes an ArcGIS org; authoritative if reachable.
+3. **Hand-digitise** — campus has perhaps 5 miles of drivable street. A one-afternoon
+   job that keeps the canonical network licence-clean.
+4. **OSM** — complete and accurate, but pulling OSM geometry into the canonical network
+   makes it an ODbL derivative database, which audit §2.4 deliberately designed around.
+   Last resort.
+
+**Recommendation: try (1), fall back to (3).** The residence-hall table for D1c has the
+same problem and the same answer.
+
+One thing that got *easier*: the town's **`UNIV` zoning polygon (1.38 sq mi, single
+feature)** is a usable first draft of D1a's hand-drawn campus core polygon. And D1's area
+arithmetic was overstated — the in-town university footprint is **1.38–1.68 sq mi
+(7–8% of the town)**, not the 4.1 sq mi / 20% the decision assumed, because most of VT's
+2,600 acres is outside the corporate limits or zoned `RR-1`.
 
 Curation decisions live in a **`curation_overrides` table keyed by stable segment ID**,
 applied *after* the automatic rules on every build. Human judgment must survive data
@@ -207,6 +327,44 @@ Implements audit §3 and spec §20. Two layers:
   pedestrian way, per D1b). Address points represent dorms poorly — one point for
   hundreds of residents — so they are excluded from the first layer and handled here.
 
+> 📋 **2026-08-03 — four changes, one of them a bug that would have shipped.**
+>
+> 1. **Unit-count resolution is essentially free.** The address layer is genuinely
+>    unit-level: **10,770 of 19,773 points carry a `unit`** (`APT` 7,045 · `UNIT` 2,591
+>    · `STE` 847 · `LOT` 249 · …). Foxridge alone is 1,728 points; `301 GIVENS LN` is
+>    139. Within `LocalType='Residential'` (18,022 points), 9,855 carry a unit and they
+>    collapse to 9,060 building-level addresses — so the layer serves as both a unit
+>    count and a building count. Drop the parcel/census-derived estimation path.
+> 2. **Use the town's land use, not the county's.** Residential filter =
+>    address-point `LocalType = 'Residential'` intersected with
+>    `Comprehensive_Plan/8 — Current Land Use` (11,398 parcel-level polygons, edited
+>    2026-01-29, PII-free, queryable). Montgomery Parcels drops to cross-check —
+>    its `LANDUSE_VA` field is a dollar amount, not a land-use code, and its features
+>    are on a host we currently can't reach. Also filter the 139 points whose
+>    `LandmkName` is `Vacant`, plus the handful marked `demolished`/`construction`.
+> 3. **Keys:** `ADDR` is unique across all 19,773 rows, and so is a normalized
+>    composite of `STNUM + STREET_PRE_DIR + STREET_NAME + STREET_TYPE +
+>    STREET_POST_DIR + unit_designator + unit`. `GlobalID` is unique too. **Derive the
+>    key from the composite** (`ADDR` is a display string; `GlobalID` is Esri-managed
+>    and reassignable on republish) and store all three for the identity matcher.
+> 4. **⚠️ The 75 m association cap will orphan households.** The Mill at Blacksburg
+>    (164 units), Hunters Ridge (110), Terrace View (559) and most of Chasewood Downs
+>    have **no internal drives in Roads** — their circulation is surface parking. Units
+>    at the back of those sites sit well beyond 75 m from any segment and would silently
+>    vanish from the household count. **Fix:** raise the cap, and/or add a
+>    `PlaceName`-keyed rule — `PlaceName` is populated on 14,417 points with the complex
+>    or subdivision name — that associates every unit in a named complex to whichever
+>    segment the complex's frontage resolves to. Log every household that finds no
+>    segment; never let one disappear quietly.
+>
+> ✅ The street-name tie-break is confirmed sound: **19,605 of 19,773 points (99.2%)**
+> match a Roads street name exactly with only case/whitespace normalization. The
+> residual 168 span 18 street names and can be handled by hand. `Placement` shows
+> 19,227 points sited on the actual structure, so distances will behave.
+>
+> ⚠️ `STUDENT_RESIDENCE` is blocked on the same problem as campus streets — there are
+> **zero VT residence-hall footprints** in the town's Building layer. See §2.4a.
+
 Corner-lot double-counting is prevented structurally: **a household has exactly one
 `primary_segment_id`** and only that link counts toward metrics. `SegmentHousehold`
 may hold secondary associations with a `relationship_type` for admin inspection and
@@ -218,6 +376,18 @@ filter is wrong and must be fixed before proceeding. `STUDENT_RESIDENCE` is repo
 separately and checked against VT's published on-campus population — it must **not**
 be folded into the census comparison, since census households exclude group quarters
 by definition. Expected combined total ≈ 18,800.
+
+> 📋 **2026-08-03 — this gate, as written, fails on correct data.** The residential
+> filter yields **18,022 points** against ~13,800 Census-2020 households: a **+31%
+> gap**, and much of it is right. We count apartment units the census counts as
+> occupied households, and five years of construction have landed since 2020. A gate
+> that halts here would halt on a working pipeline.
+>
+> **Revised gate:** compare against total **housing units**, not households; allow a
+> wide band; and print the composition — unit-level points vs building-level points,
+> and the split by `LocalType` — so a human judges rather than a threshold. Keep the
+> hard failure for the shapes that really are wrong: a residential total below the
+> household count, or a sudden double-digit swing between builds.
 
 ### 2.6 identify — stable IDs and the migration process (spec §11)
 
@@ -621,7 +791,8 @@ Screens exactly as §26. Implementation notes worth fixing now:
 | Phase | Work | Est. |
 |---|---|---|
 | 1 | Data audit + this plan | ✅ done |
-| 2a | Schema inspection report; resolve ⚠️ items | 1–2 days |
+| 2a | Schema inspection report; resolve ⚠️ items | ✅ done ([`04`](04-schema-inspection.md)) |
+| 2a′ | **Source campus streets + residence-hall footprints** (§2.4a); get network policy widened; get licence answer from Town GIS | blocks part of 2b |
 | 2b | Pipeline: fetch → split → classify → households → IDs → load | 1.5–2 weeks |
 | 2c | **Human curation pass** (public/private, trails, campus core polygon, campus paths, residence-hall table) | 2–3 days of Jacob's time + tooling |
 | 3 | Router prototype + scenario harness + tuning | 2–3 weeks |
@@ -642,7 +813,11 @@ both a strong data-quality check and the moment the project becomes real to peop
 
 | Risk | Mitigation |
 |---|---|
-| Private/apartment drives misclassified as REQUIRED → town can never hit 100% | Human curation pass (2c); admin can reclassify any segment at any time and metrics recompute |
+| Private/apartment drives misclassified as REQUIRED → town can never hit 100% | **Largely retired 2026-08-03** — `RD_MAINT` classifies all 1,547 road segments and spot-checks land correctly. Residual: 34 disagreements + a confirm pass over 232 auto-excluded segments, then the 2c visual sweep |
+| **Campus streets and dorm footprints have no data source** (§2.4a) — D1 is half-buildable | Resolve in 2a′: VGIN RCL → VT Facilities GIS → hand-digitise (~5 mi). Campus *paths* are already sourced, so D1b proceeds regardless |
+| **Households in complexes with no internal roads silently vanish** at the 75 m association cap (The Mill, Hunters Ridge, Terrace View — 800+ units) | Raise the cap; add a `PlaceName`-keyed complex→frontage rule; log every unassociated household and fail the build on a nonzero count |
+| Census calibration gate halts a *correct* pipeline (18,022 residential points vs ~13,800 households) | Compare against housing units, widen the band, print composition for human judgment (§2.5) |
+| No town dataset carries any licence text | Written confirmation from Town Engineering & GIS before publishing derived data; start the ask now, it has latency |
 | Routes are technically good but unpleasant → people stop using it | Separate walk-quality score with a hard floor; 18-scenario visual harness; pilot tuning |
 | Dorm household estimate distorts the headline number (campus ≈ 26% of the total) | `household_type` split, `confidence = LOW`, separate calibration against VT capacity; Jacob approves the computed number before launch (D1c) |
 | Campus modeled from roads only → dorm quads never actually prayed for | Campus pedestrian ways are REQUIRED, not connectors (D1b) |
@@ -661,12 +836,34 @@ Tracked in [`03-decisions.md`](03-decisions.md). Summary of current state:
 - **D1 — Virginia Tech campus. ✅ Resolved: included**, with dorms counted as rooms
   (~5,000 estimated households). Creates three Phase 2c curation artifacts: the
   campus core polygon, the required-pedestrian-way selection, and the residence-hall
-  capacity table. See D1 for reasoning and the expected metric effects.
+  capacity table.
+  > 📋 **2026-08-03 — D1 needs a follow-up decision.** The town publishes no campus
+  > streets, addresses, or building footprints (§2.4a), so **D1's road layer and D1c's
+  > residence-hall table have no source**; D1b's pedestrian ways do. Also, the in-town
+  > campus footprint is **1.38–1.68 sq mi (7–8% of the town)**, not the 4.1 sq mi / 20%
+  > D1 assumed — most of VT's 2,600 acres lies outside the corporate limits. The
+  > headline-metric effect D1 reasons about is roughly a third of what was estimated.
+  > On the plus side, the town's single `UNIV` zoning polygon is a ready first draft of
+  > D1a's campus core polygon.
 - **D2 — Which trails count (§17). ✅ Huckleberry confirmed**; Deerfield and
   Shenandoah recommended as REQUIRED, park interiors and Gateway Trail as
   connector-only, Coal Mining Heritage and the Huckleberry south of the town line out
   of area. Awaiting a yes/no on the recommendations. Trail eligibility should key off
   surface and grade attributes rather than case-by-case judgment.
+  > 📋 **2026-08-03 — half of D2's eligibility rule is unbuildable as written.**
+  > Surface exists: Paths `Material` is populated on 889 of 1,069 features
+  > (`Concrete` 572 · `Asphalt` 282 · `Gravel` 4 · `Dirt` 2 · …). **Grade does not** —
+  > `Slope` is populated on 1,026 features and *every value is 0*. `Width` is populated
+  > on 1. Either derive grade from a DEM (USGS 3DEP 1 m covers Montgomery County) or
+  > drop grade from the automatic rule and make it a curation note.
+  >
+  > Naming, for the curated list: Deerfield Trail appears as **`Deerfield`**
+  > (1 feature, 0.76 mi) and the Shenandoah *Bike* Trail as **`Shenandoah Trail`** with
+  > `Type = Trail` (2 features + 12 spur, 2.18 mi). In-town Huckleberry is 25 features /
+  > 11.15 mi. 38 trail features have a blank `Road` and need visual identification.
+  > The Huckleberry south of the town line isn't in the data at all, so "out of area"
+  > costs nothing to implement. Brush Mountain Park's 18 singletrack trails are a
+  > separate service D2 doesn't currently mention and should explicitly exclude.
 - **D3–D6** — out-of-town connector allowance, refresh cadence, admin access, hosting
   budget. All have workable defaults; none block Phase 2.
 - **D7 — GitHub write access.** Open; blocks pushing work, not doing it.
