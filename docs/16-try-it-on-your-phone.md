@@ -140,12 +140,73 @@ review.
 
 ---
 
+## Getting the newest version
+
+**A Codespace does not update itself.** It copies the code once, on the day you create
+it, and never looks again. Reopening it a week later runs week-old code — and because
+the phone app is *built* from that code into files the browser downloads, the phone
+gets a week-old app even after the source is updated.
+
+So whenever you're told there is something new to look at:
+
+```bash
+./update
+```
+
+Then `./go` to start it. `./update` pulls the newest code, rebuilds the phone app,
+rebuilds the street network if it changed, and applies any database changes.
+
+### "There are N uncommitted changes" — should I commit them?
+
+**No.** Setting up a Codespace runs the street-network build, and that rewrites about a
+dozen tracked report files under `pipeline/out/`. They are *outputs*, not edits. Git
+correctly notices they changed; nothing is wrong.
+
+Committing them makes things worse, not better: it creates a commit that only exists in
+your Codespace, so your copy and GitHub diverge, and the next `./update` is refused.
+`./update` discards those files for you automatically before pulling, and regenerates
+them afterwards.
+
+If you ever do get stuck with a diverged copy, this throws away local commits and
+matches GitHub exactly:
+
+```bash
+git fetch origin && git reset --hard origin/claude/blacksburg-prayer-walk-pwa-djiq0l
+```
+
+### Checking which version your phone has
+
+Every screen has a small dark pill in the bottom-right corner reading **build** and
+seven characters, like `build cd2b232`. That is the exact commit your phone is running.
+
+Tap it to see more: the app bundle, the server, the branch, and how many neighbourhoods
+the map data knows about. If the pill turns **red and says "stale"**, your phone is
+holding an old copy in its cache — tap it and choose **Clear cache and load the newest
+build**. That is the whole fix; you should not need any of the iPhone steps below.
+
+### If the phone is still showing the old app
+
+In order, stopping as soon as it works:
+
+1. **Tap the build pill → Clear cache and load the newest build.** Works in Safari and
+   in an installed app.
+2. **If you installed it to your Home Screen:** press and hold the icon → **Remove App**
+   → **Delete App**. Then open the address in Safari again and re-add it. An installed
+   iPhone app keeps its own private cache that closing Safari does not touch.
+3. **Clear Safari:** Settings → Safari → **Clear History and Website Data**. This signs
+   you out of other sites too, so it's third on the list rather than first.
+4. **Confirm the server is actually new.** In the Codespace terminal, look for the line
+   `INFO:     BUILD <commit>` when it starts, or open
+   `https://<your-codespace>-8000.app.github.dev/api/version` in a browser. If *that*
+   shows an old commit, the phone is innocent — run `./update`.
+
 ## Stopping and starting again
 
 - **To stop it:** click in the terminal panel and press `Ctrl` + `C`.
 - **To start it again:** type `./go` and press Enter.
 - **To come back another day:** GitHub → your profile menu → **Your codespaces** →
-  click this one. It wakes up and restarts by itself. Setup does *not* run again.
+  click this one. It wakes up and restarts by itself. Setup does *not* run again —
+  **run `./update` if you want the newest version.**
 - **To delete it:** same list, **⋯** → **Delete**. Nothing is lost that matters — the
   code is safe in the repository. You'd lose any test walks you recorded, which is
   fine.

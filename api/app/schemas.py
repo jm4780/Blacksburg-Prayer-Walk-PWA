@@ -152,6 +152,11 @@ class HealthOut(BaseModel):
     warnings: list[str]
     public_geometry_enabled: bool
     licensing_gate: dict[str, Any]
+    # Which build is running, and whether the data on disk matches the code. See
+    # api/app/version.py — these exist so a stale preview can be diagnosed from the
+    # app rather than guessed at.
+    build: dict[str, Any]
+    network_data: dict[str, Any]
 
 
 # -------------------------------------------------------------------- feedback

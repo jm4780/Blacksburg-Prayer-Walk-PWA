@@ -12,6 +12,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api, getToken, setToken } from './api'
 import type { ParticipantOut, Walk } from './types'
+import BuildBadge from './components/BuildBadge'
 import IdentityGate from './components/IdentityGate'
 import ActiveWalk from './screens/ActiveWalk'
 import Admin from './screens/Admin'
@@ -125,6 +126,8 @@ export default function App() {
         </div>
       )}
       <main>{screen}</main>
+      {/* Temporary, while previews are being verified on real phones. */}
+      <BuildBadge />
     </div>
   )
 }
