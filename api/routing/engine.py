@@ -16,11 +16,19 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from . import components as comp_mod
+from . import response as resp_mod
 from .graph import RoutingGraph
 from .score import DEFAULT_WEIGHTS, Weights, compute
 from .state import CompletionState, Route
 
 M_PER_MILE = 1609.344
+
+# Bumped whenever routing behaviour changes in a way that could alter a stored route.
+#   2.0.0  Phase 2b.1: categorised length-scaled repeat penalty, multi-component
+#          routing, structured late-opportunity response states.
+#   1.0.0  Phase 2b prototype.
+ENGINE_VERSION = "2.0.0"
 
 # Length bands, miles. Quick..Extended.
 VARIANTS = [("Quick", 1.0), ("Short", 2.0), ("Medium", 3.5), ("Long", 5.0),
@@ -56,9 +64,31 @@ class Engine:
         self.components = comps
         self._last_nearest_incomplete_m = float("inf")
 
+        # Component classification. Routing happens *within* a component; the router
+        # never invents a link between them. A start snaps to the nearest component
+        # that is a valid place to walk from, which is not always the biggest one.
+        self.component_info = comp_mod.classify(net, self.g)
+        self.snappable = set()
+        self.component_of_node = {}
+        for c in self.component_info:
+            for n in c.nodes:
+                self.component_of_node[n] = c.index
+            if c.start_snap_allowed:
+                self.snappable |= c.nodes
+
     def snap(self, lon: float, lat: float) -> int:
-        """Snap a WGS84 location to a start node on the main routing component."""
-        return self.g.nearest_node_to(lon, lat, restrict_to=self.main_component)
+        """Snap a WGS84 location to the nearest node in a valid routing area.
+
+        Not the main component — the nearest *valid* one. A walker standing in the
+        Corporate Research Center should route the CRC, not be teleported downtown.
+        Tiny accidental islands are excluded from snapping (start_snap_allowed=False),
+        so a bad snap cannot strand a request on a two-node fragment.
+        """
+        return self.g.nearest_node_to(lon, lat, restrict_to=self.snappable)
+
+    def component_for(self, node_i: int):
+        ci = self.component_of_node.get(node_i)
+        return next((c for c in self.component_info if c.index == ci), None)
 
     # ================================================================ Layer 1
     def discover_clusters(self, state: CompletionState, start_i: int,
@@ -69,8 +99,14 @@ class Engine:
         scored by how much work it holds against how far it is from the walker — a rich
         cluster twenty minutes away loses to a decent one at the door.
         """
+        # Candidate work is restricted to the start's own component. Anything in
+        # another component is unreachable by definition, and offering it would mean
+        # inventing a crossing no source asserted.
+        my_comp = self.component_of_node.get(start_i)
         incomplete = [i for i in state.incomplete_required()
-                      if state.prize_multiplier(i) > 0.05]
+                      if state.prize_multiplier(i) > 0.05
+                      and self.component_of_node.get(
+                          self.g.node_index.get(self.net.segments[i].u, -1)) == my_comp]
         if not incomplete:
             return []
 
@@ -298,14 +334,18 @@ class Engine:
             anchors_visited.append(cur)
             alive &= (seg_of != i)   # both directions of this segment are now spent
 
-        # Close the loop.
+        # Close the loop. The length of this leg is recorded so the scorer can tell
+        # necessary walk-home repeats from avoidable doubling back.
+        closing = 0
         if cur != start_i:
             _, path = self.g.shortest_path(cur, start_i)
             seg_seq.extend(path)
+            closing = len(path)
         if not seg_seq:
             return None
         return Route(seg_seq=seg_seq, start_node=start_i,
                      anchors=anchors_visited, excursions=excursions,
+                     closing_leg=closing,
                      meta=dict(cluster_root=setup.get("root")))
 
     # ================================================================ Layer 3
@@ -388,15 +428,18 @@ class Engine:
                 return None
             seq.extend(path)
             cur = nxt
+        closing = 0
         if cur != start_i:
             d, path = self.g.shortest_path(cur, start_i)
             if not np.isfinite(d):
                 return None
             seq.extend(path)
+            closing = len(path)
         if not seq:
             return None
         return Route(seg_seq=seq, start_node=start_i, anchors=list(anchor_seq),
-                     excursions=template.excursions, meta=dict(template.meta))
+                     excursions=template.excursions, closing_leg=closing,
+                     meta=dict(template.meta))
 
     # ================================================================== driver
     def best_route(self, start_i: int, target_miles: float, state: CompletionState,
@@ -467,10 +510,11 @@ class Engine:
             if r is not None:
                 base, base_idx = r, k
                 out.append(dict(name=name, target_miles=target, route=r,
-                                score=r.score, extends=None, grew=True, nested=True))
+                                score=r.score, extends=None, grew=True, nested=True,
+                                meta=meta))
                 break
             out.append(dict(name=name, target_miles=target, route=None, score=None,
-                            extends=None, grew=False, nested=True,
+                            extends=None, grew=False, nested=True, meta=meta,
                             unavailable=meta.get("reason") or "no route found",
                             nearest_incomplete_miles=meta.get("nearest_incomplete_miles")))
         if base is None:
@@ -498,11 +542,18 @@ class Engine:
                     nxt = cur
             out.append(dict(name=name, target_miles=target, route=nxt,
                             score=nxt.score, extends=out[-1]["name"] if nested else None,
-                            grew=bool(grew), nested=bool(nested)))
+                            grew=bool(grew), nested=bool(nested),
+                            meta=dict(nxt.meta)))
             cur = nxt
         total_ms = round((time.perf_counter() - t0) * 1000, 1)
+        component = self.component_for(start_i)
+        band_results = [(o["name"], o["target_miles"], o.get("route"),
+                         o.get("meta", {})) for o in out]
         for o in out:
             o["build_ms"] = total_ms
+            o["response"] = resp_mod.assess(
+                o["name"], o["target_miles"], o.get("route"),
+                o.get("meta", {}), component, band_results)
         return out
 
     def extend(self, route: Route, state: CompletionState, start_i: int,

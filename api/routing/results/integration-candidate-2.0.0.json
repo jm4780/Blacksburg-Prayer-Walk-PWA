@@ -1,0 +1,987 @@
+{
+  "frozen_at": "2026-08-03T02:01:47.648264+00:00",
+  "canonical_network_version": "v1.1",
+  "network_id": "bbg-net-v1.1-3855ef9c4c15358a",
+  "previous_network_id": "bbg-net-v1.0-b61d1067f9a57e32",
+  "routing_engine_version": "2.0.0",
+  "snapshot_date": "2026-08-03",
+  "network": {
+    "canonical_network_version": "v1.1",
+    "network_id": "bbg-net-v1.1-3855ef9c4c15358a",
+    "build_date": "2026-08-03T01:52:36.940968+00:00",
+    "snapshot_date": "2026-08-03",
+    "frozen_at": "2026-08-03T02:01:47.302382+00:00",
+    "checksum_algorithm": "sha256 over (id, role, type, connector_class, length, nodes, households, campus_obligation) for every canonical segment, sorted; first 16 hex chars",
+    "source_versions": {
+      "roads": {
+        "url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Address_Road_Building/FeatureServer/1",
+        "source_updated_at": "2026-04-07T12:03:59.988000+00:00",
+        "retrieved_at": "2026-08-03T00:37:31.070073+00:00",
+        "feature_count": 1547,
+        "license_status": "NONE_PUBLISHED"
+      },
+      "paths": {
+        "url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Paths_to_the_Future/FeatureServer/0",
+        "source_updated_at": "2025-11-07T19:46:28.881000+00:00",
+        "retrieved_at": "2026-08-03T00:38:07.092544+00:00",
+        "feature_count": 1069,
+        "license_status": "NONE_PUBLISHED"
+      },
+      "boundary": {
+        "url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Administrative_Reference_Boundaries/FeatureServer/4",
+        "source_updated_at": "2026-01-31T12:04:17.422000+00:00",
+        "retrieved_at": "2026-08-03T00:38:05.170608+00:00",
+        "feature_count": 1,
+        "license_status": "NONE_PUBLISHED"
+      },
+      "zoning": {
+        "url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Zoning_and_Landuse/FeatureServer/9",
+        "source_updated_at": "2023-01-09T18:58:24.857000+00:00",
+        "retrieved_at": "2026-08-03T00:38:16.394158+00:00",
+        "feature_count": 112,
+        "license_status": "NONE_PUBLISHED"
+      },
+      "address": {
+        "url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Address_Road_Building/FeatureServer/0",
+        "source_updated_at": "2026-04-07T12:03:59.988000+00:00",
+        "retrieved_at": "2026-08-03T00:37:40.864665+00:00",
+        "feature_count": 19773,
+        "license_status": "NONE_PUBLISHED"
+      },
+      "landuse": {
+        "url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Comprehensive_Plan/FeatureServer/8",
+        "source_updated_at": "2026-01-29T12:03:30.400000+00:00",
+        "retrieved_at": "2026-08-03T00:38:14.645899+00:00",
+        "feature_count": 11398,
+        "license_status": "NONE_PUBLISHED"
+      },
+      "openspace": {
+        "url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Parks_and_Open_Space/FeatureServer/1",
+        "source_updated_at": "2026-03-14T12:03:48.632000+00:00",
+        "retrieved_at": "2026-08-03T00:38:18.084315+00:00",
+        "feature_count": 375,
+        "license_status": "NONE_PUBLISHED"
+      },
+      "building": {
+        "url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Address_Road_Building/FeatureServer/2",
+        "source_updated_at": "2026-03-31T12:04:33.656000+00:00",
+        "retrieved_at": "2026-08-03T00:37:51.154114+00:00",
+        "feature_count": 10156,
+        "license_status": "NONE_PUBLISHED"
+      },
+      "parks": {
+        "url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Parks_and_Open_Space/FeatureServer/0",
+        "source_updated_at": "2026-03-14T12:03:48.632000+00:00",
+        "retrieved_at": "2026-08-03T00:38:19.397624+00:00",
+        "feature_count": 44,
+        "license_status": "NONE_PUBLISHED"
+      }
+    },
+    "mileage": {
+      "required_total": 134.229,
+      "required_street": 123.807,
+      "required_trail": 10.423,
+      "connector": 68.903,
+      "derived_connector": 0.871,
+      "excluded": 49.32,
+      "campus_corridor": 11.359,
+      "routable_total": 204.003,
+      "canonical_total": 253.529
+    },
+    "counts": {
+      "routing_segments": 2490,
+      "routing_nodes": 2273,
+      "required_segments": 1509,
+      "connector_segments": 761,
+      "derived_connector_segments": 220
+    },
+    "households": {
+      "on_required_coverage": 11024,
+      "held_for_review": 6284,
+      "attached_to_segments_in_routing_graph": 11679
+    },
+    "excluded_from_routing_graph": {
+      "EXCLUDED (private / ramp / bypass)": 466,
+      "derived connector: CROSSING_REVIEW_REQUIRED": 30,
+      "derived connector: LIKELY_FALSE": 8,
+      "derived connector: UNRESOLVED": 4
+    },
+    "routing_graph_membership_rule": {
+      "include": [
+        "REQUIRED",
+        "approved connector (authoritative source, walkable)",
+        "HIGH_CONFIDENCE derived connector"
+      ],
+      "exclude": [
+        "EXCLUDED",
+        "CROSSING_REVIEW_REQUIRED derived",
+        "LIKELY_FALSE derived",
+        "UNRESOLVED derived",
+        "not walkable"
+      ]
+    }
+  },
+  "engine": {
+    "version": "2.0.0",
+    "config": {
+      "clusters": 5,
+      "seeds_per_cluster": 4,
+      "rcl_size": 5,
+      "rcl_alpha": 0.45,
+      "max_anchors": 420,
+      "search_radius_factor": 0.62,
+      "improve_iters": 30,
+      "two_opt_samples": 40,
+      "length_tolerance": 0.08,
+      "random_seed": 12345
+    },
+    "weights": {
+      "new_required_mile": 100.0,
+      "household": 0.35,
+      "corridor_completion": 25.0,
+      "dead_end_completion": 12.0,
+      "isolation_bonus": 8.0,
+      "cohesion": 40.0,
+      "repeat_avoidable_mile": -55.0,
+      "repeat_closing_mile": -20.0,
+      "repeat_dead_end_mile": -6.0,
+      "repeat_share_quadratic": -260.0,
+      "repeat_extra_traversal": -14.0,
+      "repeat_band_exponent": 0.5,
+      "repeat_band_reference_miles": 2.0,
+      "connector_mile": -12.0,
+      "derived_connector_use": -6.0,
+      "stress_mile": -9.0,
+      "turn": -0.7,
+      "uturn": -6.0,
+      "length_overshoot": -120.0,
+      "length_undershoot": -25.0,
+      "loop_shape": 18.0
+    },
+    "bands": [
+      [
+        "Quick",
+        1.0
+      ],
+      [
+        "Short",
+        2.0
+      ],
+      [
+        "Medium",
+        3.5
+      ],
+      [
+        "Long",
+        5.0
+      ],
+      [
+        "Extended",
+        7.5
+      ]
+    ]
+  },
+  "curation_overrides": {
+    "applied": 6,
+    "miles": 1.041,
+    "segments": [
+      {
+        "segment_id": "SEG-000004",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.227
+      },
+      {
+        "segment_id": "SEG-000010",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.485
+      },
+      {
+        "segment_id": "SEG-000013",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.194
+      },
+      {
+        "segment_id": "SEG-000025",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.048
+      },
+      {
+        "segment_id": "SEG-000030",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.021
+      },
+      {
+        "segment_id": "SEG-000034",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.066
+      }
+    ],
+    "rules": {
+      "gordon c willis smart rd": "The Virginia Smart Road is Virginia Tech Transportation Institute's controlled research facility, not a public street. It is gated, instrumented, and closed to the public except on organised tours; members of the public cannot lawfully walk it. It carries RD_MAINT=Blacksburg in the town's 911 file because emergency vehicles must be routed there, which is exactly the failure mode the Phase 1 audit warned about: presence in a 911 road layer is not evidence of public access. Reclassified REQUIRED -> EXCLUDED 2026-08-03 (Phase 2b.1 item 3)."
+    }
+  },
+  "components": {
+    "total": 117,
+    "summary": {
+      "by_classification": {
+        "VALID_INDEPENDENT_ROUTING_AREA": {
+          "components": 6,
+          "required_miles": 134.06,
+          "households": 11023
+        },
+        "CONNECTOR_ONLY": {
+          "components": 106,
+          "required_miles": 0.0,
+          "households": 0
+        },
+        "DATA_ERROR_OR_REVIEW_REQUIRED": {
+          "components": 5,
+          "required_miles": 0.17,
+          "households": 1
+        }
+      },
+      "valid_routing_areas": 6,
+      "required_miles_in_denominator": 134.229,
+      "required_miles_removed_from_denominator": 0,
+      "required_miles_in_valid_areas": 134.06,
+      "required_miles_needing_review": 0.17
+    },
+    "with_required_mileage": [
+      {
+        "index": 0,
+        "description": "Main Blacksburg network",
+        "classification": "VALID_INDEPENDENT_ROUTING_AREA",
+        "required_miles": 130.5364,
+        "total_miles": 166.351,
+        "households": 10622,
+        "has_cycle": true,
+        "public": true,
+        "separation_m": 0.0,
+        "separation_cause": "N/A (main component)",
+        "supports_closed_route": true,
+        "max_closed_walk_miles": 332.702,
+        "supported_bands": [
+          1.0,
+          2.0,
+          3.5,
+          5.0,
+          7.5
+        ],
+        "start_snap_allowed": true,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Huckleberry Trl",
+            "miles": 7.922
+          },
+          {
+            "name": "Prices Fork Rd",
+            "miles": 6.024
+          },
+          {
+            "name": "S Main St",
+            "miles": 5.99
+          },
+          {
+            "name": "N Main St",
+            "miles": 3.482
+          },
+          {
+            "name": "Meadowbrook Dr",
+            "miles": 2.495
+          }
+        ],
+        "reasons": [
+          "main component"
+        ]
+      },
+      {
+        "index": 3,
+        "description": "Research Center Dr area (SW Kraft Dr, Pratt Dr)",
+        "classification": "VALID_INDEPENDENT_ROUTING_AREA",
+        "required_miles": 2.0438,
+        "total_miles": 3.0142,
+        "households": 288,
+        "has_cycle": true,
+        "public": true,
+        "separation_m": 0.0,
+        "separation_cause": "touches or nearly touches another component \u2014 separated by a connector we declined to route over (CROSSING_REVIEW_REQUIRED / LIKELY_FALSE / UNRESOLVED), not by a physical barrier",
+        "supports_closed_route": true,
+        "max_closed_walk_miles": 6.028,
+        "supported_bands": [
+          1.0,
+          2.0,
+          3.5,
+          5.0
+        ],
+        "start_snap_allowed": true,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Research Center Dr",
+            "miles": 0.65
+          },
+          {
+            "name": "SW Kraft Dr",
+            "miles": 0.593
+          },
+          {
+            "name": "Pratt Dr",
+            "miles": 0.415
+          },
+          {
+            "name": "S Knollwood Dr",
+            "miles": 0.201
+          },
+          {
+            "name": "N Knollwood Dr",
+            "miles": 0.185
+          }
+        ],
+        "reasons": [
+          "2.04 mi of public REQUIRED street with at least one cycle",
+          "separation is a rejected connector, not a barrier \u2014 likely merges into the main component once that crossing is reviewed, but it routes fine on its own meanwhile"
+        ]
+      },
+      {
+        "index": 2,
+        "description": "Scenic Ridge Cir",
+        "classification": "VALID_INDEPENDENT_ROUTING_AREA",
+        "required_miles": 0.5864,
+        "total_miles": 3.252,
+        "households": 59,
+        "has_cycle": true,
+        "public": true,
+        "separation_m": 0.0,
+        "separation_cause": "touches or nearly touches another component \u2014 separated by a connector we declined to route over (CROSSING_REVIEW_REQUIRED / LIKELY_FALSE / UNRESOLVED), not by a physical barrier",
+        "supports_closed_route": true,
+        "max_closed_walk_miles": 6.504,
+        "supported_bands": [
+          1.0,
+          2.0,
+          3.5,
+          5.0
+        ],
+        "start_snap_allowed": true,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Scenic Ridge Cir",
+            "miles": 0.586
+          }
+        ],
+        "reasons": [
+          "0.59 mi of public REQUIRED street with at least one cycle",
+          "separation is a rejected connector, not a barrier \u2014 likely merges into the main component once that crossing is reviewed, but it routes fine on its own meanwhile"
+        ]
+      },
+      {
+        "index": 77,
+        "description": "Davis St",
+        "classification": "VALID_INDEPENDENT_ROUTING_AREA",
+        "required_miles": 0.3046,
+        "total_miles": 0.3046,
+        "households": 0,
+        "has_cycle": false,
+        "public": true,
+        "separation_m": 6.7,
+        "separation_cause": "touches or nearly touches another component \u2014 separated by a connector we declined to route over (CROSSING_REVIEW_REQUIRED / LIKELY_FALSE / UNRESOLVED), not by a physical barrier",
+        "supports_closed_route": true,
+        "max_closed_walk_miles": 0.609,
+        "supported_bands": [],
+        "start_snap_allowed": true,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Davis St",
+            "miles": 0.305
+          }
+        ],
+        "reasons": [
+          "0.30 mi of public REQUIRED street (no cycle \u2014 walkable out and back, up to 0.6 mi)",
+          "separation is a rejected connector, not a barrier \u2014 likely merges into the main component once that crossing is reviewed, but it routes fine on its own meanwhile",
+          "too small for the Quick band \u2014 the app must offer a shorter walk here or say why it cannot"
+        ]
+      },
+      {
+        "index": 16,
+        "description": "Apple Ln area (Sandstone Rdg)",
+        "classification": "VALID_INDEPENDENT_ROUTING_AREA",
+        "required_miles": 0.2968,
+        "total_miles": 0.2968,
+        "households": 46,
+        "has_cycle": false,
+        "public": true,
+        "separation_m": 89.0,
+        "separation_cause": "short gap with no connector proposed within 25 m \u2014 probable missing link in the source",
+        "supports_closed_route": true,
+        "max_closed_walk_miles": 0.594,
+        "supported_bands": [],
+        "start_snap_allowed": true,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Apple Ln",
+            "miles": 0.177
+          },
+          {
+            "name": "Sandstone Rdg",
+            "miles": 0.12
+          }
+        ],
+        "reasons": [
+          "0.30 mi of public REQUIRED street (no cycle \u2014 walkable out and back, up to 0.6 mi)",
+          "too small for the Quick band \u2014 the app must offer a shorter walk here or say why it cannot"
+        ]
+      },
+      {
+        "index": 28,
+        "description": "Georgia St area (Bradley Ln)",
+        "classification": "VALID_INDEPENDENT_ROUTING_AREA",
+        "required_miles": 0.2916,
+        "total_miles": 0.2916,
+        "households": 8,
+        "has_cycle": false,
+        "public": true,
+        "separation_m": 11.8,
+        "separation_cause": "touches or nearly touches another component \u2014 separated by a connector we declined to route over (CROSSING_REVIEW_REQUIRED / LIKELY_FALSE / UNRESOLVED), not by a physical barrier",
+        "supports_closed_route": true,
+        "max_closed_walk_miles": 0.583,
+        "supported_bands": [],
+        "start_snap_allowed": true,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Georgia St",
+            "miles": 0.169
+          },
+          {
+            "name": "Bradley Ln",
+            "miles": 0.123
+          }
+        ],
+        "reasons": [
+          "0.29 mi of public REQUIRED street (no cycle \u2014 walkable out and back, up to 0.6 mi)",
+          "separation is a rejected connector, not a barrier \u2014 likely merges into the main component once that crossing is reviewed, but it routes fine on its own meanwhile",
+          "too small for the Quick band \u2014 the app must offer a shorter walk here or say why it cannot"
+        ]
+      },
+      {
+        "index": 76,
+        "description": "Brush Mountain Rd",
+        "classification": "DATA_ERROR_OR_REVIEW_REQUIRED",
+        "required_miles": 0.0798,
+        "total_miles": 0.0798,
+        "households": 0,
+        "has_cycle": false,
+        "public": true,
+        "separation_m": 59.0,
+        "separation_cause": "short gap with no connector proposed within 25 m \u2014 probable missing link in the source",
+        "supports_closed_route": false,
+        "max_closed_walk_miles": 0.16,
+        "supported_bands": [],
+        "start_snap_allowed": false,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Brush Mountain Rd",
+            "miles": 0.08
+          }
+        ],
+        "reasons": [
+          "only 0.08 mi of REQUIRED street across 1 segment(s), no cycle",
+          "below the threshold for an independent routing area; the mileage stays in the denominator and becomes reachable when the missing link is fixed"
+        ]
+      },
+      {
+        "index": 41,
+        "description": "Coal Bank Hollow Rd",
+        "classification": "DATA_ERROR_OR_REVIEW_REQUIRED",
+        "required_miles": 0.0388,
+        "total_miles": 0.0388,
+        "households": 0,
+        "has_cycle": false,
+        "public": true,
+        "separation_m": 59.0,
+        "separation_cause": "short gap with no connector proposed within 25 m \u2014 probable missing link in the source",
+        "supports_closed_route": false,
+        "max_closed_walk_miles": 0.078,
+        "supported_bands": [],
+        "start_snap_allowed": false,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Coal Bank Hollow Rd",
+            "miles": 0.039
+          }
+        ],
+        "reasons": [
+          "only 0.04 mi of REQUIRED street across 2 segment(s), no cycle",
+          "below the threshold for an independent routing area; the mileage stays in the denominator and becomes reachable when the missing link is fixed"
+        ]
+      },
+      {
+        "index": 86,
+        "description": "Shenandoah Trail Spur",
+        "classification": "DATA_ERROR_OR_REVIEW_REQUIRED",
+        "required_miles": 0.018,
+        "total_miles": 0.018,
+        "households": 1,
+        "has_cycle": false,
+        "public": true,
+        "separation_m": 0.0,
+        "separation_cause": "touches or nearly touches another component \u2014 separated by a connector we declined to route over (CROSSING_REVIEW_REQUIRED / LIKELY_FALSE / UNRESOLVED), not by a physical barrier",
+        "supports_closed_route": false,
+        "max_closed_walk_miles": 0.036,
+        "supported_bands": [],
+        "start_snap_allowed": false,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Shenandoah Trail Spur",
+            "miles": 0.018
+          }
+        ],
+        "reasons": [
+          "only 0.02 mi of REQUIRED street across 1 segment(s), no cycle",
+          "below the threshold for an independent routing area; the mileage stays in the denominator and becomes reachable when the missing link is fixed"
+        ]
+      },
+      {
+        "index": 46,
+        "description": "Shenandoah Trail Spur",
+        "classification": "DATA_ERROR_OR_REVIEW_REQUIRED",
+        "required_miles": 0.0169,
+        "total_miles": 0.0206,
+        "households": 0,
+        "has_cycle": false,
+        "public": true,
+        "separation_m": 0.0,
+        "separation_cause": "touches or nearly touches another component \u2014 separated by a connector we declined to route over (CROSSING_REVIEW_REQUIRED / LIKELY_FALSE / UNRESOLVED), not by a physical barrier",
+        "supports_closed_route": false,
+        "max_closed_walk_miles": 0.041,
+        "supported_bands": [],
+        "start_snap_allowed": false,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Shenandoah Trail Spur",
+            "miles": 0.017
+          }
+        ],
+        "reasons": [
+          "only 0.02 mi of REQUIRED street across 2 segment(s), no cycle",
+          "below the threshold for an independent routing area; the mileage stays in the denominator and becomes reachable when the missing link is fixed"
+        ]
+      },
+      {
+        "index": 12,
+        "description": "Shenandoah Trail Spur",
+        "classification": "DATA_ERROR_OR_REVIEW_REQUIRED",
+        "required_miles": 0.0164,
+        "total_miles": 0.181,
+        "households": 0,
+        "has_cycle": false,
+        "public": true,
+        "separation_m": 0.0,
+        "separation_cause": "touches or nearly touches another component \u2014 separated by a connector we declined to route over (CROSSING_REVIEW_REQUIRED / LIKELY_FALSE / UNRESOLVED), not by a physical barrier",
+        "supports_closed_route": true,
+        "max_closed_walk_miles": 0.362,
+        "supported_bands": [],
+        "start_snap_allowed": false,
+        "in_denominator": true,
+        "top_streets": [
+          {
+            "name": "Shenandoah Trail Spur",
+            "miles": 0.016
+          }
+        ],
+        "reasons": [
+          "only 0.02 mi of REQUIRED street across 5 segment(s), no cycle",
+          "below the threshold for an independent routing area; the mileage stays in the denominator and becomes reachable when the missing link is fixed"
+        ]
+      }
+    ]
+  },
+  "benchmark_summary": {
+    "routes": 59,
+    "distance_miles_mean": 3.972,
+    "new_required_miles_mean": 2.021,
+    "repeated_miles_mean": 1.185,
+    "households_mean": 337.068,
+    "walk_quality_mean": 67.363,
+    "score_mean": 400.415,
+    "before": {
+      "routes": 52,
+      "distance_miles_mean": 3.976,
+      "new_required_miles_mean": 1.866,
+      "repeated_miles_mean": 1.284,
+      "households_mean": 252.038,
+      "walk_quality_mean": 61.281,
+      "score_mean": 377.533
+    },
+    "stress": [
+      {
+        "completion": "0%",
+        "n": 4,
+        "distance_miles_mean": 3.69,
+        "new_required_miles_mean": 2.94,
+        "efficiency_mean": 0.8,
+        "walk_quality_mean": 68.58,
+        "repeated_miles_mean": 0.69,
+        "compute_ms_mean": 161.97
+      },
+      {
+        "completion": "25%",
+        "n": 4,
+        "distance_miles_mean": 3.71,
+        "new_required_miles_mean": 2.89,
+        "efficiency_mean": 0.78,
+        "walk_quality_mean": 64.8,
+        "repeated_miles_mean": 0.75,
+        "compute_ms_mean": 151.82
+      },
+      {
+        "completion": "50%",
+        "n": 4,
+        "distance_miles_mean": 3.69,
+        "new_required_miles_mean": 1.59,
+        "efficiency_mean": 0.43,
+        "walk_quality_mean": 61.53,
+        "repeated_miles_mean": 1.09,
+        "compute_ms_mean": 94.62
+      },
+      {
+        "completion": "75%",
+        "n": 4,
+        "distance_miles_mean": 2.99,
+        "new_required_miles_mean": 0.22,
+        "efficiency_mean": 0.13,
+        "walk_quality_mean": 65.25,
+        "repeated_miles_mean": 1.38,
+        "compute_ms_mean": 29.25
+      },
+      {
+        "completion": "90%",
+        "n": 3,
+        "distance_miles_mean": 3.18,
+        "new_required_miles_mean": 0.04,
+        "efficiency_mean": 0.01,
+        "walk_quality_mean": 62.47,
+        "repeated_miles_mean": 1.59,
+        "compute_ms_mean": 7.8
+      },
+      {
+        "completion": "98%",
+        "n": 3,
+        "distance_miles_mean": 3.18,
+        "new_required_miles_mean": 0.04,
+        "efficiency_mean": 0.01,
+        "walk_quality_mean": 62.47,
+        "repeated_miles_mean": 1.59,
+        "compute_ms_mean": 7.67
+      },
+      {
+        "completion": "98% scattered",
+        "n": 4,
+        "distance_miles_mean": 2.17,
+        "new_required_miles_mean": 0.16,
+        "efficiency_mean": 0.08,
+        "walk_quality_mean": 70.55,
+        "repeated_miles_mean": 0.82,
+        "compute_ms_mean": 11.07
+      },
+      {
+        "completion": "dead ends only",
+        "n": 4,
+        "distance_miles_mean": 3.23,
+        "new_required_miles_mean": 0.24,
+        "efficiency_mean": 0.08,
+        "walk_quality_mean": 65.35,
+        "repeated_miles_mean": 1.61,
+        "compute_ms_mean": 13.25
+      }
+    ]
+  },
+  "repeat_improvements": {
+    "repeated_share": {
+      "after": {
+        "mean": 0.28,
+        "median": 0.27,
+        "p90": 0.5,
+        "max": 0.5
+      },
+      "before": {
+        "mean": 0.31,
+        "median": 0.33,
+        "p90": 0.5,
+        "max": 0.52
+      }
+    },
+    "avoidable_repeat_share": {
+      "after": {
+        "mean": 0.08,
+        "median": 0.06,
+        "p90": 0.13,
+        "max": 0.31
+      },
+      "before": null
+    },
+    "walk_quality": {
+      "after": {
+        "mean": 70.96,
+        "median": 68.2,
+        "p90": 82.1,
+        "max": 91.5
+      },
+      "before": {
+        "mean": 64.87,
+        "median": 60.3,
+        "p90": 82.3,
+        "max": 92.6
+      }
+    },
+    "uturns_per_mile": {
+      "after": {
+        "mean": 0.22,
+        "median": 0.0,
+        "p90": 0.81,
+        "max": 1.1
+      },
+      "before": {
+        "mean": 0.2,
+        "median": 0.0,
+        "p90": 0.81,
+        "max": 1.1
+      }
+    },
+    "turns_per_mile": {
+      "after": {
+        "mean": 3.29,
+        "median": 2.8,
+        "p90": 5.8,
+        "max": 7.9
+      },
+      "before": {
+        "mean": 3.37,
+        "median": 3.3,
+        "p90": 5.6,
+        "max": 7.9
+      }
+    },
+    "loop_shape": {
+      "after": {
+        "mean": 0.72,
+        "median": 0.73,
+        "p90": 0.93,
+        "max": 1.0
+      },
+      "before": {
+        "mean": 0.69,
+        "median": 0.67,
+        "p90": 0.93,
+        "max": 1.0
+      }
+    }
+  },
+  "repeat_ab_test": {
+    "method": "same code, same network, same locations and bands; only the repeat-penalty weights differ",
+    "old_weights": {
+      "repeat_avoidable_mile": -45.0,
+      "repeat_closing_mile": -45.0,
+      "repeat_dead_end_mile": -45.0,
+      "repeat_share_quadratic": 0.0,
+      "repeat_extra_traversal": 0.0,
+      "repeat_band_exponent": 0.0,
+      "repeat_band_reference_miles": 2.0
+    },
+    "new_weights": {
+      "repeat_avoidable_mile": -55.0,
+      "repeat_closing_mile": -20.0,
+      "repeat_dead_end_mile": -6.0,
+      "repeat_share_quadratic": -260.0,
+      "repeat_extra_traversal": -14.0,
+      "repeat_band_exponent": 0.5,
+      "repeat_band_reference_miles": 2.0
+    },
+    "comparison": {
+      "new_required_miles": {
+        "before": 2.029,
+        "after": 2.038,
+        "delta": 0.009,
+        "pct": 0.4
+      },
+      "repeated_miles": {
+        "before": 1.304,
+        "after": 1.213,
+        "delta": -0.091,
+        "pct": -7.0
+      },
+      "repeat_share": {
+        "before": 0.323,
+        "after": 0.313,
+        "delta": -0.01,
+        "pct": -3.2
+      },
+      "avoidable_repeat_miles": {
+        "before": 0.546,
+        "after": 0.468,
+        "delta": -0.077,
+        "pct": -14.2
+      },
+      "avoidable_repeat_share": {
+        "before": 0.128,
+        "after": 0.114,
+        "delta": -0.014,
+        "pct": -11.1
+      },
+      "dead_end_return_miles": {
+        "before": 0.178,
+        "after": 0.2,
+        "delta": 0.023,
+        "pct": 12.7
+      },
+      "extra_traversals": {
+        "before": 0.809,
+        "after": 0.371,
+        "delta": -0.438,
+        "pct": -54.2
+      },
+      "distance_miles": {
+        "before": 4.064,
+        "after": 4.003,
+        "delta": -0.061,
+        "pct": -1.5
+      },
+      "households": {
+        "before": 399.764,
+        "after": 414.685,
+        "delta": 14.921,
+        "pct": 3.7
+      },
+      "score": {
+        "before": 449.29,
+        "after": 423.969,
+        "delta": -25.321,
+        "pct": -5.6
+      },
+      "walk_quality": {
+        "before": 65.324,
+        "after": 66.871,
+        "delta": 1.547,
+        "pct": 2.4
+      },
+      "uturns": {
+        "before": 0.944,
+        "after": 0.775,
+        "delta": -0.169,
+        "pct": -17.9
+      },
+      "turns": {
+        "before": 14.775,
+        "after": 13.775,
+        "delta": -1.0,
+        "pct": -6.8
+      },
+      "compute_ms": {
+        "before": 698.928,
+        "after": 709.916,
+        "delta": 10.988,
+        "pct": 1.6
+      },
+      "_matched_routes": 89,
+      "availability": {
+        "before": 89,
+        "after": 89,
+        "total_bands": 105
+      }
+    }
+  },
+  "performance": {
+    "five_variants_ms_median": 386.6,
+    "five_variants_ms_max": 2019.5,
+    "single_route_ms_median": 14.8,
+    "single_route_ms_p90": 135.2,
+    "single_route_ms_max": 235.9
+  },
+  "quality_findings": [
+    {
+      "severity": "INFO",
+      "issue": "Avoidable repeat traversal within target",
+      "evidence": "p90 0.13 of route mileage is avoidable doubling back (mean 0.08); dead-end returns and closing legs excluded",
+      "recommendation": "No change. The length-scaled, category-aware repeat penalty is holding."
+    },
+    {
+      "severity": "LOW",
+      "issue": "Neighbourhood readability",
+      "evidence": "median cohesion 0.56",
+      "recommendation": "Cohesion is measured from a bounding box, which punishes legitimately linear neighbourhoods. Consider replacing with convex-hull area or a street-name-entropy measure before raising its weight."
+    },
+    {
+      "severity": "LOW",
+      "issue": "Synthetic connectors appear in routes",
+      "evidence": "max 4 per route, mean 0.49",
+      "recommendation": "Only HIGH_CONFIDENCE connectors are routable, so this is within policy, but routes should surface them in turn-by-turn text ('cross here') so a walker is not surprised by a link no source asserted."
+    },
+    {
+      "severity": "INFO",
+      "issue": "Campus routing behaviour",
+      "evidence": "12 campus segments across 4 campus routes, of which 0 are ALTERNATIVE (duplicate-obligation) walkways",
+      "recommendation": "Campus normalization is holding \u2014 routes use canonical corridors."
+    }
+  ],
+  "gates": [
+    {
+      "gate": "repeat_traversal_improved_without_coverage_loss",
+      "status": "PASS",
+      "detail": "controlled A/B over 89 matched routes: avoidable repeat 0.546 -> 0.468 mi (-14.2%), third-or-later passes -54.2%, U-turns -17.9%; new coverage 2.029 -> 2.038 mi (+0.4%), households +3.7%, walk quality +2.4%"
+    },
+    {
+      "gate": "smart_road_reclassified",
+      "status": "PASS",
+      "detail": "6 segments / 1.041 mi overridden REQUIRED -> EXCLUDED; Smart Road absent from the routing graph: True"
+    },
+    {
+      "gate": "valid_independent_components_supported",
+      "status": "PASS",
+      "detail": "6 valid routing areas; start snapping restricted to them; cluster discovery is scoped to the start's own component"
+    },
+    {
+      "gate": "no_public_area_excluded_for_disconnection",
+      "status": "PASS",
+      "detail": "0 public components with >= 0.25 mi required are not classified valid; 0 mi removed from the denominator in total"
+    },
+    {
+      "gate": "south_main_explained",
+      "status": "PASS",
+      "detail": "South Main now reports up to 845 households per variant. Root cause: the benchmark coordinate was ~1.5 km west of South Main Street and snapped into the Corporate Research Center, where there are genuinely zero dwelling units within 250 m. Household methodology unchanged."
+    },
+    {
+      "gate": "late_opportunity_states_defined",
+      "status": "PASS",
+      "detail": "5 states, decided from local conditions (nearest incomplete distance, approach, new mileage, efficiency) \u2014 never from town-wide completion percentage"
+    },
+    {
+      "gate": "performance_interactive",
+      "status": "PASS",
+      "detail": "single route median 14.8 ms, p90 135.2 ms; five variants median 386.6 ms, max 2019.5 ms"
+    }
+  ],
+  "go_no_go": {
+    "recommendation": "GO",
+    "failed": [],
+    "warned": []
+  }
+}

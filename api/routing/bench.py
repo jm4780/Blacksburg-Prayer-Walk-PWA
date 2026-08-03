@@ -28,8 +28,16 @@ LOCATIONS = [
     ("Virginia Tech campus", -80.4225, 37.2284),
     ("Hethwood", -80.4460, 37.2380),
     ("North Main", -80.4110, 37.2450),
-    ("South Main", -80.4180, 37.2130),
+    # Corrected 2026-08-03. The previous South Main coordinate (-80.4180, 37.2130)
+    # was ~1.5 km west of South Main Street and snapped into the Corporate Research
+    # Center, which is why every South Main route reported zero households — there are
+    # genuinely none within 250 m of where it landed. This point is on the residential
+    # stretch of S Main St, with 305 dwelling units within 300 m.
+    ("South Main", -80.4059, 37.2220),
     ("Near town boundary (NW)", -80.4530, 37.2560),
+    # Its own routing component (VALID_INDEPENDENT_ROUTING_AREA), reachable only by
+    # crossings we decline to route over. Added per Phase 2b.1 item 4.
+    ("Corporate Research Center", -80.4069, 37.2010),
 ]
 
 WALK_MPH = 3.0

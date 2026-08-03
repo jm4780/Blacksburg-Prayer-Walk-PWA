@@ -21,7 +21,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 OUT_ROOT = os.path.join(REPO, "pipeline", "out")
 M_PER_MILE = 1609.344
 
-NETWORK_VERSION = "1.0"
+NETWORK_VERSION = "1.1"
 
 # --- routing-graph membership (Phase 2b Step 2) -----------------------------
 #

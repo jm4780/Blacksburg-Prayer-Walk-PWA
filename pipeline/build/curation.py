@@ -91,3 +91,29 @@ ALWAYS_REVIEW_COMPLEXES = [
     "Hunters Ridge",
     "Terrace View",
 ]
+
+
+# ---------------------------------------------------------------------------
+# Segment role overrides — human eligibility corrections applied after the
+# automatic rules, per technical plan §2.4. Keyed on normalized_name so they
+# survive a rebuild that renumbers segment ids.
+#
+# These are corrections to *eligibility*, not routing tuning. Each needs a
+# reason a reviewer can check.
+# ---------------------------------------------------------------------------
+ROLE_OVERRIDES_BY_NAME = {
+    "gordon c willis smart rd": dict(
+        role="EXCLUDED",
+        access_type="GATED",
+        status="CONFIRMED",
+        reason=("The Virginia Smart Road is Virginia Tech Transportation Institute's "
+                "controlled research facility, not a public street. It is gated, "
+                "instrumented, and closed to the public except on organised tours; "
+                "members of the public cannot lawfully walk it. It carries "
+                "RD_MAINT=Blacksburg in the town's 911 file because emergency "
+                "vehicles must be routed there, which is exactly the failure mode the "
+                "Phase 1 audit warned about: presence in a 911 road layer is not "
+                "evidence of public access. Reclassified REQUIRED -> EXCLUDED "
+                "2026-08-03 (Phase 2b.1 item 3)."),
+    ),
+}

@@ -85,7 +85,25 @@ def build(date="2026-08-03"):
                             r, r.score, net, fresh,
                             extra=dict(approach_miles=meta.get("approach_miles"))))
 
-    # 3. Late-stage behaviour.
+    # 3. Independent routing components — routes that exist only because the engine
+    #    no longer assumes one town-wide graph.
+    for lon, lat, label in ((-80.4069, 37.2010, "Corporate Research Center"),
+                            (-80.4619, 37.2117, "Scenic Ridge Cir")):
+        try:
+            st = eng.snap(lon, lat)
+        except ValueError:
+            continue
+        comp = eng.component_for(st)
+        r, meta = eng.best_route(st, 3.5, fresh)
+        if r is None:
+            continue
+        panels.append(panel(
+            f"{label} · independent component",
+            f"component {comp.index} · {comp.classification} · "
+            f"{comp.required_miles:.2f} required mi · separated by "
+            f"{comp.separation_m:.0f} m", r, r.score, net, fresh))
+
+    # 4. Late-stage behaviour.
     for label, frac in (("75% complete", 0.75), ("98% complete", 0.98)):
         st_state = CompletionState.at_fraction(net, frac, seed=1)
         st = eng.snap(-80.4139, 37.2296)

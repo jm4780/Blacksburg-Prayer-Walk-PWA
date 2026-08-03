@@ -34,7 +34,21 @@ class Weights:
     isolation_bonus: float = 8.0         # per newly-covered segment with few incomplete neighbours
     cohesion: float = 40.0               # x compactness in [0,1]
     # --- costs -------------------------------------------------------------
-    repeat_mile: float = -45.0           # per mile walked that earns nothing
+    # Repeat travel, split by why it happened. A cul-de-sac has to be walked twice;
+    # doubling back through covered ground because nothing better was found does not.
+    # Penalising both at one flat rate made the router avoid dead ends, which is where
+    # the households are.
+    repeat_avoidable_mile: float = -55.0     # scaled by band, see repeat_band_exponent
+    repeat_closing_mile: float = -20.0       # necessary walk home
+    repeat_dead_end_mile: float = -6.0       # essentially free; a token cost only
+    # Share-of-route penalty, quadratic: a route that is 10% repeats is fine, one that
+    # is 50% repeats is not five times worse, it is much worse.
+    repeat_share_quadratic: float = -260.0
+    # Third and subsequent passes over the same segment.
+    repeat_extra_traversal: float = -14.0
+    # Avoidable repeat gets more expensive on longer bands: sqrt(target / 2.0 mi).
+    repeat_band_exponent: float = 0.5
+    repeat_band_reference_miles: float = 2.0
     connector_mile: float = -12.0        # per mile on OPTIONAL_CONNECTOR (necessary, not valuable)
     derived_connector_use: float = -6.0  # per synthetic connector traversed
     stress_mile: float = -9.0            # per mile weighted by (walk_stress-1)/4
@@ -60,6 +74,12 @@ class RouteScore:
     # raw components, all stored so weights can change later
     new_required_miles: float = 0.0
     repeated_miles: float = 0.0
+    repeat_avoidable_miles: float = 0.0
+    repeat_closing_miles: float = 0.0
+    repeat_dead_end_miles: float = 0.0
+    repeat_share: float = 0.0
+    extra_traversals: int = 0
+    max_traversals: int = 0
     total_miles: float = 0.0
     connector_miles: float = 0.0
     required_miles_walked: float = 0.0
@@ -90,8 +110,15 @@ def compute(route, net, state, target_miles, w: Weights = DEFAULT_WEIGHTS) -> Ro
     """Score a Route. `state` is a CompletionState; `route.seg_seq` is the walk."""
     s = RouteScore()
 
+    tr = route.traversals(net)
+    s.repeat_dead_end_miles = tr["dead_end_return_miles"]
+    s.repeat_closing_miles = tr["closing_leg_miles"]
+    s.repeat_avoidable_miles = tr["avoidable_miles"]
+    s.repeat_share = tr["repeat_share"]
+    s.extra_traversals = tr["extra_traversals"]
+    s.max_traversals = tr["max_traversals"]
+
     seen = set()
-    first_pass_m = 0.0
     for idx in route.seg_seq:
         seg = net.segments[idx]
         s.total_miles += seg.miles
@@ -99,7 +126,6 @@ def compute(route, net, state, target_miles, w: Weights = DEFAULT_WEIGHTS) -> Ro
             s.repeated_miles += seg.miles
             continue
         seen.add(idx)
-        first_pass_m += seg.length_m
         if seg.role == "REQUIRED":
             s.required_miles_walked += seg.miles
             if not state.is_complete(idx):
@@ -123,6 +149,8 @@ def compute(route, net, state, target_miles, w: Weights = DEFAULT_WEIGHTS) -> Ro
     s.turns, s.uturns = route.turn_stats(net)
     s.cohesion = route.cohesion(net)
     s.loop_shape = route.loop_shape(net)
+    band_factor = ((target_miles / w.repeat_band_reference_miles)
+                   ** w.repeat_band_exponent) if target_miles else 1.0
     dev = (s.total_miles - target_miles) / target_miles if target_miles else 0.0
     s.length_deviation = abs(dev)
     s.length_overshoot = max(0.0, dev)
@@ -138,7 +166,13 @@ def compute(route, net, state, target_miles, w: Weights = DEFAULT_WEIGHTS) -> Ro
         "dead_end_completion": w.dead_end_completion * s.dead_end_completions,
         "isolation": w.isolation_bonus * s.isolated_completions,
         "cohesion": w.cohesion * s.cohesion,
-        "repeat": w.repeat_mile * s.repeated_miles,
+        "repeat_avoidable": (w.repeat_avoidable_mile * s.repeat_avoidable_miles
+                             * band_factor),
+        "repeat_closing": w.repeat_closing_mile * s.repeat_closing_miles,
+        "repeat_dead_end": w.repeat_dead_end_mile * s.repeat_dead_end_miles,
+        "repeat_share": (w.repeat_share_quadratic * (s.repeat_share ** 2)
+                         * min(s.total_miles / 3.5, 2.0)),
+        "repeat_extra_traversal": w.repeat_extra_traversal * s.extra_traversals,
         "connector": w.connector_mile * s.connector_miles,
         "derived_connector": w.derived_connector_use * s.derived_connectors_used,
         "stress": w.stress_mile * s.stress_miles,
@@ -153,7 +187,8 @@ def compute(route, net, state, target_miles, w: Weights = DEFAULT_WEIGHTS) -> Ro
 
     # A 0-100 readable "would I enjoy this walk" figure, independent of coverage.
     # Deliberately not part of `total` — it is reported to the user, not optimized.
-    penalty = (min(1.0, s.repeated_miles / max(s.total_miles, 0.01)) * 45
+    penalty = (min(1.0, (s.repeat_avoidable_miles + 0.5 * s.repeat_closing_miles)
+                   / max(s.total_miles, 0.01)) * 45
                + min(1.0, s.stress_miles / max(s.total_miles, 0.01)) * 25
                + min(1.0, s.uturns / 4.0) * 15
                + min(1.0, s.turns / max(s.total_miles * 8, 1)) * 15)
@@ -170,7 +205,11 @@ def rescore(stored: dict, w: Weights) -> float:
         + w.dead_end_completion * stored["dead_end_completions"]
         + w.isolation_bonus * stored["isolated_completions"]
         + w.cohesion * stored["cohesion"]
-        + w.repeat_mile * stored["repeated_miles"]
+        + w.repeat_avoidable_mile * stored["repeat_avoidable_miles"]
+        + w.repeat_closing_mile * stored["repeat_closing_miles"]
+        + w.repeat_dead_end_mile * stored["repeat_dead_end_miles"]
+        + w.repeat_share_quadratic * (stored["repeat_share"] ** 2)
+        + w.repeat_extra_traversal * stored["extra_traversals"]
         + w.connector_mile * stored["connector_miles"]
         + w.derived_connector_use * stored["derived_connectors_used"]
         + w.stress_mile * stored["stress_miles"]

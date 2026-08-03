@@ -260,6 +260,34 @@ def main():
     for i, s in enumerate(segments, start=1):
         s["id"] = f"SEG-{i:06d}"
 
+    # ------------------------------------------------ curation role overrides
+    # Applied after the automatic rules and before anything downstream reads a
+    # role, so an eligibility correction survives every rebuild without anyone
+    # hand-editing pipeline output.
+    overrides_applied = []
+    for s in segments:
+        ov = curation.ROLE_OVERRIDES_BY_NAME.get(s.get("normalized_name") or "")
+        if not ov:
+            continue
+        before = s["role"]
+        s["role"] = ov["role"]
+        s["access_type"] = ov.get("access_type", s["access_type"])
+        s["role_status"] = ov.get("status", "CONFIRMED")
+        s["walkable"] = ov["role"] != "EXCLUDED"
+        s["review_reasons"] = list(s["review_reasons"]) + [
+            f"CURATION OVERRIDE {before} -> {ov['role']}: {ov['reason']}"]
+        overrides_applied.append(dict(segment_id=s["id"], name=s["display_name"],
+                                      from_role=before, to_role=ov["role"],
+                                      miles=miles(s["length_m"])))
+    if overrides_applied:
+        print(f"curation overrides: {len(overrides_applied)} segments "
+              f"({miles(sum(o['miles'] * M_PER_MILE for o in overrides_applied)):.3f} mi)")
+    report["curation_overrides"] = dict(
+        applied=len(overrides_applied),
+        miles=round(sum(o["miles"] for o in overrides_applied), 3),
+        segments=overrides_applied,
+        rules={k: v["reason"] for k, v in curation.ROLE_OVERRIDES_BY_NAME.items()})
+
     # ------------------------------------------- connector trust + campus dedup
     # Both need the segment list, and both write decisions back onto it, so the
     # candidate network file carries them rather than living in a side report.

@@ -160,6 +160,9 @@ class Route:
     start_node: int = -1
     anchors: list = field(default_factory=list)   # anchor node sequence, for pruning
     excursions: list = field(default_factory=list)  # (label, [seg_idx], gain) for variants
+    # How many trailing entries of seg_seq are the walk home from the last anchor.
+    # Repeats inside it are necessary travel, not avoidable doubling back.
+    closing_leg: int = 0
     score: object = None
     meta: dict = field(default_factory=dict)
 
@@ -171,6 +174,52 @@ class Route:
 
     def distinct(self) -> set:
         return set(self.seg_seq)
+
+    def traversals(self, net) -> dict:
+        """Categorise every repeated traversal.
+
+        Three kinds of repeat, and they are not equally bad:
+
+          DEAD_END_RETURN   the only way out of a cul-de-sac is back down it. Walking
+                            it twice is the geometry, not a routing failure.
+          CLOSING_LEG       the walk home from the last piece of new coverage. Necessary
+                            unless the route happens to end where it started.
+          AVOIDABLE         everything else — doubling back through ground already
+                            covered because the search found nothing better.
+
+        Penalising all three the same made the router avoid cul-de-sacs, which are
+        exactly where households are.
+        """
+        seen, counts = set(), {}
+        dead_end_m = closing_m = avoidable_m = 0.0
+        extra_traversals = 0
+        n = len(self.seg_seq)
+        close_from = n - self.closing_leg
+        for i, idx in enumerate(self.seg_seq):
+            counts[idx] = counts.get(idx, 0) + 1
+            if idx not in seen:
+                seen.add(idx)
+                continue
+            seg = net.segments[idx]
+            if counts[idx] > 2:
+                extra_traversals += 1
+            if seg.is_dead_end:
+                dead_end_m += seg.length_m
+            elif i >= close_from:
+                closing_m += seg.length_m
+            else:
+                avoidable_m += seg.length_m
+        total_m = sum(net.segments[i].length_m for i in self.seg_seq)
+        repeat_m = dead_end_m + closing_m + avoidable_m
+        return dict(
+            dead_end_return_miles=dead_end_m / M_PER_MILE,
+            closing_leg_miles=closing_m / M_PER_MILE,
+            avoidable_miles=avoidable_m / M_PER_MILE,
+            repeated_miles=repeat_m / M_PER_MILE,
+            repeat_share=(repeat_m / total_m) if total_m else 0.0,
+            extra_traversals=extra_traversals,
+            max_traversals=max(counts.values()) if counts else 0,
+        )
 
     def required_covered(self, net) -> set:
         """The REQUIRED segments this route earns. This is what nests across variants —

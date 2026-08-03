@@ -6,6 +6,15 @@
 Companion: [`10-routing-approach-evaluation.md`](10-routing-approach-evaluation.md)
 (Step 0). Code in `api/routing/`, results in `api/routing/results/`.
 
+> ⚠️ **Superseded in part by [`12-phase-2b1-corrections.md`](12-phase-2b1-corrections.md).**
+> Phase 2b.1 shipped the length-scaled repeat penalty, multi-component routing, the
+> Smart Road reclassification (network **v1.1**, required mileage 135.271 → **134.229**),
+> and structured late-opportunity states. The architecture, approach evaluation and
+> Step 0 reasoning below stand; the numbers and the two GO conditions have moved.
+> **Two claims below are corrected there:** the Corporate Research Center is *not* cut
+> off by the US-460 bypass (it is separated by unreviewed at-grade crossings), and the
+> South Main zero-household result was a bad benchmark coordinate, not a data question.
+
 ---
 
 ## 1. Approaches considered

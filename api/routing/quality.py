@@ -54,8 +54,16 @@ def analyse(route, net, state):
                      if net.segments[i].campus_obligation == "ALTERNATIVE")
     dead = sum(1 for i in route.distinct()
                if net.segments[i].is_dead_end and net.segments[i].required)
+    tr = route.traversals(net)
     return dict(
         miles=round(miles, 2),
+        avoidable_repeat_miles=round(tr["avoidable_miles"], 3),
+        avoidable_repeat_share=round(
+            tr["avoidable_miles"] / max(miles, .01), 3),
+        closing_leg_miles=round(tr["closing_leg_miles"], 3),
+        dead_end_return_miles=round(tr["dead_end_return_miles"], 3),
+        extra_traversals=tr["extra_traversals"],
+        max_traversals=tr["max_traversals"],
         segments=len(route.seg_seq),
         turns=turns, turns_per_mile=round(turns / max(miles, .01), 1),
         uturns=uturns, uturns_per_mile=round(uturns / max(miles, .01), 2),
@@ -111,7 +119,9 @@ def main(date="2026-08-03"):
 
     summary = {f: agg(f) for f in
                ("turns_per_mile", "uturns_per_mile", "runs_per_street", "loop_shape",
-                "cohesion", "repeated_share", "connector_runs", "derived_connectors",
+                "cohesion", "repeated_share", "avoidable_repeat_share",
+                "avoidable_repeat_miles", "closing_leg_miles", "dead_end_return_miles",
+                "extra_traversals", "connector_runs", "derived_connectors",
                 "street_runs", "walk_quality")}
 
     findings = derive_findings(summary, rows, campus_rows)
@@ -168,15 +178,30 @@ def derive_findings(summary, rows, campus_rows):
                            "run. Improves how the route reads as turn-by-turn directions "
                            "without changing what it covers."))
 
-    rep = summary["repeated_share"]
-    if rep and rep["p90"] > 0.30:
+    # Total repeat is the wrong thing to judge: a cul-de-sac must be walked twice and
+    # the walk home is not a defect. Only avoidable doubling back is a quality problem.
+    av = summary["avoidable_repeat_share"]
+    if av and av["p90"] > 0.20:
         out.append(dict(
-            severity="MEDIUM", issue="Repeat traversal on longer routes",
-            evidence=f"p90 {rep['p90']} of traversed segments are repeats",
-            recommendation="The repeat penalty (-45/mi) is being outbid by new coverage "
-                           "(+100/mi). For Long and Extended, scale repeat_mile with "
-                           "route length so a 7-mile route tolerates less doubling back "
-                           "proportionally than a 1-mile one."))
+            severity="MEDIUM", issue="Avoidable repeat traversal",
+            evidence=f"p90 {av['p90']} of route mileage is avoidable doubling back "
+                     f"(mean {av['mean']})",
+            recommendation="Raise Weights.repeat_avoidable_mile or "
+                           "repeat_share_quadratic further. Note this now excludes "
+                           "dead-end returns and the closing leg, which are not faults."))
+    elif av:
+        out.append(dict(
+            severity="INFO", issue="Avoidable repeat traversal within target",
+            evidence=f"p90 {av['p90']} of route mileage is avoidable doubling back "
+                     f"(mean {av['mean']}); dead-end returns and closing legs excluded",
+            recommendation="No change. The length-scaled, category-aware repeat penalty "
+                           "is holding."))
+    ex = summary["extra_traversals"]
+    if ex and ex["max"] > 2:
+        out.append(dict(
+            severity="LOW", issue="Segments walked three or more times",
+            evidence=f"max {ex['max']} third-or-later passes in a single route",
+            recommendation="Raise Weights.repeat_extra_traversal from -14."))
 
     coh = summary["cohesion"]
     if coh and coh["median"] < 0.7:

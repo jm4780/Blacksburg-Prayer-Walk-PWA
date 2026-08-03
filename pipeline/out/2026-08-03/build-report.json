@@ -1,6 +1,6 @@
 {
   "snapshot_date": "2026-08-03",
-  "built_at": "2026-08-03T01:12:41.673978+00:00",
+  "built_at": "2026-08-03T01:52:36.940968+00:00",
   "sources": {
     "roads": {
       "dataset": "roads",
@@ -512,6 +512,57 @@
       }
     ]
   },
+  "curation_overrides": {
+    "applied": 6,
+    "miles": 1.041,
+    "segments": [
+      {
+        "segment_id": "SEG-000004",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.227
+      },
+      {
+        "segment_id": "SEG-000010",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.485
+      },
+      {
+        "segment_id": "SEG-000013",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.194
+      },
+      {
+        "segment_id": "SEG-000025",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.048
+      },
+      {
+        "segment_id": "SEG-000030",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.021
+      },
+      {
+        "segment_id": "SEG-000034",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.066
+      }
+    ],
+    "rules": {
+      "gordon c willis smart rd": "The Virginia Smart Road is Virginia Tech Transportation Institute's controlled research facility, not a public street. It is gated, instrumented, and closed to the public except on organised tours; members of the public cannot lawfully walk it. It carries RD_MAINT=Blacksburg in the town's 911 file because emergency vehicles must be routed there, which is exactly the failure mode the Phase 1 audit warned about: presence in a 911 road layer is not evidence of public access. Reclassified REQUIRED -> EXCLUDED 2026-08-03 (Phase 2b.1 item 3)."
+    }
+  },
   "connector_classes": {
     "CROSSING_REVIEW_REQUIRED": {
       "connectors": 30,
@@ -552,20 +603,20 @@
       "miles": 4.215
     },
     "REQUIRED": {
-      "segments": 1515,
-      "miles": 135.271
+      "segments": 1509,
+      "miles": 134.229
     },
     "REQUIRED::STREET": {
-      "segments": 1456,
-      "miles": 124.848
+      "segments": 1450,
+      "miles": 123.807
     },
     "EXCLUDED": {
-      "segments": 460,
-      "miles": 48.278
+      "segments": 466,
+      "miles": 49.32
     },
     "EXCLUDED::STREET": {
-      "segments": 412,
-      "miles": 44.314
+      "segments": 418,
+      "miles": 45.355
     },
     "OPTIONAL_CONNECTOR::TRAIL": {
       "segments": 369,
@@ -587,17 +638,17 @@
       "segments": 2998,
       "miles": 253.529
     },
-    "ELIGIBLE_MILEAGE": 135.271
+    "ELIGIBLE_MILEAGE": 134.229
   },
   "households": {
     "residential_address_points": 18022,
     "estimated_housing_units": 17963,
-    "units_associated_to_required_coverage": 11029,
+    "units_associated_to_required_coverage": 11024,
     "units_associated_to_connector_only": 655,
-    "units_held_for_review": 6279,
+    "units_held_for_review": 6284,
     "public_label": "Estimated households prayed for",
     "public_label_maps_to": "units_associated_to_required_coverage",
-    "public_value": 11029,
+    "public_value": 11024,
     "method": "RESIDENTIAL_UNITS_ON_REQUIRED_COVERAGE",
     "occupancy_model_applied": false,
     "occupancy_model_note": "Deliberately none. A residential dwelling unit associated with a REQUIRED segment is the unit of account. Applying an unsourced occupancy rate would make the number less auditable, not more accurate.",
@@ -614,15 +665,15 @@
     "distinct_buildings": 9002
   },
   "association_stats": {
-    "confidence_low": 1904,
-    "role_required": 11029,
-    "beyond_cap": 672,
+    "confidence_low": 1899,
+    "role_required": 11024,
+    "beyond_cap": 677,
     "confidence_high": 7548,
     "confidence_medium": 2232,
     "held_unresolved_complex": 5607,
     "role_optional_connector": 655,
-    "associated": 11684,
-    "unassociated": 6279
+    "associated": 11679,
+    "unassociated": 6284
   },
   "dedup_rules": {
     "apartment_units": "Each address point is one dwelling unit. Unit-level points (APT/UNIT/LOT/BLDG) are counted individually and never also counted as their parent building address.",
@@ -691,13 +742,13 @@
         "name": "one_primary_segment_per_household",
         "passed": true,
         "fatal": true,
-        "detail": "11684 links, 11684 distinct households"
+        "detail": "11679 links, 11679 distinct households"
       },
       {
         "name": "required_segments_connected",
         "passed": false,
         "fatal": false,
-        "detail": "45 REQUIRED segments off the main component (118 components total)"
+        "detail": "41 REQUIRED segments off the main component (117 components total)"
       },
       {
         "name": "housing_units_plausible",
@@ -712,7 +763,7 @@
         "detail": "35.0% of housing units unassociated"
       }
     ],
-    "stranded_components": 117
+    "stranded_components": 116
   },
   "blocked_sources": [
     {
