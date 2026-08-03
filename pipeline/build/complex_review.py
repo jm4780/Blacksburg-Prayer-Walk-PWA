@@ -270,7 +270,8 @@ def write_map(date, profiles):
     print(f"map -> {path} ({os.path.getsize(path)/1024:.0f} KB)")
 
 
-MAP_TEMPLATE = """<title>Apartment-complex calibration — Terrace View, Hunters Ridge, The Mill</title>
+MAP_TEMPLATE = """<meta charset="utf-8">
+<title>Apartment-complex calibration — Terrace View, Hunters Ridge, The Mill</title>
 <style>
   :root{--bg:#fbfaf8;--fg:#26232a;--mut:#6c6870;--line:#dedae2;--panel:#fff}
   @media (prefers-color-scheme:dark){:root{--bg:#141317;--fg:#eceaf0;--mut:#9a959f;--line:#2e2b33;--panel:#1c1a20}}

@@ -32,6 +32,11 @@ pipeline/out/**/*.html
 pipeline/out/**/households.json
 pipeline/out/**/review/unassociated-households.json
 
+# Routing prototype outputs. benchmark.json and quality-review.json are aggregate
+# metrics and are committed; the route visualisation embeds derived network geometry
+# and is not.
+api/routing/results/*.html
+
 # ---------------------------------------------------------------------------
 __pycache__/
 *.py[cod]

@@ -114,7 +114,8 @@ def main():
     print(f"{len(lines)} segments -> {path} ({os.path.getsize(path)/1e6:.1f} MB)")
 
 
-TEMPLATE = """<title>Blacksburg canonical walking network — review map</title>
+TEMPLATE = """<meta charset="utf-8">
+<title>Blacksburg canonical walking network — review map</title>
 <style>
   :root{--bg:#fbfaf8;--fg:#26232a;--mut:#6c6870;--line:#dedae2;--panel:#fff}
   @media (prefers-color-scheme:dark){:root{--bg:#141317;--fg:#eceaf0;--mut:#9a959f;--line:#2e2b33;--panel:#1c1a20}}
