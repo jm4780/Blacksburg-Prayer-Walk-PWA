@@ -20,7 +20,8 @@ from datetime import datetime, timezone
 from shapely.geometry import Point
 from shapely.strtree import STRtree
 
-from . import classify, connect, curation, geo, households as hh
+from . import (campus_normalize, classify, connect, connector_review, curation,
+               geo, households as hh)
 from .names import address_name, normalize, road_name
 
 OUT_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "out")
@@ -259,6 +260,45 @@ def main():
     for i, s in enumerate(segments, start=1):
         s["id"] = f"SEG-{i:06d}"
 
+    # ------------------------------------------- connector trust + campus dedup
+    # Both need the segment list, and both write decisions back onto it, so the
+    # candidate network file carries them rather than living in a side report.
+    print("classify connectors")
+    for s in segments:
+        s["_geom"] = s["geometry"]
+    conn_classes = connector_review.classify(segments)
+    by_id = {s["id"]: s for s in segments}
+    conn_counts = defaultdict(lambda: {"n": 0, "m": 0.0})
+    for c in conn_classes:
+        s = by_id[c["id"]]
+        s["connector_class"] = c["classification"]
+        s["routable_by_default"] = c["classification"] == "HIGH_CONFIDENCE"
+        s["review_reasons"] = list(s["review_reasons"]) + c["reasons"]
+        if not s["routable_by_default"]:
+            s["walkable"] = False
+        conn_counts[c["classification"]]["n"] += 1
+        conn_counts[c["classification"]]["m"] += s["length_m"]
+    for s in segments:
+        s.setdefault("connector_class", None)
+        s.setdefault("routable_by_default", True)
+    print("  " + " · ".join(f"{k}={v['n']}" for k, v in sorted(conn_counts.items())))
+    report["connector_classes"] = {
+        k: {"connectors": v["n"], "miles": miles(v["m"])} for k, v in sorted(conn_counts.items())}
+    report["connector_policy"] = (
+        "Only HIGH_CONFIDENCE connectors are routable by default. The rest stay in the "
+        "network with routable_by_default=false and walkable=false so they are visible "
+        "for review but cannot carry a route.")
+
+    print("normalize campus corridors")
+    camp = campus_normalize.normalize_segments(segments)
+    for s in segments:
+        s.setdefault("campus_corridor", None)
+        s.setdefault("campus_obligation", None)
+    print(f"  {camp['corridors']} corridors · canonical {camp['canonical_miles']:.3f} mi · "
+          f"duplicate obligations removed {camp['duplicate_miles']:.3f} mi")
+    report["campus_normalization"] = camp
+
+
     # --------------------------------------------------------- households
     print("households")
     household_records, hstats = hh.build_households(address, address_name, log["name_fixes"])
@@ -272,7 +312,8 @@ def main():
 
     unresolved_places, complex_report = set(), []
     for p in profiles:
-        status, reasons, trigger = hh.complex_status(p)
+        disposition, hold_mode, reasons, flags = hh.complex_disposition(p)
+        v1_status, v1_reasons, v1_trigger = hh.complex_status(p)
         entry = dict(place_name=p["place_name"], units=p["units"],
                      footprint_acres=round(p["footprint_area_m2"] / 4046.86, 2),
                      internal_network_miles=miles(p["internal_network_m"]),
@@ -280,10 +321,13 @@ def main():
                      internal_segment_count=len(p["internal_segment_ids"]),
                      units_beyond_cap=p["units_beyond_cap"],
                      share_beyond_cap=p["share_beyond_cap"],
-                     status=status, trigger=trigger, reasons=reasons)
-        if status == "UNRESOLVED":
+                     disposition=disposition, hold_mode=hold_mode,
+                     hold_action=hh.DISPOSITIONS[disposition],
+                     reasons=reasons, flags=flags,
+                     v1_status=v1_status, v1_trigger=v1_trigger,
+                     changed_by_recalibration=(v1_status == "UNRESOLVED") != (hold_mode == "ALL"))
+        if hold_mode == "ALL":
             unresolved_places.add(p["place_name"])
-            entry["recommendation"] = recommend_for_complex(p)
         complex_report.append(entry)
 
     links, unassociated, astats = hh.associate(household_records, eligible, unresolved_places)
@@ -315,9 +359,15 @@ def main():
         dedup_rules=hh.DEDUP_RULES,
         ownership_conflicts=dict(count=len(conflicts), rule="RD_MAINT primary",
                                  file="review/ownership-conflicts.json"),
-        complexes=dict(profiled=len(complex_report),
-                       unresolved=sum(1 for c in complex_report if c["status"] == "UNRESOLVED"),
-                       file="review/apartment-complexes.json"),
+        complexes=dict(
+            profiled=len(complex_report),
+            held_entirely=sum(1 for c in complex_report if c["hold_mode"] == "ALL"),
+            held_partially=sum(1 for c in complex_report if c["hold_mode"] == "BEYOND_CAP_ONLY"),
+            accepted=sum(1 for c in complex_report if c["hold_mode"] == "NONE"),
+            units_held_entirely=sum(c["units"] for c in complex_report if c["hold_mode"] == "ALL"),
+            rule_version="v2 (recalibrated against Terrace View / Hunters Ridge / The Mill)",
+            changed_by_recalibration=sum(1 for c in complex_report if c["changed_by_recalibration"]),
+            file="review/apartment-complexes.json"),
         review_queue=review_queue(segments),
         corrections=dict(name_fixes=len(log["name_fixes"]), value_fixes=len(log["value_fixes"]),
                          anomalies=len(log["anomalies"]), file="review/corrections.json"),
@@ -444,7 +494,8 @@ def write_outputs(outdir, segments, node_points, degrees, household_records, lin
         feats.append({
             "type": "Feature",
             "geometry": geo.to_wgs84_geojson(s["geometry"]),
-            "properties": {k: v for k, v in s.items() if k != "geometry"},
+            "properties": {k: v for k, v in s.items()
+                           if k not in ("geometry", "_geom")},
         })
     with open(os.path.join(outdir, "segments.geojson"), "w") as f:
         json.dump({"type": "FeatureCollection", "features": feats}, f, default=str)
@@ -490,13 +541,17 @@ def print_summary(report):
     print(f"  {'ALL':<44} {t['ALL']['segments']:>6} segs {t['ALL']['miles']:>9.2f} mi")
     print(f"\n  Eligible (REQUIRED) mileage: {t['ELIGIBLE_MILEAGE']:.2f} mi")
     h = report["households"]
-    print(f"\n  residential address points      {h['residential_address_points']:>7}")
-    print(f"  estimated housing units         {h['estimated_housing_units']:>7}")
-    print(f"  units associated to network     {h['housing_units_associated_to_network']:>7}")
-    print(f"  ESTIMATED OCCUPIED HOUSEHOLDS   {h['estimated_occupied_households']:>7}"
-          f"   (public label: {h['public_label']!r})")
+    print(f"\n  residential address points          {h['residential_address_points']:>7}")
+    print(f"  estimated housing units             {h['estimated_housing_units']:>7}")
+    print(f"  units on REQUIRED coverage          {h['units_associated_to_required_coverage']:>7}"
+          f"   <- public: {h['public_label']!r}")
+    print(f"  units on connector only             {h['units_associated_to_connector_only']:>7}")
+    print(f"  units held for review               {h['units_held_for_review']:>7}")
     print(f"\n  ownership conflicts: {report['ownership_conflicts']['count']}")
-    print(f"  complexes unresolved: {report['complexes']['unresolved']} of {report['complexes']['profiled']}")
+    c = report['complexes']
+    print(f"  complexes: {c['accepted']} accepted / {c['held_partially']} partial-hold / "
+          f"{c['held_entirely']} full-hold  (of {c['profiled']}; "
+          f"{c['changed_by_recalibration']} changed by recalibration)")
     print(f"  segments needing review: {report['review_queue'].get('NEEDS_REVIEW', 0)}"
           f" + {report['review_queue'].get('PROVISIONAL', 0)} provisional")
     print("\n  validation:")

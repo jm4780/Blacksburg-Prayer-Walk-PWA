@@ -201,17 +201,14 @@ def profile_complexes(households, eligible_segments):
 
 
 # A complex is unresolved when a walker on the eligible network would not pass its
-# homes. Two independent ways that happens:
-#   - the site has essentially no internal walkable network of its own, or
-#   - a large share of its units sit beyond the association cap from anything eligible.
-# Deliberately NOT a metres-per-unit density test: dense complexes legitimately have
-# very little road per unit, and that is not evidence of anything.
+# homes. Deliberately NOT a metres-per-unit density test: dense complexes legitimately
+# have very little road per unit, and that is not evidence of anything.
 NO_INTERNAL_NETWORK_M = 25.0
 MAX_SHARE_BEYOND_CAP = 0.25
 
 
 def complex_status(profile):
-    """Return (status, reasons, trigger) for one complex profile."""
+    """v1 rule, kept for comparison. See `complex_disposition` for what the build uses."""
     reasons, trigger = [], None
     if profile["internal_network_m"] < NO_INTERNAL_NETWORK_M:
         reasons.append(
@@ -242,6 +239,77 @@ def complex_status(profile):
     return ("UNRESOLVED" if reasons else "OK"), reasons, trigger
 
 
+# --- v2, recalibrated against the three named complexes ---------------------
+#
+# The v1 rule held every unit in any complex it flagged, and flagged on "no internal
+# network" alone. Looking at the three calibration complexes shows both halves of that
+# were wrong:
+#
+#   Hunters Ridge   108 units, 0.09 mi internal, but 105/108 within the cap.
+#                   v1 held all 108. A walker on Seneca Dr genuinely passes this site —
+#                   it is 4.8 acres. Holding it was over-caution.
+#   Terrace View    558 units, 1.37 mi internal, 486/558 within the cap.
+#                   v1 held all 558 because it was named. Only the 72-unit tail is
+#                   actually unreachable.
+#   The Mill        162 units, ZERO internal network, 40% beyond the cap, median
+#                   distance 72 m. v1 was right to hold this one entirely.
+#
+# So: site size and reach decide the disposition, and holding is per-unit wherever the
+# site is genuinely walked. Holding a whole complex is reserved for sites a walker
+# cannot pass at all.
+TIER_A_MAX_SHARE = 0.10      # reachable — accept automatic association
+TIER_B_MAX_SHARE = 0.35      # mostly reachable — associate the reachable units
+SMALL_SITE_ACRES = 6.0       # below this, frontage genuinely serves the site
+
+DISPOSITIONS = {
+    "ACCEPT_AUTOMATIC_ASSOCIATION": "associate every unit within the cap; hold none",
+    "ASSOCIATE_WITH_FRONTAGE_STREETS": "associate units within the cap; hold the tail "
+                                       "for hand-assignment to frontage",
+    "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK": "hold every unit until internal walkways "
+                                            "are sourced or digitised",
+}
+
+
+def complex_disposition(profile):
+    """Return (disposition, hold_mode, reasons, flags).
+
+    hold_mode is 'NONE' | 'BEYOND_CAP_ONLY' | 'ALL'.
+    """
+    share = profile["share_beyond_cap"]
+    internal = profile["internal_network_m"]
+    acres = profile["footprint_area_m2"] / 4046.86
+    reasons, flags = [], []
+
+    name = (profile["place_name"] or "").lower()
+    named = any(n.lower() in name for n in curation.ALWAYS_REVIEW_COMPLEXES)
+    if named:
+        flags.append("NAMED_FOR_REVIEW")
+
+    no_internal = internal < NO_INTERNAL_NETWORK_M
+
+    if share > TIER_B_MAX_SHARE or (no_internal and share > TIER_A_MAX_SHARE
+                                    and acres > SMALL_SITE_ACRES):
+        reasons.append(
+            f"{profile['units_beyond_cap']} of {profile['units']} units ({share:.0%}) "
+            f"beyond the {curation.ASSOCIATION_CAP_M:.0f} m cap"
+            + (f", and no internal walkable network ({internal:.0f} m) across "
+               f"{acres:.1f} acres" if no_internal else ""))
+        return "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK", "ALL", reasons, flags
+
+    if share > TIER_A_MAX_SHARE:
+        reasons.append(
+            f"{profile['units_beyond_cap']} of {profile['units']} units ({share:.0%}) "
+            f"beyond the cap, but the site has {internal:.0f} m of internal walkable "
+            f"network — most units associate honestly")
+        return "ASSOCIATE_WITH_FRONTAGE_STREETS", "BEYOND_CAP_ONLY", reasons, flags
+
+    reasons.append(
+        f"only {profile['units_beyond_cap']} of {profile['units']} units ({share:.0%}) "
+        f"beyond the cap"
+        + (f"; {acres:.1f}-acre site, frontage genuinely serves it" if no_internal else ""))
+    return "ACCEPT_AUTOMATIC_ASSOCIATION", "NONE", reasons, flags
+
+
 def _hull(points):
     from shapely.geometry import MultiPoint
     if len(points) < 3:
@@ -256,8 +324,9 @@ def associate(households, eligible_segments, unresolved_places, cap_m=None):
     """Attach each household to exactly one primary segment.
 
     Nearest eligible segment within `cap_m`, tie-broken by street-name match. A
-    household in a complex flagged unresolved is never attached — it is reported
-    instead. Returns (links, unassociated, stats).
+    household in a complex whose disposition is hold-everything is never attached — it
+    is reported instead. Units in partially-held complexes still associate if they are
+    within the cap; only the tail is held. Returns (links, unassociated, stats).
     """
     cap_m = cap_m or curation.ASSOCIATION_CAP_M
     seg_geoms = [s["geometry"] for s in eligible_segments]
@@ -295,9 +364,16 @@ def associate(households, eligible_segments, unresolved_places, cap_m=None):
                 continue
             name_match = (h["street_normalized"] is not None
                           and h["street_normalized"] == seg["normalized_name"])
-            # Name match is the tie-break, not the primary key: a 5 m penalty-equivalent
-            # bonus, enough to win a corner lot but not to drag a household across a block.
-            scored.append((dist - (12.0 if name_match else 0.0), dist, name_match, idx))
+            # Name match is the tie-break, not the primary key: a 12 m
+            # penalty-equivalent bonus, enough to win a corner lot but not to drag a
+            # household across a block.
+            #
+            # REQUIRED segments outrank connectors outright. Coverage obligations live
+            # on REQUIRED segments, so a household attached to a connector contributes
+            # to nothing a walker can complete — and the public count is defined as
+            # units served by REQUIRED coverage.
+            bonus = (12.0 if name_match else 0.0) + (1000.0 if seg["role"] == "REQUIRED" else 0.0)
+            scored.append((dist - bonus, dist, name_match, idx))
         if not scored:
             stats["beyond_cap"] += 1
             unassociated.append(dict(h, reason="BEYOND_CAP", detail="no candidate within cap"))
@@ -317,9 +393,11 @@ def associate(households, eligible_segments, unresolved_places, cap_m=None):
         stats[f"confidence_{confidence.lower()}"] += 1
 
         secondary = [eligible_segments[i]["id"] for _, _, _, i in scored[1:4]]
+        stats[f"role_{seg['role'].lower()}"] += 1
         links.append(dict(
             household_key=h["key"],
             primary_segment_id=seg["id"],
+            primary_segment_role=seg["role"],
             distance_m=round(dist, 2),
             name_match=name_match,
             confidence=confidence,
@@ -333,24 +411,43 @@ def associate(households, eligible_segments, unresolved_places, cap_m=None):
 
 
 def summarize(stats, links):
-    """Produce the three headline quantities plus the public-facing translation."""
+    """The V1 public method: a transparent count of residential units served by
+    REQUIRED coverage. No occupancy model.
+
+    An earlier version multiplied by an assumed 0.93 occupancy rate to produce
+    "estimated occupied households". That rate was a placeholder with no source, it
+    moved the headline by ~800 units, and nobody could audit it. A count of dwelling
+    units associated with segments a walker can actually complete is defensible line
+    by line, which matters more here than being closer to a true occupied-household
+    figure we cannot measure.
+    """
     units = stats["estimated_housing_units"]
-    associated_units = len(links)
-    occupied = round(associated_units * OCCUPANCY_RATE)
+    required = sum(1 for l in links if l["primary_segment_role"] == "REQUIRED")
+    connector = len(links) - required
     return {
+        # --- inputs, in order --------------------------------------------
         "residential_address_points": stats["residential_address_points"],
         "estimated_housing_units": units,
-        "housing_units_associated_to_network": associated_units,
-        "estimated_occupied_households": occupied,
-        "occupancy_rate": OCCUPANCY_RATE,
-        "occupancy_rate_source": OCCUPANCY_SOURCE,
-        "occupancy_confidence": OCCUPANCY_CONFIDENCE,
+        "units_associated_to_required_coverage": required,
+        "units_associated_to_connector_only": connector,
+        "units_held_for_review": units - len(links),
+        # --- the public number -------------------------------------------
         "public_label": "Estimated households prayed for",
-        "public_label_maps_to": "estimated_occupied_households",
+        "public_label_maps_to": "units_associated_to_required_coverage",
+        "public_value": required,
+        "method": "RESIDENTIAL_UNITS_ON_REQUIRED_COVERAGE",
+        "occupancy_model_applied": False,
+        "occupancy_model_note": (
+            "Deliberately none. A residential dwelling unit associated with a REQUIRED "
+            "segment is the unit of account. Applying an unsourced occupancy rate would "
+            "make the number less auditable, not more accurate."),
         "translation": (
-            "residential address points -> drop non-dwellings (vacant/demolished/"
-            "construction) and duplicate address keys -> estimated housing units -> "
-            "associate one-to-one with an eligible segment (unresolved complexes held "
-            "back) -> multiply by occupancy rate -> estimated occupied households"
-        ),
+            "residential address points (LocalType=Residential) "
+            "-> drop non-dwellings: vacant / demolished / under construction "
+            "-> drop duplicate normalized address keys "
+            "= estimated housing units "
+            "-> associate each unit one-to-one with the nearest REQUIRED segment within "
+            "75 m (name-match tie-break; REQUIRED outranks connectors), holding units in "
+            "complexes a walker cannot pass "
+            "= units associated to REQUIRED coverage = the public number"),
     }

@@ -89,6 +89,7 @@ def main():
             p["id"], p["display_name"] or "", p["segment_type"], p["role"],
             p["role_status"], round(float(p["length_m"]) / M_PER_MILE, 3),
             p.get("access_type") or "", int(p.get("estimated_household_count") or 0),
+            p.get("connector_class") or "", p.get("campus_obligation") or "",
         ])
 
     rings = boundary["coordinates"] if boundary["type"] == "Polygon" else boundary["coordinates"][0]
@@ -101,9 +102,8 @@ def main():
             "snapshot_date": report["snapshot_date"],
             "built_at": report["built_at"],
             "eligible_miles": report["totals"]["ELIGIBLE_MILEAGE"],
-            "households": report["households"]["estimated_occupied_households"],
-            "held": report["households"]["estimated_housing_units"]
-                    - report["households"]["housing_units_associated_to_network"],
+            "households": report["households"]["units_associated_to_required_coverage"],
+            "held": report["households"]["units_held_for_review"],
         },
     }
 
@@ -256,7 +256,9 @@ cv.addEventListener('mousemove',e=>{
   tip.innerHTML=`<div class="t">${h[4]||'(unnamed)'}</div>
     <div class="r">${h[3]} · ${h[5]} · ${h[9]||'—'}</div>
     <div class="r">${h[6]} · ${h[7]}</div>
-    <div class="r">${h[8]} mi · ${h[10]} household${h[10]===1?'':'s'}</div>`;
+    <div class="r">${h[8]} mi · ${h[10]} household${h[10]===1?'':'s'}</div>
+    ${h[11]?`<div class="r">connector: ${h[11]}</div>`:''}
+    ${h[12]?`<div class="r">campus obligation: ${h[12]}</div>`:''}`;
   tip.style.opacity=1;
   tip.style.left=Math.min(e.clientX+14,innerWidth-300)+'px';
   tip.style.top=(e.clientY+14)+'px';
@@ -283,7 +285,7 @@ document.querySelectorAll('#keys input').forEach(i=>i.onchange=()=>{on[i.dataset
 const m=D.meta;
 document.getElementById('sub').textContent=
   `snapshot ${m.snapshot_date} · ${D.lines.length} segments · ${m.eligible_miles} mi required · `+
-  `${m.households.toLocaleString()} estimated households · ${m.held.toLocaleString()} units held for review`;
+  `${m.households.toLocaleString()} households on required coverage · ${m.held.toLocaleString()} units held`;
 document.getElementById('stats').innerHTML=
   `<div class="stat"><span>Required mileage</span><b>${m.eligible_miles} mi</b></div>
    <div class="stat"><span>Segments</span><b>${D.lines.length}</b></div>

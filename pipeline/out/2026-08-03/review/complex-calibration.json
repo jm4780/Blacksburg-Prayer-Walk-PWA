@@ -1,0 +1,349 @@
+{
+  "generated_at": "2026-08-03T01:15:15.064025+00:00",
+  "snapshot_date": "2026-08-03",
+  "association_cap_m": 75.0,
+  "complexes": [
+    {
+      "place_name": "Terrace View Apartments",
+      "units": 558,
+      "footprint_acres": 50.85,
+      "inside_site": [
+        {
+          "segment_type": "STREET",
+          "role": "REQUIRED",
+          "access_type": "PUBLIC",
+          "segments": 9,
+          "miles": 0.8341,
+          "names": [
+            "Broce Dr",
+            "Hunt Club Rd",
+            "NW Progress St"
+          ]
+        },
+        {
+          "segment_type": "PEDESTRIAN_CONNECTOR",
+          "role": "OPTIONAL_CONNECTOR",
+          "access_type": "UNKNOWN",
+          "segments": 5,
+          "miles": 0.5331,
+          "names": [
+            "Progress St"
+          ]
+        },
+        {
+          "segment_type": "STREET",
+          "role": "EXCLUDED",
+          "access_type": "PRIVATE",
+          "segments": 4,
+          "miles": 0.2013,
+          "names": [
+            "University Ter"
+          ]
+        }
+      ],
+      "frontage_context": [
+        {
+          "segment_type": "STREET",
+          "role": "REQUIRED",
+          "access_type": "PUBLIC",
+          "segments": 32,
+          "miles": 2.8612,
+          "names": [
+            "Broce Dr",
+            "Givens Ln",
+            "N Main St",
+            "NW Montgomery St",
+            "NW Patrick Henry Dr",
+            "NW Progress St",
+            "Scott Alan Cir",
+            "Snyder Ln"
+          ]
+        },
+        {
+          "segment_type": "PEDESTRIAN_CONNECTOR",
+          "role": "OPTIONAL_CONNECTOR",
+          "access_type": "UNKNOWN",
+          "segments": 11,
+          "miles": 1.3214,
+          "names": [
+            "Chickahominy Dr",
+            "Patrick Henry Dr",
+            "Progress St"
+          ]
+        },
+        {
+          "segment_type": "STREET",
+          "role": "EXCLUDED",
+          "access_type": "PUBLIC",
+          "segments": 4,
+          "miles": 1.1794,
+          "names": [
+            "Eb 460 Byp",
+            "Eb 460 Bypass Ramp",
+            "Wb 460 Byp",
+            "Wb 460 Bypass Ramp"
+          ]
+        },
+        {
+          "segment_type": "STREET",
+          "role": "EXCLUDED",
+          "access_type": "PRIVATE",
+          "segments": 14,
+          "miles": 0.8739,
+          "names": [
+            "Appalachian Dr",
+            "Christine Ct",
+            "Jennifer Dr",
+            "Laurence Ln",
+            "Mary Jane Cir",
+            "Shenandoah Cir"
+          ]
+        },
+        {
+          "segment_type": "TRAIL",
+          "role": "OPTIONAL_CONNECTOR",
+          "access_type": "PUBLIC",
+          "segments": 7,
+          "miles": 0.667,
+          "names": [
+            "Patrick Henry Dr"
+          ]
+        },
+        {
+          "segment_type": "TRAIL",
+          "role": "REQUIRED",
+          "access_type": "UNKNOWN",
+          "segments": 2,
+          "miles": 0.1239,
+          "names": [
+            "Shenandoah Trl"
+          ]
+        }
+      ],
+      "internal_eligible_miles": 1.3672,
+      "private_miles_inside": 0.2013,
+      "public_miles_inside": 0.8341,
+      "pedestrian_miles_inside": 0.5331,
+      "distance_to_eligible": {
+        "median_m": 38.1,
+        "p90_m": 77.9,
+        "max_m": 108.6,
+        "within_25m": 121,
+        "within_75m": 486,
+        "within_150m": 558
+      },
+      "units_beyond_cap": 72,
+      "share_beyond_cap": 0.129,
+      "disposition": "ASSOCIATE_WITH_FRONTAGE_STREETS",
+      "hold_mode": "BEYOND_CAP_ONLY",
+      "v1_status": "UNRESOLVED",
+      "trigger": "INSTRUCTION_ONLY",
+      "reasons": [
+        "72 of 558 units (13%) beyond the cap, but the site has 2200 m of internal walkable network \u2014 most units associate honestly"
+      ],
+      "flags": [
+        "NAMED_FOR_REVIEW"
+      ],
+      "units_currently_associated": 486,
+      "units_currently_held": 72,
+      "recommendation": {
+        "action": "ASSOCIATE_WITH_FRONTAGE_STREETS",
+        "interim": "PARTIAL_COUNT",
+        "detail": "72 of 558 units (13%) sit beyond the 75 m cap. The site has real internal network (1.37 mi), so most units associate honestly; hand-assign the tail rather than holding the whole site."
+      }
+    },
+    {
+      "place_name": "Hunters Ridge",
+      "units": 108,
+      "footprint_acres": 4.78,
+      "inside_site": [
+        {
+          "segment_type": "STREET",
+          "role": "REQUIRED",
+          "access_type": "PUBLIC",
+          "segments": 1,
+          "miles": 0.0913,
+          "names": [
+            "Seneca Dr"
+          ]
+        }
+      ],
+      "frontage_context": [
+        {
+          "segment_type": "STREET",
+          "role": "EXCLUDED",
+          "access_type": "PUBLIC",
+          "segments": 1,
+          "miles": 1.4059,
+          "names": [
+            "Wb 460 Byp"
+          ]
+        },
+        {
+          "segment_type": "TRAIL",
+          "role": "REQUIRED",
+          "access_type": "UNKNOWN",
+          "segments": 5,
+          "miles": 1.0021,
+          "names": [
+            "Shenandoah Trail Spur",
+            "Shenandoah Trl"
+          ]
+        },
+        {
+          "segment_type": "STREET",
+          "role": "EXCLUDED",
+          "access_type": "PRIVATE",
+          "segments": 8,
+          "miles": 0.6319,
+          "names": [
+            "Henry Ln",
+            "Janie Ln",
+            "Mary Jane Cir",
+            "Pheasant Run Ct",
+            "Pheasant Run Dr"
+          ]
+        },
+        {
+          "segment_type": "STREET",
+          "role": "REQUIRED",
+          "access_type": "PUBLIC",
+          "segments": 8,
+          "miles": 0.4695,
+          "names": [
+            "NW Patrick Henry Dr",
+            "Seneca Dr"
+          ]
+        },
+        {
+          "segment_type": "PEDESTRIAN_CONNECTOR",
+          "role": "OPTIONAL_CONNECTOR",
+          "access_type": "UNKNOWN",
+          "segments": 9,
+          "miles": 0.3839,
+          "names": [
+            "Patrick Henry Dr"
+          ]
+        },
+        {
+          "segment_type": "TRAIL",
+          "role": "OPTIONAL_CONNECTOR",
+          "access_type": "PUBLIC",
+          "segments": 1,
+          "miles": 0.2506,
+          "names": [
+            "Patrick Henry Dr"
+          ]
+        },
+        {
+          "segment_type": "TRAIL",
+          "role": "OPTIONAL_CONNECTOR",
+          "access_type": "UNKNOWN",
+          "segments": 1,
+          "miles": 0.1513,
+          "names": [
+            "Patrick Henry Dr"
+          ]
+        }
+      ],
+      "internal_eligible_miles": 0.0913,
+      "private_miles_inside": 0.0,
+      "public_miles_inside": 0.0913,
+      "pedestrian_miles_inside": 0.0,
+      "distance_to_eligible": {
+        "median_m": 41.1,
+        "p90_m": 65.4,
+        "max_m": 79.4,
+        "within_25m": 7,
+        "within_75m": 105,
+        "within_150m": 108
+      },
+      "units_beyond_cap": 3,
+      "share_beyond_cap": 0.028,
+      "disposition": "ACCEPT_AUTOMATIC_ASSOCIATION",
+      "hold_mode": "NONE",
+      "v1_status": "UNRESOLVED",
+      "trigger": "INSTRUCTION_ONLY",
+      "reasons": [
+        "only 3 of 108 units (3%) beyond the cap"
+      ],
+      "flags": [
+        "NAMED_FOR_REVIEW"
+      ],
+      "units_currently_associated": 105,
+      "units_currently_held": 0,
+      "recommendation": {
+        "action": "ACCEPT_AUTOMATIC_ASSOCIATION",
+        "interim": "COUNT",
+        "detail": "0.09 mi of internal walkable network and only 3 of 108 units (3%) beyond the cap. The automatic association is honest here."
+      }
+    },
+    {
+      "place_name": "The Mill at Blacksburg",
+      "units": 162,
+      "footprint_acres": 7.97,
+      "inside_site": [],
+      "frontage_context": [
+        {
+          "segment_type": "STREET",
+          "role": "REQUIRED",
+          "access_type": "PUBLIC",
+          "segments": 15,
+          "miles": 1.5407,
+          "names": [
+            "Ellett Rd",
+            "Emerald St",
+            "Fairfax Rd",
+            "Grayland St",
+            "Loudon Rd",
+            "Marlington St",
+            "New Kent Rd",
+            "S Main St"
+          ]
+        },
+        {
+          "segment_type": "STREET",
+          "role": "EXCLUDED",
+          "access_type": "PRIVATE",
+          "segments": 2,
+          "miles": 0.3076,
+          "names": [
+            "Charles St",
+            "Liberty Ln"
+          ]
+        }
+      ],
+      "internal_eligible_miles": 0.0,
+      "private_miles_inside": 0.0,
+      "public_miles_inside": 0.0,
+      "pedestrian_miles_inside": 0.0,
+      "distance_to_eligible": {
+        "median_m": 71.8,
+        "p90_m": 88.4,
+        "max_m": 100.3,
+        "within_25m": 10,
+        "within_75m": 97,
+        "within_150m": 162
+      },
+      "units_beyond_cap": 65,
+      "share_beyond_cap": 0.401,
+      "disposition": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+      "hold_mode": "ALL",
+      "v1_status": "UNRESOLVED",
+      "trigger": "INSTRUCTION_AND_AUTOMATIC",
+      "reasons": [
+        "65 of 162 units (40%) beyond the 75 m cap, and no internal walkable network (0 m) across 8.0 acres"
+      ],
+      "flags": [
+        "NAMED_FOR_REVIEW"
+      ],
+      "units_currently_associated": 0,
+      "units_currently_held": 162,
+      "recommendation": {
+        "action": "ADD_AUTHORITATIVE_PEDESTRIAN_NETWORK",
+        "interim": "EXCLUDE_FROM_ESTIMATE",
+        "detail": "162 units and no walkable network inside the site at all. Nothing a walker on the frontage street passes. Source or digitise the internal walkways before counting these units."
+      }
+    }
+  ]
+}

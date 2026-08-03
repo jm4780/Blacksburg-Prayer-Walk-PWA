@@ -23,9 +23,10 @@
 # Raw source snapshots — verbatim town GIS data.
 pipeline/snapshots/**/*.geojson
 
-# Derived geometry.
+# Derived geometry. Every generated map embeds it, and complex-review-map.html also
+# embeds one point per residential unit — household coordinates.
 pipeline/out/**/*.geojson
-pipeline/out/**/network-map.html
+pipeline/out/**/*.html
 
 # Address-level records — privacy, not just licensing.
 pipeline/out/**/households.json

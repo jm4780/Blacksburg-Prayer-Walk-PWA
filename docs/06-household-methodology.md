@@ -4,6 +4,16 @@
 **Implements:** spec §6.3, §20 · audit §3 · technical plan §2.5
 **Code:** `pipeline/build/households.py`
 
+> ⚠️ **Superseded in part by [`09-phase-2a1-freeze.md`](09-phase-2a1-freeze.md) §5.**
+> Two things changed in Phase 2a.1: the occupancy model was **removed** (the public
+> number is now a transparent count of residential units on REQUIRED coverage, not an
+> occupancy-adjusted estimate), and the apartment-complex rule was **recalibrated** so
+> holding is per-unit wherever a site is genuinely walked. The figures below —
+> 9,044 occupied households, 7,710 units held, ~16,700 after resolution — are the
+> pre-recalibration values. Current: **11,029 on required coverage, 6,279 held.**
+> The deduplication rules, association rule and confidence discussion below still
+> stand.
+
 The public interface says **"Estimated households prayed for."** This document is the
 full chain from an address point in the town's GIS to that number, and the places
 where the chain is weak.

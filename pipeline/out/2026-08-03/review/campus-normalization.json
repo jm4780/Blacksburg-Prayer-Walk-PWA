@@ -1,0 +1,1086 @@
+{
+  "generated_at": "2026-08-03T01:14:17.078665+00:00",
+  "snapshot_date": "2026-08-03",
+  "method": "Campus pedestrian segments are grouped by corridor name (suffixes Trail/Spur/Underpass/Tunnel stripped), each corridor is split into physical sides by proximity (<=8 m midpoint separation or <=2 m endpoint continuation), and the longest side becomes the single canonical coverage obligation. Remaining sides are alternatives that satisfy the same obligation, per spec \u00a74.2 \u2014 walking one side counts.",
+  "totals": {
+    "campus_segments": 114,
+    "named_corridors": 14,
+    "total_pedestrian_miles": 6.457,
+    "canonical_obligation_miles": 5.331,
+    "duplicate_miles_removed": 1.126,
+    "unnamed_campus_miles": 6.946,
+    "unnamed_campus_segments": 58,
+    "unnamed_distinct_miles": 6.028,
+    "unnamed_distinct_segments": 42,
+    "unnamed_duplicate_miles": 0.918,
+    "unnamed_duplicate_segments": 16,
+    "total_campus_pedestrian_miles": 13.403,
+    "total_duplicate_miles_removed": 2.044,
+    "revised_campus_required_miles": 11.359
+  },
+  "corridors": [
+    {
+      "corridor": "campus dr w",
+      "display": "W Campus Dr",
+      "total_features": 9,
+      "obligation_segments": 3,
+      "alternative_segments": 6,
+      "total_pedestrian_miles": 0.8528,
+      "canonical_obligation_miles": 0.3751,
+      "duplicate_miles_removed": 0.4777,
+      "duplication_ratio": 2.27,
+      "canonical": {
+        "segment_ids": [
+          "SEG-001358",
+          "SEG-001583",
+          "SEG-001608"
+        ],
+        "segments": 3,
+        "miles": 0.3751,
+        "length_m": 603.6326377886062,
+        "types": [
+          "PEDESTRIAN_CONNECTOR",
+          "TRAIL"
+        ],
+        "surfaces": [
+          "Asphalt",
+          "Concrete"
+        ],
+        "names": [
+          "W Campus Dr",
+          "W Campus Drive Trl"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [
+          "SEG-001285",
+          "SEG-001437",
+          "SEG-001557",
+          "SEG-001501",
+          "SEG-001609",
+          "SEG-001488"
+        ],
+        "segments": 6,
+        "miles": 0.4777,
+        "length_m": 768.8349852717914,
+        "types": [
+          "PEDESTRIAN_CONNECTOR",
+          "TRAIL"
+        ],
+        "surfaces": [
+          "Asphalt",
+          "Concrete"
+        ],
+        "names": [
+          "W Campus Dr",
+          "W Campus Drive Trl"
+        ]
+      }
+    },
+    {
+      "corridor": "oak ln",
+      "display": "Oak Lane Trl",
+      "total_features": 1,
+      "obligation_segments": 1,
+      "alternative_segments": 0,
+      "total_pedestrian_miles": 0.7705,
+      "canonical_obligation_miles": 0.7705,
+      "duplicate_miles_removed": 0.0,
+      "duplication_ratio": 1.0,
+      "canonical": {
+        "segment_ids": [
+          "SEG-001141"
+        ],
+        "segments": 1,
+        "miles": 0.7705,
+        "length_m": 1239.9947639862721,
+        "types": [
+          "TRAIL"
+        ],
+        "surfaces": [
+          "Asphalt"
+        ],
+        "names": [
+          "Oak Lane Trl"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [],
+        "segments": 0,
+        "miles": 0.0,
+        "length_m": 0,
+        "types": [],
+        "surfaces": [],
+        "names": []
+      }
+    },
+    {
+      "corridor": "prices fork rd",
+      "display": "Prices Fork Road Trl",
+      "total_features": 8,
+      "obligation_segments": 5,
+      "alternative_segments": 3,
+      "total_pedestrian_miles": 0.716,
+      "canonical_obligation_miles": 0.6702,
+      "duplicate_miles_removed": 0.0458,
+      "duplication_ratio": 1.07,
+      "canonical": {
+        "segment_ids": [
+          "SEG-001431",
+          "SEG-001597",
+          "SEG-001632",
+          "SEG-001301",
+          "SEG-001654"
+        ],
+        "segments": 5,
+        "miles": 0.6702,
+        "length_m": 1078.5849348059307,
+        "types": [
+          "PEDESTRIAN_CONNECTOR",
+          "TRAIL"
+        ],
+        "surfaces": [
+          "Asphalt"
+        ],
+        "names": [
+          "Prices Fork Road Trl"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [
+          "SEG-001529",
+          "SEG-001625",
+          "SEG-001651"
+        ],
+        "segments": 3,
+        "miles": 0.0458,
+        "length_m": 73.6886661563259,
+        "types": [
+          "PEDESTRIAN_CONNECTOR",
+          "TRAIL"
+        ],
+        "surfaces": [
+          "Asphalt",
+          "Concrete"
+        ],
+        "names": [
+          "Prices Fork Road Trl"
+        ]
+      }
+    },
+    {
+      "corridor": "perry st",
+      "display": "Perry St",
+      "total_features": 6,
+      "obligation_segments": 2,
+      "alternative_segments": 4,
+      "total_pedestrian_miles": 0.607,
+      "canonical_obligation_miles": 0.3062,
+      "duplicate_miles_removed": 0.3008,
+      "duplication_ratio": 1.98,
+      "canonical": {
+        "segment_ids": [
+          "SEG-001619",
+          "SEG-001518"
+        ],
+        "segments": 2,
+        "miles": 0.3062,
+        "length_m": 492.76542175398816,
+        "types": [
+          "PEDESTRIAN_CONNECTOR"
+        ],
+        "surfaces": [
+          "Concrete"
+        ],
+        "names": [
+          "Perry St"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [
+          "SEG-001656",
+          "SEG-001533",
+          "SEG-001582",
+          "SEG-001566"
+        ],
+        "segments": 4,
+        "miles": 0.3008,
+        "length_m": 484.08114242274394,
+        "types": [
+          "PEDESTRIAN_CONNECTOR"
+        ],
+        "surfaces": [
+          "Concrete"
+        ],
+        "names": [
+          "Perry St"
+        ]
+      }
+    },
+    {
+      "corridor": "drillfield dr",
+      "display": "Drillfield Dr",
+      "total_features": 5,
+      "obligation_segments": 4,
+      "alternative_segments": 1,
+      "total_pedestrian_miles": 0.5863,
+      "canonical_obligation_miles": 0.5761,
+      "duplicate_miles_removed": 0.0102,
+      "duplication_ratio": 1.02,
+      "canonical": {
+        "segment_ids": [
+          "SEG-001387",
+          "SEG-001214",
+          "SEG-001234",
+          "SEG-001314"
+        ],
+        "segments": 4,
+        "miles": 0.5761,
+        "length_m": 927.1388974431107,
+        "types": [
+          "PEDESTRIAN_CONNECTOR"
+        ],
+        "surfaces": [],
+        "names": [
+          "Drillfield Dr"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [
+          "SEG-001471"
+        ],
+        "segments": 1,
+        "miles": 0.0102,
+        "length_m": 16.478000000308313,
+        "types": [
+          "PEDESTRIAN_CONNECTOR"
+        ],
+        "surfaces": [],
+        "names": [
+          "Drillfield Dr"
+        ]
+      }
+    },
+    {
+      "corridor": "smithfield rd",
+      "display": "Smithfield Road Trl",
+      "total_features": 6,
+      "obligation_segments": 3,
+      "alternative_segments": 3,
+      "total_pedestrian_miles": 0.4872,
+      "canonical_obligation_miles": 0.3849,
+      "duplicate_miles_removed": 0.1023,
+      "duplication_ratio": 1.27,
+      "canonical": {
+        "segment_ids": [
+          "SEG-000730",
+          "SEG-000953",
+          "SEG-001041"
+        ],
+        "segments": 3,
+        "miles": 0.3849,
+        "length_m": 619.4340507316098,
+        "types": [
+          "TRAIL"
+        ],
+        "surfaces": [
+          "Asphalt"
+        ],
+        "names": [
+          "Smithfield Road Trl"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [
+          "SEG-001003",
+          "SEG-001028",
+          "SEG-000660"
+        ],
+        "segments": 3,
+        "miles": 0.1023,
+        "length_m": 164.60725324966378,
+        "types": [
+          "TRAIL"
+        ],
+        "surfaces": [
+          "Asphalt"
+        ],
+        "names": [
+          "Smithfield Road Trl"
+        ]
+      }
+    },
+    {
+      "corridor": "duck pond dr",
+      "display": "Duck Pond Drive Trl",
+      "total_features": 7,
+      "obligation_segments": 2,
+      "alternative_segments": 5,
+      "total_pedestrian_miles": 0.4857,
+      "canonical_obligation_miles": 0.371,
+      "duplicate_miles_removed": 0.1147,
+      "duplication_ratio": 1.31,
+      "canonical": {
+        "segment_ids": [
+          "SEG-000916",
+          "SEG-001038"
+        ],
+        "segments": 2,
+        "miles": 0.371,
+        "length_m": 597.0452784509478,
+        "types": [
+          "TRAIL"
+        ],
+        "surfaces": [
+          "Asphalt"
+        ],
+        "names": [
+          "Duck Pond Drive Trl"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [
+          "SEG-000860",
+          "SEG-000842",
+          "SEG-001021",
+          "SEG-001032",
+          "SEG-000822"
+        ],
+        "segments": 5,
+        "miles": 0.1147,
+        "length_m": 184.60216078090662,
+        "types": [
+          "PEDESTRIAN_CONNECTOR",
+          "TRAIL"
+        ],
+        "surfaces": [
+          "Asphalt",
+          "Concrete"
+        ],
+        "names": [
+          "Duck Pond Dr",
+          "Duck Pond Drive Trl"
+        ]
+      }
+    },
+    {
+      "corridor": "duck pond",
+      "display": "Duck Pond Trl",
+      "total_features": 2,
+      "obligation_segments": 2,
+      "alternative_segments": 0,
+      "total_pedestrian_miles": 0.3932,
+      "canonical_obligation_miles": 0.3932,
+      "duplicate_miles_removed": 0.0,
+      "duplication_ratio": 1.0,
+      "canonical": {
+        "segment_ids": [
+          "SEG-001150",
+          "SEG-001160"
+        ],
+        "segments": 2,
+        "miles": 0.3932,
+        "length_m": 632.8374429123793,
+        "types": [
+          "TRAIL"
+        ],
+        "surfaces": [
+          "Asphalt"
+        ],
+        "names": [
+          "Duck Pond Trl"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [],
+        "segments": 0,
+        "miles": 0.0,
+        "length_m": 0,
+        "types": [],
+        "surfaces": [],
+        "names": []
+      }
+    },
+    {
+      "corridor": "beamer way",
+      "display": "Beamer Way",
+      "total_features": 1,
+      "obligation_segments": 1,
+      "alternative_segments": 0,
+      "total_pedestrian_miles": 0.357,
+      "canonical_obligation_miles": 0.357,
+      "duplicate_miles_removed": 0.0,
+      "duplication_ratio": 1.0,
+      "canonical": {
+        "segment_ids": [
+          "SEG-000791"
+        ],
+        "segments": 1,
+        "miles": 0.357,
+        "length_m": 574.5496995906931,
+        "types": [
+          "TRAIL"
+        ],
+        "surfaces": [],
+        "names": [
+          "Beamer Way"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [],
+        "segments": 0,
+        "miles": 0.0,
+        "length_m": 0,
+        "types": [],
+        "surfaces": [],
+        "names": []
+      }
+    },
+    {
+      "corridor": "stanger st",
+      "display": "Stanger St",
+      "total_features": 5,
+      "obligation_segments": 4,
+      "alternative_segments": 1,
+      "total_pedestrian_miles": 0.3394,
+      "canonical_obligation_miles": 0.3385,
+      "duplicate_miles_removed": 0.0009,
+      "duplication_ratio": 1.0,
+      "canonical": {
+        "segment_ids": [
+          "SEG-001551",
+          "SEG-001675",
+          "SEG-001720",
+          "SEG-001747"
+        ],
+        "segments": 4,
+        "miles": 0.3385,
+        "length_m": 544.7867370193936,
+        "types": [
+          "PEDESTRIAN_CONNECTOR"
+        ],
+        "surfaces": [
+          "Concrete"
+        ],
+        "names": [
+          "Stanger St"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [
+          "SEG-001607"
+        ],
+        "segments": 1,
+        "miles": 0.0009,
+        "length_m": 1.491999999071853,
+        "types": [
+          "PEDESTRIAN_CONNECTOR"
+        ],
+        "surfaces": [
+          "Concrete"
+        ],
+        "names": [
+          "Stanger St"
+        ]
+      }
+    },
+    {
+      "corridor": "turner st",
+      "display": "Turner St",
+      "total_features": 1,
+      "obligation_segments": 1,
+      "alternative_segments": 0,
+      "total_pedestrian_miles": 0.2814,
+      "canonical_obligation_miles": 0.2814,
+      "duplicate_miles_removed": 0.0,
+      "duplication_ratio": 1.0,
+      "canonical": {
+        "segment_ids": [
+          "SEG-001710"
+        ],
+        "segments": 1,
+        "miles": 0.2814,
+        "length_m": 452.7913594701006,
+        "types": [
+          "PEDESTRIAN_CONNECTOR"
+        ],
+        "surfaces": [
+          "Concrete"
+        ],
+        "names": [
+          "Turner St"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [],
+        "segments": 0,
+        "miles": 0.0,
+        "length_m": 0,
+        "types": [],
+        "surfaces": [],
+        "names": []
+      }
+    },
+    {
+      "corridor": "southgate dr",
+      "display": "Southgate Dr",
+      "total_features": 1,
+      "obligation_segments": 1,
+      "alternative_segments": 0,
+      "total_pedestrian_miles": 0.2246,
+      "canonical_obligation_miles": 0.2246,
+      "duplicate_miles_removed": 0.0,
+      "duplication_ratio": 1.0,
+      "canonical": {
+        "segment_ids": [
+          "SEG-000681"
+        ],
+        "segments": 1,
+        "miles": 0.2246,
+        "length_m": 361.5209999992857,
+        "types": [
+          "TRAIL"
+        ],
+        "surfaces": [],
+        "names": [
+          "Southgate Dr"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [],
+        "segments": 0,
+        "miles": 0.0,
+        "length_m": 0,
+        "types": [],
+        "surfaces": [],
+        "names": []
+      }
+    },
+    {
+      "corridor": "washington st",
+      "display": "Washington St",
+      "total_features": 3,
+      "obligation_segments": 1,
+      "alternative_segments": 2,
+      "total_pedestrian_miles": 0.2021,
+      "canonical_obligation_miles": 0.1289,
+      "duplicate_miles_removed": 0.0732,
+      "duplication_ratio": 1.57,
+      "canonical": {
+        "segment_ids": [
+          "SEG-000790"
+        ],
+        "segments": 1,
+        "miles": 0.1289,
+        "length_m": 207.44644916762584,
+        "types": [
+          "PEDESTRIAN_CONNECTOR"
+        ],
+        "surfaces": [
+          "Concrete"
+        ],
+        "names": [
+          "Washington St"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [
+          "SEG-000800",
+          "SEG-000818"
+        ],
+        "segments": 2,
+        "miles": 0.0732,
+        "length_m": 117.81727484152562,
+        "types": [
+          "PEDESTRIAN_CONNECTOR"
+        ],
+        "surfaces": [
+          "Concrete"
+        ],
+        "names": [
+          "Washington St"
+        ]
+      }
+    },
+    {
+      "corridor": "life science cir",
+      "display": "Life Science Cir",
+      "total_features": 1,
+      "obligation_segments": 1,
+      "alternative_segments": 0,
+      "total_pedestrian_miles": 0.1534,
+      "canonical_obligation_miles": 0.1534,
+      "duplicate_miles_removed": 0.0,
+      "duplication_ratio": 1.0,
+      "canonical": {
+        "segment_ids": [
+          "SEG-000941"
+        ],
+        "segments": 1,
+        "miles": 0.1534,
+        "length_m": 246.9321668469715,
+        "types": [
+          "PEDESTRIAN_CONNECTOR"
+        ],
+        "surfaces": [
+          "Concrete"
+        ],
+        "names": [
+          "Life Science Cir"
+        ]
+      },
+      "alternatives": {
+        "segment_ids": [],
+        "segments": 0,
+        "miles": 0.0,
+        "length_m": 0,
+        "types": [],
+        "surfaces": [],
+        "names": []
+      }
+    }
+  ],
+  "street_representation": [
+    {
+      "street": "Drillfield Drive",
+      "status": "REPRESENTED",
+      "corridor": "drillfield dr",
+      "canonical_miles": 0.5761,
+      "sides": 5
+    },
+    {
+      "street": "Duck Pond Drive",
+      "status": "REPRESENTED",
+      "corridor": "duck pond dr",
+      "canonical_miles": 0.371,
+      "sides": 7
+    },
+    {
+      "street": "Perry Street",
+      "status": "REPRESENTED",
+      "corridor": "perry st",
+      "canonical_miles": 0.3062,
+      "sides": 6
+    },
+    {
+      "street": "Old Turner Street",
+      "status": "NO_REPRESENTATION",
+      "corridor": null,
+      "canonical_miles": 0.0,
+      "sides": 0
+    },
+    {
+      "street": "Beamer Way",
+      "status": "REPRESENTED",
+      "corridor": "beamer way",
+      "canonical_miles": 0.357,
+      "sides": 1
+    },
+    {
+      "street": "Tech Center Drive",
+      "status": "NO_REPRESENTATION",
+      "corridor": null,
+      "canonical_miles": 0.0,
+      "sides": 0
+    },
+    {
+      "street": "Oak Lane",
+      "status": "REPRESENTED",
+      "corridor": "oak ln",
+      "canonical_miles": 0.7705,
+      "sides": 1
+    },
+    {
+      "street": "West Campus Drive",
+      "status": "REPRESENTED",
+      "corridor": "campus dr w",
+      "canonical_miles": 0.3751,
+      "sides": 9
+    },
+    {
+      "street": "Life Science Circle",
+      "status": "REPRESENTED",
+      "corridor": "life science cir",
+      "canonical_miles": 0.1534,
+      "sides": 1
+    },
+    {
+      "street": "Stadium Drive",
+      "status": "NO_REPRESENTATION",
+      "corridor": null,
+      "canonical_miles": 0.0,
+      "sides": 0
+    },
+    {
+      "street": "Coliseum Drive",
+      "status": "NO_REPRESENTATION",
+      "corridor": null,
+      "canonical_miles": 0.0,
+      "sides": 0
+    },
+    {
+      "street": "Alumni Mall",
+      "status": "NO_REPRESENTATION",
+      "corridor": null,
+      "canonical_miles": 0.0,
+      "sides": 0
+    },
+    {
+      "street": "Stanger Street",
+      "status": "REPRESENTED",
+      "corridor": "stanger st",
+      "canonical_miles": 0.3385,
+      "sides": 5
+    }
+  ],
+  "unnamed_segments": [
+    {
+      "id": "SEG-000861",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.3966,
+      "surface": null
+    },
+    {
+      "id": "SEG-001106",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.3945,
+      "surface": null
+    },
+    {
+      "id": "SEG-000960",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.3581,
+      "surface": null
+    },
+    {
+      "id": "SEG-001029",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.2972,
+      "surface": null
+    },
+    {
+      "id": "SEG-000656",
+      "type": "TRAIL",
+      "miles": 0.2951,
+      "surface": null
+    },
+    {
+      "id": "SEG-000855",
+      "type": "TRAIL",
+      "miles": 0.2915,
+      "surface": null
+    },
+    {
+      "id": "SEG-001433",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.2869,
+      "surface": null
+    },
+    {
+      "id": "SEG-001211",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.2816,
+      "surface": null
+    },
+    {
+      "id": "SEG-000872",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.2597,
+      "surface": null
+    },
+    {
+      "id": "SEG-000971",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.2584,
+      "surface": null
+    },
+    {
+      "id": "SEG-000761",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.2367,
+      "surface": null
+    },
+    {
+      "id": "SEG-001185",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.2321,
+      "surface": null
+    },
+    {
+      "id": "SEG-000871",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.2292,
+      "surface": null
+    },
+    {
+      "id": "SEG-001719",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.1958,
+      "surface": null
+    },
+    {
+      "id": "SEG-001528",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.1898,
+      "surface": null
+    },
+    {
+      "id": "SEG-001070",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.1469,
+      "surface": null
+    },
+    {
+      "id": "SEG-001306",
+      "type": "TRAIL",
+      "miles": 0.1364,
+      "surface": null
+    },
+    {
+      "id": "SEG-001614",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.1279,
+      "surface": null
+    },
+    {
+      "id": "SEG-001341",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.1268,
+      "surface": null
+    },
+    {
+      "id": "SEG-001268",
+      "type": "TRAIL",
+      "miles": 0.1256,
+      "surface": null
+    },
+    {
+      "id": "SEG-001673",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.1247,
+      "surface": null
+    },
+    {
+      "id": "SEG-000832",
+      "type": "TRAIL",
+      "miles": 0.1237,
+      "surface": null
+    },
+    {
+      "id": "SEG-001620",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.1123,
+      "surface": null
+    },
+    {
+      "id": "SEG-001538",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.1099,
+      "surface": null
+    },
+    {
+      "id": "SEG-001034",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.1033,
+      "surface": null
+    },
+    {
+      "id": "SEG-001427",
+      "type": "TRAIL",
+      "miles": 0.0957,
+      "surface": null
+    },
+    {
+      "id": "SEG-001402",
+      "type": "TRAIL",
+      "miles": 0.0888,
+      "surface": null
+    },
+    {
+      "id": "SEG-001493",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0837,
+      "surface": null
+    },
+    {
+      "id": "SEG-001585",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0788,
+      "surface": null
+    },
+    {
+      "id": "SEG-001379",
+      "type": "TRAIL",
+      "miles": 0.0767,
+      "surface": null
+    },
+    {
+      "id": "SEG-000884",
+      "type": "TRAIL",
+      "miles": 0.0763,
+      "surface": null
+    },
+    {
+      "id": "SEG-001303",
+      "type": "TRAIL",
+      "miles": 0.0716,
+      "surface": null
+    },
+    {
+      "id": "SEG-001729",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0664,
+      "surface": null
+    },
+    {
+      "id": "SEG-001536",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0615,
+      "surface": null
+    },
+    {
+      "id": "SEG-000975",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0579,
+      "surface": null
+    },
+    {
+      "id": "SEG-001252",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0578,
+      "surface": null
+    },
+    {
+      "id": "SEG-000789",
+      "type": "TRAIL",
+      "miles": 0.0559,
+      "surface": null
+    },
+    {
+      "id": "SEG-000834",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0549,
+      "surface": null
+    },
+    {
+      "id": "SEG-001325",
+      "type": "TRAIL",
+      "miles": 0.0532,
+      "surface": null
+    },
+    {
+      "id": "SEG-001099",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0519,
+      "surface": null
+    },
+    {
+      "id": "SEG-001680",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0501,
+      "surface": null
+    },
+    {
+      "id": "SEG-000757",
+      "type": "TRAIL",
+      "miles": 0.046,
+      "surface": null
+    },
+    {
+      "id": "SEG-001188",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0454,
+      "surface": null
+    },
+    {
+      "id": "SEG-001068",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0432,
+      "surface": null
+    },
+    {
+      "id": "SEG-001199",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0422,
+      "surface": null
+    },
+    {
+      "id": "SEG-001592",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0395,
+      "surface": null
+    },
+    {
+      "id": "SEG-001600",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0346,
+      "surface": null
+    },
+    {
+      "id": "SEG-001629",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0328,
+      "surface": null
+    },
+    {
+      "id": "SEG-001296",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0325,
+      "surface": null
+    },
+    {
+      "id": "SEG-001168",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0302,
+      "surface": null
+    },
+    {
+      "id": "SEG-001633",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0297,
+      "surface": null
+    },
+    {
+      "id": "SEG-001703",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0098,
+      "surface": null
+    },
+    {
+      "id": "SEG-001705",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0093,
+      "surface": null
+    },
+    {
+      "id": "SEG-000840",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0088,
+      "surface": null
+    },
+    {
+      "id": "SEG-001454",
+      "type": "TRAIL",
+      "miles": 0.0072,
+      "surface": null
+    },
+    {
+      "id": "SEG-001708",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.005,
+      "surface": null
+    },
+    {
+      "id": "SEG-001240",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0043,
+      "surface": null
+    },
+    {
+      "id": "SEG-000686",
+      "type": "PEDESTRIAN_CONNECTOR",
+      "miles": 0.0036,
+      "surface": null
+    }
+  ]
+}

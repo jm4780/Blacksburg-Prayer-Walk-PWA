@@ -1,0 +1,516 @@
+{
+  "version": "v1",
+  "frozen_at": "2026-08-03T01:14:09.111627+00:00",
+  "snapshot_date": "2026-08-03",
+  "build_crs": "EPSG:6594",
+  "routing_graph": {
+    "components": 118,
+    "main_component_nodes": 1739
+  },
+  "metrics": {
+    "required_miles": 135.271,
+    "required_street_miles": 124.848,
+    "required_trail_miles": 10.423,
+    "connector_miles": 69.98,
+    "excluded_miles": 48.278,
+    "campus_corridor_miles": 11.359,
+    "campus_duplicate_obligations_removed_miles": 2.044,
+    "total_network_miles": 253.529,
+    "segments": {
+      "total": 2998,
+      "required": 1515,
+      "required_street": 1456,
+      "required_trail": 59,
+      "connector": 1023,
+      "excluded": 460,
+      "derived_connectors": 262,
+      "campus_canonical": 73,
+      "campus_alternative": 41
+    },
+    "main_component": {
+      "nodes": 1739,
+      "required_miles": 130.958,
+      "required_segments": 1470,
+      "share_of_required_miles": 0.9681
+    },
+    "unresolved_required_miles": 4.314,
+    "unresolved_required_segments": 45,
+    "households": {
+      "residential_address_points": 18022,
+      "estimated_housing_units": 17963,
+      "associated_to_required_coverage": 11029,
+      "associated_to_connector_only": 655,
+      "held_for_review": 6279,
+      "public_label": "Estimated households prayed for",
+      "public_value": 11029,
+      "method": "RESIDENTIAL_UNITS_ON_REQUIRED_COVERAGE"
+    }
+  },
+  "gates": [
+    {
+      "gate": "no_silent_non_metric_crs",
+      "status": "PASS",
+      "detail": "build CRS EPSG:6594 has units ['metre']; assert_metric() guard present and called at build start"
+    },
+    {
+      "gate": "no_known_unit_mismatch",
+      "status": "PASS",
+      "detail": "street mileage 173.13 mi vs the town's own MILES field total 169.16 mi \u2014 ratio 1.023. No ft/m mismatch."
+    },
+    {
+      "gate": "no_unresolved_connector_routed_by_default",
+      "status": "PASS",
+      "detail": "0 non-HIGH_CONFIDENCE connectors routable. Classes: CROSSING_REVIEW_REQUIRED=30, HIGH_CONFIDENCE=220, LIKELY_FALSE=8, UNRESOLVED=4"
+    },
+    {
+      "gate": "household_methodology_internally_consistent",
+      "status": "PASS",
+      "detail": "11029 on required + 655 connector-only + 6279 held = 17963 vs 17963 housing units; public label maps to units_associated_to_required_coverage; occupancy model applied: False"
+    },
+    {
+      "gate": "campus_duplicate_obligations_removed",
+      "status": "PASS",
+      "detail": "14 corridors normalized; 2.044 mi of parallel walkway marked ALTERNATIVE; 0 campus segments unstamped"
+    },
+    {
+      "gate": "required_mileage_reachable",
+      "status": "PASS",
+      "detail": "96.81% of required mileage is in the main routing component (130.958 of 135.271 mi); target 95%. Unresolved: 4.314 mi across 45 segments"
+    }
+  ],
+  "go_no_go": {
+    "recommendation": "GO",
+    "failed": [],
+    "warned": []
+  },
+  "coverage_decision_table": [
+    {
+      "key": "provisional_trails",
+      "title": "Provisional trails",
+      "segments": 24,
+      "miles": 2.175,
+      "recommended_ruling": "CONFIRM as REQUIRED",
+      "reason": "D2 recommended Deerfield and Shenandoah as REQUIRED and they are applied provisionally. Both are short paved neighbourhood trails that pass homes, which is exactly the D2 test. Confirming changes nothing in the build; declining removes them from the denominator.",
+      "top_features": [
+        {
+          "name": "Shenandoah Trl",
+          "miles": 1.559
+        },
+        {
+          "name": "Shenandoah Trail Spur",
+          "miles": 0.617
+        }
+      ],
+      "segment_ids": [
+        "SEG-002460",
+        "SEG-002461",
+        "SEG-002470",
+        "SEG-002476",
+        "SEG-002478",
+        "SEG-002480",
+        "SEG-002484",
+        "SEG-002486",
+        "SEG-002489",
+        "SEG-002492",
+        "SEG-002497",
+        "SEG-002508",
+        "SEG-002514",
+        "SEG-002517",
+        "SEG-002527",
+        "SEG-002530",
+        "SEG-002548",
+        "SEG-002552",
+        "SEG-002555",
+        "SEG-002556",
+        "SEG-002557",
+        "SEG-002558",
+        "SEG-002566",
+        "SEG-002577"
+      ]
+    },
+    {
+      "key": "required_street_conflicts",
+      "title": "Required-street conflicts",
+      "segments": 40,
+      "miles": 3.085,
+      "recommended_ruling": "UPHOLD RD_MAINT",
+      "reason": "36 segments where RD_MAINT says Private and ROAD_CLASS says Local, plus 4 public streets whose midpoint falls inside an HOA/private open-space polygon. RD_MAINT is the maintenance authority's own field and zero conflicts run the other way. Uphold it; spot-check the 4 HOA cases on a map.",
+      "top_features": [
+        {
+          "name": "Richmond Ln",
+          "miles": 0.344
+        },
+        {
+          "name": "Chelsea Ct",
+          "miles": 0.195
+        },
+        {
+          "name": "Houndschase Ln",
+          "miles": 0.193
+        },
+        {
+          "name": "Hunters Mill Rd",
+          "miles": 0.19
+        },
+        {
+          "name": "NW Wellesley Ct",
+          "miles": 0.165
+        },
+        {
+          "name": "Foxridge Ln",
+          "miles": 0.165
+        },
+        {
+          "name": "Brightwood Manor Dr",
+          "miles": 0.162
+        },
+        {
+          "name": "Copper Croft Run",
+          "miles": 0.157
+        },
+        {
+          "name": "Foxtrail Ln",
+          "miles": 0.146
+        },
+        {
+          "name": "Heather Dr",
+          "miles": 0.138
+        }
+      ],
+      "segment_ids": [
+        "SEG-000298",
+        "SEG-000307",
+        "SEG-000503",
+        "SEG-000515",
+        "SEG-000522",
+        "SEG-000540",
+        "SEG-000541",
+        "SEG-000542",
+        "SEG-000545",
+        "SEG-000560",
+        "SEG-000570",
+        "SEG-000580",
+        "SEG-000591",
+        "SEG-000600",
+        "SEG-000609",
+        "SEG-000612",
+        "SEG-000613",
+        "SEG-000626",
+        "SEG-000634",
+        "SEG-000644",
+        "SEG-000645",
+        "SEG-000649",
+        "SEG-000651",
+        "SEG-000659",
+        "SEG-000665",
+        "SEG-000679",
+        "SEG-000682",
+        "SEG-000698",
+        "SEG-000940",
+        "SEG-000972",
+        "SEG-000976",
+        "SEG-001008",
+        "SEG-001027",
+        "SEG-001060",
+        "SEG-001077",
+        "SEG-001091",
+        "SEG-002334",
+        "SEG-002466",
+        "SEG-002482",
+        "SEG-002821"
+      ]
+    },
+    {
+      "key": "campus_path_decisions",
+      "title": "Campus path decisions (D1b)",
+      "segments": 73,
+      "miles": 11.359,
+      "recommended_ruling": "PROMOTE canonical campus corridors to REQUIRED",
+      "reason": "After normalization each campus corridor carries exactly one obligation, so promoting these adds campus coverage without demanding a walker cover the same street twice. Parallel walkways are already marked ALTERNATIVE and stay connectors.",
+      "top_features": [
+        {
+          "name": "(unnamed)",
+          "miles": 6.028
+        },
+        {
+          "name": "Oak Lane Trl",
+          "miles": 0.77
+        },
+        {
+          "name": "Prices Fork Road Trl",
+          "miles": 0.67
+        },
+        {
+          "name": "Drillfield Dr",
+          "miles": 0.576
+        },
+        {
+          "name": "Duck Pond Trl",
+          "miles": 0.393
+        },
+        {
+          "name": "Smithfield Road Trl",
+          "miles": 0.385
+        },
+        {
+          "name": "Duck Pond Drive Trl",
+          "miles": 0.371
+        },
+        {
+          "name": "Beamer Way",
+          "miles": 0.357
+        },
+        {
+          "name": "W Campus Dr",
+          "miles": 0.342
+        },
+        {
+          "name": "Stanger St",
+          "miles": 0.339
+        }
+      ],
+      "segment_ids": [
+        "SEG-000656",
+        "SEG-000681",
+        "SEG-000730",
+        "SEG-000757",
+        "SEG-000789",
+        "SEG-000790",
+        "SEG-000791",
+        "SEG-000832",
+        "SEG-000834",
+        "SEG-000840",
+        "SEG-000855",
+        "SEG-000861",
+        "SEG-000871",
+        "SEG-000872",
+        "SEG-000884",
+        "SEG-000916",
+        "SEG-000941",
+        "SEG-000953",
+        "SEG-000960",
+        "SEG-000971",
+        "SEG-000975",
+        "SEG-001029",
+        "SEG-001034",
+        "SEG-001038",
+        "SEG-001041",
+        "SEG-001068",
+        "SEG-001070",
+        "SEG-001099",
+        "SEG-001106",
+        "SEG-001141",
+        "SEG-001150",
+        "SEG-001160",
+        "SEG-001185",
+        "SEG-001211",
+        "SEG-001214",
+        "SEG-001234",
+        "SEG-001268",
+        "SEG-001296",
+        "SEG-001301",
+        "SEG-001303",
+        "SEG-001306",
+        "SEG-001314",
+        "SEG-001325",
+        "SEG-001341",
+        "SEG-001358",
+        "SEG-001379",
+        "SEG-001387",
+        "SEG-001402",
+        "SEG-001427",
+        "SEG-001431",
+        "SEG-001433",
+        "SEG-001493",
+        "SEG-001518",
+        "SEG-001528",
+        "SEG-001536",
+        "SEG-001538",
+        "SEG-001551",
+        "SEG-001583",
+        "SEG-001592",
+        "SEG-001597",
+        "SEG-001600",
+        "SEG-001608",
+        "SEG-001614",
+        "SEG-001619",
+        "SEG-001629",
+        "SEG-001632",
+        "SEG-001654",
+        "SEG-001673",
+        "SEG-001675",
+        "SEG-001710",
+        "SEG-001720",
+        "SEG-001729",
+        "SEG-001747"
+      ]
+    },
+    {
+      "key": "derived_connections_affecting_access",
+      "title": "Derived connections affecting required-network accessibility",
+      "segments": 42,
+      "miles": 0.206,
+      "recommended_ruling": "KEEP OUT of the default graph; review the 30 crossing cases",
+      "reason": "8 LIKELY_FALSE assert access onto the US-460 bypass, its ramps, or private drives \u2014 reject outright. 30 CROSSING_REVIEW_REQUIRED and 4 UNRESOLVED need a human. Only 0.31 mi of required mileage depends on any of them.",
+      "top_features": [
+        {
+          "name": "(unnamed)",
+          "miles": 0.206
+        }
+      ],
+      "segment_ids": [
+        "SEG-000148",
+        "SEG-000149",
+        "SEG-000156",
+        "SEG-000180",
+        "SEG-000217",
+        "SEG-000256",
+        "SEG-000265",
+        "SEG-000270",
+        "SEG-000271",
+        "SEG-000273",
+        "SEG-000459",
+        "SEG-000569",
+        "SEG-001166",
+        "SEG-001222",
+        "SEG-001253",
+        "SEG-001316",
+        "SEG-001517",
+        "SEG-001554",
+        "SEG-001565",
+        "SEG-001567",
+        "SEG-001575",
+        "SEG-001647",
+        "SEG-001679",
+        "SEG-001774",
+        "SEG-001857",
+        "SEG-001922",
+        "SEG-001960",
+        "SEG-001979",
+        "SEG-002084",
+        "SEG-002273",
+        "SEG-002347",
+        "SEG-002356",
+        "SEG-002359",
+        "SEG-002425",
+        "SEG-002427",
+        "SEG-002441",
+        "SEG-002469",
+        "SEG-002506",
+        "SEG-002576",
+        "SEG-002595",
+        "SEG-002624",
+        "SEG-002769"
+      ]
+    },
+    {
+      "key": "other_consequential",
+      "title": "Other consequential cases",
+      "segments": 48,
+      "miles": 3.965,
+      "recommended_ruling": "REVIEW individually",
+      "reason": "Trails currently EXCLUDED on a Paths Owner=PRIV tag, and off-main required stubs such as the Gordon C Willis Smart Road \u2014 a closed research facility that is probably EXCLUDED rather than REQUIRED.",
+      "top_features": [
+        {
+          "name": "Hethwood Trl",
+          "miles": 2.892
+        },
+        {
+          "name": "Hethwood Trail Spur",
+          "miles": 0.623
+        },
+        {
+          "name": "Heather Drive Trl",
+          "miles": 0.226
+        },
+        {
+          "name": "Tall Oaks Drive Trl",
+          "miles": 0.198
+        },
+        {
+          "name": "(unnamed)",
+          "miles": 0.026
+        }
+      ],
+      "segment_ids": [
+        "SEG-000258",
+        "SEG-000262",
+        "SEG-000263",
+        "SEG-000264",
+        "SEG-000267",
+        "SEG-000269",
+        "SEG-000292",
+        "SEG-000300",
+        "SEG-000311",
+        "SEG-000312",
+        "SEG-000316",
+        "SEG-000376",
+        "SEG-000416",
+        "SEG-000440",
+        "SEG-000457",
+        "SEG-000460",
+        "SEG-000465",
+        "SEG-000508",
+        "SEG-000510",
+        "SEG-000518",
+        "SEG-000519",
+        "SEG-000543",
+        "SEG-000611",
+        "SEG-000621",
+        "SEG-000630",
+        "SEG-000632",
+        "SEG-000655",
+        "SEG-000673",
+        "SEG-000677",
+        "SEG-000705",
+        "SEG-000712",
+        "SEG-000714",
+        "SEG-000721",
+        "SEG-000723",
+        "SEG-000726",
+        "SEG-000728",
+        "SEG-000760",
+        "SEG-000762",
+        "SEG-000771",
+        "SEG-000808",
+        "SEG-000809",
+        "SEG-000810",
+        "SEG-000815",
+        "SEG-000837",
+        "SEG-000839",
+        "SEG-000848",
+        "SEG-000851",
+        "SEG-000868"
+      ]
+    }
+  ],
+  "blocked": [
+    {
+      "url": "https://services5.arcgis.com/IZ8QFYP84iubFqmi/arcgis/rest/services/Parcels_Open_Data/FeatureServer/0",
+      "title": "Montgomery County \u2014 Parcels Open Data",
+      "publisher": "Montgomery County, VA",
+      "role": "Residential cross-check; EX_CLASSD property class",
+      "blocked_host": "services5.arcgis.com",
+      "license_status": "DISCLAIMER_ONLY",
+      "note": "egress policy denied this host from the build environment; no data retrieved, no schema inferred"
+    },
+    {
+      "url": "https://vginmaps.vdem.virginia.gov/arcgis/rest/services/VA_Base_Layers/VBMP_RCL/FeatureServer",
+      "title": "VGIN \u2014 Virginia Road Centerlines (RCL)",
+      "publisher": "Virginia Geographic Information Network",
+      "role": "VT campus street candidate source; statewide cross-check",
+      "blocked_host": "vginmaps.vdem.virginia.gov",
+      "license_status": "DISCLAIMER_ONLY",
+      "note": "egress policy denied this host from the build environment; no data retrieved, no schema inferred"
+    },
+    {
+      "url": "https://vginmaps.vdem.virginia.gov/arcgis/rest/services/VA_Base_Layers/VA_Address_Points/FeatureServer",
+      "title": "VGIN \u2014 Virginia Address Points",
+      "publisher": "Virginia Geographic Information Network",
+      "role": "Address cross-check; campus address candidate source",
+      "blocked_host": "vginmaps.vdem.virginia.gov",
+      "license_status": "DISCLAIMER_ONLY",
+      "note": "egress policy denied this host from the build environment; no data retrieved, no schema inferred"
+    }
+  ]
+}

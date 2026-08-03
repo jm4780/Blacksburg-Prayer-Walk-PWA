@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-03T00:49:27.181416+00:00",
+  "generated_at": "2026-08-03T01:14:19.520019+00:00",
   "snapshot_date": "2026-08-03",
   "campus_polygon": {
     "source": "Town Zoning, Labels='UNIV' (single polygon)",
@@ -498,7 +498,8 @@
       "owner": "VT",
       "miles": 0.2367,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -630,7 +631,8 @@
       "owner": "VT",
       "miles": 0.1958,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -669,7 +671,8 @@
       "owner": "VT",
       "miles": 0.1879,
       "reasons": [
-        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Parallel walkway on corridor 'campus dr w' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -734,7 +737,8 @@
       "owner": "VT",
       "miles": 0.1414,
       "reasons": [
-        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Parallel walkway on corridor 'campus dr w' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -877,7 +881,8 @@
       "owner": "VT",
       "miles": 0.1123,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -890,7 +895,8 @@
       "owner": "VT",
       "miles": 0.1107,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'perry st' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -955,7 +961,8 @@
       "owner": "VT",
       "miles": 0.1007,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'perry st' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1020,7 +1027,8 @@
       "owner": "VT",
       "miles": 0.0821,
       "reasons": [
-        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Parallel walkway on corridor 'campus dr w' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1033,7 +1041,8 @@
       "owner": "VT",
       "miles": 0.0788,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1046,7 +1055,8 @@
       "owner": "VT",
       "miles": 0.0771,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'perry st' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1085,7 +1095,8 @@
       "owner": "VT",
       "miles": 0.0727,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'washington st' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1124,7 +1135,8 @@
       "owner": "VT",
       "miles": 0.0696,
       "reasons": [
-        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Parallel walkway on corridor 'smithfield rd' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1137,7 +1149,8 @@
       "owner": "VT",
       "miles": 0.0687,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'duck pond dr' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1202,7 +1215,8 @@
       "owner": "VT",
       "miles": 0.0578,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1281,7 +1295,8 @@
       "owner": "VT",
       "miles": 0.0501,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1307,7 +1322,8 @@
       "owner": "VT",
       "miles": 0.0454,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1346,7 +1362,8 @@
       "owner": "VT",
       "miles": 0.0422,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1411,7 +1428,8 @@
       "owner": "VT",
       "miles": 0.0329,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'campus dr w' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1450,7 +1468,8 @@
       "owner": "VT",
       "miles": 0.032,
       "reasons": [
-        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Parallel walkway on corridor 'campus dr w' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1463,7 +1482,8 @@
       "owner": "VT",
       "miles": 0.0302,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1476,7 +1496,8 @@
       "owner": "VT",
       "miles": 0.0297,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1489,7 +1510,8 @@
       "owner": "VT",
       "miles": 0.0285,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'duck pond dr' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1503,7 +1525,8 @@
       "miles": 0.0277,
       "reasons": [
         "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
-        "Paths Owner blank on 83% of the layer; ownership unknown."
+        "Paths Owner blank on 83% of the layer; ownership unknown.",
+        "Parallel walkway on corridor 'prices fork rd' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1516,7 +1539,8 @@
       "owner": "VT",
       "miles": 0.0256,
       "reasons": [
-        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Parallel walkway on corridor 'smithfield rd' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1542,7 +1566,8 @@
       "owner": "VT",
       "miles": 0.0126,
       "reasons": [
-        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Parallel walkway on corridor 'duck pond dr' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1555,7 +1580,8 @@
       "owner": "VT",
       "miles": 0.0123,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'perry st' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1568,7 +1594,8 @@
       "owner": "VT",
       "miles": 0.0113,
       "reasons": [
-        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Parallel walkway on corridor 'prices fork rd' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1581,7 +1608,8 @@
       "owner": "VT",
       "miles": 0.0102,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'drillfield dr' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1594,7 +1622,8 @@
       "owner": "VT",
       "miles": 0.0098,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1607,7 +1636,8 @@
       "owner": "VT",
       "miles": 0.0093,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1633,7 +1663,8 @@
       "owner": "VT",
       "miles": 0.0072,
       "reasons": [
-        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1647,7 +1678,8 @@
       "miles": 0.0071,
       "reasons": [
         "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
-        "Paths Owner blank on 83% of the layer; ownership unknown."
+        "Paths Owner blank on 83% of the layer; ownership unknown.",
+        "Parallel walkway on corridor 'smithfield rd' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1660,7 +1692,8 @@
       "owner": "VT",
       "miles": 0.0068,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'prices fork rd' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1673,7 +1706,8 @@
       "owner": "VT",
       "miles": 0.005,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1686,7 +1720,8 @@
       "owner": "VT",
       "miles": 0.0043,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1699,7 +1734,8 @@
       "owner": "VT",
       "miles": 0.0042,
       "reasons": [
-        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review."
+        "Campus path: D1b requires a curated selection, not blanket inclusion. Held for review.",
+        "Parallel walkway on corridor 'duck pond dr' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1712,7 +1748,8 @@
       "owner": "VT",
       "miles": 0.0036,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Unnamed campus walkway running parallel to a named corridor already carrying an obligation \u2014 duplicate coverage, not new ground."
       ]
     },
     {
@@ -1738,7 +1775,8 @@
       "owner": "VT",
       "miles": 0.0015,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'campus dr w' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1751,7 +1789,8 @@
       "owner": "VT",
       "miles": 0.0009,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'stanger st' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1764,7 +1803,8 @@
       "owner": "VT",
       "miles": 0.0007,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'duck pond dr' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     },
     {
@@ -1777,7 +1817,8 @@
       "owner": "VT",
       "miles": 0.0005,
       "reasons": [
-        "Campus walkway, unmatched to any street. D1b candidate; held for review."
+        "Campus walkway, unmatched to any street. D1b candidate; held for review.",
+        "Parallel walkway on corridor 'washington st' \u2014 satisfies the same coverage obligation as the canonical side (spec \u00a74.2). Not a separate obligation."
       ]
     }
   ],

@@ -1,6 +1,6 @@
 {
   "snapshot_date": "2026-08-03",
-  "built_at": "2026-08-03T00:48:26.211194+00:00",
+  "built_at": "2026-08-03T01:12:41.673978+00:00",
   "sources": {
     "roads": {
       "dataset": "roads",
@@ -512,6 +512,36 @@
       }
     ]
   },
+  "connector_classes": {
+    "CROSSING_REVIEW_REQUIRED": {
+      "connectors": 30,
+      "miles": 0.137
+    },
+    "HIGH_CONFIDENCE": {
+      "connectors": 220,
+      "miles": 0.871
+    },
+    "LIKELY_FALSE": {
+      "connectors": 8,
+      "miles": 0.04
+    },
+    "UNRESOLVED": {
+      "connectors": 4,
+      "miles": 0.029
+    }
+  },
+  "connector_policy": "Only HIGH_CONFIDENCE connectors are routable by default. The rest stay in the network with routable_by_default=false and walkable=false so they are visible for review but cannot carry a route.",
+  "campus_normalization": {
+    "corridors": 14,
+    "campus_segments": 114,
+    "canonical_miles": 11.359,
+    "duplicate_miles": 2.044,
+    "named_canonical_miles": 5.331,
+    "named_duplicate_miles": 1.126,
+    "unnamed_distinct_miles": 6.028,
+    "unnamed_duplicate_miles": 0.918,
+    "total_campus_pedestrian_miles": 13.403
+  },
   "totals": {
     "OPTIONAL_CONNECTOR": {
       "segments": 1023,
@@ -562,14 +592,16 @@
   "households": {
     "residential_address_points": 18022,
     "estimated_housing_units": 17963,
-    "housing_units_associated_to_network": 9725,
-    "estimated_occupied_households": 9044,
-    "occupancy_rate": 0.93,
-    "occupancy_rate_source": "ACS 5-year occupancy rate for Blacksburg town (placeholder \u2014 confirm against the current table before launch)",
-    "occupancy_confidence": "LOW",
+    "units_associated_to_required_coverage": 11029,
+    "units_associated_to_connector_only": 655,
+    "units_held_for_review": 6279,
     "public_label": "Estimated households prayed for",
-    "public_label_maps_to": "estimated_occupied_households",
-    "translation": "residential address points -> drop non-dwellings (vacant/demolished/construction) and duplicate address keys -> estimated housing units -> associate one-to-one with an eligible segment (unresolved complexes held back) -> multiply by occupancy rate -> estimated occupied households"
+    "public_label_maps_to": "units_associated_to_required_coverage",
+    "public_value": 11029,
+    "method": "RESIDENTIAL_UNITS_ON_REQUIRED_COVERAGE",
+    "occupancy_model_applied": false,
+    "occupancy_model_note": "Deliberately none. A residential dwelling unit associated with a REQUIRED segment is the unit of account. Applying an unsourced occupancy rate would make the number less auditable, not more accurate.",
+    "translation": "residential address points (LocalType=Residential) -> drop non-dwellings: vacant / demolished / under construction -> drop duplicate normalized address keys = estimated housing units -> associate each unit one-to-one with the nearest REQUIRED segment within 75 m (name-match tie-break; REQUIRED outranks connectors), holding units in complexes a walker cannot pass = units associated to REQUIRED coverage = the public number"
   },
   "household_stats": {
     "address_points_total": 19773,
@@ -582,13 +614,15 @@
     "distinct_buildings": 9002
   },
   "association_stats": {
-    "confidence_low": 1241,
-    "beyond_cap": 528,
-    "confidence_high": 6697,
-    "confidence_medium": 1787,
-    "held_unresolved_complex": 7710,
-    "associated": 9725,
-    "unassociated": 8238
+    "confidence_low": 1904,
+    "role_required": 11029,
+    "beyond_cap": 672,
+    "confidence_high": 7548,
+    "confidence_medium": 2232,
+    "held_unresolved_complex": 5607,
+    "role_optional_connector": 655,
+    "associated": 11684,
+    "unassociated": 6279
   },
   "dedup_rules": {
     "apartment_units": "Each address point is one dwelling unit. Unit-level points (APT/UNIT/LOT/BLDG) are counted individually and never also counted as their parent building address.",
@@ -604,7 +638,12 @@
   },
   "complexes": {
     "profiled": 103,
-    "unresolved": 58,
+    "held_entirely": 32,
+    "held_partially": 13,
+    "accepted": 58,
+    "units_held_entirely": 5607,
+    "rule_version": "v2 (recalibrated against Terrace View / Hunters Ridge / The Mill)",
+    "changed_by_recalibration": 26,
     "file": "review/apartment-complexes.json"
   },
   "review_queue": {
@@ -652,13 +691,13 @@
         "name": "one_primary_segment_per_household",
         "passed": true,
         "fatal": true,
-        "detail": "9725 links, 9725 distinct households"
+        "detail": "11684 links, 11684 distinct households"
       },
       {
         "name": "required_segments_connected",
         "passed": false,
         "fatal": false,
-        "detail": "41 REQUIRED segments off the main component (89 components total)"
+        "detail": "45 REQUIRED segments off the main component (118 components total)"
       },
       {
         "name": "housing_units_plausible",
@@ -670,10 +709,10 @@
         "name": "association_rate",
         "passed": false,
         "fatal": false,
-        "detail": "45.9% of housing units unassociated"
+        "detail": "35.0% of housing units unassociated"
       }
     ],
-    "stranded_components": 88
+    "stranded_components": 117
   },
   "blocked_sources": [
     {
