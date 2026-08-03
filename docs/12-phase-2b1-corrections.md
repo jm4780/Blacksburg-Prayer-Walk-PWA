@@ -187,11 +187,26 @@ VALID_INDEPENDENT_ROUTING_AREA, added to the benchmark harness.**
 | Is an excluded highway crossing being wrongly treated as necessary? | **The Phase 2b framing was wrong.** The CRC is not cut off by the US-460 bypass. It is separated by **at-grade crossings of Research Center Dr and SW Kraft Dr** that the connector classifier marked `CROSSING_REVIEW_REQUIRED` — 25–35 mph secondary roads. Those are ordinary street crossings that a human review will almost certainly approve, at which point the CRC merges into the main component. |
 | Should it be a valid independent routing area? | **Yes**, and it is. |
 
-Eight connectors touching the CRC are `CROSSING_REVIEW_REQUIRED`: Rimrock Dr →
+Eight connectors touching the CRC are held out of the routing graph: Rimrock Dr →
 Research Center Dr (8.6 m), Kraft Drive Trail → Research Center Dr (7.5 m), Research
-Center Drive → Kraft Dr SW (6.6 m), and five more. **Reviewing these eight is the
-single highest-value connector review available** — it would fold 2.044 required miles
-and 288 households back into the main network.
+Center Drive → Kraft Dr SW (6.6 m), and five more.
+
+> **CORRECTED 2026-08-03 (Phase 3, docs/13 §1).** Two claims above are wrong.
+>
+> 1. **Reviewing these eight would NOT fold the CRC back into the main network.** Each
+>    links the CRC to a *small isolated fragment*, not to the town graph. The review is
+>    still worth doing for local CRC walkability, but whatever separates the CRC from
+>    downtown is not in this list. Measured in
+>    `review/crc-crossings.json → if_all_crc_crossings_were_promoted`.
+> 2. **It is not the highest-value connector review available.** Under network v1.2
+>    that is the campus↔town crossings, chiefly of Prices Fork Rd, worth 6.080 mi of
+>    stranded required mileage.
+> 3. One of the eight is `LIKELY_FALSE` and one `UNRESOLVED`; the sentence above
+>    implied all eight were `CROSSING_REVIEW_REQUIRED`.
+>
+> The connector-attribution figures elsewhere in this document also understated
+> connector-caused disconnection, because `attribute_disconnection` could never add a
+> rejected connector back — see docs/13 §1, finding 2.
 
 ---
 
@@ -362,7 +377,8 @@ classification and response assessment.
 
 Carry forward, none blocking:
 
-1. **Review the eight CRC connectors** — biggest single connectivity win available.
+1. **Review the eight CRC connectors** — ~~biggest single connectivity win available~~
+   *(corrected in §4: it is neither the biggest win nor a route to the main network)*.
 2. **Handle components that cannot support the Quick band** in the UI (§8.3).
 3. **Vary the random seed per participant** before two people walk together.
 4. **The five Phase 2a.1 rulings are still open** — D1b campus promotion (11.36 mi), D2

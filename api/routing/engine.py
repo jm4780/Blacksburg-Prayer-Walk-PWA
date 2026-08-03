@@ -25,10 +25,16 @@ from .state import CompletionState, Route
 M_PER_MILE = 1609.344
 
 # Bumped whenever routing behaviour changes in a way that could alter a stored route.
+#   2.1.0  Phase 3 item 1: campus coverage credit. Walking a parallel campus walkway
+#          now earns the canonical corridor it runs alongside (spec §4.2), so
+#          new_required_miles can include mileage the walk did not physically traverse.
+#          Weights are UNCHANGED — this is the network v1.2 ruling's coverage
+#          semantics, not scoring tuning, and it is the only routing change made in
+#          Phase 3. UI integration modified nothing below this line.
 #   2.0.0  Phase 2b.1: categorised length-scaled repeat penalty, multi-component
 #          routing, structured late-opportunity response states.
 #   1.0.0  Phase 2b prototype.
-ENGINE_VERSION = "2.0.0"
+ENGINE_VERSION = "2.1.0"
 
 # Length bands, miles. Quick..Extended.
 VARIANTS = [("Quick", 1.0), ("Short", 2.0), ("Medium", 3.5), ("Long", 5.0),

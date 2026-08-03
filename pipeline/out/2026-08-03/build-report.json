@@ -1,6 +1,6 @@
 {
   "snapshot_date": "2026-08-03",
-  "built_at": "2026-08-03T01:52:36.940968+00:00",
+  "built_at": "2026-08-03T02:17:41.780897+00:00",
   "sources": {
     "roads": {
       "dataset": "roads",
@@ -585,6 +585,14 @@
   "campus_normalization": {
     "corridors": 14,
     "campus_segments": 114,
+    "canonical_segments": 73,
+    "alternative_segments": 41,
+    "alternatives_with_credit": 41,
+    "canonical_segments_with_an_alternative": 35,
+    "alternatives_without_credit": 0,
+    "alternatives_without_credit_ids": [],
+    "satisfy_share": 0.6,
+    "satisfy_distance_m": 45.0,
     "canonical_miles": 11.359,
     "duplicate_miles": 2.044,
     "named_canonical_miles": 5.331,
@@ -593,18 +601,538 @@
     "unnamed_duplicate_miles": 0.918,
     "total_campus_pedestrian_miles": 13.403
   },
+  "campus_promotion": {
+    "applied": 73,
+    "miles": 11.36,
+    "status": "CONFIRMED",
+    "note": "D1b: campus pedestrian corridors carry the coverage obligation for campus, because the town Roads layer does not contain campus streets at all (see docs/02-technical-plan.md \u00a72.4a). One obligation per corridor: the canonical side is REQUIRED, parallel walkways are ALTERNATIVE and satisfy it. Promoted for network v1.2, 2026-08-03.",
+    "duplicate_obligation_miles_avoided": 2.044,
+    "segments": [
+      {
+        "segment_id": "SEG-000656",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.295
+      },
+      {
+        "segment_id": "SEG-000681",
+        "name": "Southgate Dr",
+        "corridor": "southgate dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.225
+      },
+      {
+        "segment_id": "SEG-000730",
+        "name": "Smithfield Road Trl",
+        "corridor": "smithfield rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.236
+      },
+      {
+        "segment_id": "SEG-000757",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.046
+      },
+      {
+        "segment_id": "SEG-000789",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.056
+      },
+      {
+        "segment_id": "SEG-000790",
+        "name": "Washington St",
+        "corridor": "washington st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.129
+      },
+      {
+        "segment_id": "SEG-000791",
+        "name": "Beamer Way",
+        "corridor": "beamer way",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.357
+      },
+      {
+        "segment_id": "SEG-000832",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.124
+      },
+      {
+        "segment_id": "SEG-000834",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.055
+      },
+      {
+        "segment_id": "SEG-000840",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.009
+      },
+      {
+        "segment_id": "SEG-000855",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.292
+      },
+      {
+        "segment_id": "SEG-000861",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.397
+      },
+      {
+        "segment_id": "SEG-000871",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.229
+      },
+      {
+        "segment_id": "SEG-000872",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.26
+      },
+      {
+        "segment_id": "SEG-000884",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.076
+      },
+      {
+        "segment_id": "SEG-000916",
+        "name": "Duck Pond Drive Trl",
+        "corridor": "duck pond dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.301
+      },
+      {
+        "segment_id": "SEG-000941",
+        "name": "Life Science Cir",
+        "corridor": "life science cir",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.153
+      },
+      {
+        "segment_id": "SEG-000953",
+        "name": "Smithfield Road Trl",
+        "corridor": "smithfield rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.146
+      },
+      {
+        "segment_id": "SEG-000960",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.358
+      },
+      {
+        "segment_id": "SEG-000971",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.258
+      },
+      {
+        "segment_id": "SEG-000975",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.058
+      },
+      {
+        "segment_id": "SEG-001029",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.297
+      },
+      {
+        "segment_id": "SEG-001034",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.103
+      },
+      {
+        "segment_id": "SEG-001038",
+        "name": "Duck Pond Drive Trl",
+        "corridor": "duck pond dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.07
+      },
+      {
+        "segment_id": "SEG-001041",
+        "name": "Smithfield Road Trl",
+        "corridor": "smithfield rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.004
+      },
+      {
+        "segment_id": "SEG-001068",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.043
+      },
+      {
+        "segment_id": "SEG-001070",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.147
+      },
+      {
+        "segment_id": "SEG-001099",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.052
+      },
+      {
+        "segment_id": "SEG-001106",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.395
+      },
+      {
+        "segment_id": "SEG-001141",
+        "name": "Oak Lane Trl",
+        "corridor": "oak ln",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.77
+      },
+      {
+        "segment_id": "SEG-001150",
+        "name": "Duck Pond Trl",
+        "corridor": "duck pond",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.27
+      },
+      {
+        "segment_id": "SEG-001160",
+        "name": "Duck Pond Trl",
+        "corridor": "duck pond",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.123
+      },
+      {
+        "segment_id": "SEG-001185",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.232
+      },
+      {
+        "segment_id": "SEG-001211",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.282
+      },
+      {
+        "segment_id": "SEG-001214",
+        "name": "Drillfield Dr",
+        "corridor": "drillfield dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.193
+      },
+      {
+        "segment_id": "SEG-001234",
+        "name": "Drillfield Dr",
+        "corridor": "drillfield dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.083
+      },
+      {
+        "segment_id": "SEG-001268",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.126
+      },
+      {
+        "segment_id": "SEG-001296",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.032
+      },
+      {
+        "segment_id": "SEG-001301",
+        "name": "Prices Fork Road Trl",
+        "corridor": "prices fork rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.056
+      },
+      {
+        "segment_id": "SEG-001303",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.072
+      },
+      {
+        "segment_id": "SEG-001306",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.136
+      },
+      {
+        "segment_id": "SEG-001314",
+        "name": "Drillfield Dr",
+        "corridor": "drillfield dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.065
+      },
+      {
+        "segment_id": "SEG-001325",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.053
+      },
+      {
+        "segment_id": "SEG-001341",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.127
+      },
+      {
+        "segment_id": "SEG-001358",
+        "name": "W Campus Dr",
+        "corridor": "campus dr w",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.233
+      },
+      {
+        "segment_id": "SEG-001379",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.077
+      },
+      {
+        "segment_id": "SEG-001387",
+        "name": "Drillfield Dr",
+        "corridor": "drillfield dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.235
+      },
+      {
+        "segment_id": "SEG-001402",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.089
+      },
+      {
+        "segment_id": "SEG-001427",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.096
+      },
+      {
+        "segment_id": "SEG-001431",
+        "name": "Prices Fork Road Trl",
+        "corridor": "prices fork rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.214
+      },
+      {
+        "segment_id": "SEG-001433",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.287
+      },
+      {
+        "segment_id": "SEG-001493",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.084
+      },
+      {
+        "segment_id": "SEG-001518",
+        "name": "Perry St",
+        "corridor": "perry st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.106
+      },
+      {
+        "segment_id": "SEG-001528",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.19
+      },
+      {
+        "segment_id": "SEG-001536",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.061
+      },
+      {
+        "segment_id": "SEG-001538",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.11
+      },
+      {
+        "segment_id": "SEG-001551",
+        "name": "Stanger St",
+        "corridor": "stanger st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.134
+      },
+      {
+        "segment_id": "SEG-001583",
+        "name": "W Campus Dr",
+        "corridor": "campus dr w",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.108
+      },
+      {
+        "segment_id": "SEG-001592",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.04
+      },
+      {
+        "segment_id": "SEG-001597",
+        "name": "Prices Fork Road Trl",
+        "corridor": "prices fork rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.2
+      },
+      {
+        "segment_id": "SEG-001600",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.035
+      },
+      {
+        "segment_id": "SEG-001608",
+        "name": "W Campus Drive Trl",
+        "corridor": "campus dr w",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.033
+      },
+      {
+        "segment_id": "SEG-001614",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.128
+      },
+      {
+        "segment_id": "SEG-001619",
+        "name": "Perry St",
+        "corridor": "perry st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.2
+      },
+      {
+        "segment_id": "SEG-001629",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.033
+      },
+      {
+        "segment_id": "SEG-001632",
+        "name": "Prices Fork Road Trl",
+        "corridor": "prices fork rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.182
+      },
+      {
+        "segment_id": "SEG-001654",
+        "name": "Prices Fork Road Trl",
+        "corridor": "prices fork rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.018
+      },
+      {
+        "segment_id": "SEG-001673",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.125
+      },
+      {
+        "segment_id": "SEG-001675",
+        "name": "Stanger St",
+        "corridor": "stanger st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.117
+      },
+      {
+        "segment_id": "SEG-001710",
+        "name": "Turner St",
+        "corridor": "turner st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.281
+      },
+      {
+        "segment_id": "SEG-001720",
+        "name": "Stanger St",
+        "corridor": "stanger st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.045
+      },
+      {
+        "segment_id": "SEG-001729",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.066
+      },
+      {
+        "segment_id": "SEG-001747",
+        "name": "Stanger St",
+        "corridor": "stanger st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.042
+      }
+    ]
+  },
   "totals": {
     "OPTIONAL_CONNECTOR": {
-      "segments": 1023,
-      "miles": 69.98
+      "segments": 950,
+      "miles": 58.621
     },
     "OPTIONAL_CONNECTOR::OUT_OF_AREA_CONNECTOR": {
       "segments": 4,
       "miles": 4.215
     },
     "REQUIRED": {
-      "segments": 1509,
-      "miles": 134.229
+      "segments": 1582,
+      "miles": 145.588
     },
     "REQUIRED::STREET": {
       "segments": 1450,
@@ -619,26 +1147,30 @@
       "miles": 45.355
     },
     "OPTIONAL_CONNECTOR::TRAIL": {
-      "segments": 369,
-      "miles": 34.434
+      "segments": 342,
+      "miles": 29.963
     },
     "OPTIONAL_CONNECTOR::PEDESTRIAN_CONNECTOR": {
-      "segments": 650,
-      "miles": 31.33
+      "segments": 604,
+      "miles": 24.443
     },
     "REQUIRED::TRAIL": {
-      "segments": 59,
-      "miles": 10.423
+      "segments": 86,
+      "miles": 14.894
     },
     "EXCLUDED::TRAIL": {
       "segments": 48,
       "miles": 3.965
     },
+    "REQUIRED::PEDESTRIAN_CONNECTOR": {
+      "segments": 46,
+      "miles": 6.887
+    },
     "ALL": {
       "segments": 2998,
       "miles": 253.529
     },
-    "ELIGIBLE_MILEAGE": 134.229
+    "ELIGIBLE_MILEAGE": 145.588
   },
   "households": {
     "residential_address_points": 18022,
@@ -668,8 +1200,8 @@
     "confidence_low": 1899,
     "role_required": 11024,
     "beyond_cap": 677,
-    "confidence_high": 7548,
-    "confidence_medium": 2232,
+    "confidence_high": 7545,
+    "confidence_medium": 2235,
     "held_unresolved_complex": 5607,
     "role_optional_connector": 655,
     "associated": 11679,
@@ -698,18 +1230,15 @@
     "file": "review/apartment-complexes.json"
   },
   "review_queue": {
-    "NEEDS_REVIEW": 1104,
+    "NEEDS_REVIEW": 1031,
     "reason::Trail not on the D2 curated list; connector until reviewed.": 375,
     "reason::SYNTHETIC: derived connector stitching a disconnected pedestrian compo": 262,
     "reason::Sidewalk with no matching street segment \u2014 may be a genuine connector ": 283,
     "reason::Public per RD_MAINT but midpoint falls inside an HOA/privately-owned o": 4,
     "reason::RD_MAINT=Private conflicts with ROAD_CLASS=Local": 36,
-    "reason::Campus path: D1b requires a curated selection, not blanket inclusion. ": 39,
-    "reason::Campus walkway, unmatched to any street. D1b candidate; held for revie": 75,
-    "reason::Path Type='Alley' not covered by an automatic rule.": 30,
-    "PROVISIONAL": 24,
-    "reason::D2 recommendation pending confirmation.": 10,
-    "reason::D2 recommendation pending confirmation. (inherited by spur/related fea": 14
+    "reason::Campus path: D1b requires a curated selection, not blanket inclusion. ": 12,
+    "reason::Campus walkway, unmatched to any street. D1b candidate; held for revie": 29,
+    "reason::Path Type='Alley' not covered by an automatic rule.": 30
   },
   "corrections": {
     "name_fixes": 24,
@@ -748,7 +1277,7 @@
         "name": "required_segments_connected",
         "passed": false,
         "fatal": false,
-        "detail": "41 REQUIRED segments off the main component (117 components total)"
+        "detail": "98 REQUIRED segments off the main component (117 components total)"
       },
       {
         "name": "housing_units_plausible",

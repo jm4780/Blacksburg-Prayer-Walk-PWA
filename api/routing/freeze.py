@@ -1,4 +1,4 @@
-"""Freeze the Phase 2b.1 integration candidate: network v1.1 + engine version.
+"""Freeze the integration candidate: the canonical network + the engine version.
 
 Publishes one manifest that pins the network, the engine, the component
 classification, the benchmark summary and the go/no-go gates.
@@ -53,7 +53,7 @@ def main(date="2026-08-03"):
         frozen_at=datetime.now(timezone.utc).isoformat(),
         canonical_network_version=f"v{net.version}",
         network_id=net.network_id,
-        previous_network_id="bbg-net-v1.0-b61d1067f9a57e32",
+        previous_network_id="bbg-net-v1.1-3855ef9c4c15358a",
         routing_engine_version=ENGINE_VERSION,
         snapshot_date=net.snapshot_date,
         network=network.freeze_manifest(net),
@@ -234,6 +234,71 @@ def _gates(net, comps, csum, bench, quality, qbefore, overrides):
          f"{len(states)} states, decided from local conditions (nearest incomplete "
          f"distance, approach, new mileage, efficiency) — never from town-wide "
          f"completion percentage")
+
+    # 8 — campus promoted without creating a duplicate obligation (Phase 3 item 1)
+    co = network.freeze_manifest(net)["campus_obligation"]
+    campus_req = net.stats["required_campus_miles"]
+    alts = [s for s in net.segments if s.campus_obligation == "ALTERNATIVE"]
+    alt_required = [s for s in alts if s.required]
+    ok = (campus_req > 10.0 and not alt_required
+          and co["alternatives_crediting_a_canonical_side"] == len(alts)
+          and co["credit_links_dropped_as_dangling"] == 0)
+    gate("campus_promoted_without_duplicate_obligation", ok,
+         f"{campus_req} mi of canonical campus corridor is REQUIRED; "
+         f"{len(alt_required)} ALTERNATIVE walkways are REQUIRED (must be 0); "
+         f"{co['duplicate_obligation_miles_avoided']} mi of duplicate obligation "
+         f"avoided; {co['alternatives_crediting_a_canonical_side']}/{len(alts)} "
+         f"alternatives credit a canonical side, {co['credit_links_dropped_as_dangling']} "
+         f"dangling credit links")
+
+    # 9 — the three mileage buckets partition the required total exactly
+    m = network.freeze_manifest(net)["mileage"]
+    three = m["required_street"] + m["required_trail"] + m["required_campus"]
+    gate("required_mileage_partitions", abs(three - m["required_total"]) <= 0.002,
+         f"street {m['required_street']} + trail {m['required_trail']} + campus "
+         f"{m['required_campus']} = {round(three, 3)} vs required total "
+         f"{m['required_total']}")
+
+    # 10 — CRC catalogued for review, still held out of the graph, still valid
+    crc_path = os.path.join(network.OUT_ROOT, net.snapshot_date, "review",
+                            "crc-crossings.json")
+    if os.path.exists(crc_path):
+        crc = json.load(open(crc_path))
+        crc_comp = next((c for c in comps
+                         if "Research Center" in (c.description or "")), None)
+        promoted = [r for r in crc["crossings"]
+                    if r["touches_crc"] and r["segment_id"] in
+                    {s.id for s in net.segments}]
+        ok = (crc["counts"]["crc_crossings"] > 0 and not promoted
+              and crc_comp is not None
+              and crc_comp.classification == "VALID_INDEPENDENT_ROUTING_AREA")
+        gate("crc_crossings_catalogued_not_promoted", ok,
+             f"{crc['counts']['crc_crossings']} CRC crossings catalogued for review; "
+             f"{len(promoted)} of them are in the routing graph (must be 0); CRC is "
+             f"{crc_comp.classification if crc_comp else 'MISSING'} with "
+             f"{crc_comp.required_miles if crc_comp else 0} required mi. "
+             f"{crc['if_all_crc_crossings_were_promoted']['finding']}")
+    else:
+        gate("crc_crossings_catalogued_not_promoted", False,
+             "crc-crossings.json not found; run python3 -m pipeline.build.crc_review")
+
+    # 11 — required mileage stranded off the main component, with its cause.
+    # A WARN, not a FAIL: the campus promotion legitimately added required mileage that
+    # the town street graph does not connect to, and hiding that behind a pass would be
+    # worse than carrying it as a known, quantified limitation.
+    cpath = os.path.join(network.OUT_ROOT, net.snapshot_date, "review",
+                         "connector-classification.json")
+    if os.path.exists(cpath):
+        att = json.load(open(cpath))["disconnection_attribution"]["summary"]
+        off = att["required_miles_off_main_high_confidence"]
+        gate("off_main_required_mileage_attributed", off <= 2.0,
+             f"{off} mi of REQUIRED mileage is off the main component: "
+             f"{att['caused_by_rejected_connectors']} mi would be recovered by "
+             f"reviewing specific rejected connectors, "
+             f"{att['caused_by_isolation_or_missing_data']} mi is isolated or missing "
+             f"from the source. Introduced by the campus promotion — campus pedestrian "
+             f"geometry does not join the town street graph through any trusted "
+             f"connector.", warn=True)
 
     # 7 — performance still interactive
     perf = bench.get("performance", {})

@@ -43,3 +43,26 @@ __pycache__/
 .venv/
 venv/
 .DS_Store
+
+# ---------------------------------------------------------------------------
+# Phase 3 — application
+# ---------------------------------------------------------------------------
+# Participant data. The database holds names, emails and token hashes, and it is a
+# runtime artifact, not source. It must never be committed regardless of tier.
+*.db
+*.db-wal
+*.db-shm
+
+# Secrets. BPW_TOKEN_PEPPER and BPW_DATABASE_URL are supplied by the environment or
+# a managed secret store; a committed .env would put a working credential in git.
+.env
+.env.*
+!.env.example
+
+# Build output and dependencies.
+node_modules/
+web/dist/
+web/dev-dist/
+.pytest_cache/
+.vitest/
+*.tsbuildinfo

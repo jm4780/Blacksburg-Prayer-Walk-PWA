@@ -73,6 +73,9 @@ DEFAULT_WEIGHTS = Weights()
 class RouteScore:
     # raw components, all stored so weights can change later
     new_required_miles: float = 0.0
+    # Of new_required_miles, how much was earned by walking a parallel campus walkway
+    # rather than the canonical side. Reported so a coverage claim can be traced.
+    credited_required_miles: float = 0.0
     repeated_miles: float = 0.0
     repeat_avoidable_miles: float = 0.0
     repeat_closing_miles: float = 0.0
@@ -140,6 +143,20 @@ def compute(route, net, state, target_miles, w: Weights = DEFAULT_WEIGHTS) -> Ro
         if seg.is_derived:
             s.derived_connectors_used += 1
         s.stress_miles += seg.miles * (seg.walk_stress - 1) / 4.0
+
+    # Campus corridors earned by walking the parallel walkway instead of the canonical
+    # side. The walkway's own mileage already counted as connector mileage above; what
+    # is added here is the coverage it credits, which is what the walker actually earned.
+    s.credited_required_miles = 0.0
+    credited = net.credited(seen)
+    for idx in credited:
+        seg = net.segments[idx]
+        if not seg.required or state.is_complete(idx):
+            continue
+        s.new_required_miles += seg.miles
+        s.credited_required_miles += seg.miles
+        s.households += seg.households
+    seen = seen | credited
 
     # Corridor completion: named streets this route finishes off entirely.
     touched, completed = state.corridor_progress(net, seen)

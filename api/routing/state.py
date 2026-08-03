@@ -223,8 +223,15 @@ class Route:
 
     def required_covered(self, net) -> set:
         """The REQUIRED segments this route earns. This is what nests across variants —
-        the closing leg's connectors are incidental and may differ."""
-        return {i for i in set(self.seg_seq) if net.segments[i].required}
+        the closing leg's connectors are incidental and may differ.
+
+        Includes campus corridors earned indirectly: walking the parallel walkway on
+        the other side of a corridor counts (spec §4.2), and network v1.2 makes that
+        operational through `net.credited`.
+        """
+        walked = set(self.seg_seq)
+        direct = {i for i in walked if net.segments[i].required}
+        return direct | {i for i in net.credited(walked) if net.segments[i].required}
 
     def segment_ids(self, net) -> list:
         return [net.segments[i].id for i in self.seg_seq]

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-03T01:14:16.651122+00:00",
+  "generated_at": "2026-08-03T02:21:59.998863+00:00",
   "snapshot_date": "2026-08-03",
   "basemap_evidence": "NONE \u2014 all imagery/tile hosts are denied by this environment's egress policy. Classification uses geometry, endpoint alignment, road class, speed limit, name agreement and crossing context only.",
   "connectors_proposed_across_passes": 426,
@@ -26,14 +26,14 @@
   "connectivity": {
     "all_connectors": {
       "label": "all connectors routable",
-      "components": 118,
+      "components": 88,
       "main_component": {
         "component": 0,
-        "nodes": 1739,
-        "segments": 2061,
-        "miles": 166.772,
-        "required_segments": 1470,
-        "required_miles": 130.958,
+        "nodes": 1867,
+        "segments": 2190,
+        "miles": 177.192,
+        "required_segments": 1526,
+        "required_miles": 138.811,
         "sample_names": [
           "Aden Ln",
           "Airport Rd",
@@ -43,17 +43,23 @@
           "Alice Dr"
         ]
       },
-      "total_required_miles": 135.271,
-      "main_component_required_share": 0.9681,
+      "total_required_miles": 145.588,
+      "main_component_required_share": 0.9534,
       "largest_disconnected": [
         {
           "component": 1,
-          "nodes": 66,
-          "segments": 66,
-          "miles": 6.49,
-          "required_segments": 0,
-          "required_miles": 0.0,
-          "sample_names": []
+          "nodes": 47,
+          "segments": 50,
+          "miles": 3.757,
+          "required_segments": 22,
+          "required_miles": 2.044,
+          "sample_names": [
+            "N Knollwood Dr",
+            "Pratt Dr",
+            "Research Center Dr",
+            "S Knollwood Dr",
+            "SW Kraft Dr"
+          ]
         },
         {
           "component": 2,
@@ -68,30 +74,22 @@
         },
         {
           "component": 3,
-          "nodes": 32,
-          "segments": 34,
-          "miles": 3.014,
-          "required_segments": 22,
-          "required_miles": 2.044,
+          "nodes": 30,
+          "segments": 31,
+          "miles": 2.921,
+          "required_segments": 13,
+          "required_miles": 2.555,
           "sample_names": [
-            "N Knollwood Dr",
-            "Pratt Dr",
-            "Research Center Dr",
-            "S Knollwood Dr",
-            "SW Kraft Dr"
+            "Duck Pond Drive Trl",
+            "Duck Pond Trl",
+            "Oak Lane Trl",
+            "Prices Fork Road Trl",
+            "Smithfield Road Trl",
+            "Washington St"
           ]
         },
         {
           "component": 4,
-          "nodes": 29,
-          "segments": 30,
-          "miles": 2.919,
-          "required_segments": 0,
-          "required_miles": 0.0,
-          "sample_names": []
-        },
-        {
-          "component": 5,
           "nodes": 13,
           "segments": 12,
           "miles": 0.241,
@@ -100,7 +98,7 @@
           "sample_names": []
         },
         {
-          "component": 6,
+          "component": 5,
           "nodes": 9,
           "segments": 8,
           "miles": 0.734,
@@ -109,16 +107,7 @@
           "sample_names": []
         },
         {
-          "component": 7,
-          "nodes": 9,
-          "segments": 8,
-          "miles": 0.457,
-          "required_segments": 0,
-          "required_miles": 0.0,
-          "sample_names": []
-        },
-        {
-          "component": 8,
+          "component": 6,
           "nodes": 8,
           "segments": 8,
           "miles": 1.019,
@@ -127,7 +116,7 @@
           "sample_names": []
         },
         {
-          "component": 9,
+          "component": 7,
           "nodes": 8,
           "segments": 7,
           "miles": 0.16,
@@ -136,27 +125,45 @@
           "sample_names": []
         },
         {
-          "component": 10,
+          "component": 8,
           "nodes": 7,
           "segments": 6,
           "miles": 0.429,
           "required_segments": 0,
           "required_miles": 0.0,
           "sample_names": []
+        },
+        {
+          "component": 9,
+          "nodes": 6,
+          "segments": 5,
+          "miles": 0.454,
+          "required_segments": 0,
+          "required_miles": 0.0,
+          "sample_names": []
+        },
+        {
+          "component": 10,
+          "nodes": 6,
+          "segments": 5,
+          "miles": 0.297,
+          "required_segments": 0,
+          "required_miles": 0.0,
+          "sample_names": []
         }
       ],
-      "unresolved_required_miles": 4.315
+      "unresolved_required_miles": 6.778
     },
     "high_confidence_only": {
       "label": "HIGH_CONFIDENCE only (Phase 2b default)",
-      "components": 118,
+      "components": 117,
       "main_component": {
         "component": 0,
-        "nodes": 1739,
-        "segments": 2061,
-        "miles": 166.772,
-        "required_segments": 1470,
-        "required_miles": 130.958,
+        "nodes": 1737,
+        "segments": 2059,
+        "miles": 166.351,
+        "required_segments": 1484,
+        "required_miles": 132.73,
         "sample_names": [
           "Aden Ln",
           "Airport Rd",
@@ -166,17 +173,23 @@
           "Alice Dr"
         ]
       },
-      "total_required_miles": 135.271,
-      "main_component_required_share": 0.9681,
+      "total_required_miles": 145.588,
+      "main_component_required_share": 0.9117,
       "largest_disconnected": [
         {
           "component": 1,
           "nodes": 66,
           "segments": 66,
           "miles": 6.49,
-          "required_segments": 0,
-          "required_miles": 0.0,
-          "sample_names": []
+          "required_segments": 36,
+          "required_miles": 5.62,
+          "sample_names": [
+            "Drillfield Dr",
+            "Duck Pond Trl",
+            "Perry St",
+            "Stanger St",
+            "W Campus Dr"
+          ]
         },
         {
           "component": 2,
@@ -209,9 +222,16 @@
           "nodes": 29,
           "segments": 30,
           "miles": 2.919,
-          "required_segments": 0,
-          "required_miles": 0.0,
-          "sample_names": []
+          "required_segments": 13,
+          "required_miles": 2.555,
+          "sample_names": [
+            "Duck Pond Drive Trl",
+            "Duck Pond Trl",
+            "Oak Lane Trl",
+            "Prices Fork Road Trl",
+            "Smithfield Road Trl",
+            "Washington St"
+          ]
         },
         {
           "component": 5,
@@ -268,18 +288,18 @@
           "sample_names": []
         }
       ],
-      "unresolved_required_miles": 4.315
+      "unresolved_required_miles": 12.858
     },
     "no_connectors": {
       "label": "no connectors (pre-connect baseline)",
-      "components": 265,
+      "components": 264,
       "main_component": {
         "component": 0,
-        "nodes": 1411,
-        "segments": 1724,
-        "miles": 150.682,
-        "required_segments": 1465,
-        "required_miles": 130.678,
+        "nodes": 1409,
+        "segments": 1722,
+        "miles": 150.261,
+        "required_segments": 1464,
+        "required_miles": 130.493,
         "sample_names": [
           "Aden Ln",
           "Airport Rd",
@@ -289,8 +309,8 @@
           "Alice Dr"
         ]
       },
-      "total_required_miles": 135.271,
-      "main_component_required_share": 0.966,
+      "total_required_miles": 145.588,
+      "main_component_required_share": 0.8963,
       "largest_disconnected": [
         {
           "component": 1,
@@ -323,9 +343,12 @@
           "nodes": 15,
           "segments": 14,
           "miles": 1.583,
-          "required_segments": 0,
-          "required_miles": 0.0,
-          "sample_names": []
+          "required_segments": 10,
+          "required_miles": 1.414,
+          "sample_names": [
+            "Drillfield Dr",
+            "Stanger St"
+          ]
         },
         {
           "component": 4,
@@ -341,26 +364,33 @@
           "nodes": 10,
           "segments": 9,
           "miles": 1.469,
-          "required_segments": 0,
-          "required_miles": 0.0,
-          "sample_names": []
+          "required_segments": 6,
+          "required_miles": 1.404,
+          "sample_names": [
+            "Duck Pond Drive Trl",
+            "Oak Lane Trl",
+            "Prices Fork Road Trl",
+            "Smithfield Road Trl"
+          ]
         },
         {
           "component": 6,
           "nodes": 10,
           "segments": 9,
           "miles": 0.633,
-          "required_segments": 0,
-          "required_miles": 0.0,
-          "sample_names": []
+          "required_segments": 3,
+          "required_miles": 0.298,
+          "sample_names": [
+            "Stanger St"
+          ]
         },
         {
           "component": 7,
           "nodes": 9,
           "segments": 9,
           "miles": 1.577,
-          "required_segments": 0,
-          "required_miles": 0.0,
+          "required_segments": 8,
+          "required_miles": 1.547,
           "sample_names": []
         },
         {
@@ -386,28 +416,51 @@
           "nodes": 8,
           "segments": 7,
           "miles": 0.556,
-          "required_segments": 0,
-          "required_miles": 0.0,
-          "sample_names": []
+          "required_segments": 1,
+          "required_miles": 0.225,
+          "sample_names": [
+            "Southgate Dr"
+          ]
         }
       ],
-      "unresolved_required_miles": 4.595
+      "unresolved_required_miles": 15.1
     }
   },
   "disconnection_attribution": {
     "summary": {
-      "required_miles_off_main_high_confidence": 4.314,
-      "caused_by_rejected_connectors": 0.0,
-      "caused_by_isolation_or_missing_data": 4.314
+      "required_miles_off_main_high_confidence": 12.858,
+      "caused_by_rejected_connectors": 6.08,
+      "caused_by_isolation_or_missing_data": 6.778
     },
     "interpretation": "'caused_by_rejected_connectors' is required mileage that WOULD reach the main graph if we routed over connectors we do not trust \u2014 recoverable by reviewing those specific connectors. 'caused_by_isolation_or_missing_data' is off-main even with every connector allowed: either a genuinely isolated stub, or a real gap in the source data.",
     "segments": [
       {
-        "id": "SEG-000010",
-        "name": "Gordon C Willis Smart Rd",
-        "type": "STREET",
-        "miles": 0.4849,
+        "id": "SEG-001141",
+        "name": "Oak Lane Trl",
+        "type": "TRAIL",
+        "miles": 0.7705,
         "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-000861",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.3966,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001106",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.3945,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-000960",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.3581,
+        "recovered_by_rejected_connector": true
       },
       {
         "id": "SEG-000245",
@@ -431,6 +484,97 @@
         "recovered_by_rejected_connector": false
       },
       {
+        "id": "SEG-000916",
+        "name": "Duck Pond Drive Trl",
+        "type": "TRAIL",
+        "miles": 0.3006,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001029",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.2972,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-000656",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.2951,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-000855",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.2915,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001433",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.2869,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001211",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.2816,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001150",
+        "name": "Duck Pond Trl",
+        "type": "TRAIL",
+        "miles": 0.27,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-000971",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.2584,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001387",
+        "name": "Drillfield Dr",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.2347,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001358",
+        "name": "W Campus Dr",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.2331,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001185",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.2321,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-000871",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.2292,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001431",
+        "name": "Prices Fork Road Trl",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.214,
+        "recovered_by_rejected_connector": false
+      },
+      {
         "id": "SEG-000359",
         "name": "Scenic Ridge Cir",
         "type": "STREET",
@@ -442,6 +586,48 @@
         "name": "Scenic Ridge Cir",
         "type": "STREET",
         "miles": 0.2021,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001619",
+        "name": "Perry St",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.2001,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001597",
+        "name": "Prices Fork Road Trl",
+        "type": "TRAIL",
+        "miles": 0.1996,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001214",
+        "name": "Drillfield Dr",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1927,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-000941",
+        "name": "Life Science Cir",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1534,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001070",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1469,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-000953",
+        "name": "Smithfield Road Trl",
+        "type": "TRAIL",
+        "miles": 0.1456,
         "recovered_by_rejected_connector": false
       },
       {
@@ -459,18 +645,74 @@
         "recovered_by_rejected_connector": false
       },
       {
+        "id": "SEG-001306",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.1364,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001551",
+        "name": "Stanger St",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1344,
+        "recovered_by_rejected_connector": true
+      },
+      {
         "id": "SEG-002559",
         "name": "Georgia St",
         "type": "STREET",
         "miles": 0.1293,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-000790",
+        "name": "Washington St",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1289,
         "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001614",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1279,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001341",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1268,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001268",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.1256,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001673",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1247,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001160",
+        "name": "Duck Pond Trl",
+        "type": "TRAIL",
+        "miles": 0.1232,
+        "recovered_by_rejected_connector": true
       },
       {
         "id": "SEG-002539",
         "name": "Bradley Ln",
         "type": "STREET",
         "miles": 0.1229,
-        "recovered_by_rejected_connector": false
+        "recovered_by_rejected_connector": true
       },
       {
         "id": "SEG-000343",
@@ -480,11 +722,39 @@
         "recovered_by_rejected_connector": false
       },
       {
+        "id": "SEG-001675",
+        "name": "Stanger St",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1169,
+        "recovered_by_rejected_connector": true
+      },
+      {
         "id": "SEG-000243",
         "name": "Apple Ln",
         "type": "STREET",
         "miles": 0.1132,
         "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001538",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1099,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001583",
+        "name": "W Campus Dr",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1085,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001518",
+        "name": "Perry St",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1061,
+        "recovered_by_rejected_connector": true
       },
       {
         "id": "SEG-000261",
@@ -508,6 +778,13 @@
         "recovered_by_rejected_connector": false
       },
       {
+        "id": "SEG-001034",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.1033,
+        "recovered_by_rejected_connector": true
+      },
+      {
         "id": "SEG-000226",
         "name": "Sandstone Rdg",
         "type": "STREET",
@@ -527,6 +804,27 @@
         "type": "STREET",
         "miles": 0.0972,
         "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001427",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.0957,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001402",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.0888,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001234",
+        "name": "Drillfield Dr",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0834,
+        "recovered_by_rejected_connector": true
       },
       {
         "id": "SEG-000137",
@@ -557,6 +855,20 @@
         "recovered_by_rejected_connector": false
       },
       {
+        "id": "SEG-001379",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.0767,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-000884",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.0763,
+        "recovered_by_rejected_connector": false
+      },
+      {
         "id": "SEG-000223",
         "name": "N Knollwood Dr",
         "type": "STREET",
@@ -564,10 +876,17 @@
         "recovered_by_rejected_connector": false
       },
       {
-        "id": "SEG-000034",
-        "name": "Gordon C Willis Smart Rd",
-        "type": "STREET",
-        "miles": 0.0659,
+        "id": "SEG-001303",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.0716,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001038",
+        "name": "Duck Pond Drive Trl",
+        "type": "TRAIL",
+        "miles": 0.0703,
         "recovered_by_rejected_connector": false
       },
       {
@@ -578,10 +897,38 @@
         "recovered_by_rejected_connector": false
       },
       {
+        "id": "SEG-001314",
+        "name": "Drillfield Dr",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0653,
+        "recovered_by_rejected_connector": true
+      },
+      {
         "id": "SEG-000224",
         "name": "Apple Ln",
         "type": "STREET",
         "miles": 0.0638,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-000975",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0579,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001301",
+        "name": "Prices Fork Road Trl",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0561,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-000789",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.0559,
         "recovered_by_rejected_connector": false
       },
       {
@@ -592,11 +939,39 @@
         "recovered_by_rejected_connector": false
       },
       {
-        "id": "SEG-000025",
-        "name": "Gordon C Willis Smart Rd",
-        "type": "STREET",
-        "miles": 0.0484,
+        "id": "SEG-000834",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0549,
         "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001325",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.0532,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001099",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0519,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-000757",
+        "name": null,
+        "type": "TRAIL",
+        "miles": 0.046,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001720",
+        "name": "Stanger St",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0454,
+        "recovered_by_rejected_connector": true
       },
       {
         "id": "SEG-000252",
@@ -606,6 +981,20 @@
         "recovered_by_rejected_connector": false
       },
       {
+        "id": "SEG-001068",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0432,
+        "recovered_by_rejected_connector": true
+      },
+      {
+        "id": "SEG-001747",
+        "name": "Stanger St",
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0418,
+        "recovered_by_rejected_connector": true
+      },
+      {
         "id": "SEG-000366",
         "name": "Scenic Ridge Cir",
         "type": "STREET",
@@ -613,11 +1002,18 @@
         "recovered_by_rejected_connector": false
       },
       {
+        "id": "SEG-001592",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0395,
+        "recovered_by_rejected_connector": true
+      },
+      {
         "id": "SEG-002549",
         "name": "Georgia St",
         "type": "STREET",
         "miles": 0.0394,
-        "recovered_by_rejected_connector": false
+        "recovered_by_rejected_connector": true
       },
       {
         "id": "SEG-000174",
@@ -625,6 +1021,13 @@
         "type": "STREET",
         "miles": 0.0387,
         "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001296",
+        "name": null,
+        "type": "PEDESTRIAN_CONNECTOR",
+        "miles": 0.0325,
+        "recovered_by_rejected_connector": true
       },
       {
         "id": "SEG-002998",
@@ -641,18 +1044,11 @@
         "recovered_by_rejected_connector": false
       },
       {
-        "id": "SEG-000030",
-        "name": "Gordon C Willis Smart Rd",
-        "type": "STREET",
-        "miles": 0.0214,
-        "recovered_by_rejected_connector": false
-      },
-      {
         "id": "SEG-002497",
         "name": "Shenandoah Trail Spur",
         "type": "TRAIL",
         "miles": 0.018,
-        "recovered_by_rejected_connector": false
+        "recovered_by_rejected_connector": true
       },
       {
         "id": "SEG-000234",
@@ -708,6 +1104,13 @@
         "name": "Pratt Dr",
         "type": "STREET",
         "miles": 0.0044,
+        "recovered_by_rejected_connector": false
+      },
+      {
+        "id": "SEG-001041",
+        "name": "Smithfield Road Trl",
+        "type": "TRAIL",
+        "miles": 0.0036,
         "recovered_by_rejected_connector": false
       },
       {

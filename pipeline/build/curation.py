@@ -19,11 +19,13 @@ TRAIL_ROLES = {
     # Confirmed by Jacob 2026-08-02.
     "huckleberry trl": dict(role="REQUIRED", status="CONFIRMED",
                             note="Town spine; paved; passes neighborhoods. D2."),
-    # Recommended, awaiting yes/no. Applied provisionally.
-    "deerfield trl": dict(role="REQUIRED", status="PROVISIONAL",
-                          note="D2 recommendation pending confirmation."),
-    "shenandoah trl": dict(role="REQUIRED", status="PROVISIONAL",
-                           note="D2 recommendation pending confirmation."),
+    # Confirmed by Jacob 2026-08-03 (Phase 3 item 1). Were PROVISIONAL through v1.1.
+    "deerfield trl": dict(role="REQUIRED", status="CONFIRMED",
+                          note="D2 recommendation accepted at the Phase 3 network "
+                               "ruling. PROVISIONAL -> CONFIRMED for network v1.2."),
+    "shenandoah trl": dict(role="REQUIRED", status="CONFIRMED",
+                           note="D2 recommendation accepted at the Phase 3 network "
+                                "ruling. PROVISIONAL -> CONFIRMED for network v1.2."),
     # Explicitly connector-only per D2.
     "gateway trl": dict(role="OPTIONAL_CONNECTOR", status="CONFIRMED",
                         note="3.7 mi dirt, 869 ft gain; destination hike, not a "
@@ -57,10 +59,36 @@ CAMPUS_CORE_SOURCE = dict(
 
 # Campus pedestrian ways are REQUIRED per D1b — but only ones a human has approved.
 # The schema inspection found campus paths in Paths to the Future tagged Owner=VT;
-# they are classified NEEDS_REVIEW, not auto-REQUIRED, because D1b asks for a
-# *selection* of major ways, not blanket inclusion.
+# the classifier leaves them NEEDS_REVIEW, because D1b asks for a *selection* of major
+# ways, not blanket inclusion.
 CAMPUS_PATH_DEFAULT_ROLE = "OPTIONAL_CONNECTOR"
 CAMPUS_PATH_DEFAULT_STATUS = "NEEDS_REVIEW"
+
+# ---------------------------------------------------------------------------
+# D1b ruling — network v1.2, 2026-08-03 (Phase 3 item 1)
+# ---------------------------------------------------------------------------
+# The *selection* D1b asked for is now made, and campus_normalize.py is what makes
+# it. Rather than hand-picking street names, the approved selection is: one coverage
+# obligation per campus corridor. The corridor's canonical side becomes REQUIRED; the
+# parallel walkway on the other side stays a connector and *satisfies* the canonical
+# obligation instead of creating a second one (spec §4.2 — walking one side counts).
+#
+# This is the whole point of the ruling. Promoting all 114 campus pedestrian segments
+# would demand 13.403 mi of walking to cover 11.358 mi of distinct ground, and would
+# make Drillfield Drive count as unfinished until a walker had been down both sides.
+CAMPUS_PROMOTE_CANONICAL_TO_REQUIRED = True
+CAMPUS_PROMOTION_STATUS = "CONFIRMED"
+CAMPUS_PROMOTION_NOTE = (
+    "D1b: campus pedestrian corridors carry the coverage obligation for campus, "
+    "because the town Roads layer does not contain campus streets at all (see "
+    "docs/02-technical-plan.md §2.4a). One obligation per corridor: the canonical "
+    "side is REQUIRED, parallel walkways are ALTERNATIVE and satisfy it. "
+    "Promoted for network v1.2, 2026-08-03.")
+
+# A parallel walkway is credited with covering a canonical segment when it runs
+# alongside at least this share of that segment's length. Below the threshold it is
+# beside part of the corridor but does not stand in for the whole obligation.
+CAMPUS_SATISFY_SHARE = 0.6
 
 # ---------------------------------------------------------------------------
 # Hard exclusions — limited-access facilities nobody walks.

@@ -1,0 +1,1928 @@
+{
+  "generated_at": "2026-08-03T02:19:28.480099+00:00",
+  "snapshot_date": "2026-08-03",
+  "network_version": "1.2",
+  "status": "OPEN \u2014 no connector below is promoted, and none is in the routing graph",
+  "policy": "Network v1.2 keeps every connector below out of the default routing graph and keeps the Corporate Research Center classified as a valid independent routing area. A walker starting in the CRC routes the CRC. The router never invents a crossing. Promoting any row here requires a curation entry with evidence and a new canonical-network version.",
+  "correction_of_record": "Phase 2b reported the CRC as severed by the US-460 bypass. That was wrong. The bypass is EXCLUDED and unwalkable, but it is not what separates the CRC \u2014 these short at-grade links are. Corrected in docs/12; restated here so the review artifact does not inherit the error.",
+  "basemap_evidence": "NONE. Every imagery and tile host is denied by this environment's egress policy, so no row below has been checked against an aerial. That is exactly why these are review items and not decisions.",
+  "crc_component": 3,
+  "crc_profile": {
+    "component": 3,
+    "nodes": 32,
+    "required_miles": 2.044,
+    "total_miles": 3.327,
+    "households": 288,
+    "top_streets": [
+      "Research Center Dr",
+      "SW Kraft Dr",
+      "Pratt Dr",
+      "S Knollwood Dr",
+      "N Knollwood Dr"
+    ]
+  },
+  "if_all_crc_crossings_were_promoted": {
+    "crc_would_join_main_component": false,
+    "additional_required_miles_reachable_from_crc": 0.0,
+    "finding": "Promoting every CRC crossing would NOT join the CRC to the main network. Each of these links the CRC to a small isolated fragment, not to the town graph \u2014 so the review is worth doing for local CRC walkability, but it is not the thing that would let someone walk from the CRC to downtown. Whatever separates the CRC from the main component is not in this list."
+  },
+  "counts": {
+    "bridging_connectors_total": 32,
+    "crc_crossings": 8,
+    "by_classification": {
+      "CROSSING_REVIEW_REQUIRED": 29,
+      "LIKELY_FALSE": 1,
+      "UNRESOLVED": 2
+    }
+  },
+  "crossings": [
+    {
+      "segment_id": "SEG-000148",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 5.8,
+      "joins_components": [
+        3,
+        null
+      ],
+      "bridges_components": false,
+      "touches_crc": true,
+      "other_side_component": null,
+      "from_feature": "Rimrock Drive",
+      "to_feature": "Research Center Drive Trail",
+      "side_a": {
+        "component": 3,
+        "nodes": 32,
+        "required_miles": 2.044,
+        "total_miles": 3.327,
+        "households": 288,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "side_b": null,
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto Research Center Drive Trail (5.8 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Secondary roadway (Research Center Dr, 35 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.40396517652859,
+            37.19595430592886
+          ],
+          [
+            -80.40389984438163,
+            37.19595279653008
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-000149",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 8.6,
+      "joins_components": [
+        77,
+        3
+      ],
+      "bridges_components": true,
+      "touches_crc": true,
+      "other_side_component": 77,
+      "from_feature": "Rimrock Drive",
+      "to_feature": "RESEARCH CENTER DR",
+      "side_a": {
+        "component": 77,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.089,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 3,
+        "nodes": 32,
+        "required_miles": 2.044,
+        "total_miles": 3.327,
+        "households": 288,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto RESEARCH CENTER DR (8.61 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Secondary roadway (Research Center Dr, 35 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4040620655412,
+            37.1959575155855
+          ],
+          [
+            -80.40396517652859,
+            37.19595430592886
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-000156",
+      "classification": "LIKELY_FALSE",
+      "length_m": 7.7,
+      "joins_components": [
+        15,
+        null
+      ],
+      "bridges_components": false,
+      "touches_crc": true,
+      "other_side_component": 15,
+      "from_feature": "Research Center Drive Trail",
+      "to_feature": "RIDGE RD",
+      "side_a": {
+        "component": 15,
+        "nodes": 5,
+        "required_miles": 0.0,
+        "total_miles": 0.297,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": null,
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto RIDGE RD (7.7 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it."
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4038120913723,
+            37.19640778344909
+          ],
+          [
+            -80.40381351397127,
+            37.196338372551345
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-000180",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 7.5,
+      "joins_components": [
+        25,
+        3
+      ],
+      "bridges_components": true,
+      "touches_crc": true,
+      "other_side_component": 25,
+      "from_feature": "Kraft Drive Trail",
+      "to_feature": "RESEARCH CENTER DR",
+      "side_a": {
+        "component": 25,
+        "nodes": 4,
+        "required_miles": 0.0,
+        "total_miles": 0.208,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 3,
+        "nodes": 32,
+        "required_miles": 2.044,
+        "total_miles": 3.327,
+        "households": 288,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto RESEARCH CENTER DR (7.5 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Secondary roadway (Research Center Dr, 35 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4045544448308,
+            37.1979780149299
+          ],
+          [
+            -80.40447538952952,
+            37.19800193193148
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-000217",
+      "classification": "UNRESOLVED",
+      "length_m": 10.2,
+      "joins_components": [
+        26,
+        3
+      ],
+      "bridges_components": true,
+      "touches_crc": true,
+      "other_side_component": 26,
+      "from_feature": "CRC Trail",
+      "to_feature": "PRATT DR",
+      "side_a": {
+        "component": 26,
+        "nodes": 4,
+        "required_miles": 0.0,
+        "total_miles": 0.196,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 3,
+        "nodes": 32,
+        "required_miles": 2.044,
+        "total_miles": 3.327,
+        "households": 288,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto PRATT DR (10.24 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "insufficient signal: 10.2 m, target class Local, speed 25, no name agreement"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4107448137955,
+            37.2012106079584
+          ],
+          [
+            -80.41071644546385,
+            37.2011211683893
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-000270",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 5.6,
+      "joins_components": [
+        82,
+        3
+      ],
+      "bridges_components": true,
+      "touches_crc": true,
+      "other_side_component": 82,
+      "from_feature": "Research Center Drive Trail",
+      "to_feature": "KRAFT DR SW",
+      "side_a": {
+        "component": 82,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.145,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 3,
+        "nodes": 32,
+        "required_miles": 2.044,
+        "total_miles": 3.327,
+        "households": 288,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto KRAFT DR SW (5.64 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Secondary roadway (SW Kraft Dr, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4099886772653,
+            37.204830539260705
+          ],
+          [
+            -80.4099251912681,
+            37.204829639087244
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-000271",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 0.4,
+      "joins_components": [
+        3,
+        3
+      ],
+      "bridges_components": false,
+      "touches_crc": true,
+      "other_side_component": null,
+      "from_feature": "Research Center Drive Trail",
+      "to_feature": "KRAFT DR SW",
+      "side_a": {
+        "component": 3,
+        "nodes": 32,
+        "required_miles": 2.044,
+        "total_miles": 3.327,
+        "households": 288,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "side_b": {
+        "component": 3,
+        "nodes": 32,
+        "required_miles": 2.044,
+        "total_miles": 3.327,
+        "households": 288,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto KRAFT DR SW (1.48 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Secondary roadway (SW Kraft Dr, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4099251912681,
+            37.204829639087244
+          ],
+          [
+            -80.40992511619345,
+            37.20483302667892
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-000273",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 6.6,
+      "joins_components": [
+        81,
+        3
+      ],
+      "bridges_components": true,
+      "touches_crc": true,
+      "other_side_component": 81,
+      "from_feature": "Research Center Drive",
+      "to_feature": "KRAFT DR SW",
+      "side_a": {
+        "component": 81,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.1,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 3,
+        "nodes": 32,
+        "required_miles": 2.044,
+        "total_miles": 3.327,
+        "households": 288,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto KRAFT DR SW (6.59 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Secondary roadway (SW Kraft Dr, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4098506157891,
+            37.2048418938592
+          ],
+          [
+            -80.40992489633969,
+            37.20484294713297
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001679",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 6.2,
+      "joins_components": [
+        1,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "West Campus Drive",
+      "to_feature": "PRICES FORK RD",
+      "side_a": {
+        "component": 1,
+        "nodes": 66,
+        "required_miles": 5.62,
+        "total_miles": 6.494,
+        "households": 0,
+        "top_streets": [
+          "Drillfield Dr",
+          "Perry St",
+          "Stanger St",
+          "W Campus Dr",
+          "Duck Pond Trl"
+        ]
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 5.62,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto PRICES FORK RD (6.18 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Secondary roadway (Prices Fork Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.42796610030551,
+            37.23179241569792
+          ],
+          [
+            -80.42800282045793,
+            37.231839770326395
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002576",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 18.6,
+      "joins_components": [
+        39,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "BRADLEY LN",
+      "to_feature": "Maple Ridge",
+      "side_a": {
+        "component": 39,
+        "nodes": 4,
+        "required_miles": 0.292,
+        "total_miles": 0.303,
+        "households": 8,
+        "top_streets": [
+          "Georgia St",
+          "Bradley Ln"
+        ]
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.292,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto Maple Ridge (18.62 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "18.6 m gap \u2014 too long to be a digitising offset; something is genuinely missing here"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4032242767179,
+            37.25168061081731
+          ],
+          [
+            -80.4030527557223,
+            37.25158391512859
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001647",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 10.2,
+      "joins_components": [
+        94,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "West Campus Drive",
+      "to_feature": "PRICES FORK RD",
+      "side_a": {
+        "component": 94,
+        "nodes": 2,
+        "required_miles": 0.108,
+        "total_miles": 0.115,
+        "households": 0,
+        "top_streets": [
+          "W Campus Dr"
+        ]
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.108,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto PRICES FORK RD (10.16 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Secondary roadway (Prices Fork Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4286896536387,
+            37.23145226195611
+          ],
+          [
+            -80.42873111862107,
+            37.23153755203574
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001774",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 15.9,
+      "joins_components": [
+        97,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Stanger Street",
+      "to_feature": "PRICES FORK RD",
+      "side_a": {
+        "component": 97,
+        "nodes": 2,
+        "required_miles": 0.042,
+        "total_miles": 0.052,
+        "households": 0,
+        "top_streets": [
+          "Stanger St"
+        ]
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.042,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto PRICES FORK RD (15.94 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Secondary roadway (Prices Fork Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4251146665611,
+            37.233113931657705
+          ],
+          [
+            -80.42520788462969,
+            37.23323670098637
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002506",
+      "classification": "UNRESOLVED",
+      "length_m": 13.4,
+      "joins_components": [
+        111,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Shenandoah Trail Spur",
+      "to_feature": "SEMINOLE DR",
+      "side_a": {
+        "component": 111,
+        "nodes": 2,
+        "required_miles": 0.018,
+        "total_miles": 0.026,
+        "households": 1,
+        "top_streets": [
+          "Shenandoah Trail Spur"
+        ]
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.018,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto SEMINOLE DR (13.36 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "insufficient signal: 13.4 m, target class Local, speed 25, no name agreement"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4199833123294,
+            37.24825855550219
+          ],
+          [
+            -80.4200618948175,
+            37.24836127797279
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001166",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 4.7,
+      "joins_components": [
+        50,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Otey Street",
+      "to_feature": "WASHINGTON ST SW",
+      "side_a": {
+        "component": 50,
+        "nodes": 3,
+        "required_miles": 0.0,
+        "total_miles": 0.15,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto WASHINGTON ST SW (4.68 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (SW Washington St, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.415712044358,
+            37.225816346368624
+          ],
+          [
+            -80.41567788092324,
+            37.22578426256229
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001253",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 9.3,
+      "joins_components": [
+        29,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": " ",
+      "to_feature": "KENT ST",
+      "side_a": {
+        "component": 29,
+        "nodes": 4,
+        "required_miles": 0.0,
+        "total_miles": 0.733,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto KENT ST (9.31 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Kent St, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4167581025223,
+            37.2268625428697
+          ],
+          [
+            -80.4168044164783,
+            37.226787245008616
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001517",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 5.1,
+      "joins_components": [
+        31,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Roanoke Street",
+      "to_feature": "N MAIN ST",
+      "side_a": {
+        "component": 31,
+        "nodes": 4,
+        "required_miles": 0.0,
+        "total_miles": 0.162,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto N MAIN ST (5.07 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Arterial roadway (N Main St, 20 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.41458161113941,
+            37.230027174028585
+          ],
+          [
+            -80.4146254163052,
+            37.22999790113833
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001554",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 5.0,
+      "joins_components": [
+        91,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Clay Street",
+      "to_feature": "CLAY ST SE",
+      "side_a": {
+        "component": 91,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.023,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto CLAY ST SE (4.97 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (SE Clay St, 20 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4062312298829,
+            37.2305655963626
+          ],
+          [
+            -80.40626702139687,
+            37.23060008402207
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001565",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 15.3,
+      "joins_components": [
+        92,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Fiddlers Green Trail Spur",
+      "to_feature": "ARTIS CT",
+      "side_a": {
+        "component": 92,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.02,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto ARTIS CT (15.33 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "15.3 m gap \u2014 too long to be a digitising offset; something is genuinely missing here"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4040505463033,
+            37.23071108691117
+          ],
+          [
+            -80.4041111701939,
+            37.23084043556351
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001567",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 5.9,
+      "joins_components": [
+        93,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Clay Street",
+      "to_feature": "CLAY ST SE",
+      "side_a": {
+        "component": 93,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.025,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto CLAY ST SE (5.92 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (SE Clay St, 20 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4059203281475,
+            37.2307647417806
+          ],
+          [
+            -80.40596369639962,
+            37.23080526166353
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001575",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 5.2,
+      "joins_components": [
+        95,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Progress Street Trail",
+      "to_feature": "N MAIN ST",
+      "side_a": {
+        "component": 95,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.087,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto N MAIN ST (5.25 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Arterial roadway (N Main St, 20 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4152392810414,
+            37.23070675215911
+          ],
+          [
+            -80.41528534426642,
+            37.230736392148295
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001922",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 6.0,
+      "joins_components": [
+        100,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Progress Street",
+      "to_feature": "GILES RD",
+      "side_a": {
+        "component": 100,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.173,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto GILES RD (5.97 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Giles Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4189807866942,
+            37.2352441958518
+          ],
+          [
+            -80.41893039316744,
+            37.2352084918508
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001960",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 5.6,
+      "joins_components": [
+        99,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Montgomery Street",
+      "to_feature": "GILES RD",
+      "side_a": {
+        "component": 99,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.039,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto GILES RD (5.56 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Giles Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4180999538714,
+            37.23591157156739
+          ],
+          [
+            -80.4181478098806,
+            37.23594393795572
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-001979",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 6.2,
+      "joins_components": [
+        101,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": null,
+      "to_feature": "GLADE RD",
+      "side_a": {
+        "component": 101,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.1,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto GLADE RD (6.19 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Secondary roadway (Glade Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4405266889089,
+            37.2358744289911
+          ],
+          [
+            -80.44053775383118,
+            37.23581936212852
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002084",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 4.1,
+      "joins_components": [
+        103,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Hearthstone Trail",
+      "to_feature": "GILES RD",
+      "side_a": {
+        "component": 103,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.153,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto GILES RD (4.11 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Giles Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4166659693454,
+            37.2381831060201
+          ],
+          [
+            -80.41662198767736,
+            37.2381715253981
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002273",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 5.2,
+      "joins_components": [
+        104,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Turner Street",
+      "to_feature": "GILES RD",
+      "side_a": {
+        "component": 104,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.24,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto GILES RD (5.21 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Giles Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4149200509588,
+            37.24252927707051
+          ],
+          [
+            -80.41495824154883,
+            37.242564947271624
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002347",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 4.8,
+      "joins_components": [
+        7,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Patrick Henry Drive",
+      "to_feature": "GILES RD",
+      "side_a": {
+        "component": 7,
+        "nodes": 9,
+        "required_miles": 0.0,
+        "total_miles": 0.46,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto GILES RD (4.82 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Giles Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4122922155534,
+            37.2448079035916
+          ],
+          [
+            -80.41233871679415,
+            37.24483029075105
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002356",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 8.9,
+      "joins_components": [
+        106,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Patrick Henry Drive",
+      "to_feature": "GILES RD",
+      "side_a": {
+        "component": 106,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.116,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto GILES RD (8.92 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Giles Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4120927854106,
+            37.24499784750321
+          ],
+          [
+            -80.41217830150063,
+            37.24504019246788
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002359",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 8.3,
+      "joins_components": [
+        107,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Patrick Henry Drive",
+      "to_feature": "GILES RD",
+      "side_a": {
+        "component": 107,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.166,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto GILES RD (8.32 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Giles Rd, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.41225268051402,
+            37.245086503244
+          ],
+          [
+            -80.41217299287288,
+            37.24504704444719
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002469",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 5.1,
+      "joins_components": [
+        38,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Chickahominy Drive",
+      "to_feature": "GIVENS LN",
+      "side_a": {
+        "component": 38,
+        "nodes": 4,
+        "required_miles": 0.0,
+        "total_miles": 0.309,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto GIVENS LN (5.09 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Givens Ln, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.429363180339,
+            37.24734084364051
+          ],
+          [
+            -80.4293073851912,
+            37.24735151802068
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002595",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 7.5,
+      "joins_components": [
+        112,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Givens Lane Trail",
+      "to_feature": "PROGRESS ST NW",
+      "side_a": {
+        "component": 112,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.085,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto PROGRESS ST NW (7.52 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (NW Progress St, 25 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.42252129144201,
+            37.25200176719768
+          ],
+          [
+            -80.42243708800439,
+            37.252009871009605
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002624",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 4.3,
+      "joins_components": [
+        113,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Progress Street",
+      "to_feature": "GIVENS LN",
+      "side_a": {
+        "component": 113,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.035,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto GIVENS LN (4.32 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Givens Ln, 15 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4224359218552,
+            37.25264056103081
+          ],
+          [
+            -80.42244870187744,
+            37.2526029755213
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    },
+    {
+      "segment_id": "SEG-002769",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "length_m": 3.4,
+      "joins_components": [
+        115,
+        0
+      ],
+      "bridges_components": true,
+      "touches_crc": false,
+      "other_side_component": null,
+      "from_feature": "Deerfield",
+      "to_feature": "TOMS CREEK RD",
+      "side_a": {
+        "component": 115,
+        "nodes": 2,
+        "required_miles": 0.0,
+        "total_miles": 0.761,
+        "households": 0,
+        "top_streets": []
+      },
+      "side_b": {
+        "component": 0,
+        "nodes": 1737,
+        "required_miles": 132.73,
+        "total_miles": 178.867,
+        "households": 10617,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_on_smaller_side": 0.0,
+      "classifier_reasons": [
+        "SYNTHETIC: derived connector stitching a disconnected pedestrian component onto TOMS CREEK RD (3.36 m). Not observed in any source. Confirm the crossing this implies actually exists before relying on it.",
+        "steps into a Collector roadway (Toms Creek Rd, 35 mph) \u2014 needs a real crossing"
+      ],
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -80.4421410830717,
+            37.2571108924674
+          ],
+          [
+            -80.44217804962354,
+            37.25710411549967
+          ]
+        ]
+      },
+      "review_question": "Is there a lawful, physically usable pedestrian crossing at this point? Answer YES only with direct evidence \u2014 a marked crosswalk, a signal, a curb ramp pair, or first-hand local knowledge. Absence of evidence is not a yes.",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null,
+      "evidence": null
+    }
+  ]
+}

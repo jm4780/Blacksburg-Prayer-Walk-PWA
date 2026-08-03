@@ -196,13 +196,76 @@ def analyse(date):
     return corridors, unnamed, segs, unnamed_distinct, unnamed_dupe
 
 
-def normalize_segments(segments):
+def covered_fraction(alt_geom, canon_geom):
+    """What share of `canon_geom`'s length runs within PARALLEL_M of `alt_geom`.
+
+    Sampled along the *canonical* segment, not the alternative. That direction is the
+    one that matters: the question is how much of the obligation the alternative
+    stands in for, not how much of the alternative is beside something.
+    """
+    n = max(4, int(canon_geom.length // 5))
+    near = sum(1 for k in range(n + 1)
+               if alt_geom.distance(canon_geom.interpolate(k / n, normalized=True))
+               <= PARALLEL_M)
+    return near / (n + 1)
+
+
+# Below this, an alternative brushes a canonical segment rather than covering any
+# meaningful part of it, and the pair is not worth recording.
+MIN_CREDIT_FRACTION = 0.05
+
+
+def _link_alternatives(alts, canons, share):
+    """Stamp each ALTERNATIVE with the canonical segments it covers, and by how much.
+
+    This is what makes "walking one side counts" mean something operationally. Without
+    it, promoting canonical sides to REQUIRED would leave a walker who took the north
+    sidewalk of Drillfield Drive with the south side still showing as unprayed-for.
+
+    Credit is **proportional and additive**, not all-or-nothing, because canonical and
+    alternative segments are not split at the same points. A 100 m alternative beside a
+    300 m canonical segment covers a third of it — crediting the whole thing would
+    falsely mark ground as prayed for, and crediting nothing (the first version of this
+    function, which left 28 of 41 alternatives earning nothing) understates a walk that
+    genuinely covered the corridor. So each pair records a fraction, and the routing
+    layer credits a canonical segment once the fractions of the alternatives actually
+    walked add up to `share`. Summing at completion time is also the only place the
+    "did they walk the *whole* other side?" question can be answered.
+
+    An alternative that covers nothing is still reported: it is beside the corridor but
+    stands in for no obligation, so somebody should look at why.
+    """
+    orphans = []
+    for a in alts:
+        sat = []
+        for c in canons:
+            frac = covered_fraction(a["_geom"], c["_geom"])
+            if frac >= MIN_CREDIT_FRACTION:
+                sat.append(dict(segment_id=c["id"], fraction=round(frac, 4)))
+        sat.sort(key=lambda x: -x["fraction"])
+        a["satisfies"] = sat
+        a["satisfies_segment_ids"] = [x["segment_id"] for x in sat]
+        if not sat:
+            orphans.append(a["id"])
+            a["review_reasons"] = list(a.get("review_reasons") or []) + [
+                "ALTERNATIVE walkway that does not run alongside any canonical segment "
+                "closely enough to stand in for it. Walking it earns no coverage "
+                "credit. Review whether it should be canonical instead."]
+    return orphans
+
+
+def normalize_segments(segments, satisfy_share=0.6):
     """In-build campus normalization: stamp campus_corridor / campus_obligation.
 
     Called from run.py with the live segment list (geometry under "_geom"). Marks each
     campus pedestrian segment CANONICAL (carries the corridor's coverage obligation) or
     ALTERNATIVE (satisfies the same obligation from the other side). Prevents parallel
     sidewalks from creating duplicate prayer-coverage obligations for one corridor.
+
+    Each ALTERNATIVE also records `satisfies_segment_ids` — the canonical segments a
+    walker earns by walking it. Network v1.2 promotes CANONICAL to REQUIRED, so this
+    mapping is what stops the promotion from creating the duplicate obligation the
+    normalization exists to prevent.
     """
     campus = [s for s in segments
               if s.get("in_campus_core") and s["source"]["dataset"] != "DERIVED"]
@@ -213,7 +276,7 @@ def normalize_segments(segments):
         (by_corridor[key] if key else unnamed).append(s)
 
     canonical_m = duplicate_m = 0.0
-    canon_geoms = []
+    canon_geoms, canon_all, orphans = [], [], []
     for key, members in by_corridor.items():
         ob_idx, alt_idx = build_obligation(members)
         for i in ob_idx:
@@ -221,6 +284,7 @@ def normalize_segments(segments):
             members[i]["campus_obligation"] = "CANONICAL"
             canonical_m += members[i]["_geom"].length
             canon_geoms.append(members[i]["_geom"])
+            canon_all.append(members[i])
         for i in alt_idx:
             members[i]["campus_corridor"] = key
             members[i]["campus_obligation"] = "ALTERNATIVE"
@@ -228,9 +292,14 @@ def normalize_segments(segments):
                 f"Parallel walkway on corridor '{key}' — satisfies the same coverage "
                 f"obligation as the canonical side (spec §4.2). Not a separate obligation."]
             duplicate_m += members[i]["_geom"].length
+        # Credit within the corridor first: an alternative on West Campus Drive should
+        # satisfy West Campus Drive, not whatever happens to be geometrically nearest.
+        orphans += _link_alternatives([members[i] for i in alt_idx],
+                                      [members[i] for i in ob_idx], satisfy_share)
 
     canon_union = unary_union(canon_geoms) if canon_geoms else None
     unnamed_distinct = unnamed_dupe = 0.0
+    unnamed_alts = []
     for s in unnamed:
         g = s["_geom"]
         dup = False
@@ -243,15 +312,37 @@ def normalize_segments(segments):
         s["campus_obligation"] = "ALTERNATIVE" if dup else "CANONICAL"
         if dup:
             unnamed_dupe += g.length
+            unnamed_alts.append(s)
             s["review_reasons"] = list(s.get("review_reasons") or []) + [
                 "Unnamed campus walkway running parallel to a named corridor already "
                 "carrying an obligation — duplicate coverage, not new ground."]
         else:
             unnamed_distinct += g.length
+            canon_all.append(s)
 
+    # Unnamed duplicates have no corridor, so they are matched against every canonical
+    # segment on campus.
+    orphans += _link_alternatives(unnamed_alts, canon_all, satisfy_share)
+    for s in campus:
+        s.setdefault("satisfies", [])
+        s.setdefault("satisfies_segment_ids", [])
+
+    alts = [s for s in campus if s["campus_obligation"] == "ALTERNATIVE"]
+    # How much of the promoted obligation is reachable by walking alternatives instead.
+    creditable = set()
+    for a in alts:
+        creditable |= {x["segment_id"] for x in a["satisfies"]}
     return dict(
         corridors=len(by_corridor),
         campus_segments=len(campus),
+        canonical_segments=len(canon_all),
+        alternative_segments=len(alts),
+        alternatives_with_credit=sum(1 for a in alts if a["satisfies_segment_ids"]),
+        canonical_segments_with_an_alternative=len(creditable),
+        alternatives_without_credit=len(orphans),
+        alternatives_without_credit_ids=sorted(orphans),
+        satisfy_share=satisfy_share,
+        satisfy_distance_m=PARALLEL_M,
         canonical_miles=round((canonical_m + unnamed_distinct) / M_PER_MILE, 3),
         duplicate_miles=round((duplicate_m + unnamed_dupe) / M_PER_MILE, 3),
         named_canonical_miles=round(canonical_m / M_PER_MILE, 3),

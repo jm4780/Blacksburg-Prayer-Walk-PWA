@@ -200,13 +200,26 @@ def _rule(s, info, length, streets, peds, worst_class, worst_speed, worst_role,
     return "UNRESOLVED", why
 
 
+def _in_graph(s, routable_ids):
+    """Membership for a what-if connectivity graph.
+
+    Derived connectors are decided **only** by `routable_ids`. They must not also be
+    filtered on `walkable`, because the build sets walkable=false on every connector
+    the classifier rejected — so testing "what if we allowed the rejected ones" by
+    adding their ids did nothing, and `caused_by_rejected_connectors` came out 0.000
+    no matter what. That made the attribution report blame missing source data for
+    disconnection that a single reviewable crossing would fix.
+    """
+    if s["source"]["dataset"] == "DERIVED":
+        return s["id"] in routable_ids
+    return s["walkable"] and s["role"] != "EXCLUDED"
+
+
 def connectivity(segs, routable_ids, label):
     """Component analysis over a graph restricted to `routable_ids` + all non-derived."""
     G = nx.Graph()
     for s in segs:
-        if not s["walkable"] or s["role"] == "EXCLUDED":
-            continue
-        if s["source"]["dataset"] == "DERIVED" and s["id"] not in routable_ids:
+        if not _in_graph(s, routable_ids):
             continue
         G.add_edge(s["start_node_id"], s["end_node_id"], id=s["id"])
 
@@ -221,9 +234,7 @@ def connectivity(segs, routable_ids, label):
         for s in segs:
             if s["start_node_id"] not in comp:
                 continue
-            if s["source"]["dataset"] == "DERIVED" and s["id"] not in routable_ids:
-                continue
-            if not s["walkable"] or s["role"] == "EXCLUDED":
+            if not _in_graph(s, routable_ids):
                 continue
             L = float(s["length_m"])
             tot_m += L
@@ -332,9 +343,7 @@ def attribute_disconnection(segs, results, conn_high, conn_all):
     def comp_map(routable):
         G = nx.Graph()
         for s in segs:
-            if not s["walkable"] or s["role"] == "EXCLUDED":
-                continue
-            if s["source"]["dataset"] == "DERIVED" and s["id"] not in routable:
+            if not _in_graph(s, routable):
                 continue
             G.add_edge(s["start_node_id"], s["end_node_id"])
         comps = sorted(nx.connected_components(G), key=len, reverse=True)

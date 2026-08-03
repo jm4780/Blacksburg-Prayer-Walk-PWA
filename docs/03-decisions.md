@@ -199,3 +199,25 @@ reasons to keep wooded trails out are different and better:
 
 - [VT Housing & Residential Experience](https://housing.vt.edu/) · [VT Housing overview](https://www.vt.edu/campus-life/housing.html) · [Facts About Virginia Tech](https://www.vt.edu/about/facts-about-virginia-tech.html) · [Campus of Virginia Tech](https://en.wikipedia.org/wiki/Campus_of_Virginia_Tech) · [BOV housing expansion (2026)](https://news.vt.edu/articles/2026/06/cm-bov-housing.html)
 - [Census QuickFacts — Blacksburg town](https://www.census.gov/quickfacts/fact/table/blacksburgtownvirginia/PST045224)
+
+
+---
+
+## Rulings applied at Phase 3 (2026-08-03) — canonical network v1.2
+
+| Decision | Was | Now | Where |
+|---|---|---|---|
+| **D1b** — which campus ways are REQUIRED | `OPTIONAL_CONNECTOR` / `NEEDS_REVIEW` | **One coverage obligation per campus corridor.** The canonical side is `REQUIRED` (73 segments, 11.360 mi); the parallel walkway stays a connector and *satisfies* the same obligation rather than creating a second one. | `curation.CAMPUS_PROMOTE_CANONICAL_TO_REQUIRED`, `campus_normalize._link_alternatives`, `network.credited()` |
+| **D2** — Deerfield Trail | `REQUIRED` / PROVISIONAL | `REQUIRED` / **CONFIRMED** | `curation.TRAIL_ROLES` |
+| **D2** — Shenandoah Trail | `REQUIRED` / PROVISIONAL | `REQUIRED` / **CONFIRMED** | `curation.TRAIL_ROLES` |
+
+The D1b ruling is a *selection*, as D1b asked for — but the selection is made by rule
+rather than by naming streets: one obligation per corridor. Promoting all 114 campus
+pedestrian segments would have demanded 13.403 mi of walking to cover 11.359 mi of
+distinct ground, and Drillfield Drive would not have counted as done until someone had
+walked both sides of it. Spec §4.2 already says walking one side counts.
+
+Consequence, recorded rather than hidden: campus pedestrian geometry does not join the
+town street graph through any *trusted* connector, so the promotion stranded 12.858 mi
+of required mileage off the main component and created two new valid routing areas.
+See docs/13 §1 and §21.

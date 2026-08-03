@@ -318,13 +318,51 @@ def main():
         "for review but cannot carry a route.")
 
     print("normalize campus corridors")
-    camp = campus_normalize.normalize_segments(segments)
+    camp = campus_normalize.normalize_segments(
+        segments, satisfy_share=curation.CAMPUS_SATISFY_SHARE)
     for s in segments:
         s.setdefault("campus_corridor", None)
         s.setdefault("campus_obligation", None)
+        s.setdefault("satisfies", [])
+        s.setdefault("satisfies_segment_ids", [])
     print(f"  {camp['corridors']} corridors · canonical {camp['canonical_miles']:.3f} mi · "
-          f"duplicate obligations removed {camp['duplicate_miles']:.3f} mi")
+          f"duplicate obligations removed {camp['duplicate_miles']:.3f} mi · "
+          f"alternatives crediting a canonical side {camp['alternatives_with_credit']}"
+          f"/{camp['alternative_segments']}")
     report["campus_normalization"] = camp
+
+    # ------------------------------------------- D1b campus promotion (v1.2)
+    # Runs after normalization so exactly one side of each corridor is promoted, and
+    # before households so campus dwelling units land on REQUIRED coverage rather than
+    # on a connector. Deliberately not folded into classify_path(): the promotion is a
+    # human ruling about *which* campus ways count, and it only becomes expressible
+    # once the canonical/alternative split exists.
+    promoted = []
+    if curation.CAMPUS_PROMOTE_CANONICAL_TO_REQUIRED:
+        for s in segments:
+            if not s.get("in_campus_core") or s["source"]["dataset"] == "DERIVED":
+                continue
+            if s.get("campus_obligation") != "CANONICAL":
+                continue
+            if s["role"] == "EXCLUDED" or not s["walkable"]:
+                continue          # an exclusion outranks the promotion
+            before = s["role"]
+            s["role"] = "REQUIRED"
+            s["role_status"] = curation.CAMPUS_PROMOTION_STATUS
+            s["review_reasons"] = list(s["review_reasons"]) + [
+                f"CAMPUS PROMOTION {before} -> REQUIRED: {curation.CAMPUS_PROMOTION_NOTE}"]
+            promoted.append(dict(segment_id=s["id"], name=s["display_name"],
+                                 corridor=s.get("campus_corridor"),
+                                 from_role=before, miles=miles(s["length_m"])))
+    print(f"  promoted {len(promoted)} canonical campus segments to REQUIRED "
+          f"({sum(p['miles'] for p in promoted):.3f} mi)")
+    report["campus_promotion"] = dict(
+        applied=len(promoted),
+        miles=round(sum(p["miles"] for p in promoted), 3),
+        status=curation.CAMPUS_PROMOTION_STATUS,
+        note=curation.CAMPUS_PROMOTION_NOTE,
+        duplicate_obligation_miles_avoided=camp["duplicate_miles"],
+        segments=promoted)
 
 
     # --------------------------------------------------------- households
