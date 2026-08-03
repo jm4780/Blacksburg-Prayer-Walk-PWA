@@ -76,8 +76,18 @@ class RouteRequest(Base):
     start_node: Mapped[int] = mapped_column(Integer)
     start_source: Mapped[str] = mapped_column(String(16))     # DEVICE_LOCATION | MAP
     seed: Mapped[int] = mapped_column(Integer)
+    # The routing component the start snapped into — §7's coverage-area ID.
+    coverage_area_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
     component_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Completion-state version the variants were computed against (§7). Two requests
+    # with the same seed and the same state version reproduce identical routes; a
+    # different state version explains why they would not.
+    completion_state_version: Mapped[str] = mapped_column(String(64), default="")
+    requested_family: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    active_reservation_count: Mapped[int] = mapped_column(Integer, default=0)
     variants: Mapped[dict] = mapped_column(JSON)              # full per-variant payload
+    # Recorded when generation produces nothing usable, so §17 can inspect failures.
+    failure_reason: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                 default=utcnow, index=True)
 
@@ -103,7 +113,19 @@ class Walk(Base):
     # different. What actually got walked lives in `completions`.
     planned_segment_ids: Mapped[list] = mapped_column(JSON)
     planned_required_ids: Mapped[list] = mapped_column(JSON)
+    planned_connector_ids: Mapped[list] = mapped_column(JSON, default=list)
     score_components: Mapped[dict] = mapped_column(JSON)
+
+    # The seed that produced this route, denormalised off the request so a walk is
+    # self-contained for audit (§15).
+    seed: Mapped[int] = mapped_column(Integer, default=0)
+
+    # --- what was actually submitted (§15) ---------------------------------
+    # The plan above is never rewritten. These record the edits on top of it.
+    final_segment_ids: Mapped[list] = mapped_column(JSON, default=list)
+    manual_additions: Mapped[list] = mapped_column(JSON, default=list)
+    manual_removals: Mapped[list] = mapped_column(JSON, default=list)
+    final_distance_miles: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True),
@@ -157,13 +179,31 @@ class Completion(Base):
     participant_id: Mapped[str] = mapped_column(ForeignKey("participants.id"), index=True)
     segment_id: Mapped[str] = mapped_column(String(16))
     network_id: Mapped[str] = mapped_column(String(64))
-    # AS_PLANNED | PARTIAL | DIFFERENT_ROUTE — how the walker reported it (§14).
+    # AS_PLANNED | EDITED | MANUAL_ADDITION — how this segment came to be recorded (§14).
     source: Mapped[str] = mapped_column(String(24))
     # True when the credit came from walking a parallel campus walkway rather than the
     # canonical side (network v1.2, spec §4.2). Kept so a coverage claim is traceable.
     via_alternative: Mapped[bool] = mapped_column(Boolean, default=False)
     completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                    default=utcnow, index=True)
+
+
+class WalkEdit(Base):
+    """An audit row for every manual change a walker made to their plan (§17).
+
+    Kept separate from `completions` so an administrator reviewing manual edits sees
+    the *diff* — what was skipped, what was added instead — rather than having to
+    reconstruct it by comparing two lists.
+    """
+    __tablename__ = "walk_edits"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    walk_id: Mapped[str] = mapped_column(ForeignKey("walks.id"), index=True)
+    participant_id: Mapped[str] = mapped_column(ForeignKey("participants.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(16))          # ADDED | REMOVED
+    segment_id: Mapped[str] = mapped_column(String(16))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 default=utcnow, index=True)
 
 
 class AdminAction(Base):

@@ -25,6 +25,8 @@ function variant(band: string, available: boolean, miles = 1): Variant {
     required_segment_count: 8, nests_within_shorter: true, component: null,
     score_components: {}, campus_credited_miles: 0, suggested_band: null,
     nearest_incomplete_miles: null, segment_ids: [], required_segment_ids: [],
+    connector_segment_ids: [], start_point: null, end_point: null, route_score: 1,
+    seed: 1, network_version: 'v1.2', engine_version: '2.1.0',
     geometry: null,
   }
 }
@@ -112,5 +114,16 @@ describe('MapCanvas', () => {
   it('renders no marker unless one is given', () => {
     const { container } = render(<MapCanvas lines={[line]} ariaLabel="m" />)
     expect(container.querySelector('.marker')).toBeNull()
+  })
+
+  it('draws the town boundary behind the network', () => {
+    const ring: [number, number][] = [
+      [-80.46, 37.19], [-80.38, 37.19], [-80.38, 37.27], [-80.46, 37.27], [-80.46, 37.19],
+    ]
+    const { container } = render(
+      <MapCanvas lines={[line]} boundary={{ coordinates: [ring] }} ariaLabel="m" />)
+    const paths = [...container.querySelectorAll('path')]
+    expect(paths[0].getAttribute('class')).toBe('ln-boundary')
+    expect(container.querySelectorAll('path.ln-boundary').length).toBe(1)
   })
 })

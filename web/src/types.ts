@@ -35,6 +35,13 @@ export interface Variant {
   nearest_incomplete_miles: number | null
   segment_ids: string[]
   required_segment_ids: string[]
+  connector_segment_ids: string[]
+  start_point: [number, number] | null
+  end_point: [number, number] | null
+  route_score: number | null
+  seed: number
+  network_version: string
+  engine_version: string
   geometry: LineString | null
 }
 
@@ -54,6 +61,8 @@ export interface RouteResponse {
   engine_version: string
   seed: number
   state: string
+  coverage_area_id: string | null
+  completion_state_version: string
   component: ComponentInfo | null
   available_bands: string[]
   variants: Variant[]
@@ -69,6 +78,9 @@ export interface Walk {
   network_id: string
   engine_version: string
   required_segment_count: number
+  planned_required_ids: string[]
+  households: number | null
+  start_point: [number, number] | null
   created_at: string
   started_at: string | null
   resolved_at: string | null
@@ -111,6 +123,7 @@ export interface ProgressMap {
   network_id: string
   network_version: string
   features: ProgressFeature[]
+  boundary: { type: 'MultiLineString'; coordinates: [number, number][][] } | null
   excludes: string[]
 }
 

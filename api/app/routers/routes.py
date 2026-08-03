@@ -6,18 +6,30 @@ The documented contract for POST /api/routes/generate:
     lat, lon           one-time device fix, or a point the walker tapped on the map
     start_source       DEVICE_LOCATION | MAP — recorded, because a tapped start is a
                        different kind of evidence from a GPS fix
+    requested_family   optional band name; omitted returns every variant in one
+                       response, which is what the size control needs
     seed               optional, to reproduce an earlier request exactly
-    Authorization      Bearer <opaque participant token>
+    Authorization      Bearer <opaque participant token> — the participant ID
 
-  IMPLICIT INPUT (server-side, never sent by the browser)
-    completion state   every segment recorded as prayed for, town-wide
-    reservations       live soft holds from other walkers, as prize multipliers
-    network            the frozen canonical network named in the response
+  RESOLVED SERVER-SIDE, NEVER SENT BY THE BROWSER
+    coverage-area ID          the routing component the start snapped into. Derived,
+                              not supplied: a browser that could name its own coverage
+                              area could ask for a route in one it is not standing in.
+    completion-state version  fingerprint of every segment recorded as prayed for.
+                              Echoed back and stored, so a failure to reproduce a
+                              route is explainable rather than mysterious.
+    active reservations       live soft holds from other walkers, applied as prize
+                              multipliers. Count echoed back; holders never named.
+    network                   the frozen canonical network named in the response.
 
   OUTPUT
-    request_id, network_id, network_version, engine_version, seed, component,
-    available_bands, state, and one VariantOut per band carrying the 17 documented
-    per-variant fields (see schemas.VariantOut).
+    request_id, network_id, network_version, engine_version, seed, coverage_area_id,
+    completion_state_version, component, available_bands, state, and one VariantOut
+    per band carrying: route-size label, geometry, start/end point, ordered traversed
+    segments, canonical REQUIRED obligations, connector segments, total distance,
+    estimated walking time, estimated households passed, expected new required
+    mileage, route status, availability reason, route score, walk-quality score,
+    reproducibility seed, network version, engine version.
 
   NOT IN THE OUTPUT, ever
     any address, household coordinate, per-segment household count, participant
@@ -65,14 +77,23 @@ def generate(body: RouteRequestIn, p: Participant = Depends(current_participant)
     state = ns.completion_state(db, participant_id=p.id)
     seed = body.seed if body.seed is not None else routing.new_seed()
 
-    result = routing.generate(ns, lo, la, state, seed)
+    result = routing.generate(ns, lo, la, state, seed,
+                              requested_family=body.requested_family)
 
     req = RouteRequest(participant_id=p.id, network_id=result["network_id"],
                        engine_version=result["engine_version"],
                        start_node=result["start_node"], start_source=body.start_source,
                        seed=seed,
+                       coverage_area_id=result["coverage_area_id"],
                        component_index=(result["component"] or {}).get("index"),
-                       variants=result["variants"])
+                       completion_state_version=result["completion_state_version"],
+                       requested_family=body.requested_family,
+                       active_reservation_count=len(state.reserved),
+                       variants=result["variants"],
+                       # §17: a request that produced nothing is a route-generation
+                       # failure worth inspecting, not just an empty response.
+                       failure_reason=(None if result["available_bands"]
+                                       else result["state"]))
     db.add(req)
     db.commit()
 
@@ -80,6 +101,8 @@ def generate(body: RouteRequestIn, p: Participant = Depends(current_participant)
         request_id=req.id, network_id=result["network_id"],
         network_version=ns.manifest["canonical_network_version"],
         engine_version=result["engine_version"], seed=seed, state=result["state"],
+        coverage_area_id=result["coverage_area_id"],
+        completion_state_version=result["completion_state_version"],
         component=result["component"], available_bands=result["available_bands"],
         variants=result["variants"])
 
@@ -127,6 +150,8 @@ def select_walk(body: SelectWalkIn, p: Participant = Depends(current_participant
                 estimated_minutes=v["estimated_minutes"],
                 planned_segment_ids=v["segment_ids"],
                 planned_required_ids=v["required_segment_ids"],
+                planned_connector_ids=v.get("connector_segment_ids") or [],
+                seed=req.seed,
                 score_components=v["score_components"] or {})
     db.add(walk)
     db.commit()
@@ -170,20 +195,11 @@ def complete_walk(walk_id: str, body: CompleteWalkIn,
     walk = _own_walk(db, walk_id, p)
     if walk.status == "DISCARDED":
         raise HTTPException(status.HTTP_409_CONFLICT, "walk was discarded")
-    if body.outcome != "AS_PLANNED" and not body.segment_ids:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
-                            "select the segments you walked")
-    if body.outcome == "PARTIAL":
-        # A partial walk is a subset of the plan. Anything else is a different route,
-        # and calling it partial would put segments in the record that this walk never
-        # offered.
-        planned = set(walk.planned_required_ids)
-        stray = [s for s in (body.segment_ids or []) if s not in planned]
-        if stray:
-            raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
-                f"{len(stray)} of the selected segments are not part of this walk's "
-                f"plan; report those as 'walked somewhere different'")
+    if body.outcome == "EDITED" and not body.segment_ids:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "select the streets you covered, or report that you did not complete "
+            "the walk")
 
     result = completion_svc.record(db, ns, walk, body.outcome, body.segment_ids,
                                    body.note)
@@ -222,11 +238,34 @@ def _walk_out(ns, walk: Walk, variant: dict | None = None) -> WalkOut:
         estimated_minutes=walk.estimated_minutes, network_id=walk.network_id,
         engine_version=walk.engine_version,
         required_segment_count=len(walk.planned_required_ids),
+        planned_required_ids=list(walk.planned_required_ids),
+        households=_households(ns, walk),
+        start_point=_start_point(ns, walk),
         created_at=walk.created_at.isoformat(),
         started_at=walk.started_at.isoformat() if walk.started_at else None,
         resolved_at=walk.resolved_at.isoformat() if walk.resolved_at else None,
         outcome=walk.outcome, geometry=geom,
         directions=_directions(ns, walk))
+
+
+def _households(ns, walk: Walk) -> int:
+    """Estimated dwelling units passed by the plan (§13).
+
+    Summed over the walk's own required segments — an aggregate for one route, never
+    a per-segment figure, and never anything that identifies a dwelling.
+    """
+    return sum(ns.net.segments[ns.idx_of_id[s]].households
+               for s in walk.planned_required_ids if s in ns.idx_of_id)
+
+
+def _start_point(ns, walk: Walk) -> list | None:
+    """WGS84 [lon, lat] where the walk begins and ends (§13). A closed walk, so one
+    point serves as both."""
+    for sid in walk.planned_segment_ids:
+        i = ns.idx_of_id.get(sid)
+        if i is not None and ns.net.segments[i].coords:
+            return list(ns.net.segments[i].coords[0])
+    return None
 
 
 def _geometry_for(ns, walk: Walk) -> dict | None:

@@ -48,6 +48,16 @@ body {
 
 main { flex: 1; }
 
+.whoami {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+  padding: .45rem .9rem; font-size: .82rem;
+  background: #f1efe8; border-bottom: 1px solid var(--line); color: var(--muted);
+}
+.whoami strong { color: var(--ink); }
+.whoami .link { white-space: nowrap; }
+
+.fine.centered { text-align: center; margin-top: .5rem; }
+
 .screen {
   padding: 1rem .9rem 3rem;
   padding-bottom: max(3rem, env(safe-area-inset-bottom));
@@ -148,20 +158,32 @@ button.link {
   border: 1px solid var(--line); border-radius: var(--radius);
   touch-action: manipulation;
 }
-.map path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.map path { fill: none; stroke-linecap: round; stroke-linejoin: round;
+            pointer-events: none; }
 .ln-todo   { stroke: var(--todo);  stroke-width: 1.4px; }
 .ln-done   { stroke: var(--done);  stroke-width: 1.6px; }
 .ln-held   { stroke: var(--held);  stroke-width: 1.8px; }
 .ln-picked { stroke: var(--gold);  stroke-width: 3.4px; }
+.ln-dropped { stroke: var(--todo); stroke-width: 2.6px; stroke-dasharray: 4 4; }
+.ln-boundary { stroke: #b9b5a8; stroke-width: 1.6px; stroke-dasharray: 6 5; }
 .ln-route  { stroke: var(--green); stroke-width: 3.6px; }
 .marker circle { fill: var(--gold); stroke: #fff; stroke-width: 3px; }
 .map[data-pickable="true"] { cursor: crosshair; }
+
+/* Invisible tap targets. 14px is the smallest stroke that reliably beats a
+   fingertip's landing error on a 1.4px street line. */
+.map path.hit {
+  stroke: transparent; stroke-width: 14px; pointer-events: stroke; cursor: pointer;
+}
 
 .legend { display: flex; flex-wrap: wrap; gap: .9rem; margin: .6rem 0; font-size: .8rem; }
 .legend i { display: inline-block; width: 18px; height: 3px; margin-right: .35rem; vertical-align: middle; }
 .legend .done { background: var(--done); }
 .legend .todo { background: var(--todo); }
 .legend .held { background: var(--held); }
+.legend .picked { background: var(--gold); }
+.legend .dropped { background: var(--todo); }
+.legend .boundary { background: #b9b5a8; }
 
 /* --- directions -------------------------------------------------------- */
 .directions { list-style: none; margin: 1rem 0; padding: 0; }

@@ -37,8 +37,18 @@ def minutes(miles: float) -> int:
     return int(round(miles / WALK_MPH * 60))
 
 
+def _node_point(ns: NetworkService, r: Route) -> list | None:
+    """WGS84 [lon, lat] of the walk's start node, read off its first segment."""
+    if not r.seg_seq:
+        return None
+    seg = ns.net.segments[r.seg_seq[0]]
+    if not seg.coords:
+        return None
+    return list(seg.coords[0] if seg.u == r.start_node else seg.coords[-1])
+
+
 def _variant_payload(ns: NetworkService, band: str, target: float, v: dict,
-                     component) -> dict:
+                     component, seed: int, network_version: str) -> dict:
     """The 17 documented per-variant outputs.
 
     Everything here is either an aggregate, a segment id, or public street geometry.
@@ -66,7 +76,9 @@ def _variant_payload(ns: NetworkService, band: str, target: float, v: dict,
             nearest_incomplete_miles=(resp.nearest_incomplete_miles if resp else None),
             component=_component_payload(component),
             score_components=None, segment_ids=[], required_segment_ids=[],
-            geometry=None, campus_credited_miles=None,
+            connector_segment_ids=[], geometry=None, campus_credited_miles=None,
+            route_score=None, start_point=None, end_point=None, seed=seed,
+            network_version=network_version, engine_version=_engine_version(),
         )
         return base
 
@@ -100,6 +112,17 @@ def _variant_payload(ns: NetworkService, band: str, target: float, v: dict,
         nearest_incomplete_miles=(resp.nearest_incomplete_miles if resp else None),
         segment_ids=ns.ids(r.seg_seq),
         required_segment_ids=sorted(ns.required_ids(r.required_covered(ns.net))),
+        connector_segment_ids=sorted({ns.id_of_idx[i] for i in set(r.seg_seq)
+                                      if not ns.net.segments[i].required}),
+        # A closed walk, so start and end are the same node — reported as two fields
+        # anyway, because the contract promises both and a future open route would
+        # break a caller that assumed otherwise.
+        start_point=_node_point(ns, r),
+        end_point=_node_point(ns, r),
+        route_score=s.total,
+        seed=seed,
+        network_version=network_version,
+        engine_version=_engine_version(),
     )
     return base
 
@@ -117,14 +140,39 @@ def _component_payload(c) -> dict | None:
                                      if c.required_miles < BANDS[0][1] else None))
 
 
-def generate(ns: NetworkService, lon: float, lat: float, state, seed: int) -> dict:
-    """Run the engine for one request and return the full variant set."""
+def completion_state_version(state) -> str:
+    """A short, stable fingerprint of the completion state (§7).
+
+    Two requests with the same seed reproduce identical routes only if the town has
+    not changed underneath them. Storing this makes a failure to reproduce
+    *explainable* rather than mysterious.
+    """
+    import hashlib
+    h = hashlib.sha256()
+    for i in sorted(state.complete):
+        h.update(str(i).encode())
+        h.update(b",")
+    return f"cs-{len(state.complete)}-{h.hexdigest()[:12]}"
+
+
+def generate(ns: NetworkService, lon: float, lat: float, state, seed: int,
+             requested_family: str | None = None) -> dict:
+    """Run the engine for one request and return the full variant set.
+
+    `requested_family` narrows the response to one band. The default is to return all
+    of them: §7 prefers one response carrying every related variant, because the size
+    control has to be able to re-render without another round trip.
+    """
     eng = ns.engine_with_seed(seed)
     start = eng.snap(lon, lat)
     component = eng.component_for(start)
     variants = eng.variants(start, state)
+    if requested_family:
+        variants = [v for v in variants if v["name"] == requested_family] or variants
 
-    payload = [_variant_payload(ns, v["name"], v["target_miles"], v, component)
+    network_version = ns.manifest["canonical_network_version"]
+    payload = [_variant_payload(ns, v["name"], v["target_miles"], v, component,
+                                seed, network_version)
                for v in variants]
 
     # Route geometry, resolved server-side from the frozen network. Sent as one
@@ -138,8 +186,11 @@ def generate(ns: NetworkService, lon: float, lat: float, state, seed: int) -> di
             geoms[p["band"]] = p["geometry"]
 
     available = [p for p in payload if p["available"]]
+    comp = _component_payload(component)
     return dict(
         start_node=start,
+        coverage_area_id=(f"comp-{component.index}" if component is not None else None),
+        completion_state_version=completion_state_version(state),
         seed=seed,
         network_id=ns.net.network_id,
         engine_version=_engine_version(),

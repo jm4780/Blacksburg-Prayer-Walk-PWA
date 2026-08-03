@@ -102,12 +102,27 @@ locations, weights swapped): avoidable repeat −22.2 %, third-or-later passes �
 U-turns −15.6 %, new coverage +0.8 %, walk quality +2.8 %. Performance: **14.2 ms**
 median single route, 306.6 ms median for five variants.
 
-One defect was found during integration, and it was found by *test ordering*, not by
-design: a participant could leave a walk ACTIVE on any error path, start another, and
-hold both sets of segments against everyone else for the full four-hour window.
-`/api/walks/select` now refuses to start a second walk while one is ACTIVE (409), while
-still replacing a PREVIEW freely — previewing is browsing, starting is a commitment.
-Covered by `test_cannot_start_a_second_walk_while_one_is_active`.
+Three defects were found by integration tests, each recorded, reproduced and fixed
+separately:
+
+1. **Reservation accumulation.** A participant could leave a walk ACTIVE on any error
+   path, start another, and hold both sets of segments against everyone else for the
+   full four-hour window. `/api/walks/select` now refuses to start a second walk while
+   one is ACTIVE (409) while still replacing a PREVIEW freely — previewing is
+   browsing, starting is a commitment. Found by test ordering, not by design.
+   `test_cannot_start_a_second_walk_while_one_is_active`.
+2. **Lost response states.** When *every* band failed, `Engine.variants` returned
+   early without attaching response objects, so the API fell back to a blanket
+   `NO_USEFUL_ROUTE_NEAR_START` and lost the `SELECT_DIFFERENT_START_AREA` and
+   `LONGER_ROUTE_REQUIRED` distinctions — precisely when §10's structured states
+   matter most. `test_no_useful_route_state_is_structured_not_padded`.
+3. **Untappable streets.** Required streets render at 1.4 px and overlap; whichever
+   path happened to be on top swallowed the tap, so selecting the street you meant
+   during "Review and edit" was close to impossible on a phone. Fixed with an
+   invisible 14 px hit layer above the drawing. This was a mobile usability defect the
+   e2e test surfaced by being unable to click anything.
+
+Scoring weights, bands and the search are untouched by all three.
 
 ---
 
@@ -128,25 +143,30 @@ dashboard moves. Verified end to end on a Pixel 7 viewport by `web/e2e/slice.mjs
 | § | Requirement | Implementation |
 |---|---|---|
 | 4 | Home dashboard | Three metrics, each with its definition behind a disclosure. Households always labelled *estimated*. |
-| 5 | Lightweight identity | First/last/email; matched on lowercased-and-trimmed email; opaque 256-bit token in the browser, `hmac-sha256(pepper, token)` in the database. |
+| 5 | Lightweight identity | First/last/email; matched on lowercased-and-trimmed email; opaque 256-bit token in the browser, `hmac-sha256(pepper, token)` in the database. Returning walkers see **"Walking as [Name]"** with **"Not you? Switch person"** — this is a shared-phone situation as often as not. |
 | 6 | One-time location | `getCurrentPosition`, never `watchPosition`. Purpose stated *before* the browser prompt. Map-start fallback is first-class. |
-| 7 | Route-generation contract | Documented in `api/app/routers/routes.py`; 17 per-variant outputs in `schemas.VariantOut`. |
+| 7 | Route-generation contract | Documented in `api/app/routers/routes.py`; every per-variant output in `schemas.VariantOut`. Coverage-area ID, completion-state version and active reservations are **resolved server-side**, not accepted from the browser — a client that could name its own coverage area could ask for a route in one it is not standing in. Both are echoed back and stored. |
 | 8 | Size interface | Slider snapping to computed variants only. Unavailable sizes shown, disabled, with the reason. |
-| 9 | Small components | An area with less required mileage than the Quick band is offered as **"Complete this area"**, not a sixth size. Applies to Davis St (0.305 mi), Apple Ln (0.297), Georgia St (0.292). |
+| 9 | Small components | An area with less required mileage than the Quick band **replaces** the slider with **"Complete this area"** — not a sixth size bolted onto a control whose other five do not apply. Davis St (0.305 mi), Apple Ln (0.297), Georgia St (0.292). |
 | 10 | Late-opportunity states | Five states, each with its own copy, all decided from local conditions — never from town-wide completion. |
 | 11 | Controlled diversity | Per-request random seed, stored. Same seed → identical routes; different seeds → different routes within a 40 % quality tolerance, asserted in tests. |
 | 12 | Reservations | Created on preview, extended on start, auto-expiring, released on submit/discard. Applied as a **prize multiplier of 0.15**, never a graph edit. Two nearby simultaneous walkers both get useful routes. |
-| 13 | Active walk | Static plan and a collapsed turn list. No live-location indicator, no moving marker, no GPS or tracking language — enforced by a regex guard in the e2e test. |
-| 14 | Post-walk confirmation | Three paths. Segment selection, never freehand. `Walk.planned_segment_ids` is never rewritten. |
-| 15 | Completion model | Unique `(walk_id, segment_id)`; a repeat submission records 0 and moves no metric. |
-| 16 | Public progress map | Required geometry + done/held only. Canonical campus corridors only. No household points, addresses, per-segment counts, participant identity or raw source layers. |
+| 13 | Active walk | Static plan, fixed start/end marker, distance, time, households, and a collapsed turn list. No live-location indicator, no moving marker, no GPS or tracking language. Enforced three ways in the e2e test: a language guard, an assertion that the only marker is `data-kind="route-start-end"` and does not move, and instrumentation proving `getCurrentPosition` was called **once** and `watchPosition` **never**. |
+| 14 | Post-walk confirmation | "Did you complete the route as shown?" → *Yes, mark it complete* / *Review and edit* / *I didn't complete it*. Editing starts pre-selected from the plan and lets a walker drop skipped obligations and add nearby ones in one pass, with the adjusted distance and contribution updating live. Segment selection, never freehand. `Walk.planned_segment_ids` is never rewritten. |
+| 15 | Completion model | Unique `(walk_id, segment_id)`; a repeat submission records 0 and moves no metric. Stored: planned route, final confirmed obligations, manual additions, manual removals, planned distance, final distance, participant, network version, engine version, route seed, submission timestamp — plus a `walk_edits` row per change so an administrator sees the *diff*, not two opaque lists. |
+| 16 | Public progress map | Completed and incomplete required obligations, required trails, town boundary, legend, live metrics. Canonical campus corridors only. No household points, addresses, per-segment counts, participant identity or raw source layers. |
 | 17 | Administration | Eleven capabilities (see below). |
 
-**The eleven administration capabilities**, since the exact enumeration was not
-available to check against — please confirm this matches your list:
-progress overview · participant roster · walk log · live reservations and release ·
-reverse a completion · record an offline walk · network manifest · review queues ·
-deployment posture and licensing gate · aggregate export · audit log.
+**The eleven administration capabilities**, matching §17 one for one:
+view submitted walks · view manual route edits · correct a walk submission · correct
+segment completion (reverse, or record one walked offline) · release or inspect
+reservations · review participant duplicates · inspect route-generation failures ·
+view network and engine versions · review the eight CRC crossings · export aggregate
+pilot data · town-wide progress and deployment posture including the licensing gate.
+
+Route-generation failures are stored with everything needed to reproduce them — seed,
+start node, coverage area, completion-state version, engine and network version — so
+"it gave me nothing" is a bug report, not an anecdote.
 
 Deliberately absent: any way to read one *named* participant's routes. §16 forbids
 tying routes to names, and an admin screen is exactly where that rule would leak.
@@ -163,7 +183,17 @@ the obvious first upgrade once licensing is settled.
 **SQLite by default.** The technical plan specifies PostgreSQL 16 + PostGIS. Nothing
 here depends on SQLite — switching is `BPW_DATABASE_URL`. PostGIS is not needed at all:
 all geometry lives in the frozen canonical network on disk, and the database stores
-only ids, counts and timestamps.
+only ids, counts and timestamps. Schema changes are Alembic migrations
+(`api/migrations/`), with the URL read from the environment so no credential is ever
+written to the repository; `alembic check` is kept green so the migrations and the
+models cannot drift apart.
+
+**GIS data is an internal application dependency, not a redistributable asset.** The
+pipeline fetches it, the application reads the frozen network it produces, and none of
+it is committed. A deployment runs `pipeline.sources.fetch` and has what it needs; the
+repository carries the code that reproduces it. The town boundary the progress map
+draws is read from the snapshot at runtime for the same reason — if it is absent the
+map simply draws without an outline.
 
 ---
 
@@ -226,15 +256,16 @@ warning naming G1. `/api/health` and the admin deployment screen both publish th
 
 | Matrix | File | Tests |
 |---|---|---|
-| Identity | `tests/test_identity.py` | 15 |
-| Location + routing | `tests/test_routing_api.py` | 20 |
-| Completion, reservations, metrics | `tests/test_completion.py` | 19 |
-| Privacy | `tests/test_privacy.py` | 12 |
-| UI components | `web/src/components/__tests__/ui.test.tsx` | 9 |
-| End-to-end, mobile viewport | `web/e2e/slice.mjs` | 30 assertions |
+| Identity | `tests/test_identity.py` | first-time, returning, switch, duplicate normalized email, token rotation, hashing |
+| Location + small components | `tests/test_location.py` | parking-lot start, multiple nearby components, inside the CRC, tiny component, complete-this-area, structured no-route state |
+| Routing | `tests/test_routing_api.py` | five variants, unavailable variants, determinism from a stored seed, diversity within tolerance, nesting, component containment |
+| Completion, reservations, metrics | `tests/test_completion.py` | as planned, remove skipped, add nearby, partial, did-not-complete, duplicate completion by two users, discarded, expired reservation, two simultaneous walkers, campus double-count, denominator |
+| Privacy | `tests/test_privacy.py` | no addresses, no participant data on public endpoints, no stored GPS, no sensitive artifacts committed |
+| UI components | `web/src/components/__tests__/ui.test.tsx` | 10 |
+| End-to-end, mobile viewport | `web/e2e/slice.mjs` | 41 assertions |
 
-**66 passed, 1 skipped** (household coordinates are stripped when `households.json` is
-written, so there is nothing to test for), plus 9 frontend and 30 e2e. Run:
+**82 passed, 1 skipped** (household coordinates are stripped when `households.json` is
+written, so there is nothing to test for), plus 10 frontend and 41 e2e. Run:
 
 ```bash
 python3 -m pytest                                    # backend matrices
@@ -250,6 +281,23 @@ cd web && npm run build && node e2e/slice.mjs        # full slice, needs the API
 
 Seven of eight freeze gates PASS; one WARNs.
 
+### Deliverables
+
+| # | Deliverable | Where |
+|---|---|---|
+| 1 | Mobile-first PWA vertical slice | `web/` |
+| 2 | Backend/API integration | `api/app/` |
+| 3 | Canonical network v1.2 manifest | `api/routing/results/integration-candidate-2.1.0.json` |
+| 4 | Routing-engine integration contract | `api/app/routers/routes.py` docstring + `schemas.VariantOut` |
+| 5 | Database schema and migrations | `api/app/models.py`, `api/migrations/` |
+| 6 | Automated test results | §20 above — 82 backend, 10 component |
+| 7 | Mobile browser test results | `web/e2e/slice.mjs`, Pixel 7 viewport, 41 assertions |
+| 8 | PWA installation test | manifest, standalone display, service-worker registration — in the same run |
+| 9 | Privacy and data-exposure audit | §18 above, `tests/test_privacy.py` |
+| 10 | Licensing-dependent deployment matrix | §19 above |
+| 11 | Known limitations | below |
+| 12 | Pilot-readiness recommendation | this section |
+
 ### Ready
 
 - The twelve-step slice works on a phone and as an installed PWA.
@@ -262,13 +310,18 @@ Seven of eight freeze gates PASS; one WARNs.
 
 ### Before a pilot — small, and yours to decide
 
-1. **Make the repository private.** It is still public as of this writing. Nothing
-   sensitive is committed, but this was a stated Phase 3 gate and it is unmet.
-2. **Set `BPW_TOKEN_PEPPER`** to a generated value, and `BPW_TIER=pilot`.
-3. **Confirm the eleven administration capabilities** above match your list.
+1. **Set `BPW_TOKEN_PEPPER`** to a generated value, and `BPW_TIER=pilot`.
+2. **Run `alembic upgrade head`** against the pilot database.
+3. **Run `python3 -m pipeline.sources.fetch && python3 -m pipeline.build.run`** on the
+   deployment host. The GIS data is an internal dependency and is not in the
+   repository.
 4. **Seed one administrator.** There is deliberately no API for granting admin — an
    application that can promote itself over HTTP is one request away from anyone else
    doing so. Promote the first account directly in the database.
+
+Repository visibility is no longer treated as a blocker, per your instruction. The
+exclusions still hold and are asserted by a test: no raw source datasets, no household
+coordinates, no participant database, no secrets.
 
 ### Before public release — larger, and not all ours
 

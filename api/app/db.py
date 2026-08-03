@@ -37,6 +37,15 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False
 
 
 def init_db() -> None:
+    """Create any missing tables.
+
+    Convenience for local work and tests. A real deployment runs
+
+        alembic upgrade head
+
+    which is the only path that can migrate an *existing* database forward.
+    `alembic check` is kept green, so the two agree on the schema.
+    """
     Base.metadata.create_all(engine)
 
 

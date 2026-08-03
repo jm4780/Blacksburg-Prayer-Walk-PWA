@@ -1,20 +1,27 @@
 /**
  * Post-walk confirmation (§14).
  *
- * Three paths: walked it as planned, walked part of it, walked something different.
- * The second and third are segment selection, never freehand drawing — a drawn line
- * would have to be map-matched back onto the network, and every one of those matches
- * would be a silent guess about what somebody prayed for.
+ * One question — "Did you complete the route as shown?" — and three answers:
  *
- * Whatever is reported here, the original plan is untouched in the record.
+ *   Yes, mark it complete    the plan is the record
+ *   Review and edit          drop obligations you skipped, add nearby ones you walked
+ *                            instead, in one pass; the adjusted distance and
+ *                            contribution update as you go
+ *   I didn't complete it     nothing is recorded, the holds are released
+ *
+ * Editing is segment selection, never freehand drawing. A drawn line would have to be
+ * map-matched back onto the network, and every match would be a silent guess about
+ * what somebody actually prayed for.
+ *
+ * Whatever is reported, the original planned route is untouched in the record.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { api } from '../api'
 import MapCanvas, { type MapLine } from '../components/MapCanvas'
 import type { ProgressMap, Walk } from '../types'
 import type { Nav } from '../App'
 
-type Outcome = 'AS_PLANNED' | 'PARTIAL' | 'DIFFERENT_ROUTE'
+type Outcome = 'AS_PLANNED' | 'EDITED' | 'DID_NOT_COMPLETE'
 
 export default function Confirm({ nav, walkId, onDone }: {
   nav: Nav; walkId: string; onDone: () => void
@@ -29,9 +36,17 @@ export default function Confirm({ nav, walkId, onDone }: {
   const [done, setDone] = useState<any | null>(null)
 
   useEffect(() => {
-    api.walk(walkId).then(setWalk).catch((e) => setError(e.message))
+    api.walk(walkId).then((w) => {
+      setWalk(w)
+      // "Review and edit" starts from the plan, so the common edit — dropping the
+      // last street because it started raining — is two taps, not forty.
+      setPicked(new Set(w.planned_required_ids ?? []))
+    }).catch((e) => setError(e.message))
     api.progressMap().then(setBase).catch(() => setBase(null))
   }, [walkId])
+
+  const planned = useMemo(
+    () => new Set(walk?.planned_required_ids ?? []), [walk])
 
   function toggle(id: string) {
     setPicked((prev) => {
@@ -41,13 +56,37 @@ export default function Confirm({ nav, walkId, onDone }: {
     })
   }
 
-  async function submit() {
-    if (!outcome) return
+  // Live contribution preview, computed from what the server already told us about
+  // this walk plus per-segment lengths from the map payload.
+  const lengths = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const f of base?.features ?? []) {
+      let metres = 0
+      const c = f.geometry.coordinates
+      for (let i = 1; i < c.length; i++) {
+        const dx = (c[i][0] - c[i - 1][0]) * 88_800
+        const dy = (c[i][1] - c[i - 1][1]) * 111_320
+        metres += Math.hypot(dx, dy)
+      }
+      m.set(f.properties.id, metres / 1609.344)
+    }
+    return m
+  }, [base])
+
+  const adjusted = useMemo(() => {
+    let miles = 0
+    for (const id of picked) miles += lengths.get(id) ?? 0
+    const added = [...picked].filter((id) => !planned.has(id)).length
+    const removed = [...planned].filter((id) => !picked.has(id)).length
+    return { miles, added, removed, count: picked.size }
+  }, [picked, planned, lengths])
+
+  async function submit(chosen: Outcome) {
     setBusy(true); setError(null)
     try {
       const r = await api.complete(
-        walkId, outcome,
-        outcome === 'AS_PLANNED' ? undefined : [...picked],
+        walkId, chosen,
+        chosen === 'EDITED' ? [...picked] : undefined,
         note || undefined)
       setDone(r)
       onDone()
@@ -61,11 +100,14 @@ export default function Confirm({ nav, walkId, onDone }: {
   if (done) {
     return (
       <div className="screen narrow">
-        <h1>Thank you</h1>
+        <h1>{done.outcome === 'DID_NOT_COMPLETE' ? 'No problem' : 'Thank you'}</h1>
         <p className="lede">
-          {done.segments_newly_recorded > 0
-            ? `${done.miles_credited} miles are now recorded as prayed for.`
-            : 'This walk was already recorded — nothing was counted twice.'}
+          {done.outcome === 'DID_NOT_COMPLETE'
+            ? 'Nothing was recorded, and the streets you were holding are free for '
+              + 'someone else.'
+            : done.segments_newly_recorded > 0
+              ? `${done.miles_credited} miles are now recorded as prayed for.`
+              : 'This walk was already recorded — nothing was counted twice.'}
         </p>
         {done.campus_credited_segments > 0 && (
           <p className="fine">
@@ -73,43 +115,48 @@ export default function Confirm({ nav, walkId, onDone }: {
             you took alongside them.
           </p>
         )}
+        {(done.manual_additions > 0 || done.manual_removals > 0) &&
+          done.outcome === 'EDITED' && (
+          <p className="fine">
+            You added {done.manual_additions} and removed {done.manual_removals}. Your
+            original plan is kept alongside the change.
+          </p>
+        )}
         <button className="primary big" onClick={() => nav('/')}>Back to home</button>
       </div>
     )
   }
 
-  // Selection surface. For PARTIAL that is the walk's own segments; for
-  // DIFFERENT_ROUTE it is the whole required network, because they went elsewhere.
-  const planned = new Set(walk.directions ? [] : [])
-  const selectable: MapLine[] = (base?.features ?? [])
-    .filter((f) => outcome === 'DIFFERENT_ROUTE' || planned.size === 0)
-    .map((f) => ({
-      id: f.properties.id,
-      coords: f.geometry.coordinates,
-      className: picked.has(f.properties.id)
-        ? 'ln-picked' : f.properties.done ? 'ln-done' : 'ln-todo',
-      onClick: () => toggle(f.properties.id),
-    }))
+  const selectable: MapLine[] = (base?.features ?? []).map((f) => ({
+    id: f.properties.id,
+    coords: f.geometry.coordinates,
+    className: picked.has(f.properties.id)
+      ? 'ln-picked'
+      : planned.has(f.properties.id)
+        ? 'ln-dropped'
+        : f.properties.done ? 'ln-done' : 'ln-todo',
+    onClick: () => toggle(f.properties.id),
+  }))
 
   return (
     <div className="screen">
-      <h1>How did the walk go?</h1>
+      <h1>Did you complete the route as shown?</h1>
 
       <div className="choices">
         <button className={outcome === 'AS_PLANNED' ? 'choice on' : 'choice'}
                 onClick={() => setOutcome('AS_PLANNED')}>
-          <strong>I walked the route as planned</strong>
+          <strong>Yes, mark it complete</strong>
           <span>{walk.distance_miles} mi · {walk.required_segment_count} streets</span>
         </button>
-        <button className={outcome === 'PARTIAL' ? 'choice on' : 'choice'}
-                onClick={() => setOutcome('PARTIAL')}>
-          <strong>I walked part of it</strong>
-          <span>Pick the streets you covered</span>
+        <button className={outcome === 'EDITED' ? 'choice on' : 'choice'}
+                onClick={() => setOutcome('EDITED')}>
+          <strong>Review and edit</strong>
+          <span>Skip streets you missed, add ones you walked instead</span>
         </button>
-        <button className={outcome === 'DIFFERENT_ROUTE' ? 'choice on' : 'choice'}
-                onClick={() => setOutcome('DIFFERENT_ROUTE')}>
-          <strong>I walked somewhere different</strong>
-          <span>Pick the streets you covered</span>
+        <button className={outcome === 'DID_NOT_COMPLETE' ? 'choice on' : 'choice'}
+                onClick={() => setOutcome('DID_NOT_COMPLETE')}>
+          <strong>I didn’t complete it</strong>
+          <span>Nothing is recorded and your streets are released</span>
         </button>
       </div>
 
@@ -120,19 +167,36 @@ export default function Confirm({ nav, walkId, onDone }: {
         </div>
       )}
 
-      {(outcome === 'PARTIAL' || outcome === 'DIFFERENT_ROUTE') && (
+      {outcome === 'EDITED' && (
         <div className="card">
           <p className="muted">
-            Tap each street you prayed for. {picked.size} selected.
+            Tap a street to add or remove it. Your planned route is selected to start
+            with.
           </p>
-          <MapCanvas lines={selectable} focus={walk.geometry} height={380}
-                     ariaLabel="Select the streets you walked" />
-          {outcome === 'PARTIAL' && (
-            <p className="fine">
-              For a partial walk, choose only streets that were part of your plan. If
-              you went elsewhere, pick “I walked somewhere different” instead.
-            </p>
-          )}
+          <MapCanvas lines={selectable} height={400}
+                     ariaLabel="Select the streets you covered" />
+          <div className="legend">
+            <span><i className="sw picked" /> Counting</span>
+            <span><i className="sw dropped" /> Planned, skipped</span>
+            <span><i className="sw todo" /> Not yet prayed for</span>
+          </div>
+          <dl className="facts">
+            <div><dt>Streets</dt><dd>{adjusted.count}</dd></div>
+            <div><dt>Coverage</dt><dd>{adjusted.miles.toFixed(2)} mi</dd></div>
+            <div><dt>Added</dt><dd>{adjusted.added}</dd></div>
+            <div><dt>Skipped</dt><dd>{adjusted.removed}</dd></div>
+          </dl>
+        </div>
+      )}
+
+      {outcome === 'DID_NOT_COMPLETE' && (
+        <div className="note warn">
+          <strong>Nothing will be recorded</strong>
+          <p>
+            No streets are marked as prayed for, and the ones held for you are released
+            straight away so someone else can walk them. We keep only the walk itself,
+            so the route can be looked at if something went wrong.
+          </p>
         </div>
       )}
 
@@ -144,10 +208,11 @@ export default function Confirm({ nav, walkId, onDone }: {
                       onChange={(e) => setNote(e.target.value)} rows={3} />
           </label>
           {error && <p className="error" role="alert">{error}</p>}
-          <button className="primary big" disabled={busy ||
-                    (outcome !== 'AS_PLANNED' && picked.size === 0)}
-                  onClick={submit}>
-            {busy ? 'Recording…' : 'Record this walk'}
+          <button className="primary big"
+                  disabled={busy || (outcome === 'EDITED' && picked.size === 0)}
+                  onClick={() => submit(outcome)}>
+            {busy ? 'Recording…'
+              : outcome === 'DID_NOT_COMPLETE' ? 'Submit' : 'Submit contribution'}
           </button>
         </>
       )}

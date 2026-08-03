@@ -73,26 +73,76 @@ def test_metrics_do_not_move_on_a_repeat_submission(client, h):
         after["estimated_households_prayed_for"]["value"]
 
 
-def test_partial_walk_records_only_the_selected_segments(client, h):
+def test_removing_skipped_segments(client, h):
+    """§14: drop planned obligations the walker did not reach."""
     w = plan(client, h)
     client.post(f"/api/walks/{w['id']}/start", headers=h)
     full = client.get(f"/api/walks/{w['id']}", headers=h).json()
     some = _planned_required(client, w["id"], h)[:3]
     r = client.post(f"/api/walks/{w['id']}/complete",
-                    json=dict(outcome="PARTIAL", segment_ids=some), headers=h).json()
+                    json=dict(outcome="EDITED", segment_ids=some), headers=h).json()
     assert r["segments_recorded"] == len(some)
     assert r["segments_recorded"] < full["required_segment_count"]
+    assert r["manual_removals"] == full["required_segment_count"] - len(some)
+    assert r["manual_additions"] == 0
 
 
-def test_partial_cannot_smuggle_in_unplanned_segments(client, h, ns):
+def test_adding_nearby_segments(client, h, ns):
+    """§14: add obligations the walker completed instead, in the same submission."""
     w = plan(client, h)
     client.post(f"/api/walks/{w['id']}/start", headers=h)
-    planned = set(_planned_required(client, w["id"], h))
-    stray = next(s.id for s in ns.net.segments if s.required and s.id not in planned)
+    planned = _planned_required(client, w["id"], h)
+    extra = [s.id for s in ns.net.segments
+             if s.required and s.id not in set(planned)][:2]
     r = client.post(f"/api/walks/{w['id']}/complete",
-                    json=dict(outcome="PARTIAL", segment_ids=[stray]), headers=h)
-    assert r.status_code == 422
-    assert "not part of this walk" in r.json()["detail"]
+                    json=dict(outcome="EDITED", segment_ids=planned[:2] + extra),
+                    headers=h).json()
+    assert r["manual_additions"] == len(extra)
+    assert r["manual_removals"] == len(planned) - 2
+    assert r["segments_recorded"] == 2 + len(extra)
+
+
+def test_edits_are_recorded_as_a_diff(client, h, ns):
+    w = plan(client, h)
+    client.post(f"/api/walks/{w['id']}/start", headers=h)
+    planned = _planned_required(client, w["id"], h)
+    extra = [s.id for s in ns.net.segments
+             if s.required and s.id not in set(planned)][:1]
+    client.post(f"/api/walks/{w['id']}/complete",
+                json=dict(outcome="EDITED", segment_ids=planned[:1] + extra), headers=h)
+    from sqlalchemy import select
+
+    from api.app.db import SessionLocal
+    from api.app.models import WalkEdit
+    with SessionLocal() as db:
+        rows = db.execute(select(WalkEdit)
+                          .where(WalkEdit.walk_id == w["id"])).scalars().all()
+    assert {r.segment_id for r in rows if r.kind == "ADDED"} == set(extra)
+    assert {r.segment_id for r in rows if r.kind == "REMOVED"} == set(planned[1:])
+
+
+def test_did_not_complete_records_nothing(client, h):
+    """§14: no obligations, holds released, minimal audit data kept."""
+    from api.app.db import SessionLocal
+    from api.app.services import reservations as res
+
+    before = client.get("/api/progress/metrics").json()
+    w = plan(client, h)
+    client.post(f"/api/walks/{w['id']}/start", headers=h)
+    r = client.post(f"/api/walks/{w['id']}/complete",
+                    json=dict(outcome="DID_NOT_COMPLETE"), headers=h).json()
+    assert r["segments_recorded"] == 0
+    assert r["final_distance_miles"] == 0.0
+
+    after = client.get("/api/progress/metrics").json()
+    assert after["percent_prayed_for"]["value"] == before["percent_prayed_for"]["value"]
+    assert after["total_miles_walked"]["value"] == before["total_miles_walked"]["value"]
+    with SessionLocal() as db:
+        assert not (set(_planned_required(client, w["id"], h))
+                    & res.held_segment_ids(db))
+    # The walk itself survives, for debugging.
+    assert client.get(f"/api/walks/{w['id']}", headers=h).json()["outcome"] \
+        == "DID_NOT_COMPLETE"
 
 
 def test_different_route_leaves_the_plan_intact(client, h, ns):
@@ -104,7 +154,7 @@ def test_different_route_leaves_the_plan_intact(client, h, ns):
     elsewhere = [s.id for s in ns.net.segments
                  if s.required and s.id not in planned_before][:4]
     client.post(f"/api/walks/{w['id']}/complete",
-                json=dict(outcome="DIFFERENT_ROUTE", segment_ids=elsewhere,
+                json=dict(outcome="EDITED", segment_ids=elsewhere,
                           note="went up Draper instead"), headers=h)
 
     assert _planned_all(client, w["id"]) == planned_before
@@ -123,7 +173,7 @@ def test_connectors_do_not_earn_coverage(client, h, ns):
     client.post(f"/api/walks/{w['id']}/start", headers=h)
     connector = next(s.id for s in ns.net.segments if not s.required)
     r = client.post(f"/api/walks/{w['id']}/complete",
-                    json=dict(outcome="DIFFERENT_ROUTE", segment_ids=[connector]),
+                    json=dict(outcome="EDITED", segment_ids=[connector]),
                     headers=h).json()
     assert r["segments_recorded"] == 0
 
@@ -297,3 +347,95 @@ def _planned_all(client, walk_id):
     from api.app.models import Walk
     with SessionLocal() as db:
         return list(db.get(Walk, walk_id).planned_segment_ids)
+
+
+# ------------------------------------------------------- §20 metrics matrix
+def test_duplicate_completion_by_two_users_counts_once(client, ns):
+    """§15: the obligation completes once; both walks keep their contribution."""
+    a = auth(register(client, "dup-a@example.com")["token"])
+    b = auth(register(client, "dup-b@example.com")["token"])
+
+    wa = plan(client, a, band="Short")
+    client.post(f"/api/walks/{wa['id']}/start", headers=a)
+    client.post(f"/api/walks/{wa['id']}/complete", json=dict(outcome="AS_PLANNED"),
+                headers=a)
+
+    shared = _planned_required(client, wa["id"], a)
+    mid = client.get("/api/progress/metrics").json()
+
+    wb = plan(client, b, band="Short")
+    client.post(f"/api/walks/{wb['id']}/start", headers=b)
+    rb = client.post(f"/api/walks/{wb['id']}/complete",
+                     json=dict(outcome="EDITED", segment_ids=shared),
+                     headers=b).json()
+    after = client.get("/api/progress/metrics").json()
+
+    # Coverage does not move — the same obligations were already complete.
+    assert after["percent_prayed_for"]["value"] == mid["percent_prayed_for"]["value"]
+    assert after["estimated_households_prayed_for"]["value"] == \
+        mid["estimated_households_prayed_for"]["value"]
+    # But both walks count toward miles walked, and B keeps its own contribution.
+    assert after["total_miles_walked"]["value"] > mid["total_miles_walked"]["value"]
+    assert after["completed_walks"] == mid["completed_walks"] + 1
+    assert rb["segments_recorded"] == len(shared)
+
+
+def test_households_deduplicate_across_walks(client, h, ns):
+    """A household on a segment two walks both cover is counted once."""
+    from api.app.db import SessionLocal
+    from api.app.services import completion as csvc
+    with SessionLocal() as db:
+        done = csvc.completed_segment_ids(db)
+        m = csvc.metrics(db, ns)
+    expected = sum(ns.net.segments[i].households
+                   for i in ns.indices(done) if ns.net.segments[i].required)
+    assert m["estimated_households_prayed_for"]["value"] == expected
+
+
+def test_campus_alternatives_do_not_double_count(client, h, ns):
+    """§20: walking a parallel walkway credits the canonical side — once.
+
+    The alternative itself is a connector and carries no obligation of its own, so
+    the corridor cannot be completed twice.
+    """
+    alts = [s for s in ns.net.segments if s.campus_obligation == "ALTERNATIVE"]
+    assert alts, "network has no campus alternatives to test"
+    assert not any(s.required for s in alts), \
+        "an ALTERNATIVE walkway is REQUIRED — that is a duplicate obligation"
+
+    alt = next(s for s in alts if s.satisfies)
+    credited = ns.net.credited({alt.idx})
+    # Walking it twice credits the same canonical segments, not more.
+    assert ns.net.credited({alt.idx}) == credited
+    for i in credited:
+        assert ns.net.segments[i].campus_obligation == "CANONICAL"
+
+
+def test_excluded_segments_are_not_in_the_denominator(client, ns):
+    """§20: EXCLUDED mileage affects neither half of the percentage."""
+    m = client.get("/api/progress/metrics").json()
+    denom = m["percent_prayed_for"]["denominator_miles"]
+    assert denom == pytest.approx(ns.net.stats["required_miles"], abs=0.01)
+    # Smart Road and the bypass are excluded, so they are absent entirely.
+    assert not any(s.role == "EXCLUDED" for s in ns.net.segments)
+    assert not any(s.normalized_name == "gordon c willis smart rd"
+                   for s in ns.net.segments)
+    assert ns.net.stats["excluded_miles"] > 40  # they exist in the canonical network
+    assert denom < ns.net.stats["canonical_total_miles"]
+
+
+def test_total_miles_includes_repeats_and_connectors(client, h, ns):
+    """§4: total miles walked is the submitted route distance, not new coverage."""
+    before = client.get("/api/progress/metrics").json()["total_miles_walked"]["value"]
+    w = plan(client, h, band="Medium")
+    client.post(f"/api/walks/{w['id']}/start", headers=h)
+    r = client.post(f"/api/walks/{w['id']}/complete", json=dict(outcome="AS_PLANNED"),
+                    headers=h).json()
+    after = client.get("/api/progress/metrics").json()["total_miles_walked"]["value"]
+
+    # The published figure is rounded to one decimal, so a difference of two rounded
+    # values carries up to 0.1 mi of rounding error. That is the metric's precision,
+    # not a discrepancy.
+    assert after - before == pytest.approx(w["distance_miles"], abs=0.11)
+    # The walk is longer than the new ground it earned — that is the point.
+    assert w["distance_miles"] >= r["miles_credited"]

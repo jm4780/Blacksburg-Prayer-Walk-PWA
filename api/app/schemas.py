@@ -39,6 +39,8 @@ class RouteRequestIn(BaseModel):
     lat: float | None = None
     lon: float | None = None
     start_source: Literal["DEVICE_LOCATION", "MAP"] = "DEVICE_LOCATION"
+    # Optional: narrow the response to one size. Default returns all of them (§7).
+    requested_family: str | None = None
     # Optional: reproduce an earlier request byte-for-byte.
     seed: int | None = None
 
@@ -68,6 +70,13 @@ class VariantOut(BaseModel):
     nearest_incomplete_miles: float | None
     segment_ids: list[str]
     required_segment_ids: list[str]
+    connector_segment_ids: list[str]
+    start_point: list[float] | None
+    end_point: list[float] | None
+    route_score: float | None
+    seed: int
+    network_version: str
+    engine_version: str
     geometry: dict | None
 
 
@@ -78,6 +87,8 @@ class RouteResponseOut(BaseModel):
     engine_version: str
     seed: int
     state: str
+    coverage_area_id: str | None
+    completion_state_version: str
     component: dict | None
     available_bands: list[str]
     variants: list[VariantOut]
@@ -99,6 +110,9 @@ class WalkOut(BaseModel):
     network_id: str
     engine_version: str
     required_segment_count: int
+    planned_required_ids: list[str] = []
+    households: int | None = None
+    start_point: list[float] | None = None
     created_at: str
     started_at: str | None = None
     resolved_at: str | None = None
@@ -108,7 +122,7 @@ class WalkOut(BaseModel):
 
 
 class CompleteWalkIn(BaseModel):
-    outcome: Literal["AS_PLANNED", "PARTIAL", "DIFFERENT_ROUTE"]
+    outcome: Literal["AS_PLANNED", "EDITED", "DID_NOT_COMPLETE"]
     segment_ids: list[str] | None = None
     note: str | None = Field(default=None, max_length=2000)
 

@@ -16,7 +16,7 @@ streets covered. Watch the town gradually fill in.
 | 2b | Routing prototype | ✅ Complete |
 | 2b.1 | Routing corrections + integration readiness | ✅ Complete |
 | 3 | Functional PWA integration (vertical slice) | ✅ Complete |
-| 4 | Pilot | Blocked on repository privacy; **public release blocked on licensing gate G1** |
+| 4 | Pilot | Ready — **public release blocked on licensing gate G1** |
 
 **Canonical network `v1.2` · `bbg-net-v1.2-e1284e6001ff54f5` · routing engine `2.1.0`**
 
@@ -27,8 +27,9 @@ routing components, with 11,024 households associated to required coverage.
 
 ```bash
 cp .env.example .env          # fill in BPW_TOKEN_PEPPER
-pip install fastapi 'uvicorn[standard]' sqlalchemy pydantic pydantic-settings
+pip install fastapi 'uvicorn[standard]' sqlalchemy pydantic pydantic-settings alembic
 cd web && npm install && npm run build && cd ..
+alembic upgrade head
 uvicorn api.app.main:app --reload          # http://127.0.0.1:8000
 ```
 
@@ -45,9 +46,9 @@ python3 -m api.routing.freeze
 Tests:
 
 ```bash
-python3 -m pytest                                  # 66 backend tests
-cd web && npm test                                 # 9 component tests
-cd web && node e2e/slice.mjs                       # 30 end-to-end assertions
+python3 -m pytest                                  # 82 backend tests
+cd web && npm test                                 # 10 component tests
+cd web && node e2e/slice.mjs                       # 41 end-to-end assertions
 ```
 
 ## Layout
@@ -81,6 +82,10 @@ docs/        every decision, with the evidence for it
 geometry is therefore served only to authenticated participants; anonymous callers get
 aggregate metrics and a 403 naming the gate. `BPW_PUBLIC_GEOMETRY_ENABLED` overrides
 that and should stay false until the question is answered.
+
+**GIS data is an internal dependency, not a redistributable asset.** Source snapshots,
+derived geometry and address data are fetched and built by the pipeline and are never
+committed. Run the pipeline on the deployment host.
 
 **Privacy.** No residential address, household coordinate or participant location is
 stored anywhere in this application. The browser holds an opaque token; the server

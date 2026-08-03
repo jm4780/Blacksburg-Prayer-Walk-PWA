@@ -53,7 +53,10 @@ export default function App() {
     })()
   }, [refreshWalk])
 
-  function signOut() {
+  function switchPerson() {
+    // Drops the opaque token only. The participant record, and everything walked
+    // under it, stays on the server and is recovered by signing in with the same
+    // email — which is the whole reason identity is not stored in the browser.
     setToken(null); setMe(null); setWalk(null); nav('/')
   }
 
@@ -84,9 +87,14 @@ export default function App() {
         <nav>
           <button onClick={() => nav('/progress')}>Progress</button>
           {me.is_admin && <button onClick={() => nav('/admin')}>Admin</button>}
-          <button onClick={signOut} title={`Signed in as ${me.email}`}>Sign out</button>
         </nav>
       </header>
+      {/* §5: a returning walker should see who the app thinks they are, and be able
+          to say it is not them — this is a shared-phone situation as often as not. */}
+      <div className="whoami">
+        <span>Walking as <strong>{me.first_name} {me.last_name}</strong></span>
+        <button className="link" onClick={switchPerson}>Not you? Switch person</button>
+      </div>
       <main>{screen}</main>
     </div>
   )

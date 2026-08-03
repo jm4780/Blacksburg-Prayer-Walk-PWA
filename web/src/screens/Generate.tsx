@@ -88,6 +88,11 @@ export default function Generate({ nav, onWalk }: {
   const selected: Variant | undefined =
     result?.variants.find((v) => v.band === band)
 
+  // A component with less required mileage than the shortest band cannot offer five
+  // meaningful sizes; §9 says replace the control rather than pad the route.
+  const isSmallArea = Boolean(result?.component
+    && result.component.complete_area_miles != null)
+
   return (
     <div className="screen">
       <h1>Generate a Prayer Walk</h1>
@@ -108,7 +113,7 @@ export default function Generate({ nav, onWalk }: {
         <div className="card">
           {error && <p className="error" role="alert">{error}</p>}
           <p>Tap where you would like to start.</p>
-          <MapCanvas lines={lines} marker={start} height={380}
+          <MapCanvas lines={lines} boundary={base?.boundary} marker={start} height={380}
                      ariaLabel="Blacksburg required streets. Tap to choose a start point."
                      onPick={(p) => { setStart(p); run(p.lat, p.lon, 'MAP') }} />
           <button className="secondary" onClick={useMyLocation}>
@@ -136,8 +141,23 @@ export default function Generate({ nav, onWalk }: {
 
           {result.available_bands.length > 0 && (
             <>
-              <SizeSlider variants={result.variants} selected={band}
-                          onSelect={setBand} disabled={busy} />
+              {/* §9: a component that cannot support the normal Quick band gets a
+                  focused "Complete this area" option INSTEAD of the slider — not a
+                  sixth size bolted onto a control whose other five do not apply. */}
+              {isSmallArea ? (
+                <div className="note ok">
+                  <strong>Complete this area</strong>
+                  <p>
+                    {result.component!.description} is its own area with{' '}
+                    {result.component!.required_miles} mi of streets left, and it is
+                    not connected to the rest of the network. One walk covers what is
+                    here rather than a set distance.
+                  </p>
+                </div>
+              ) : (
+                <SizeSlider variants={result.variants} selected={band}
+                            onSelect={setBand} disabled={busy} />
+              )}
 
               {selected?.available && (
                 <div className="card">
@@ -157,7 +177,8 @@ export default function Generate({ nav, onWalk }: {
                     </p>
                   ) : null}
                   <button className="primary big" disabled={busy} onClick={preview}>
-                    {busy ? 'Holding your route…' : 'Preview this walk'}
+                    {busy ? 'Holding your route…'
+                      : isSmallArea ? 'Complete this area' : 'Preview this walk'}
                   </button>
                 </div>
               )}
@@ -189,31 +210,20 @@ function Opportunity({ result, onRestart }: {
   const nearest = worst?.nearest_incomplete_miles
     ?? result.variants.find((v) => v.nearest_incomplete_miles != null)?.nearest_incomplete_miles
 
-  const comp = result.component
-  // §9: an area with less required mileage than the shortest size is offered as
-  // "complete this area", not as a sixth size on the slider.
-  const smallArea = comp && comp.complete_area_miles != null
-
   switch (result.state) {
     case 'ROUTE_AVAILABLE':
-      return smallArea ? (
-        <div className="note ok">
-          <strong>Complete this area</strong>
-          <p>
-            {comp!.description} has {comp!.required_miles} mi of streets left and is not
-            connected to the rest of the network. This walk covers what is here rather
-            than a fixed distance.
-          </p>
-        </div>
-      ) : null
+      // The small-area case is handled by replacing the size control itself, above.
+      return null
 
     case 'LIMITED_LOCAL_COVERAGE':
       return (
         <div className="note warn">
-          <strong>Most of the streets near here have already been prayed for</strong>
+          <strong>There are few unprayed streets near this starting point</strong>
           <p>
             We can still put a walk together, but much of it retraces ground that is
             already covered.
+            {nearest != null && ` The nearest unfinished area is approximately
+              ${nearest} miles away.`}
           </p>
         </div>
       )
@@ -223,9 +233,10 @@ function Opportunity({ result, onRestart }: {
         <div className="note warn">
           <strong>A longer walk is needed from here</strong>
           <p>
-            The nearest streets that still need prayer are
-            {nearest != null ? ` about ${nearest} miles away` : ' further out'}, so the
-            shorter sizes cannot reach them and get back.
+            {nearest != null
+              ? `The nearest unfinished area is approximately ${nearest} miles away`
+              : 'The nearest unfinished area is further out'}, so the shorter sizes
+            cannot reach it and get back.
           </p>
         </div>
       )
@@ -235,10 +246,12 @@ function Opportunity({ result, onRestart }: {
         <div className="note stop">
           <strong>Try starting somewhere else</strong>
           <p>
-            Everything within walking distance of here has been prayed for. The nearest
-            area that still needs it is
-            {nearest != null ? ` about ${nearest} miles away` : ' some distance away'} —
-            better to start closer to it than to walk there and back.
+            There are no remaining unprayed streets near this starting point.
+            {nearest != null
+              ? ` The nearest unfinished area is approximately ${nearest} miles away.`
+              : ''}{' '}
+            Choose a different starting point or start closer to the nearest
+            unfinished area.
           </p>
           <button className="secondary" onClick={onRestart}>
             Choose a different starting point

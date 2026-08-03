@@ -53,12 +53,18 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
       <h1>{started ? 'Your walk' : 'Preview your walk'}</h1>
 
       <div className="card">
+        {/* The marker is the walk's fixed start and end point, computed once when
+            the route was generated. It is not the walker — it never moves. */}
         <MapCanvas lines={[]} focus={walk.geometry} height={320}
+                   marker={walk.start_point
+                     ? { lon: walk.start_point[0], lat: walk.start_point[1] } : null}
                    ariaLabel={`Planned route, ${walk.distance_miles} miles`} />
+        <p className="fine centered">Starts and ends at the same point.</p>
         <dl className="facts">
           <div><dt>Distance</dt><dd>{walk.distance_miles} mi</dd></div>
           <div><dt>About</dt><dd>{walk.estimated_minutes} min</dd></div>
           <div><dt>Streets</dt><dd>{walk.required_segment_count}</dd></div>
+          <div><dt>Households</dt><dd>~{(walk.households ?? 0).toLocaleString()}</dd></div>
         </dl>
       </div>
 
@@ -95,7 +101,7 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
         )}
         {started && (
           <button className="primary big" onClick={() => nav(`/confirm/${walk.id}`)}>
-            I have finished
+            Finish Walk
           </button>
         )}
         <button className="secondary" disabled={busy} onClick={discard}>

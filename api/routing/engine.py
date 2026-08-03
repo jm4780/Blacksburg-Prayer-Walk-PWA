@@ -524,8 +524,22 @@ class Engine:
                             unavailable=meta.get("reason") or "no route found",
                             nearest_incomplete_miles=meta.get("nearest_incomplete_miles")))
         if base is None:
+            # Every band failed. This is precisely when the caller most needs a
+            # structured state — "nothing here, the nearest work is 2.6 mi away" — so
+            # the responses are attached here too. An earlier version returned early
+            # without them, and the API fell back to a blanket
+            # NO_USEFUL_ROUTE_NEAR_START, losing the SELECT_DIFFERENT_START_AREA and
+            # LONGER_ROUTE_REQUIRED distinctions. Found by
+            # tests/test_location.py::test_no_useful_route_state_is_structured_not_padded.
+            ms = round((time.perf_counter() - t0) * 1000, 1)
+            component = self.component_for(start_i)
+            band_results = [(o["name"], o["target_miles"], None, o.get("meta", {}))
+                            for o in out]
             for o in out:
-                o["build_ms"] = round((time.perf_counter() - t0) * 1000, 1)
+                o["build_ms"] = ms
+                o["response"] = resp_mod.assess(
+                    o["name"], o["target_miles"], None, o.get("meta", {}),
+                    component, band_results)
             return out
 
         cur = base

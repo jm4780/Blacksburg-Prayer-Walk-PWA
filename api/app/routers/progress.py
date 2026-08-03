@@ -19,6 +19,10 @@ What it must never show, and does not:
 """
 from __future__ import annotations
 
+import json
+import os
+from functools import lru_cache
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -30,6 +34,40 @@ from ..services import reservations as res_svc
 from ..services.network_state import network_service
 
 router = APIRouter(prefix="/api/progress", tags=["progress"])
+
+
+@lru_cache
+def _boundary() -> dict | None:
+    """The town outline, for map context (§16).
+
+    Read from the source snapshot at runtime rather than committed. The snapshot is an
+    internal application dependency — a deployment runs `pipeline.sources.fetch` and
+    has it; the repository does not carry a copy. If it is absent the map simply draws
+    without an outline, which is a cosmetic loss, not a broken screen.
+    """
+    import glob
+
+    from ...routing import network as net_mod
+    root = os.path.join(os.path.dirname(net_mod.OUT_ROOT), "snapshots", "boundary")
+    files = sorted(glob.glob(os.path.join(root, "*.geojson")))
+    if not files:
+        return None
+    try:
+        with open(files[-1]) as f:
+            fc = json.load(f)
+        rings: list = []
+        for feat in fc.get("features", []):
+            g = feat.get("geometry") or {}
+            if g.get("type") == "Polygon":
+                rings.append(g["coordinates"][0])
+            elif g.get("type") == "MultiPolygon":
+                rings.extend(poly[0] for poly in g["coordinates"])
+        # Thin the outline: the source ring runs to thousands of vertices and the map
+        # is drawn a few hundred pixels wide.
+        return {"type": "MultiLineString",
+                "coordinates": [r[::4] + [r[-1]] for r in rings if len(r) > 8]} or None
+    except (OSError, ValueError, KeyError, IndexError):
+        return None
 
 
 @router.get("/metrics", response_model=MetricsOut)
@@ -71,6 +109,7 @@ def progress_map(db: Session = Depends(get_db), _: bool = Depends(geometry_or_40
         "network_id": ns.net.network_id,
         "network_version": ns.manifest["canonical_network_version"],
         "features": feats,
+        "boundary": _boundary(),
         "excludes": ["household points", "residential addresses",
                      "per-segment household counts", "participant identity",
                      "parallel campus walkways (ALTERNATIVE)",

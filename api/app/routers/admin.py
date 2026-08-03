@@ -5,17 +5,17 @@ number — reversing a completion and recording one walked offline — write an
 AdminAction row first, because a number that can be edited without a trace is a number
 nobody can defend.
 
-  1  town-wide progress, with definitions
-  2  participant roster (counts and activity, no walk-level detail per person)
-  3  walk log, filterable by status
-  4  live reservations, and release one
-  5  reverse a completion
-  6  record a segment walked offline
-  7  the frozen network manifest and version
-  8  review queues: CRC crossings, segments still needing review
-  9  deployment posture and the licensing gate
- 10  aggregate progress export
- 11  the admin audit log
+  1  view submitted walks
+  2  view manual route edits
+  3  correct a walk submission
+  4  correct segment completion (reverse, or record one walked offline)
+  5  release or inspect reservations
+  6  review participant duplicates
+  7  inspect route-generation failures
+  8  view network and engine versions
+  9  review the eight Corporate Research Center crossings
+ 10  export aggregate pilot data
+ 11  town-wide progress and deployment posture, including the licensing gate
 
 Deliberately absent: anything that reads one named participant's routes. An
 administrator can see that Jane has completed four walks; they cannot pull up where
@@ -36,7 +36,8 @@ from ...routing import network as net_mod
 from ..config import settings
 from ..db import get_db
 from ..deps import require_admin
-from ..models import AdminAction, Completion, Participant, Reservation, Walk
+from ..models import (AdminAction, Completion, Participant, Reservation,
+                      RouteRequest, Walk, WalkEdit)
 from ..services import completion as completion_svc
 from ..services import reservations as res_svc
 from ..services.network_state import network_service
@@ -61,7 +62,126 @@ def overview(db: Session = Depends(get_db)):
                     select(Walk.status, func.count(Walk.id)).group_by(Walk.status)).all()))
 
 
-# 2 ---------------------------------------------------------------------------
+# 2 --- view manual route edits ------------------------------------------------
+@router.get("/walk-edits")
+def walk_edits(limit: int = 200, db: Session = Depends(get_db)):
+    """Every manual change a walker made to a plan, as a diff.
+
+    This is the screen that answers "is anyone gaming the numbers?" — not by naming
+    people, but by showing whether manual additions are concentrated somewhere odd.
+    """
+    rows = db.execute(select(WalkEdit).order_by(WalkEdit.created_at.desc())
+                      .limit(min(limit, 1000))).scalars().all()
+    by_walk: dict = {}
+    for e in rows:
+        w = by_walk.setdefault(e.walk_id, dict(walk_id=e.walk_id, added=[], removed=[],
+                                               at=e.created_at.isoformat()))
+        (w["added"] if e.kind == "ADDED" else w["removed"]).append(e.segment_id)
+    return dict(edited_walks=len(by_walk), edits=len(rows),
+                walks=sorted(by_walk.values(), key=lambda w: w["at"], reverse=True))
+
+
+# 3 --- correct a walk submission ----------------------------------------------
+@router.post("/walks/{walk_id}/correct")
+def correct_walk(walk_id: str, outcome: str, reason: str,
+                 segment_ids: list[str] | None = None,
+                 actor: Participant = Depends(require_admin),
+                 db: Session = Depends(get_db)):
+    """Re-record a walk's outcome. Audited, and the plan is still never rewritten.
+
+    Existing completions for the walk are cleared first, because a correction that
+    could only ever *add* would make an over-claim uncorrectable.
+    """
+    from ..services import completion as csvc
+    if not reason or len(reason.strip()) < 5:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            "a reason is required to correct a walk")
+    walk = db.get(Walk, walk_id)
+    if walk is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "unknown walk")
+    if outcome not in csvc.OUTCOMES:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            f"outcome must be one of {sorted(csvc.OUTCOMES)}")
+    before = db.execute(select(func.count(Completion.id))
+                        .where(Completion.walk_id == walk_id)).scalar() or 0
+    _audit(db, actor, "correct_walk", walk_id,
+           dict(from_outcome=walk.outcome, to_outcome=outcome,
+                completions_cleared=before, reason=reason.strip()))
+    db.execute(delete(Completion).where(Completion.walk_id == walk_id))
+    walk.manual_additions, walk.manual_removals = [], []
+    db.commit()
+    result = csvc.record(db, network_service(), walk, outcome, segment_ids, reason)
+    db.commit()
+    return dict(corrected=walk_id, completions_cleared=before, **result)
+
+
+# 6 --- review participant duplicates ------------------------------------------
+@router.get("/participant-duplicates")
+def participant_duplicates(db: Session = Depends(get_db)):
+    """Likely duplicate people.
+
+    Normalized email already prevents exact duplicates, so what is left is the cases
+    the normalizer deliberately does NOT merge: same name on two addresses, and
+    plus-tagged variants of one mailbox. Both are surfaced for a human, because
+    merging them automatically would risk attributing one person's walks to another.
+    """
+    people = db.execute(select(Participant)).scalars().all()
+    by_name: dict = {}
+    by_mailbox: dict = {}
+    for p in people:
+        by_name.setdefault(
+            f"{p.first_name.strip().lower()} {p.last_name.strip().lower()}", []).append(p)
+        local, _, domain = p.email_normalized.partition("@")
+        by_mailbox.setdefault(f"{local.split('+')[0]}@{domain}", []).append(p)
+
+    def pack(group):
+        return [dict(id=x.id, first_name=x.first_name, last_name=x.last_name,
+                     email=x.email, created_at=x.created_at.isoformat()) for x in group]
+
+    return dict(
+        same_name=[dict(key=k, participants=pack(v))
+                   for k, v in by_name.items() if len(v) > 1],
+        same_mailbox_different_tag=[dict(key=k, participants=pack(v))
+                                    for k, v in by_mailbox.items() if len(v) > 1],
+        note=("Nothing here is merged automatically. Plus-tagged addresses are treated "
+              "as distinct people on purpose — collapsing them is provider-specific "
+              "and getting it wrong attributes one person's walks to another."),
+    )
+
+
+# 7 --- inspect route-generation failures --------------------------------------
+@router.get("/route-failures")
+def route_failures(limit: int = 100, db: Session = Depends(get_db)):
+    """Requests that produced no usable route, with everything needed to reproduce."""
+    rows = db.execute(
+        select(RouteRequest).where(RouteRequest.failure_reason.isnot(None))
+        .order_by(RouteRequest.created_at.desc()).limit(min(limit, 500))).scalars().all()
+    return dict(
+        failures=len(rows),
+        by_reason=_count_rows(rows, "failure_reason"),
+        by_coverage_area=_count_rows(rows, "coverage_area_id"),
+        requests=[dict(id=r.id, reason=r.failure_reason,
+                       coverage_area_id=r.coverage_area_id,
+                       start_node=r.start_node, start_source=r.start_source,
+                       seed=r.seed, network_id=r.network_id,
+                       engine_version=r.engine_version,
+                       completion_state_version=r.completion_state_version,
+                       active_reservations=r.active_reservation_count,
+                       created_at=r.created_at.isoformat())
+                  for r in rows],
+        reproduce=("POST /api/routes/generate with the same seed from the same start "
+                   "node reproduces the failure, provided completion_state_version "
+                   "still matches."))
+
+
+def _count_rows(rows, attr):
+    out: dict = {}
+    for r in rows:
+        k = getattr(r, attr)
+        out[str(k)] = out.get(str(k), 0) + 1
+    return out
+
+
 @router.get("/participants")
 def participants(db: Session = Depends(get_db)):
     rows = db.execute(

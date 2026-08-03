@@ -42,6 +42,19 @@ const ctx = await browser.newContext({
 })
 const page = await ctx.newPage()
 
+// §6/§13: the app must use a one-time fix and never a continuous watch. Instrument
+// both APIs before any app code runs, so a watch would be recorded rather than
+// merely invisible.
+await page.addInitScript(() => {
+  window.__watchIds = []
+  window.__getCurrentPositionCalls = 0
+  const g = navigator.geolocation
+  const watch = g.watchPosition.bind(g)
+  const once = g.getCurrentPosition.bind(g)
+  g.watchPosition = (...a) => { const id = watch(...a); window.__watchIds.push(id); return id }
+  g.getCurrentPosition = (...a) => { window.__getCurrentPositionCalls++; return once(...a) }
+})
+
 // Capture every API payload for the privacy assertion.
 const payloads = []
 page.on('response', async (r) => {
@@ -57,6 +70,9 @@ await page.getByLabel('Email').fill(`ada+${Date.now()}@example.com`)
 await page.getByRole('button', { name: 'Start walking' }).click()
 await page.getByRole('heading', { name: /Hello, Ada/ }).waitFor({ timeout: 15000 })
 check('registered and landed on the dashboard', true)
+const who = await page.locator('.whoami').innerText()
+check('shows "Walking as [Name]"', /Walking as\s+Ada Walker/.test(who), who)
+check('offers a way to switch person', /Not you\?|Switch person/.test(who), who)
 
 log('\n3    home dashboard')
 const metricLabels = await page.locator('.metric-label').allTextContents()
@@ -74,6 +90,11 @@ check('location purpose explained before the prompt',
   /once/i.test(explain) && /not saved/i.test(explain), explain)
 check('explanation disclaims tracking', /do not track you/i.test(explain))
 await page.getByRole('button', { name: 'Use my location' }).click()
+
+const geo = await page.evaluate(
+  () => ({ once: window.__getCurrentPositionCalls, watches: window.__watchIds.length }))
+check('location requested exactly once', geo.once === 1, JSON.stringify(geo))
+check('no continuous location watch was started', geo.watches === 0, JSON.stringify(geo))
 
 log('\n6-7  sizes offered, and changing size updates everything')
 await page.locator('.sizes').waitFor({ timeout: 60000 })
@@ -107,15 +128,57 @@ for (const re of FORBIDDEN_ON_ACTIVE_WALK) {
   check(`no match for ${re}`, !re.test(activeText),
     (activeText.match(re) || []).join())
 }
-check('no live position marker on the active walk',
-  await page.locator('.marker').count() === 0)
+// §13 requires the start/end location to be SHOWN, and forbids a live-location
+// indicator or a moving user marker. So the assertion is not "no marker" — an
+// earlier version asserted that and was simply wrong — it is that the only marker
+// is the route's fixed start/end, and that it does not move.
+const markerKinds = await page.locator('.marker').evaluateAll(
+  (els) => els.map((e) => e.getAttribute('data-kind')))
+check('start/end location is shown',
+  markerKinds.length === 1 && markerKinds[0] === 'route-start-end',
+  JSON.stringify(markerKinds))
+const pos1 = await page.locator('.marker circle').getAttribute('cx')
+await page.waitForTimeout(1200)
+const pos2 = await page.locator('.marker circle').getAttribute('cx')
+check('the marker does not move', pos1 === pos2, `${pos1} -> ${pos2}`)
+check('no geolocation watch is active',
+  await page.evaluate(() => !window.__watchIds || window.__watchIds.length === 0))
 
 log('\n10-11 finish and confirm')
-await page.getByRole('button', { name: 'I have finished' }).click()
-await page.getByRole('heading', { name: /How did the walk go/ }).waitFor()
+await page.getByRole('button', { name: 'Finish Walk' }).click()
+await page.getByRole('heading', { name: /Did you complete the route as shown/ }).waitFor()
 check('three confirmation paths offered', await page.locator('.choice').count() === 3)
-await page.locator('.choice', { hasText: 'as planned' }).click()
-await page.getByRole('button', { name: 'Record this walk' }).click()
+const choices = (await page.locator('.choice strong').allTextContents()).join(' | ')
+check('offers mark-complete, review-and-edit, and did-not-complete',
+  /mark it complete/i.test(choices) && /Review and edit/i.test(choices)
+  && /didn.t complete it/i.test(choices), choices)
+
+// Review-and-edit must start from the plan and update the contribution live.
+await page.locator('.choice', { hasText: 'Review and edit' }).click()
+await page.locator('.map path.ln-picked').first().waitFor({ timeout: 15000 })
+const beforeEdit = await page.locator('.facts dd').allTextContents()
+// Click the invisible hit target for one specific street. Clicking the drawn line
+// itself would land wherever its bounding-box centre happens to be, which is often a
+// different street — the drawn paths carry pointer-events: none for that reason.
+const pickedId = await page.locator('.map path.ln-picked').first()
+  .evaluate((el) => el.getAttribute('d'))
+const targetId = await page.evaluate(() => {
+  const drawn = document.querySelector('.map path.ln-picked')
+  const d = drawn && drawn.getAttribute('d')
+  const hit = [...document.querySelectorAll('.map path.hit')]
+    .find((h) => h.getAttribute('d') === d)
+  return hit ? hit.getAttribute('data-id') : null
+})
+check('every selectable street has a tap target', targetId !== null, String(pickedId))
+await page.locator(`.map path.hit[data-id="${targetId}"]`).click({ force: true })
+const afterEdit = await page.locator('.facts dd').allTextContents()
+check('editing updates the adjusted contribution',
+  beforeEdit.join() !== afterEdit.join(), `${beforeEdit} vs ${afterEdit}`)
+check('freehand drawing is not offered',
+  await page.locator('canvas, [contenteditable="true"]').count() === 0)
+
+await page.locator('.choice', { hasText: 'mark it complete' }).click()
+await page.getByRole('button', { name: 'Submit contribution' }).click()
 await page.getByRole('heading', { name: 'Thank you' }).waitFor({ timeout: 20000 })
 check('completion confirmed', true)
 
@@ -132,6 +195,10 @@ check('progress map renders required geometry',
   await page.locator('.map path').count() > 100)
 check('map states what it excludes',
   await page.locator('details.fine').count() === 1)
+check('town boundary drawn', await page.locator('path.ln-boundary').count() > 0)
+const legend = await page.locator('.legend').innerText()
+check('legend explains the colours',
+  /Prayed for/i.test(legend) && /Not yet/i.test(legend), legend)
 
 log('\n     PWA installability')
 const manifest = await page.evaluate(async () => {

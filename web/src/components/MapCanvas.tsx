@@ -31,7 +31,12 @@ interface Props {
   lines: MapLine[]
   /** Extra geometry drawn on top and always fully in frame. */
   focus?: LineString | null
+  /** A FIXED point — a route's start/end, or a chosen start. Never the user's live
+   *  position: this component has no access to geolocation and never re-renders from
+   *  it. See §13. */
   marker?: { lat: number; lon: number } | null
+  /** Town outline, drawn behind everything for context (§16). */
+  boundary?: { coordinates: [number, number][][] } | null
   height?: number
   /** When set, tapping the map reports the lon/lat tapped (§6 map-start fallback). */
   onPick?: (lonLat: { lon: number; lat: number }) => void
@@ -41,12 +46,13 @@ interface Props {
 const PAD = 12
 
 export default function MapCanvas({
-  lines, focus, marker, height = 320, onPick, ariaLabel,
+  lines, focus, marker, boundary, height = 320, onPick, ariaLabel,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null)
 
   const { project, unproject, viewBox } = useMemo(() => {
     const pts: [number, number][] = []
+    for (const r of boundary?.coordinates ?? []) pts.push(...r)
     for (const l of lines) pts.push(...l.coords)
     if (focus) pts.push(...focus.coordinates)
     if (marker) pts.push([marker.lon, marker.lat])
@@ -78,7 +84,7 @@ export default function MapCanvas({
       lat: minY + (1000 - oy - py) / scale,
     })
     return { project, unproject, viewBox: '0 0 1000 1000' }
-  }, [lines, focus, marker])
+  }, [lines, focus, marker, boundary])
 
   const path = (coords: [number, number][]) =>
     coords.map((c, i) => `${i ? 'L' : 'M'}${project(c).map((n) => n.toFixed(1)).join(' ')}`)
@@ -103,16 +109,32 @@ export default function MapCanvas({
       onClick={handleClick}
       data-pickable={onPick ? 'true' : 'false'}
     >
+      {(boundary?.coordinates ?? []).map((ring, i) => (
+        <path key={`b${i}`} d={path(ring)} className="ln-boundary"
+              vectorEffect="non-scaling-stroke" />
+      ))}
       {lines.map((l, i) => (
         <path key={l.id ?? i} d={path(l.coords)} className={l.className}
-              onClick={l.onClick} vectorEffect="non-scaling-stroke" />
+              vectorEffect="non-scaling-stroke" />
+      ))}
+      {/* Tap targets, drawn last and invisible.
+          A required street renders at 1.4 px. On a phone that is far below a usable
+          touch target, and neighbouring streets overlap enough that whichever path
+          happens to be on top swallows the tap — selecting the street you meant was
+          close to impossible. These transparent 14 px strokes sit above everything,
+          take the pointer events, and never affect what is drawn. */}
+      {lines.filter((l) => l.onClick).map((l, i) => (
+        <path key={`hit-${l.id ?? i}`} d={path(l.coords)} className="hit"
+              data-id={l.id} onClick={l.onClick}
+              vectorEffect="non-scaling-stroke" aria-hidden="true" />
       ))}
       {focus && (
         <path d={path(focus.coordinates)} className="ln-route"
               vectorEffect="non-scaling-stroke" />
       )}
       {marker && (
-        <g className="marker" aria-label="Start point">
+        <g className="marker" data-kind="route-start-end"
+           aria-label="Route start and end point">
           <circle cx={project([marker.lon, marker.lat])[0]}
                   cy={project([marker.lon, marker.lat])[1]} r={11} />
         </g>
