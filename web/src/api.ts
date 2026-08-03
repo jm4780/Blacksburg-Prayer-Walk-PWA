@@ -43,9 +43,11 @@ async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
 export const api = {
   health: () => req<any>('/api/health'),
 
-  register: (first_name: string, last_name: string, email: string) =>
+  register: (first_name: string, last_name: string, email: string,
+             invite_code?: string) =>
     req<ParticipantOut>('/api/identity/register', {
-      method: 'POST', body: JSON.stringify({ first_name, last_name, email }),
+      method: 'POST',
+      body: JSON.stringify({ first_name, last_name, email, invite_code }),
     }),
 
   me: () => req<ParticipantOut>('/api/identity/me'),
@@ -70,10 +72,22 @@ export const api = {
       method: 'POST', body: JSON.stringify({ outcome, segment_ids, note }),
     }),
 
+  feedback: (walkId: string, body: Record<string, unknown>) =>
+    req<any>(`/api/walks/${walkId}/feedback`, {
+      method: 'POST', body: JSON.stringify(body),
+    }),
+  getFeedback: (walkId: string) => req<any | null>(`/api/walks/${walkId}/feedback`),
+
   metrics: () => req<Metrics>('/api/progress/metrics'),
   progressMap: () => req<ProgressMap>('/api/progress/map'),
 
   adminOverview: () => req<AdminOverview>('/api/admin/overview'),
+  adminPilot: () => req<any>('/api/admin/pilot-summary'),
+  adminFeedback: () => req<any[]>('/api/admin/feedback'),
+  adminWalkEdits: () => req<any>('/api/admin/walk-edits'),
+  adminRouteFailures: () => req<any>('/api/admin/route-failures'),
+  adminDuplicates: () => req<any>('/api/admin/participant-duplicates'),
+  adminConnectors: () => req<any>('/api/admin/connector-candidates'),
   adminReviewQueues: () => req<any>('/api/admin/review-queues'),
   adminDeployment: () => req<any>('/api/admin/deployment'),
   adminReservations: () => req<any[]>('/api/admin/reservations'),

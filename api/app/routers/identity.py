@@ -20,6 +20,7 @@ from ..db import get_db
 from ..deps import current_participant
 from ..models import Participant
 from ..schemas import ParticipantOut, RegisterIn
+from ..config import settings
 from ..security import hash_token, new_token, normalize_email, valid_email
 
 router = APIRouter(prefix="/api/identity", tags=["identity"])
@@ -30,6 +31,13 @@ def register(body: RegisterIn, db: Session = Depends(get_db)):
     if not valid_email(body.email):
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
                             "that does not look like an email address")
+    # Invite-restricted pilots (BPW_ACCESS_MODE=invite). Still no password and no
+    # verification: the code gates who can sign up, not how identity works.
+    cfg = settings()
+    if cfg.access_mode == "invite" and cfg.invite_code:
+        if (body.invite_code or "").strip() != cfg.invite_code:
+            raise HTTPException(status.HTTP_403_FORBIDDEN,
+                                "this pilot needs an invite code")
     key = normalize_email(body.email)
     token = new_token()
 

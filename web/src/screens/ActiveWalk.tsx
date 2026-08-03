@@ -14,6 +14,7 @@
  */
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import FeedbackForm from '../components/FeedbackForm'
 import MapCanvas from '../components/MapCanvas'
 import type { Walk } from '../types'
 import type { Nav } from '../App'
@@ -24,6 +25,7 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
   const [walk, setWalk] = useState<Walk | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [reporting, setReporting] = useState(false)
 
   useEffect(() => {
     api.walk(walkId).then(setWalk).catch((e) => setError(e.message))
@@ -91,6 +93,18 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
             </li>
           ))}
         </ol>
+      )}
+
+      {/* §5: reportable from the active screen, so "this crossing doesn't exist" can
+          be said standing at the crossing rather than remembered afterwards. */}
+      {started && !reporting && (
+        <button className="secondary" onClick={() => setReporting(true)}>
+          Report a problem with this route
+        </button>
+      )}
+      {started && reporting && (
+        <FeedbackForm walkId={walk.id} from="ACTIVE_WALK"
+                      onDone={() => setReporting(false)} />
       )}
 
       <div className="actions">

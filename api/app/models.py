@@ -188,6 +188,49 @@ class Completion(Base):
                                                    default=utcnow, index=True)
 
 
+class RouteFeedback(Base):
+    """Pilot feedback on one route (Phase 3.1 §5).
+
+    The point is not to gather opinions — it is to make a bad route **reproducible**.
+    Every row carries the network version, engine version, seed, coverage area and
+    band, which together regenerate the exact route the person walked. "The route sent
+    me down a path that doesn't exist" becomes a command someone can run.
+
+    Deliberately small: five structured answers and a comment. Not a survey, not an
+    analytics platform.
+    """
+    __tablename__ = "route_feedback"
+    __table_args__ = (
+        UniqueConstraint("walk_id", name="uq_feedback_walk"),
+    )
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    walk_id: Mapped[str] = mapped_column(ForeignKey("walks.id"), index=True)
+    participant_id: Mapped[str] = mapped_column(ForeignKey("participants.id"), index=True)
+
+    rating: Mapped[int] = mapped_column(Integer)                    # 1-5 overall
+    easy_to_follow: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    time_felt_accurate: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    had_bad_connection: Mapped[bool] = mapped_column(Boolean, default=False)
+    bad_connection_detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+    completed_as_planned: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # --- reproduction key --------------------------------------------------
+    network_id: Mapped[str] = mapped_column(String(64))
+    network_version: Mapped[str] = mapped_column(String(16))
+    engine_version: Mapped[str] = mapped_column(String(16))
+    seed: Mapped[int] = mapped_column(Integer)
+    coverage_area_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    start_node: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    band: Mapped[str] = mapped_column(String(16))
+    # Where the walk was submitted from in the flow: ACTIVE_WALK | AFTER_SUBMISSION.
+    submitted_from: Mapped[str] = mapped_column(String(24), default="AFTER_SUBMISSION")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+                                                 default=utcnow, index=True)
+
+
 class WalkEdit(Base):
     """An audit row for every manual change a walker made to their plan (§17).
 

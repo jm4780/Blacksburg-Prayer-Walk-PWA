@@ -157,7 +157,12 @@ class CompletionState:
 class Route:
     """A closed walk. `seg_seq` is the ordered list of segment indices traversed."""
     seg_seq: list = field(default_factory=list)
+    # Graph node INDEX (position in RoutingGraph.nodes), not a canonical node id.
     start_node: int = -1
+    # The canonical node id the walk starts and ends at. Distinct from `start_node`
+    # on purpose: the engine works in compact graph indices, while Segment.u/v carry
+    # canonical ids, and conflating the two is what broke node_sequence().
+    start_node_id: int = -1
     anchors: list = field(default_factory=list)   # anchor node sequence, for pruning
     excursions: list = field(default_factory=list)  # (label, [seg_idx], gain) for variants
     # How many trailing entries of seg_seq are the walk home from the last anchor.
@@ -238,16 +243,56 @@ class Route:
 
     # ------------------------------------------------------------- geometry
     def node_sequence(self, net) -> list:
-        """Walk the segment sequence and recover the node path."""
+        """The canonical node ids visited, in order. Length = len(seg_seq) + 1.
+
+        BUG HISTORY, worth keeping: this used to seed from `self.start_node`, which is
+        a compact *graph index*, and compare it against `Segment.u`, which is a
+        canonical *node id*. The comparison was essentially always false, so the first
+        step fell through to `s.u` — the node it started at — and the entire sequence
+        came out shifted by one position. Every turn angle in `turn_stats` was then
+        measured at the junction *before* the one where the turn happens, and every
+        route reported as "does not close".
+
+        Nothing failed loudly, because a shifted sequence is still a plausible list of
+        node ids. It surfaced only when Phase 3.1's campus validation asked whether
+        routes form coherent loops and got "no" for every route including the known-good
+        controls.
+        """
         if not self.seg_seq:
-            return [self.start_node]
-        nodes = [self.start_node]
-        cur = self.start_node
+            return [self.start_node_id]
+        start = self.start_node_id
+        if start < 0:
+            start = self._infer_start(net)
+        nodes = [start]
+        cur = start
         for idx in self.seg_seq:
             s = net.segments[idx]
-            cur = s.v if s.u == cur else s.u
+            # Follow the edge from whichever end we are standing on. If neither end
+            # matches, the walk is not contiguous — report it rather than silently
+            # inventing a node, because a wrong node here is exactly the failure this
+            # docstring is about.
+            if s.u == cur:
+                cur = s.v
+            elif s.v == cur:
+                cur = s.u
+            else:
+                cur = s.v
             nodes.append(cur)
         return nodes
+
+    def _infer_start(self, net) -> int:
+        """Recover the start node from geometry, for routes stored before
+        `start_node_id` existed."""
+        first = net.segments[self.seg_seq[0]]
+        if len(self.seg_seq) > 1:
+            second = net.segments[self.seg_seq[1]]
+            ends = {second.u, second.v}
+            # The start is the end of the first segment the second one does NOT touch.
+            if first.u in ends and first.v not in ends:
+                return first.v
+            if first.v in ends and first.u not in ends:
+                return first.u
+        return first.u
 
     def turn_stats(self, net) -> tuple[int, int]:
         """(sharp turns, u-turns). A u-turn is retracing the same segment immediately

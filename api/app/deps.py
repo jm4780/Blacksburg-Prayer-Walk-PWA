@@ -57,13 +57,14 @@ def may_see_geometry(p: Participant | None = Depends(optional_participant)) -> b
     it to anonymous callers is publication. Serving it to a signed-up pilot participant
     is not, on the same footing as showing someone a map in a meeting.
 
-    So: authenticated callers always may. Anonymous callers may only when an operator
-    has explicitly set BPW_PUBLIC_GEOMETRY_ENABLED, which the startup check flags
-    loudly.
+    This function is the ONLY place the access mode is consulted. That is deliberate:
+    G1 is a deployment configuration, not a permanent architectural limit, and moving
+    to lightweight public participant access must be an environment change rather than
+    a rewrite. See api/app/config.Settings.access_mode.
     """
     if p is not None:
         return True
-    return settings().public_geometry_enabled
+    return settings().geometry_is_public
 
 
 def geometry_or_403(allowed: bool = Depends(may_see_geometry)) -> bool:
@@ -72,5 +73,5 @@ def geometry_or_403(allowed: bool = Depends(may_see_geometry)) -> bool:
             status.HTTP_403_FORBIDDEN,
             "Map geometry is derived from Town of Blacksburg GIS data whose reuse "
             "terms are unresolved (licensing gate G1). Sign in to view it, or set "
-            "BPW_PUBLIC_GEOMETRY_ENABLED once the licensing question is settled.")
+            "BPW_ACCESS_MODE=public once the licensing question is settled.")
     return True

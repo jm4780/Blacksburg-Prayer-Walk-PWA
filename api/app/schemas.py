@@ -16,6 +16,8 @@ class RegisterIn(BaseModel):
     first_name: str = Field(min_length=1, max_length=80)
     last_name: str = Field(min_length=1, max_length=80)
     email: str = Field(min_length=3, max_length=320)
+    # Only consulted when BPW_ACCESS_MODE=invite.
+    invite_code: str | None = Field(default=None, max_length=120)
 
 
 class ParticipantOut(BaseModel):
@@ -150,3 +152,23 @@ class HealthOut(BaseModel):
     warnings: list[str]
     public_geometry_enabled: bool
     licensing_gate: dict[str, Any]
+
+
+# -------------------------------------------------------------------- feedback
+class FeedbackIn(BaseModel):
+    rating: int = Field(ge=1, le=5)
+    easy_to_follow: bool | None = None
+    time_felt_accurate: bool | None = None
+    had_bad_connection: bool = False
+    bad_connection_detail: str | None = Field(default=None, max_length=2000)
+    completed_as_planned: bool | None = None
+    comment: str | None = Field(default=None, max_length=2000)
+    submitted_from: Literal["ACTIVE_WALK", "AFTER_SUBMISSION"] = "AFTER_SUBMISSION"
+
+
+class FeedbackOut(BaseModel):
+    id: str
+    walk_id: str
+    rating: int
+    reproduce: dict
+    updated: bool

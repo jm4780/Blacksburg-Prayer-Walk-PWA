@@ -28,6 +28,20 @@ class Settings(BaseSettings):
 
     tier: str = "pilot"
 
+    # WHO MAY SEE ROUTE AND MAP GEOMETRY. This is the G1 control, and it is a
+    # deployment setting rather than a product decision baked into the API:
+    #
+    #   authenticated  any signed-up participant. The pilot default.
+    #   invite         signing up additionally requires BPW_INVITE_CODE.
+    #   public         anyone, no sign-up. Set this once G1 is resolved.
+    #
+    # Moving to `public` changes no route handler, no schema and no client code —
+    # `deps.may_see_geometry` is the single place the mode is consulted. The identity
+    # model is unaffected in all three: name, email, remembered device. There is no
+    # password and no account system to build.
+    access_mode: str = "authenticated"
+    invite_code: str = ""
+
     # sqlite for the vertical slice; set BPW_DATABASE_URL to a postgresql+psycopg URL
     # for a real deployment. No credentials are ever written to the repository.
     database_url: str = "sqlite:///./bpw.db"
@@ -57,6 +71,11 @@ class Settings(BaseSettings):
     def is_public(self) -> bool:
         return self.tier == "public"
 
+    @property
+    def geometry_is_public(self) -> bool:
+        """The single question `deps.may_see_geometry` asks."""
+        return self.access_mode == "public" or self.public_geometry_enabled
+
     def check(self) -> list[str]:
         """Deployment warnings, surfaced at startup and by /health."""
         out = []
@@ -65,10 +84,16 @@ class Settings(BaseSettings):
         if self.tier != "development" and not self.token_pepper:
             out.append("BPW_TOKEN_PEPPER is unset outside development — participant "
                        "tokens are hashed without a pepper")
-        if self.is_public and not self.public_geometry_enabled:
-            out.append("tier=public but public_geometry_enabled is false — geometry "
+        if self.access_mode not in ("authenticated", "invite", "public"):
+            out.append(f"BPW_ACCESS_MODE={self.access_mode!r} is not one of "
+                       f"authenticated | invite | public")
+        if self.access_mode == "invite" and not self.invite_code:
+            out.append("BPW_ACCESS_MODE=invite but BPW_INVITE_CODE is unset — "
+                       "registration would be open to anyone")
+        if self.is_public and not self.geometry_is_public:
+            out.append("tier=public but access_mode is not public — geometry "
                        "endpoints require authentication (licensing gate G1)")
-        if self.public_geometry_enabled:
+        if self.geometry_is_public:
             out.append("public_geometry_enabled=true — source-derived geometry is "
                        "being served without authentication. This is redistribution "
                        "of Town of Blacksburg GIS data. Confirm licensing gate G1 is "

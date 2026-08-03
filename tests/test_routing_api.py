@@ -137,9 +137,16 @@ def test_every_variant_reports_the_documented_fields(client, downtown):
 
 
 def test_response_names_the_network_and_engine(client, downtown):
+    """Assert against the source of truth, not a literal.
+
+    Pinning the patch version here made a legitimate defect fix look like a
+    regression. What matters is that the response names the engine that actually
+    produced it, so a stored route stays traceable.
+    """
+    from api.routing.engine import ENGINE_VERSION
     assert downtown["network_version"] == "v1.2"
     assert downtown["network_id"].startswith("bbg-net-v1.2-")
-    assert downtown["engine_version"] == "2.1.0"
+    assert downtown["engine_version"] == ENGINE_VERSION
 
 
 # ------------------------------------------------------------------ components

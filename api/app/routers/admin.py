@@ -37,7 +37,7 @@ from ..config import settings
 from ..db import get_db
 from ..deps import require_admin
 from ..models import (AdminAction, Completion, Participant, Reservation,
-                      RouteRequest, Walk, WalkEdit)
+                      RouteFeedback, RouteRequest, Walk, WalkEdit)
 from ..services import completion as completion_svc
 from ..services import reservations as res_svc
 from ..services.network_state import network_service
@@ -389,6 +389,177 @@ def export_progress(db: Session = Depends(get_db)):
         contains=["segment ids", "aggregate counts"],
         excludes=["participant identity", "household coordinates", "addresses",
                   "per-segment household counts"],
+    )
+
+
+# --- pilot summary (Phase 3.1 §6) --------------------------------------------
+@router.get("/pilot-summary")
+def pilot_summary(db: Session = Depends(get_db)):
+    """One screen for running a three-to-five-person pilot.
+
+    Everything here is a count or an average. No participant appears by name against a
+    route, and no starting point is reported more precisely than the routing component
+    it fell in — §8 forbids exposing precise participant location, and a coverage-area
+    id is the coarsest thing that still answers "where are people walking?".
+    """
+    ns = network_service()
+
+    walks = db.execute(select(Walk)).scalars().all()
+    by_status = _tally(w.status for w in walks)
+    resolved = [w for w in walks if w.status in ("COMPLETED", "DISCARDED")]
+    completed = [w for w in walks if w.status == "COMPLETED"]
+    did_not = [w for w in completed if w.outcome == "DID_NOT_COMPLETE"]
+    edited = [w for w in completed if w.outcome == "EDITED"]
+
+    fb = db.execute(select(RouteFeedback)).scalars().all()
+    ratings = [f.rating for f in fb]
+    flagged = [f for f in fb if f.had_bad_connection]
+    # Response rate needs a denominator that can actually contain its numerator.
+    # Dividing all feedback by submitted walks gave 200% in the pilot screenshot,
+    # because feedback can be left from the active-walk screen before the walk is
+    # submitted — and a rate above 100% discredits every other number beside it.
+    completed_ids = {w.id for w in completed}
+    fb_on_completed = {f.walk_id for f in fb if f.walk_id in completed_ids}
+
+    reqs = db.execute(select(RouteRequest)).scalars().all()
+    failures = [r for r in reqs if r.failure_reason]
+
+    # Late-opportunity states actually served, read off the stored variant payloads.
+    states: dict = {}
+    for r in reqs:
+        for v in (r.variants or []):
+            st = v.get("state")
+            if st:
+                states[st] = states.get(st, 0) + 1
+
+    edits = db.execute(select(WalkEdit)).scalars().all()
+
+    return dict(
+        network=dict(id=ns.net.network_id,
+                     version=ns.manifest["canonical_network_version"],
+                     engine_version=_engine_version()),
+        participants=dict(
+            total=db.execute(select(func.count(Participant.id))).scalar() or 0,
+            with_a_completed_walk=len({w.participant_id for w in completed}),
+        ),
+        walks=dict(
+            total=len(walks), by_status=by_status,
+            submitted=len(completed),
+            discarded=by_status.get("DISCARDED", 0),
+            in_progress=by_status.get("ACTIVE", 0) + by_status.get("PREVIEW", 0),
+            completion_rate=(round(len(completed) / len(resolved), 3)
+                             if resolved else None),
+            completion_rate_definition=(
+                "submitted walks divided by walks that reached a terminal state "
+                "(submitted + discarded). Walks still in progress are excluded rather "
+                "than counted as failures."),
+            reported_not_completed=len(did_not),
+            edited=len(edited),
+            by_band=_tally(w.band for w in completed),
+        ),
+        manual_edits=dict(
+            walks_with_edits=len({e.walk_id for e in edits}),
+            segments_added=sum(1 for e in edits if e.kind == "ADDED"),
+            segments_removed=sum(1 for e in edits if e.kind == "REMOVED"),
+        ),
+        feedback=dict(
+            responses=len(fb),
+            responses_on_submitted_walks=len(fb_on_completed),
+            responses_on_walks_still_in_progress=len(fb) - len(fb_on_completed),
+            response_rate=(round(len(fb_on_completed) / len(completed), 3)
+                           if completed else None),
+            response_rate_definition=(
+                "submitted walks that have feedback, divided by submitted walks. "
+                "Feedback left mid-walk on a walk that has not been submitted is "
+                "counted in `responses` but not in this rate."),
+            average_rating=(round(sum(ratings) / len(ratings), 2) if ratings else None),
+            rating_distribution=_tally(str(r) for r in ratings),
+            easy_to_follow=_tally_bool(f.easy_to_follow for f in fb),
+            time_felt_accurate=_tally_bool(f.time_felt_accurate for f in fb),
+            flagged_unsafe_or_incorrect=len(flagged),
+            flagged=[dict(walk_id=f.walk_id, band=f.band,
+                          coverage_area_id=f.coverage_area_id,
+                          detail=f.bad_connection_detail,
+                          reproduce=dict(seed=f.seed, start_node=f.start_node,
+                                         network_version=f.network_version,
+                                         engine_version=f.engine_version,
+                                         band=f.band))
+                     for f in flagged],
+        ),
+        route_generation=dict(
+            requests=len(reqs),
+            failures=len(failures),
+            failure_rate=(round(len(failures) / len(reqs), 3) if reqs else None),
+            by_reason=_tally(r.failure_reason for r in failures),
+        ),
+        late_opportunity_states=states,
+        coverage_areas=_tally(r.coverage_area_id for r in reqs),
+        starting_areas_note=(
+            "Reported as routing components, never as coordinates. A component is "
+            "hundreds of acres; a start point is somebody's front door."),
+    )
+
+
+def _tally(values):
+    out: dict = {}
+    for v in values:
+        if v is None:
+            continue
+        out[str(v)] = out.get(str(v), 0) + 1
+    return dict(sorted(out.items(), key=lambda x: -x[1]))
+
+
+def _tally_bool(values):
+    vals = [v for v in values if v is not None]
+    return dict(yes=sum(1 for v in vals if v), no=sum(1 for v in vals if not v),
+                unanswered=0)
+
+
+def _engine_version():
+    from ...routing.engine import ENGINE_VERSION
+    return ENGINE_VERSION
+
+
+# --- pilot route feedback ----------------------------------------------------
+@router.get("/feedback")
+def all_feedback(limit: int = 200, db: Session = Depends(get_db)):
+    rows = db.execute(select(RouteFeedback).order_by(RouteFeedback.created_at.desc())
+                      .limit(min(limit, 1000))).scalars().all()
+    return [dict(id=f.id, walk_id=f.walk_id, rating=f.rating,
+                 easy_to_follow=f.easy_to_follow,
+                 time_felt_accurate=f.time_felt_accurate,
+                 had_bad_connection=f.had_bad_connection,
+                 bad_connection_detail=f.bad_connection_detail,
+                 completed_as_planned=f.completed_as_planned,
+                 comment=f.comment, band=f.band,
+                 submitted_from=f.submitted_from,
+                 coverage_area_id=f.coverage_area_id,
+                 created_at=f.created_at.isoformat(),
+                 reproduce=dict(network_id=f.network_id,
+                                network_version=f.network_version,
+                                engine_version=f.engine_version, seed=f.seed,
+                                start_node=f.start_node, band=f.band))
+            for f in rows]
+
+
+# --- connector candidates ----------------------------------------------------
+@router.get("/connector-candidates")
+def connector_candidates():
+    """The prioritised campus-edge connector review (Phase 3.1 §3)."""
+    path = os.path.join(net_mod.OUT_ROOT, settings().snapshot_date, "review",
+                        "connector-candidates.json")
+    if not os.path.exists(path):
+        raise HTTPException(status.HTTP_404_NOT_FOUND,
+                            "run python3 -m pipeline.build.connector_candidates")
+    data = json.load(open(path))
+    return dict(
+        generated_at=data["generated_at"],
+        network_version=data["network_version"],
+        basemap_evidence=data["basemap_evidence"],
+        candidates=data["candidates"], promoted=data["promoted"],
+        component_stats=data["component_stats"],
+        rows=[{k: v for k, v in r.items() if k not in ("component_a", "component_b")}
+              for r in data["rows"]],
     )
 
 

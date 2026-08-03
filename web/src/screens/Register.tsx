@@ -10,6 +10,8 @@ export default function Register({ onDone }: { onDone: (p: ParticipantOut) => vo
   const [first, setFirst] = useState('')
   const [last, setLast] = useState('')
   const [email, setEmail] = useState('')
+  const [invite, setInvite] = useState('')
+  const [needsInvite, setNeedsInvite] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -17,10 +19,13 @@ export default function Register({ onDone }: { onDone: (p: ParticipantOut) => vo
     e.preventDefault()
     setBusy(true); setError(null)
     try {
-      const p = await api.register(first, last, email)
+      const p = await api.register(first, last, email, invite || undefined)
       setToken(p.token ?? null)
       onDone(p)
     } catch (err: any) {
+      // The deployment decides whether an invite is needed (BPW_ACCESS_MODE=invite).
+      // The form asks for one only once the server has said it wants one.
+      if (err?.status === 403) setNeedsInvite(true)
       setError(err.message ?? 'Could not sign you up.')
     } finally { setBusy(false) }
   }
@@ -48,6 +53,13 @@ export default function Register({ onDone }: { onDone: (p: ParticipantOut) => vo
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                  required autoComplete="email" inputMode="email" />
         </label>
+        {needsInvite && (
+          <label>
+            Invite code
+            <input value={invite} onChange={(e) => setInvite(e.target.value)}
+                   autoComplete="off" />
+          </label>
+        )}
         {error && <p className="error" role="alert">{error}</p>}
         <button className="primary" disabled={busy || !first || !last || !email}>
           {busy ? 'Signing you up…' : 'Start walking'}

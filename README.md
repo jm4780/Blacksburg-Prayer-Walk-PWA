@@ -16,9 +16,10 @@ streets covered. Watch the town gradually fill in.
 | 2b | Routing prototype | ✅ Complete |
 | 2b.1 | Routing corrections + integration readiness | ✅ Complete |
 | 3 | Functional PWA integration (vertical slice) | ✅ Complete |
-| 4 | Pilot | Ready — **public release blocked on licensing gate G1** |
+| 3.1 | Pilot deployment + campus validation | ✅ Complete |
+| 4 | Pilot (3–5 people) | **GO** — **public release still blocked on licensing gate G1** |
 
-**Canonical network `v1.2` · `bbg-net-v1.2-e1284e6001ff54f5` · routing engine `2.1.0`**
+**Canonical network `v1.2` · `bbg-net-v1.2-e1284e6001ff54f5` · routing engine `2.1.1`**
 
 145.588 required miles (123.807 street · 10.423 trail · 11.359 campus) across 9 valid
 routing components, with 11,024 households associated to required coverage.
@@ -46,9 +47,10 @@ python3 -m api.routing.freeze
 Tests:
 
 ```bash
-python3 -m pytest                                  # 82 backend tests
+python3 -m pytest                                  # 101 backend tests
 cd web && npm test                                 # 10 component tests
 cd web && node e2e/slice.mjs                       # 41 end-to-end assertions
+cd web && node e2e/admin.mjs <admin-token>         # 12 admin-interface checks
 ```
 
 ## Layout
@@ -74,14 +76,18 @@ docs/        every decision, with the evidence for it
 - [`docs/09-phase-2a1-freeze.md`](docs/09-phase-2a1-freeze.md) — connector classification and campus normalization.
 - [`docs/10-routing-approach-evaluation.md`](docs/10-routing-approach-evaluation.md) — ten algorithms scored before any was built.
 - [`docs/12-phase-2b1-corrections.md`](docs/12-phase-2b1-corrections.md) — repeat penalty, multi-component routing.
-- [`docs/13-phase-3-integration.md`](docs/13-phase-3-integration.md) — **current**: network v1.2, the vertical slice, privacy, deployment tiers, pilot readiness.
+- [`docs/13-phase-3-integration.md`](docs/13-phase-3-integration.md) — network v1.2, the vertical slice, privacy, deployment tiers.
+- [`docs/14-phase-3-1-pilot.md`](docs/14-phase-3-1-pilot.md) — **current**: campus validation, connector review, pilot plan, go/no-go.
+- [`docs/15-pilot-deployment.md`](docs/15-pilot-deployment.md) — the deployment runbook: environment, migrations, health checks, backup, rollback.
 
 ## Two things to know before deploying
 
-**Licensing.** No Town of Blacksburg dataset publishes any reuse licence. Route and map
-geometry is therefore served only to authenticated participants; anonymous callers get
-aggregate metrics and a 403 naming the gate. `BPW_PUBLIC_GEOMETRY_ENABLED` overrides
-that and should stay false until the question is answered.
+**Licensing.** No Town of Blacksburg dataset publishes any reuse licence, so route and
+map geometry is served only to authenticated participants. This is *deployment
+configuration*, not architecture: `BPW_ACCESS_MODE` takes `authenticated` (default),
+`invite`, or `public`, and `api/app/deps.may_see_geometry` is the only place it is
+read. Moving to public participant access once G1 is resolved is one environment
+variable and a restart — no API, schema or client change.
 
 **GIS data is an internal dependency, not a redistributable asset.** Source snapshots,
 derived geometry and address data are fetched and built by the pipeline and are never

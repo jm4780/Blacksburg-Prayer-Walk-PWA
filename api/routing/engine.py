@@ -25,6 +25,13 @@ from .state import CompletionState, Route
 M_PER_MILE = 1609.344
 
 # Bumped whenever routing behaviour changes in a way that could alter a stored route.
+#   2.1.1  Phase 3.1: node_sequence seeded from a compact graph index instead of a
+#          canonical node id, shifting the whole visited-node sequence by one. Every
+#          turn angle was measured at the junction before the one where the turn
+#          happens, and every route reported as not closing. Turns/mi -3.3%,
+#          U-turns/mi -12.2%; route selection is unchanged (mean score +0.1%), which
+#          is the expected shape for a measurement fix rather than a tuning change.
+#          Weights untouched. Found by the Phase 3.1 campus loop-coherence check.
 #   2.1.0  Phase 3 item 1: campus coverage credit. Walking a parallel campus walkway
 #          now earns the canonical corridor it runs alongside (spec §4.2), so
 #          new_required_miles can include mileage the walk did not physically traverse.
@@ -34,7 +41,7 @@ M_PER_MILE = 1609.344
 #   2.0.0  Phase 2b.1: categorised length-scaled repeat penalty, multi-component
 #          routing, structured late-opportunity response states.
 #   1.0.0  Phase 2b prototype.
-ENGINE_VERSION = "2.1.0"
+ENGINE_VERSION = "2.1.1"
 
 # Length bands, miles. Quick..Extended.
 VARIANTS = [("Quick", 1.0), ("Short", 2.0), ("Medium", 3.5), ("Long", 5.0),
@@ -350,6 +357,7 @@ class Engine:
         if not seg_seq:
             return None
         return Route(seg_seq=seg_seq, start_node=start_i,
+                     start_node_id=self.g.nodes[start_i],
                      anchors=anchors_visited, excursions=excursions,
                      closing_leg=closing,
                      meta=dict(cluster_root=setup.get("root")))
@@ -443,7 +451,8 @@ class Engine:
             closing = len(path)
         if not seq:
             return None
-        return Route(seg_seq=seq, start_node=start_i, anchors=list(anchor_seq),
+        return Route(seg_seq=seq, start_node=start_i,
+                     start_node_id=self.g.nodes[start_i], anchors=list(anchor_seq),
                      excursions=template.excursions, closing_leg=closing,
                      meta=dict(template.meta))
 

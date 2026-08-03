@@ -46,9 +46,9 @@ from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..deps import current_participant
-from ..models import Participant, RouteRequest, Walk
-from ..schemas import (CompleteWalkIn, RouteRequestIn, RouteResponseOut, SelectWalkIn,
-                       WalkOut)
+from ..models import Participant, RouteFeedback, RouteRequest, Walk
+from ..schemas import (CompleteWalkIn, FeedbackIn, FeedbackOut, RouteRequestIn,
+                       RouteResponseOut, SelectWalkIn, WalkOut)
 from ..services import completion as completion_svc
 from ..services import reservations as res_svc
 from ..services import routing_service as routing
@@ -205,6 +205,69 @@ def complete_walk(walk_id: str, body: CompleteWalkIn,
                                    body.note)
     res_svc.release(db, walk)
     return result
+
+
+@router.post("/walks/{walk_id}/feedback", response_model=FeedbackOut)
+def submit_feedback(walk_id: str, body: FeedbackIn,
+                    p: Participant = Depends(current_participant),
+                    db: Session = Depends(get_db)):
+    """Pilot feedback (§5). Available from the active-walk screen and after submission.
+
+    One row per walk, updated in place if sent twice — a walker who rates the route
+    mid-walk and again at the end has one opinion, not two. Everything needed to
+    regenerate the exact route is stored alongside, so a complaint is reproducible.
+    """
+    walk = _own_walk(db, walk_id, p)
+    req = db.get(RouteRequest, walk.request_id) if walk.request_id else None
+    ns = network_service()
+
+    row = db.execute(select(RouteFeedback)
+                     .where(RouteFeedback.walk_id == walk.id)).scalar_one_or_none()
+    updated = row is not None
+    if row is None:
+        row = RouteFeedback(walk_id=walk.id, participant_id=p.id,
+                            network_id=walk.network_id,
+                            network_version=ns.manifest["canonical_network_version"],
+                            engine_version=walk.engine_version,
+                            seed=walk.seed,
+                            coverage_area_id=(req.coverage_area_id if req else None),
+                            start_node=(req.start_node if req else None),
+                            band=walk.band)
+        db.add(row)
+    row.rating = body.rating
+    row.easy_to_follow = body.easy_to_follow
+    row.time_felt_accurate = body.time_felt_accurate
+    row.had_bad_connection = body.had_bad_connection
+    row.bad_connection_detail = body.bad_connection_detail
+    row.completed_as_planned = body.completed_as_planned
+    row.comment = body.comment
+    row.submitted_from = body.submitted_from
+    db.commit()
+    db.refresh(row)
+
+    return FeedbackOut(
+        id=row.id, walk_id=walk.id, rating=row.rating, updated=updated,
+        reproduce=dict(network_id=row.network_id, network_version=row.network_version,
+                       engine_version=row.engine_version, seed=row.seed,
+                       coverage_area_id=row.coverage_area_id,
+                       start_node=row.start_node, band=row.band))
+
+
+@router.get("/walks/{walk_id}/feedback", response_model=FeedbackOut | None)
+def get_feedback(walk_id: str, p: Participant = Depends(current_participant),
+                 db: Session = Depends(get_db)):
+    walk = _own_walk(db, walk_id, p)
+    row = db.execute(select(RouteFeedback)
+                     .where(RouteFeedback.walk_id == walk.id)).scalar_one_or_none()
+    if row is None:
+        return None
+    return FeedbackOut(id=row.id, walk_id=walk.id, rating=row.rating, updated=True,
+                       reproduce=dict(network_id=row.network_id,
+                                      network_version=row.network_version,
+                                      engine_version=row.engine_version,
+                                      seed=row.seed,
+                                      coverage_area_id=row.coverage_area_id,
+                                      start_node=row.start_node, band=row.band))
 
 
 @router.get("/walks/current", response_model=WalkOut | None)

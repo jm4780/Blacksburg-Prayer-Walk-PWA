@@ -17,6 +17,7 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { api } from '../api'
+import FeedbackForm from '../components/FeedbackForm'
 import MapCanvas, { type MapLine } from '../components/MapCanvas'
 import type { ProgressMap, Walk } from '../types'
 import type { Nav } from '../App'
@@ -122,6 +123,7 @@ export default function Confirm({ nav, walkId, onDone }: {
             original plan is kept alongside the change.
           </p>
         )}
+        <FeedbackForm walkId={walkId} from="AFTER_SUBMISSION" />
         <button className="primary big" onClick={() => nav('/')}>Back to home</button>
       </div>
     )

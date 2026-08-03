@@ -1,0 +1,3043 @@
+{
+  "generated_at": "2026-08-03T03:23:58.860502+00:00",
+  "snapshot_date": "2026-08-03",
+  "network_version": "1.2",
+  "basemap_evidence": "NONE. No aerial or street-level imagery host is reachable from this environment. Every judgement below rests on geometry, endpoint alignment, road class, speed and ownership. That ceiling is why confidence is capped at MEDIUM for anything crossing a trafficked road.",
+  "evidence_rules": {
+    "opposed_sidewalk_termini": "a pedestrian way ends within 40 m opposite another",
+    "at_road_intersection": "crossing point within 30 m of a road-road junction",
+    "proximity_alone": "explicitly NOT evidence; no candidate is promoted on it"
+  },
+  "component_stats": {
+    "0": {
+      "component": 0,
+      "required_miles": 132.73,
+      "households": 10617,
+      "nodes": 1837,
+      "edges": 2189,
+      "independent_cycles": 353,
+      "top_streets": [
+        "Huckleberry Trl",
+        "Prices Fork Rd",
+        "S Main St",
+        "N Main St",
+        "Meadowbrook Dr"
+      ]
+    },
+    "75": {
+      "component": 75,
+      "required_miles": 0.305,
+      "households": 0,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Davis St"
+      ]
+    },
+    "76": {
+      "component": 76,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "14": {
+      "component": 14,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "40": {
+      "component": 40,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "11": {
+      "component": 11,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 7,
+      "edges": 6,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "3": {
+      "component": 3,
+      "required_miles": 2.044,
+      "households": 288,
+      "nodes": 39,
+      "edges": 42,
+      "independent_cycles": 4,
+      "top_streets": [
+        "Research Center Dr",
+        "SW Kraft Dr",
+        "Pratt Dr",
+        "S Knollwood Dr",
+        "N Knollwood Dr"
+      ]
+    },
+    "77": {
+      "component": 77,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "15": {
+      "component": 15,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 6,
+      "edges": 5,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "25": {
+      "component": 25,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "78": {
+      "component": 78,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "79": {
+      "component": 79,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "6": {
+      "component": 6,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 9,
+      "edges": 8,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "80": {
+      "component": 80,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "26": {
+      "component": 26,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "16": {
+      "component": 16,
+      "required_miles": 0.297,
+      "households": 46,
+      "nodes": 6,
+      "edges": 5,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Apple Ln",
+        "Sandstone Rdg"
+      ]
+    },
+    "82": {
+      "component": 82,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "81": {
+      "component": 81,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "41": {
+      "component": 41,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "2": {
+      "component": 2,
+      "required_miles": 0.586,
+      "households": 59,
+      "nodes": 34,
+      "edges": 37,
+      "independent_cycles": 4,
+      "top_streets": [
+        "Scenic Ridge Cir"
+      ]
+    },
+    "17": {
+      "component": 17,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "42": {
+      "component": 42,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "83": {
+      "component": 83,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "43": {
+      "component": 43,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "18": {
+      "component": 18,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 6,
+      "edges": 5,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "84": {
+      "component": 84,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 2,
+      "edges": 2,
+      "independent_cycles": 1,
+      "top_streets": []
+    },
+    "44": {
+      "component": 44,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "4": {
+      "component": 4,
+      "required_miles": 2.555,
+      "households": 0,
+      "nodes": 30,
+      "edges": 31,
+      "independent_cycles": 2,
+      "top_streets": [
+        "Oak Lane Trl",
+        "Prices Fork Road Trl",
+        "Duck Pond Drive Trl",
+        "Duck Pond Trl",
+        "Smithfield Road Trl"
+      ]
+    },
+    "86": {
+      "component": 86,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 2,
+      "edges": 2,
+      "independent_cycles": 1,
+      "top_streets": []
+    },
+    "85": {
+      "component": 85,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "87": {
+      "component": 87,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "5": {
+      "component": 5,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 13,
+      "edges": 12,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "88": {
+      "component": 88,
+      "required_miles": 0.292,
+      "households": 5,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "45": {
+      "component": 45,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "1": {
+      "component": 1,
+      "required_miles": 5.62,
+      "households": 0,
+      "nodes": 67,
+      "edges": 67,
+      "independent_cycles": 1,
+      "top_streets": [
+        "Drillfield Dr",
+        "Perry St",
+        "Stanger St",
+        "W Campus Dr",
+        "Duck Pond Trl"
+      ]
+    },
+    "89": {
+      "component": 89,
+      "required_miles": 0.076,
+      "households": 0,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "46": {
+      "component": 46,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "47": {
+      "component": 47,
+      "required_miles": 0.153,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Life Science Cir"
+      ]
+    },
+    "27": {
+      "component": 27,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 4,
+      "edges": 3,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "48": {
+      "component": 48,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 4,
+      "edges": 3,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "49": {
+      "component": 49,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "8": {
+      "component": 8,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 11,
+      "edges": 11,
+      "independent_cycles": 1,
+      "top_streets": []
+    },
+    "50": {
+      "component": 50,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 4,
+      "edges": 3,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "90": {
+      "component": 90,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "51": {
+      "component": 51,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "52": {
+      "component": 52,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "28": {
+      "component": 28,
+      "required_miles": 0.056,
+      "households": 0,
+      "nodes": 6,
+      "edges": 5,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Prices Fork Road Trl"
+      ]
+    },
+    "29": {
+      "component": 29,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "10": {
+      "component": 10,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 7,
+      "edges": 6,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "19": {
+      "component": 19,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "53": {
+      "component": 53,
+      "required_miles": 0.126,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "20": {
+      "component": 20,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "54": {
+      "component": 54,
+      "required_miles": 0.136,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "9": {
+      "component": 9,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 8,
+      "edges": 7,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "21": {
+      "component": 21,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 5,
+      "independent_cycles": 1,
+      "top_streets": []
+    },
+    "30": {
+      "component": 30,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 4,
+      "edges": 3,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "12": {
+      "component": 12,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 6,
+      "edges": 5,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "31": {
+      "component": 31,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "55": {
+      "component": 55,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "32": {
+      "component": 32,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 4,
+      "edges": 3,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "91": {
+      "component": 91,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "92": {
+      "component": 92,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "93": {
+      "component": 93,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "95": {
+      "component": 95,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "94": {
+      "component": 94,
+      "required_miles": 0.108,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": [
+        "W Campus Dr"
+      ]
+    },
+    "33": {
+      "component": 33,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 4,
+      "edges": 3,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "56": {
+      "component": 56,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "57": {
+      "component": 57,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "58": {
+      "component": 58,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "59": {
+      "component": 59,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "96": {
+      "component": 96,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "97": {
+      "component": 97,
+      "required_miles": 0.042,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Stanger St"
+      ]
+    },
+    "60": {
+      "component": 60,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "98": {
+      "component": 98,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "34": {
+      "component": 34,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 6,
+      "edges": 5,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "61": {
+      "component": 61,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "100": {
+      "component": 100,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "99": {
+      "component": 99,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "101": {
+      "component": 101,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "62": {
+      "component": 62,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "63": {
+      "component": 63,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "64": {
+      "component": 64,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "35": {
+      "component": 35,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "103": {
+      "component": 103,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "102": {
+      "component": 102,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "36": {
+      "component": 36,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 6,
+      "edges": 5,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "65": {
+      "component": 65,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "104": {
+      "component": 104,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "66": {
+      "component": 66,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "7": {
+      "component": 7,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 10,
+      "edges": 9,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "67": {
+      "component": 67,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "68": {
+      "component": 68,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "22": {
+      "component": 22,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "37": {
+      "component": 37,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "69": {
+      "component": 69,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "105": {
+      "component": 105,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "106": {
+      "component": 106,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "70": {
+      "component": 70,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "107": {
+      "component": 107,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "23": {
+      "component": 23,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 6,
+      "edges": 5,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "108": {
+      "component": 108,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "38": {
+      "component": 38,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "110": {
+      "component": 110,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "109": {
+      "component": 109,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "111": {
+      "component": 111,
+      "required_miles": 0.018,
+      "households": 1,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Shenandoah Trail Spur"
+      ]
+    },
+    "13": {
+      "component": 13,
+      "required_miles": 0.016,
+      "households": 0,
+      "nodes": 6,
+      "edges": 5,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Shenandoah Trail Spur"
+      ]
+    },
+    "71": {
+      "component": 71,
+      "required_miles": 0.017,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Shenandoah Trail Spur"
+      ]
+    },
+    "39": {
+      "component": 39,
+      "required_miles": 0.292,
+      "households": 8,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Georgia St",
+        "Bradley Ln"
+      ]
+    },
+    "112": {
+      "component": 112,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "113": {
+      "component": 113,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "72": {
+      "component": 72,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "24": {
+      "component": 24,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "115": {
+      "component": 115,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "114": {
+      "component": 114,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 2,
+      "edges": 1,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "73": {
+      "component": 73,
+      "required_miles": 0.0,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": []
+    },
+    "116": {
+      "component": 116,
+      "required_miles": 0.08,
+      "households": 0,
+      "nodes": 3,
+      "edges": 2,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Brush Mountain Rd"
+      ]
+    },
+    "74": {
+      "component": 74,
+      "required_miles": 0.039,
+      "households": 0,
+      "nodes": 5,
+      "edges": 4,
+      "independent_cycles": 0,
+      "top_streets": [
+        "Coal Bank Hollow Rd"
+      ]
+    }
+  },
+  "candidates": 29,
+  "promoted": 0,
+  "promote_segment_ids": [],
+  "rows": [
+    {
+      "segment_id": "SEG-001679",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 564.62,
+      "length_m": 6.2,
+      "map_location": {
+        "lon": -80.428003,
+        "lat": 37.23184,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23184/-80.42800"
+      },
+      "connects_components": [
+        1,
+        0
+      ],
+      "component_a": {
+        "component": 1,
+        "required_miles": 5.62,
+        "households": 0,
+        "nodes": 67,
+        "edges": 67,
+        "independent_cycles": 1,
+        "top_streets": [
+          "Drillfield Dr",
+          "Perry St",
+          "Stanger St",
+          "W Campus Dr",
+          "Duck Pond Trl"
+        ]
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 5.62,
+      "households_recovered": 0,
+      "households_within_500m": 124,
+      "likely_start_area": true,
+      "road_crossed": "Prices Fork Rd",
+      "road_class": "Secondary",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "prices fork rd"
+      ],
+      "evidence_for": [],
+      "evidence_against": [
+        "mid-block crossing of a Secondary road at 25 mph",
+        "no opposed pedestrian terminus \u2014 nothing on the far side suggests a crossing was ever digitised here"
+      ],
+      "opposed_sidewalk_termini": false,
+      "at_road_intersection": false,
+      "from_feature": "West Campus Drive",
+      "to_feature": "PRICES FORK RD",
+      "recommendation": "DO_NOT_PROMOTE_WITHOUT_EVIDENCE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002576",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 29.61,
+      "length_m": 18.6,
+      "map_location": {
+        "lon": -80.403053,
+        "lat": 37.251584,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.25158/-80.40305"
+      },
+      "connects_components": [
+        39,
+        0
+      ],
+      "component_a": {
+        "component": 39,
+        "required_miles": 0.292,
+        "households": 8,
+        "nodes": 5,
+        "edges": 4,
+        "independent_cycles": 0,
+        "top_streets": [
+          "Georgia St",
+          "Bradley Ln"
+        ]
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.292,
+      "households_recovered": 8,
+      "households_within_500m": 81,
+      "likely_start_area": false,
+      "road_crossed": "Georgia St",
+      "road_class": "Local",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "georgia st"
+      ],
+      "evidence_for": [
+        "crosses a Local street at 25 mph"
+      ],
+      "evidence_against": [
+        "no opposed pedestrian terminus \u2014 nothing on the far side suggests a crossing was ever digitised here"
+      ],
+      "opposed_sidewalk_termini": false,
+      "at_road_intersection": false,
+      "from_feature": "BRADLEY LN",
+      "to_feature": "Maple Ridge",
+      "recommendation": "DO_NOT_PROMOTE_WITHOUT_EVIDENCE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001647",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 21.34,
+      "length_m": 10.2,
+      "map_location": {
+        "lon": -80.428731,
+        "lat": 37.231538,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23154/-80.42873"
+      },
+      "connects_components": [
+        94,
+        0
+      ],
+      "component_a": {
+        "component": 94,
+        "required_miles": 0.108,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": [
+          "W Campus Dr"
+        ]
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.108,
+      "households_recovered": 0,
+      "households_within_500m": 109,
+      "likely_start_area": true,
+      "road_crossed": "Prices Fork Rd",
+      "road_class": "Secondary",
+      "speed_limit": 25,
+      "crossing_type": "at intersection",
+      "forms_street_junction": true,
+      "junction_streets": [
+        "campus dr w",
+        "prices fork rd"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "links two differently-named streets (campus dr w / prices fork rd) \u2014 this is a street junction, not a mid-block hop. Campus corridors count as streets here: the town Roads layer contains no campus streets, so treating them otherwise labels a main campus entrance mid-block",
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": true,
+      "from_feature": "West Campus Drive",
+      "to_feature": "PRICES FORK RD",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001774",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 16.48,
+      "length_m": 15.9,
+      "map_location": {
+        "lon": -80.425208,
+        "lat": 37.233237,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23324/-80.42521"
+      },
+      "connects_components": [
+        97,
+        0
+      ],
+      "component_a": {
+        "component": 97,
+        "required_miles": 0.042,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": [
+          "Stanger St"
+        ]
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.042,
+      "households_recovered": 0,
+      "households_within_500m": 455,
+      "likely_start_area": true,
+      "road_crossed": "Prices Fork Rd",
+      "road_class": "Secondary",
+      "speed_limit": 25,
+      "crossing_type": "at intersection",
+      "forms_street_junction": true,
+      "junction_streets": [
+        "prices fork rd",
+        "stanger st"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "links two differently-named streets (prices fork rd / stanger st) \u2014 this is a street junction, not a mid-block hop. Campus corridors count as streets here: the town Roads layer contains no campus streets, so treating them otherwise labels a main campus entrance mid-block",
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": true,
+      "from_feature": "Stanger Street",
+      "to_feature": "PRICES FORK RD",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001517",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 9.88,
+      "length_m": 5.1,
+      "map_location": {
+        "lon": -80.414625,
+        "lat": 37.229998,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23000/-80.41463"
+      },
+      "connects_components": [
+        31,
+        0
+      ],
+      "component_a": {
+        "component": 31,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 5,
+        "edges": 4,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 576,
+      "likely_start_area": true,
+      "road_crossed": "N Main St",
+      "road_class": "Arterial",
+      "speed_limit": 20,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "main st n"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": true,
+      "from_feature": "Roanoke Street",
+      "to_feature": "N MAIN ST",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001960",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 9.72,
+      "length_m": 5.6,
+      "map_location": {
+        "lon": -80.418148,
+        "lat": 37.235944,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23594/-80.41815"
+      },
+      "connects_components": [
+        99,
+        0
+      ],
+      "component_a": {
+        "component": 99,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 944,
+      "likely_start_area": true,
+      "road_crossed": "Giles Rd",
+      "road_class": "Collector",
+      "speed_limit": 25,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "giles rd"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": true,
+      "from_feature": "Montgomery Street",
+      "to_feature": "GILES RD",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001922",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 9.43,
+      "length_m": 6.0,
+      "map_location": {
+        "lon": -80.41893,
+        "lat": 37.235208,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23521/-80.41893"
+      },
+      "connects_components": [
+        100,
+        0
+      ],
+      "component_a": {
+        "component": 100,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 885,
+      "likely_start_area": true,
+      "road_crossed": "Giles Rd",
+      "road_class": "Collector",
+      "speed_limit": 25,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "giles rd"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": true,
+      "from_feature": "Progress Street",
+      "to_feature": "GILES RD",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001166",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 8.94,
+      "length_m": 4.7,
+      "map_location": {
+        "lon": -80.415678,
+        "lat": 37.225784,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.22578/-80.41568"
+      },
+      "connects_components": [
+        50,
+        0
+      ],
+      "component_a": {
+        "component": 50,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 4,
+        "edges": 3,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 388,
+      "likely_start_area": true,
+      "road_crossed": "SW Washington St",
+      "road_class": "Collector",
+      "speed_limit": 25,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "washington st sw"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": true,
+      "from_feature": "Otey Street",
+      "to_feature": "WASHINGTON ST SW",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002469",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 7.14,
+      "length_m": 5.1,
+      "map_location": {
+        "lon": -80.429307,
+        "lat": 37.247352,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.24735/-80.42931"
+      },
+      "connects_components": [
+        38,
+        0
+      ],
+      "component_a": {
+        "component": 38,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 5,
+        "edges": 4,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 828,
+      "likely_start_area": true,
+      "road_crossed": "Givens Ln",
+      "road_class": "Collector",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "givens ln"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer"
+      ],
+      "evidence_against": [
+        "mid-block crossing of a Collector road at 25 mph"
+      ],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": "Chickahominy Drive",
+      "to_feature": "GIVENS LN",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002506",
+      "classification": "UNRESOLVED",
+      "priority_score": 7.07,
+      "length_m": 13.4,
+      "map_location": {
+        "lon": -80.420062,
+        "lat": 37.248361,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.24836/-80.42006"
+      },
+      "connects_components": [
+        111,
+        0
+      ],
+      "component_a": {
+        "component": 111,
+        "required_miles": 0.018,
+        "households": 1,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": [
+          "Shenandoah Trail Spur"
+        ]
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.018,
+      "households_recovered": 1,
+      "households_within_500m": 455,
+      "likely_start_area": true,
+      "road_crossed": "Seminole Dr",
+      "road_class": "Local",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "seminole dr"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "crosses a Local street at 25 mph"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": "Shenandoah Trail Spur",
+      "to_feature": "SEMINOLE DR",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001575",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 6.85,
+      "length_m": 5.2,
+      "map_location": {
+        "lon": -80.415285,
+        "lat": 37.230736,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23074/-80.41529"
+      },
+      "connects_components": [
+        95,
+        0
+      ],
+      "component_a": {
+        "component": 95,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 570,
+      "likely_start_area": true,
+      "road_crossed": "N Main St",
+      "road_class": "Arterial",
+      "speed_limit": 20,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "main st n"
+      ],
+      "evidence_for": [
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [
+        "no opposed pedestrian terminus \u2014 nothing on the far side suggests a crossing was ever digitised here"
+      ],
+      "opposed_sidewalk_termini": false,
+      "at_road_intersection": true,
+      "from_feature": "Progress Street Trail",
+      "to_feature": "N MAIN ST",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002356",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 6.81,
+      "length_m": 8.9,
+      "map_location": {
+        "lon": -80.412178,
+        "lat": 37.24504,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.24504/-80.41218"
+      },
+      "connects_components": [
+        106,
+        0
+      ],
+      "component_a": {
+        "component": 106,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 363,
+      "likely_start_area": true,
+      "road_crossed": "NE Patrick Henry Dr",
+      "road_class": "Secondary",
+      "speed_limit": 35,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "giles rd"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": true,
+      "from_feature": "Patrick Henry Drive",
+      "to_feature": "GILES RD",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002359",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 6.81,
+      "length_m": 8.3,
+      "map_location": {
+        "lon": -80.412173,
+        "lat": 37.245047,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.24505/-80.41217"
+      },
+      "connects_components": [
+        107,
+        0
+      ],
+      "component_a": {
+        "component": 107,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 363,
+      "likely_start_area": true,
+      "road_crossed": "NE Patrick Henry Dr",
+      "road_class": "Secondary",
+      "speed_limit": 35,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "giles rd"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": true,
+      "from_feature": "Patrick Henry Drive",
+      "to_feature": "GILES RD",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002347",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 6.79,
+      "length_m": 4.8,
+      "map_location": {
+        "lon": -80.412339,
+        "lat": 37.24483,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.24483/-80.41234"
+      },
+      "connects_components": [
+        7,
+        0
+      ],
+      "component_a": {
+        "component": 7,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 10,
+        "edges": 9,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 358,
+      "likely_start_area": true,
+      "road_crossed": "NE Patrick Henry Dr",
+      "road_class": "Secondary",
+      "speed_limit": 35,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "giles rd"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": true,
+      "from_feature": "Patrick Henry Drive",
+      "to_feature": "GILES RD",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001253",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 6.68,
+      "length_m": 9.3,
+      "map_location": {
+        "lon": -80.416804,
+        "lat": 37.226787,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.22679/-80.41680"
+      },
+      "connects_components": [
+        29,
+        0
+      ],
+      "component_a": {
+        "component": 29,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 5,
+        "edges": 4,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 336,
+      "likely_start_area": true,
+      "road_crossed": "Kent St",
+      "road_class": "Collector",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "kent st"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer"
+      ],
+      "evidence_against": [
+        "mid-block crossing of a Collector road at 25 mph"
+      ],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": " ",
+      "to_feature": "KENT ST",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001567",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 6.67,
+      "length_m": 5.9,
+      "map_location": {
+        "lon": -80.405964,
+        "lat": 37.230805,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23081/-80.40596"
+      },
+      "connects_components": [
+        93,
+        0
+      ],
+      "component_a": {
+        "component": 93,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 734,
+      "likely_start_area": true,
+      "road_crossed": "SE Clay St",
+      "road_class": "Collector",
+      "speed_limit": 20,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "clay st se"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer"
+      ],
+      "evidence_against": [
+        "mid-block crossing of a Collector road at 20 mph"
+      ],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": "Clay Street",
+      "to_feature": "CLAY ST SE",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001554",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 6.57,
+      "length_m": 5.0,
+      "map_location": {
+        "lon": -80.406267,
+        "lat": 37.2306,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23060/-80.40627"
+      },
+      "connects_components": [
+        91,
+        0
+      ],
+      "component_a": {
+        "component": 91,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 714,
+      "likely_start_area": true,
+      "road_crossed": "SE Clay St",
+      "road_class": "Collector",
+      "speed_limit": 20,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "clay st se"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer"
+      ],
+      "evidence_against": [
+        "mid-block crossing of a Collector road at 20 mph"
+      ],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": "Clay Street",
+      "to_feature": "CLAY ST SE",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002084",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 6.08,
+      "length_m": 4.1,
+      "map_location": {
+        "lon": -80.416622,
+        "lat": 37.238172,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23817/-80.41662"
+      },
+      "connects_components": [
+        103,
+        0
+      ],
+      "component_a": {
+        "component": 103,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 817,
+      "likely_start_area": true,
+      "road_crossed": "Giles Rd",
+      "road_class": "Collector",
+      "speed_limit": 25,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "giles rd"
+      ],
+      "evidence_for": [
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [
+        "no opposed pedestrian terminus \u2014 nothing on the far side suggests a crossing was ever digitised here"
+      ],
+      "opposed_sidewalk_termini": false,
+      "at_road_intersection": true,
+      "from_feature": "Hearthstone Trail",
+      "to_feature": "GILES RD",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002273",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 4.42,
+      "length_m": 5.2,
+      "map_location": {
+        "lon": -80.414958,
+        "lat": 37.242565,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.24256/-80.41496"
+      },
+      "connects_components": [
+        104,
+        0
+      ],
+      "component_a": {
+        "component": 104,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 483,
+      "likely_start_area": true,
+      "road_crossed": "Giles Rd",
+      "road_class": "Collector",
+      "speed_limit": 25,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "giles rd"
+      ],
+      "evidence_for": [
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [
+        "no opposed pedestrian terminus \u2014 nothing on the far side suggests a crossing was ever digitised here"
+      ],
+      "opposed_sidewalk_termini": false,
+      "at_road_intersection": true,
+      "from_feature": "Turner Street",
+      "to_feature": "GILES RD",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-000180",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 4.2,
+      "length_m": 7.5,
+      "map_location": {
+        "lon": -80.404475,
+        "lat": 37.198002,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.19800/-80.40448"
+      },
+      "connects_components": [
+        25,
+        3
+      ],
+      "component_a": {
+        "component": 25,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 5,
+        "edges": 4,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 3,
+        "required_miles": 2.044,
+        "households": 288,
+        "nodes": 39,
+        "edges": 42,
+        "independent_cycles": 4,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 240,
+      "likely_start_area": false,
+      "road_crossed": "Research Center Dr",
+      "road_class": "Secondary",
+      "speed_limit": 35,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "research center dr"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer"
+      ],
+      "evidence_against": [
+        "mid-block crossing of a Secondary road at 35 mph"
+      ],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": "Kraft Drive Trail",
+      "to_feature": "RESEARCH CENTER DR",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002595",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 4.05,
+      "length_m": 7.5,
+      "map_location": {
+        "lon": -80.422437,
+        "lat": 37.25201,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.25201/-80.42244"
+      },
+      "connects_components": [
+        112,
+        0
+      ],
+      "component_a": {
+        "component": 112,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 211,
+      "likely_start_area": false,
+      "road_crossed": "NW Progress St",
+      "road_class": "Collector",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "progress st nw"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer"
+      ],
+      "evidence_against": [
+        "mid-block crossing of a Collector road at 25 mph"
+      ],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": "Givens Lane Trail",
+      "to_feature": "PROGRESS ST NW",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-000149",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 3.68,
+      "length_m": 8.6,
+      "map_location": {
+        "lon": -80.403965,
+        "lat": 37.195954,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.19595/-80.40397"
+      },
+      "connects_components": [
+        77,
+        3
+      ],
+      "component_a": {
+        "component": 77,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 3,
+        "required_miles": 2.044,
+        "households": 288,
+        "nodes": 39,
+        "edges": 42,
+        "independent_cycles": 4,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 136,
+      "likely_start_area": false,
+      "road_crossed": "Research Center Dr",
+      "road_class": "Secondary",
+      "speed_limit": 35,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "research center dr"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer"
+      ],
+      "evidence_against": [
+        "mid-block crossing of a Secondary road at 35 mph"
+      ],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": "Rimrock Drive",
+      "to_feature": "RESEARCH CENTER DR",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001565",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 3.42,
+      "length_m": 15.3,
+      "map_location": {
+        "lon": -80.404111,
+        "lat": 37.23084,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23084/-80.40411"
+      },
+      "connects_components": [
+        92,
+        0
+      ],
+      "component_a": {
+        "component": 92,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 684,
+      "likely_start_area": true,
+      "road_crossed": "Artis Ct",
+      "road_class": "Local",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "artis ct"
+      ],
+      "evidence_for": [
+        "crosses a Local street at 25 mph"
+      ],
+      "evidence_against": [
+        "no opposed pedestrian terminus \u2014 nothing on the far side suggests a crossing was ever digitised here"
+      ],
+      "opposed_sidewalk_termini": false,
+      "at_road_intersection": false,
+      "from_feature": "Fiddlers Green Trail Spur",
+      "to_feature": "ARTIS CT",
+      "recommendation": "DO_NOT_PROMOTE_WITHOUT_EVIDENCE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-000217",
+      "classification": "UNRESOLVED",
+      "priority_score": 3.34,
+      "length_m": 10.2,
+      "map_location": {
+        "lon": -80.410716,
+        "lat": 37.201121,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.20112/-80.41072"
+      },
+      "connects_components": [
+        26,
+        3
+      ],
+      "component_a": {
+        "component": 26,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 5,
+        "edges": 4,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 3,
+        "required_miles": 2.044,
+        "households": 288,
+        "nodes": 39,
+        "edges": 42,
+        "independent_cycles": 4,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 69,
+      "likely_start_area": false,
+      "road_crossed": "Pratt Dr",
+      "road_class": "Local",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "pratt dr"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer",
+        "crosses a Local street at 25 mph"
+      ],
+      "evidence_against": [],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": "CRC Trail",
+      "to_feature": "PRATT DR",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-000270",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 3.29,
+      "length_m": 5.6,
+      "map_location": {
+        "lon": -80.409925,
+        "lat": 37.20483,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.20483/-80.40993"
+      },
+      "connects_components": [
+        82,
+        3
+      ],
+      "component_a": {
+        "component": 82,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 3,
+        "required_miles": 2.044,
+        "households": 288,
+        "nodes": 39,
+        "edges": 42,
+        "independent_cycles": 4,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 59,
+      "likely_start_area": false,
+      "road_crossed": "SW Kraft Dr",
+      "road_class": "Secondary",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "kraft dr sw"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer"
+      ],
+      "evidence_against": [
+        "mid-block crossing of a Secondary road at 25 mph"
+      ],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": "Research Center Drive Trail",
+      "to_feature": "KRAFT DR SW",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-000273",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 3.29,
+      "length_m": 6.6,
+      "map_location": {
+        "lon": -80.409925,
+        "lat": 37.204843,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.20484/-80.40992"
+      },
+      "connects_components": [
+        81,
+        3
+      ],
+      "component_a": {
+        "component": 81,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 3,
+        "required_miles": 2.044,
+        "households": 288,
+        "nodes": 39,
+        "edges": 42,
+        "independent_cycles": 4,
+        "top_streets": [
+          "Research Center Dr",
+          "SW Kraft Dr",
+          "Pratt Dr",
+          "S Knollwood Dr",
+          "N Knollwood Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 59,
+      "likely_start_area": false,
+      "road_crossed": "SW Kraft Dr",
+      "road_class": "Secondary",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "kraft dr sw"
+      ],
+      "evidence_for": [
+        "pedestrian ways terminate on both sides \u2014 an opposed pair, which is what a crossing looks like in a sidewalk layer"
+      ],
+      "evidence_against": [
+        "mid-block crossing of a Secondary road at 25 mph"
+      ],
+      "opposed_sidewalk_termini": true,
+      "at_road_intersection": false,
+      "from_feature": "Research Center Drive",
+      "to_feature": "KRAFT DR SW",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002624",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 2.9,
+      "length_m": 4.3,
+      "map_location": {
+        "lon": -80.422449,
+        "lat": 37.252603,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.25260/-80.42245"
+      },
+      "connects_components": [
+        113,
+        0
+      ],
+      "component_a": {
+        "component": 113,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 179,
+      "likely_start_area": false,
+      "road_crossed": "NW Progress St",
+      "road_class": "Collector",
+      "speed_limit": 25,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "givens ln"
+      ],
+      "evidence_for": [
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [
+        "no opposed pedestrian terminus \u2014 nothing on the far side suggests a crossing was ever digitised here"
+      ],
+      "opposed_sidewalk_termini": false,
+      "at_road_intersection": true,
+      "from_feature": "Progress Street",
+      "to_feature": "GIVENS LN",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "MEDIUM",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-002769",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 2.08,
+      "length_m": 3.4,
+      "map_location": {
+        "lon": -80.442178,
+        "lat": 37.257104,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.25710/-80.44218"
+      },
+      "connects_components": [
+        115,
+        0
+      ],
+      "component_a": {
+        "component": 115,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 17,
+      "likely_start_area": false,
+      "road_crossed": "Toms Creek Rd",
+      "road_class": "Collector",
+      "speed_limit": 35,
+      "crossing_type": "at intersection",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "toms creek rd"
+      ],
+      "evidence_for": [
+        "within 30 m of an existing street junction, where marked crosswalks are placed. Campus corridors carrying street names count as streets here \u2014 the town Roads layer has no campus streets, so treating them as anything else labels a main campus entrance a mid-block crossing"
+      ],
+      "evidence_against": [
+        "no opposed pedestrian terminus \u2014 nothing on the far side suggests a crossing was ever digitised here"
+      ],
+      "opposed_sidewalk_termini": false,
+      "at_road_intersection": true,
+      "from_feature": "Deerfield",
+      "to_feature": "TOMS CREEK RD",
+      "recommendation": "REVIEW_ON_SITE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    },
+    {
+      "segment_id": "SEG-001979",
+      "classification": "CROSSING_REVIEW_REQUIRED",
+      "priority_score": 1.03,
+      "length_m": 6.2,
+      "map_location": {
+        "lon": -80.440538,
+        "lat": 37.235819,
+        "osm_link": "https://www.openstreetmap.org/#map=19/37.23582/-80.44054"
+      },
+      "connects_components": [
+        101,
+        0
+      ],
+      "component_a": {
+        "component": 101,
+        "required_miles": 0.0,
+        "households": 0,
+        "nodes": 3,
+        "edges": 2,
+        "independent_cycles": 0,
+        "top_streets": []
+      },
+      "component_b": {
+        "component": 0,
+        "required_miles": 132.73,
+        "households": 10617,
+        "nodes": 1837,
+        "edges": 2189,
+        "independent_cycles": 353,
+        "top_streets": [
+          "Huckleberry Trl",
+          "Prices Fork Rd",
+          "S Main St",
+          "N Main St",
+          "Meadowbrook Dr"
+        ]
+      },
+      "required_miles_recovered": 0.0,
+      "households_recovered": 0,
+      "households_within_500m": 206,
+      "likely_start_area": false,
+      "road_crossed": "Glade Rd",
+      "road_class": "Secondary",
+      "speed_limit": 25,
+      "crossing_type": "mid-block",
+      "forms_street_junction": false,
+      "junction_streets": [
+        "glade rd"
+      ],
+      "evidence_for": [],
+      "evidence_against": [
+        "mid-block crossing of a Secondary road at 25 mph",
+        "no opposed pedestrian terminus \u2014 nothing on the far side suggests a crossing was ever digitised here"
+      ],
+      "opposed_sidewalk_termini": false,
+      "at_road_intersection": false,
+      "from_feature": null,
+      "to_feature": "GLADE RD",
+      "recommendation": "DO_NOT_PROMOTE_WITHOUT_EVIDENCE",
+      "confidence": "LOW",
+      "decision": null,
+      "decided_by": null,
+      "decided_at": null
+    }
+  ]
+}
