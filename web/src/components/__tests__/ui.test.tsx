@@ -173,7 +173,7 @@ describe('MapView', () => {
     await settle()
     expect(setStyle).toHaveBeenCalled()
     expect(await screen.findByRole('status')).toHaveProperty(
-      'textContent', expect.stringContaining('route is still shown'))
+      'textContent', expect.stringContaining('background unavailable'))
   })
 
   it('carries the aria label onto the map itself', async () => {

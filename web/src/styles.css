@@ -439,16 +439,18 @@ button.link {
 }
 .dash-bar i {
   position: absolute; inset: 0 auto 0 0; display: block;
-  background: repeating-linear-gradient(90deg, #E8E4DB 0 4px, transparent 4px 9px);
-  transition: width .5s ease;
+  background: repeating-linear-gradient(90deg, var(--d-green) 0 4px, transparent 4px 9px);
+  transition: width .6s cubic-bezier(.22,.61,.36,1);
 }
 
 /* The map takes whatever vertical room the fixed rows above and below leave. */
 .dash-map {
   flex: 1 1 auto; position: relative; min-height: 140px;
-  margin-top: 22px; background: var(--d-panel);
-  border-top: 1px solid var(--d-rule); border-bottom: 1px solid var(--d-rule);
+  margin-top: 12px; background: var(--d-panel);
+  border-bottom: 1px solid var(--d-rule);
 }
+/* The bar is the map, compressed. A rule between them would make them two things. */
+.dash-pct { padding-bottom: 0; }
 .dash-map .mapwrap { border: 0; border-radius: 0; height: 100% !important; }
 .dash-map-blocked { padding: 20px 24px; }
 .dash-map-blocked strong { display: block; color: var(--d-paper);
@@ -461,17 +463,31 @@ button.link {
   display: flex; flex-direction: column; gap: 8px; pointer-events: none;
 }
 .dash-legend span { display: flex; align-items: center; gap: 10px;
-                    font: 500 12px/1 Archivo, sans-serif; color: var(--d-paper); }
+                    font: 500 11px/1 Archivo, sans-serif; color: var(--d-dim); }
 .dash-legend i { width: 26px; flex: none; }
 .dash-legend .lg-done { height: 5px; border-radius: 3px; background: var(--d-green); }
 .dash-legend .lg-todo { height: 0; border-top: 3px dashed #6E7676; }
 
 .dash-explore, .dash-collapse {
   position: absolute; right: 14px; bottom: 14px; z-index: 3;
-  height: 36px; padding: 0 14px; border-radius: 999px;
-  background: rgba(20, 23, 26, .86); border: 1px solid var(--d-rule-2);
-  color: var(--d-paper); font: 500 13px/1 Archivo, sans-serif; cursor: pointer;
+  height: 32px; padding: 0 12px; border-radius: 999px;
+  background: rgba(20, 23, 26, .55);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 1px solid var(--d-rule); color: var(--d-dim);
+  font: 500 10px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
 }
+.dash-explore:active, .dash-collapse:active { color: var(--d-paper); }
+/* Legally required once a basemap loads, and nothing more than that. */
+.mapwrap.dark .maplibregl-ctrl-attrib { background: rgba(20, 23, 26, .45); }
+.mapwrap.dark .maplibregl-ctrl-attrib, 
+.mapwrap.dark .maplibregl-ctrl-attrib a { color: #6E7676; font-size: 10px; }
+/* The expanded view is navigated, so it keeps its zoom buttons — but quietly. */
+.mapwrap.dark .maplibregl-ctrl-group {
+  background: rgba(20, 23, 26, .55); border: 1px solid var(--d-rule);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: none;
+}
+.mapwrap.dark .maplibregl-ctrl-group button + button { border-top-color: var(--d-rule); }
 
 .dash-metrics {
   flex: none; margin: 20px 24px 0; display: grid; grid-template-columns: 1fr 1fr 1fr;
@@ -553,8 +569,10 @@ button.link {
   bottom: auto; top: calc(60px + env(safe-area-inset-top)); left: 14px;
 }
 .mapwrap.dark .map-degraded {
-  background: rgba(20, 23, 26, .9); border-color: rgba(247, 245, 241, .18);
-  color: #C6C3BC; font-family: Archivo, sans-serif;
+  left: auto; right: 14px; top: 12px; max-width: 62%;
+  background: none; border: 0; padding: 0; text-align: right;
+  color: #6E7676; font: 500 10px/1.35 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .06em; text-transform: uppercase;
 }
 /* The degraded-basemap banner sits top-left by default, where the expanded overlay
    puts Close and Recenter. Drop it below them. */

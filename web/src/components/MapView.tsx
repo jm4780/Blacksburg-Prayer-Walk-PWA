@@ -75,6 +75,11 @@ interface Props {
   /** Zoom in close enough that individual streets are separable by thumb. */
   editing?: boolean
   /**
+   * Zoom buttons. Off for the dashboard's compact map, which is read rather than
+   * navigated — a +/- box there reads as GIS chrome sitting on a briefing.
+   */
+  controls?: boolean
+  /**
    * `dark` matches the approved design's map treatment: solid green for covered
    * ground, dashed grey for what is still to walk, on a dark panel. The distinction
    * is not only colour — dashed vs solid survives being printed, being screenshotted
@@ -124,7 +129,7 @@ const FALLBACK_BG = { light: '#f2f1ec', dark: '#1B1F22' }
 
 export default function MapView({
   route, segments, start, onSegmentTap, onMapTap, height = 340, fitTo = null,
-  editing = false, theme = 'light', ariaLabel,
+  editing = false, theme = 'light', controls = true, ariaLabel,
 }: Props) {
   const palette = theme === 'dark' ? DARK_COLORS : COLORS
   const container = useRef<HTMLDivElement>(null)
@@ -142,6 +147,8 @@ export default function MapView({
   // handlers inside it fire later and need the current theme.
   const themeRef = useRef(theme)
   themeRef.current = theme
+  const controlsRef = useRef(controls)
+  controlsRef.current = controls
 
   // ---------------------------------------------------------------- lifecycle
   useEffect(() => {
@@ -161,7 +168,9 @@ export default function MapView({
       touchZoomRotate: true,
     })
     m.touchZoomRotate?.disableRotation()
-    m.addControl(new NavigationControl({ showCompass: false }), 'top-right')
+    if (controlsRef.current) {
+      m.addControl(new NavigationControl({ showCompass: false }), 'top-right')
+    }
 
     // A style that never arrives would otherwise leave a blank screen with a route
     // that never draws, because the layers are added on 'load'.
@@ -255,17 +264,35 @@ export default function MapView({
     }
     // Unwalked ground is dashed as well as grey, so "covered" and "still to walk"
     // are distinguishable without relying on colour.
+    //
+    // The weights are deliberately unequal. At town scale a few covered miles drawn
+    // at the same weight as 140 uncovered ones simply disappear, and the map then
+    // contradicts the percentage sitting above it. Covered ground is drawn heavy,
+    // lit from beneath by a soft halo; everything else recedes to a thin dashed
+    // context layer.
     if (theme === 'dark' && m.getLayer('segments-todo-dash') === undefined) {
       m.addLayer({
         id: 'segments-todo-dash', type: 'line', source: 'segments',
         filter: ['==', ['get', 'state'], 'todo'],
         layout: { 'line-cap': 'butt' },
         paint: {
-          'line-color': DARK_COLORS.todo, 'line-width': 2, 'line-dasharray': [2, 2.2],
+          'line-color': DARK_COLORS.todo, 'line-width': 1.1,
+          'line-opacity': 0.5, 'line-dasharray': [2, 2.4],
         },
-      })
+      }, 'segments-line')
+      m.addLayer({
+        id: 'segments-done-glow', type: 'line', source: 'segments',
+        filter: ['!=', ['get', 'state'], 'todo'],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': DARK_COLORS.done, 'line-opacity': 0.16,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 10, 8, 15, 22],
+        },
+      }, 'segments-line')
       m.setPaintProperty('segments-line', 'line-opacity',
         ['case', ['==', ['get', 'state'], 'todo'], 0, 1])
+      m.setPaintProperty('segments-line', 'line-width',
+        ['interpolate', ['linear'], ['zoom'], 10, 3, 15, 7])
     }
     if (!m.getLayer('route-line')) {
       m.addLayer({
@@ -358,7 +385,7 @@ export default function MapView({
       </button>
       {basemapFailed && (
         <div className="map-degraded" role="status">
-          Map background unavailable — the route is still shown.
+          Street background unavailable
         </div>
       )}
     </div>

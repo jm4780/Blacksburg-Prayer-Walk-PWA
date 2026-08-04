@@ -118,8 +118,12 @@ const metricLabels = await page.locator('.dash-metrics .dash-label').allTextCont
 check('three supporting metrics present', metricLabels.length === 3, metricLabels.join(' | '))
 check('households leads the metric row',
   /households/i.test(metricLabels[0]), metricLabels.join(' | '))
-check('the numbers are declared as the town\'s, not the visitor\'s',
-  /whole town, not for you/i.test(await page.locator('.dash-shared').innerText()))
+// Assert the property, not the wording — the sentence is meant to be revisable.
+const sharedLine = await page.locator('.dash-shared').innerText()
+check('the numbers are declared as shared and town-wide',
+  /shared|together|whole town|across blacksburg/i.test(sharedLine), sharedLine)
+check('and are never claimed as the reader\'s own',
+  !/\byour\b|\byou've\b|\byou have\b/i.test(sharedLine), sharedLine)
 
 // The town map is part of this screen now, not a place you navigate to.
 await mapHasSegments()

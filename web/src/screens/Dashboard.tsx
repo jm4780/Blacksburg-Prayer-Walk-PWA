@@ -29,6 +29,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api, ApiError } from '../api'
 import MapView, { type SegmentFeature } from '../components/MapView'
+import { boundsOf, frameAsRing, progressFrame } from './progressFrame'
 import type { Metrics, ParticipantOut, ProgressMap, Walk } from '../types'
 import type { Nav } from '../App'
 
@@ -63,9 +64,32 @@ export default function Dashboard({ nav, me, walk }: {
       state: f.properties.done ? 'done' : f.properties.held ? 'held' : 'todo',
     })), [map])
 
+  // Point the map at the progress, pulled back until it is clearly a minority of the
+  // view. See progressFrame.ts for why neither "whole town" nor "tight on covered"
+  // is the right answer.
+  const frame = useMemo(() => {
+    if (!segments.length) return null
+    const coveredCoords: [number, number][] = []
+    const allCoords: [number, number][] = []
+    for (const s of segments) {
+      for (const c of s.coordinates) {
+        allCoords.push(c)
+        if (s.state !== 'todo') coveredCoords.push(c)
+      }
+    }
+    const b = progressFrame(boundsOf(coveredCoords), boundsOf(allCoords))
+    return b ? frameAsRing(b) : null
+  }, [segments])
+
   const pct = m ? m.percent_prayed_for.value : null
   const done = m?.required_segments_complete ?? 0
   const total = m?.required_segments_total ?? 0
+  // The percentage is measured in MILES. Showing a segment count beneath it invited
+  // the reader to check the arithmetic against a different denominator and find it
+  // wrong: 100 of 1,582 segments is 6.3%, while the same state of the town is 4.5%
+  // by mileage. The sub-line now reports what the number above it actually measures.
+  const milesDone = m?.percent_prayed_for.numerator_miles ?? 0
+  const milesTotal = m?.percent_prayed_for.denominator_miles ?? 0
 
   return (
     <div className="dash">
@@ -101,15 +125,15 @@ export default function Dashboard({ nav, me, walk }: {
             <span className="dash-pct-sign">%</span>
           </div>
           <div className="dash-pct-side">
-            <div className="dash-label">Prayed through</div>
+            <div className="dash-label">Prayed for</div>
             <div className="dash-pct-sub">
-              {done.toLocaleString()} of {total.toLocaleString()} street segments
+              {milesDone.toLocaleString()} of {milesTotal.toLocaleString()} miles
             </div>
           </div>
         </div>
         {/* Dashed rule, filled from the left — the design's own progress treatment. */}
         <div className="dash-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100}
-             aria-valuenow={pct ?? 0} aria-label="Share of Blacksburg prayed through">
+             aria-valuenow={pct ?? 0} aria-label="Share of Blacksburg prayed for">
           <i style={{ width: `${Math.min(100, Math.max(0, pct ?? 0))}%` }} />
         </div>
       </section>
@@ -122,7 +146,8 @@ export default function Dashboard({ nav, me, walk }: {
           </div>
         ) : (
           <MapView segments={segments} theme="dark" height="100%"
-                   ariaLabel={`Town progress map: ${done.toLocaleString()} of ${total.toLocaleString()} street segments prayed through`} />
+                   fitTo={frame} controls={false}
+                   ariaLabel={`Town progress map: ${milesDone} of ${milesTotal} miles prayed for`} />
         )}
         <div className="dash-legend">
           <span><i className="lg-done" /> Covered</span>
@@ -157,7 +182,7 @@ export default function Dashboard({ nav, me, walk }: {
         </button>
       </section>
 
-      <p className="dash-shared">Counted for the whole town, not for you.</p>
+      <p className="dash-shared">Shared progress across Blacksburg.</p>
 
       {defs && m && (
         <div className="dash-defs">
@@ -165,8 +190,15 @@ export default function Dashboard({ nav, me, walk }: {
             <dt>Households</dt><dd>{m.estimated_households_prayed_for.definition}</dd>
             <dt>Streets</dt>
             <dd>
-              Street <em>segments</em>, not whole streets — one street is usually many
-              segments. {done.toLocaleString()} of {total.toLocaleString()} recorded.
+              Counted in <em>segments</em> — the pieces a street is split into between
+              junctions, so one street is usually several. {done.toLocaleString()} of{' '}
+              {total.toLocaleString()} recorded. The percentage above is measured by
+              mileage, not by this count.
+            </dd>
+            <dt>The map</dt>
+            <dd>
+              Framed on the ground covered so far, pulled back far enough to show it
+              in context. It widens by itself as coverage spreads.
             </dd>
             <dt>Miles</dt><dd>{m.total_miles_walked.definition}</dd>
             <dt>Percentage</dt><dd>{m.percent_prayed_for.definition}</dd>
