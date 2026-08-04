@@ -36,6 +36,14 @@ check('no stale flag on a freshly built bundle',
   !/stale/.test(badge), badge)
 
 await page.locator('.buildbadge > button').click()
+// The panel renders an em dash until /api/health resolves. Wait for the real value
+// rather than racing it — a flaky diagnostic is worse than no diagnostic.
+await page.waitForFunction(() => {
+  const el = document.querySelector('.bb-detail')
+  // textContent concatenates dt/dd with no separator ("Neighbourhoods25"), so this
+  // must not require whitespace the way the innerText assertion below can.
+  return el && /Neighbourhoods\s*\d/.test(el.textContent || '')
+}, null, { timeout: 20000 })
 const detail = await page.locator('.bb-detail').innerText()
 check('detail names the app bundle, the server and the branch',
   /App bundle/.test(detail) && /Server/.test(detail) && /Branch/.test(detail), detail)

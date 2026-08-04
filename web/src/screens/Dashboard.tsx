@@ -1,119 +1,215 @@
 /**
- * The landing screen (Priority 2).
+ * Mission control — the landing screen.
  *
- * This is what somebody sees when they open the app, signed in or not. It answers
- * "what is this and how is it going?" before it asks anything of them. Three numbers,
- * the shared progress, and one clear way in.
+ * Implements design "01 — Mission control" from the approved Claude Design direction.
+ * One story, top to bottom, in a fixed order: what we are doing, how far it has come,
+ * where it stands on the ground, what it adds up to, and the single way in.
  *
- * The three numbers each carry their own definition behind a disclosure. That is not
- * decoration: "42% of Blacksburg prayed for" is a claim about a denominator two phases
- * of work went into establishing, and a number that cannot be questioned cannot be
- * trusted.
+ * Three things this screen commits to:
  *
- * Nothing here requires an identity. A visitor sees the same figures a walker does,
- * because the point of the number is that it belongs to the town.
+ *   ONE DESTINATION.  The town map is not a separate screen any more. It lives here,
+ *                     filling whatever vertical space the rest of the layout leaves,
+ *                     and "Explore" expands it *in place* — an overlay, not a route.
+ *                     There is nowhere else to go to see progress.
+ *
+ *   NOT ABOUT YOU.    Every number here belongs to the town. That is stated in words
+ *                     ("Counted for the whole town, not for you.") rather than left to
+ *                     be inferred, because a big percentage on a personal dashboard
+ *                     reads as a personal score, and this one never is.
+ *
+ *   DEFINITIONS KEPT. Phase 3 committed to every number carrying its own definition —
+ *                     "42% prayed for" is a claim about a denominator two phases of
+ *                     work went into establishing. The design has no room for three
+ *                     disclosures, so the whole metric row opens one panel instead.
+ *                     The commitment survives; only its packaging changed.
+ *
+ * This screen is dark; the rest of the app is not yet. See docs/19 — the approved
+ * direction is dark throughout and the other screens follow later.
  */
-import { useEffect, useState } from 'react'
-import { api } from '../api'
-import type { Metrics, ParticipantOut, Walk } from '../types'
+import { useEffect, useMemo, useState } from 'react'
+import { api, ApiError } from '../api'
+import MapView, { type SegmentFeature } from '../components/MapView'
+import type { Metrics, ParticipantOut, ProgressMap, Walk } from '../types'
 import type { Nav } from '../App'
-
-function Metric({ label, value, unit, definition, extra }: {
-  label: string; value: string; unit?: string; definition: string; extra?: string
-}) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="metric">
-      <div className="metric-value">{value}{unit && <span className="unit">{unit}</span>}</div>
-      <div className="metric-label">{label}</div>
-      {extra && <div className="metric-extra">{extra}</div>}
-      <button className="link" aria-expanded={open} onClick={() => setOpen(!open)}>
-        {open ? 'Hide' : 'What does this mean?'}
-      </button>
-      {open && <p className="definition">{definition}</p>}
-    </div>
-  )
-}
 
 export default function Dashboard({ nav, me, walk }: {
   nav: Nav; me: ParticipantOut | null; walk: Walk | null
 }) {
   const [m, setM] = useState<Metrics | null>(null)
+  const [map, setMap] = useState<ProgressMap | null>(null)
+  const [mapBlocked, setMapBlocked] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [expanded, setExpanded] = useState(false)
+  const [defs, setDefs] = useState(false)
 
   useEffect(() => {
     api.metrics().then(setM).catch((e) => setError(e.message))
   }, [walk?.id])
 
-  return (
-    <div className="screen">
-      <h1>{me ? `Hello, ${me.first_name}` : 'Blacksburg Prayer Walk'}</h1>
-      <p className="lede">
-        {me
-          ? 'Here is how far the town has come.'
-          : 'Walk a route through Blacksburg and pray for the homes you pass. '
-            + 'Here is how far the town has come.'}
-      </p>
+  useEffect(() => {
+    api.progressMap().then(setMap).catch((e) => {
+      // The map is gated behind the G1 licensing decision. Under
+      // BPW_ACCESS_MODE=authenticated an anonymous visitor gets a 403 here — on the
+      // landing screen, where the map is the centrepiece. Say so rather than
+      // showing an empty panel.
+      if (e instanceof ApiError && e.status === 403) setMapBlocked(e.message)
+    })
+  }, [walk?.id])
 
+  const segments: SegmentFeature[] = useMemo(
+    () => (map?.features ?? []).map((f) => ({
+      id: f.properties.id,
+      coordinates: f.geometry.coordinates,
+      state: f.properties.done ? 'done' : f.properties.held ? 'held' : 'todo',
+    })), [map])
+
+  const pct = m ? m.percent_prayed_for.value : null
+  const done = m?.required_segments_complete ?? 0
+  const total = m?.required_segments_total ?? 0
+
+  return (
+    <div className="dash">
+      {/* Not in the design, and deliberately kept: somebody with an unfinished walk
+          needs to get back to it, and burying that under a full-height map would be
+          a regression in the name of fidelity. */}
       {walk && (
-        <div className="banner">
-          <div>
-            <strong>You have a walk in progress</strong>
-            <div className="muted">
-              About {walk.estimated_minutes} min · {walk.distance_miles} mi
+        <button className="dash-resume" onClick={() => nav(`/walk/${walk.id}`)}>
+          <span>
+            <strong>Walk in progress</strong>
+            <em>{walk.distance_miles} mi · about {walk.estimated_minutes} min</em>
+          </span>
+          <span className="dash-resume-go">Resume →</span>
+        </button>
+      )}
+
+      <header className="dash-head">
+        <div className="dash-brand">PRAYER WALK</div>
+        <div className="dash-place">Blacksburg, VA</div>
+      </header>
+
+      <section className="dash-mission">
+        <div className="dash-label">The mission</div>
+        <p>Pray for every household in Blacksburg, one street at a time.</p>
+      </section>
+
+      {error && <p className="dash-error" role="alert">{error}</p>}
+
+      <section className="dash-pct">
+        <div className="dash-pct-row">
+          <div className="dash-pct-num">
+            <span className="dash-pct-value">{pct === null ? '—' : pct.toFixed(1)}</span>
+            <span className="dash-pct-sign">%</span>
+          </div>
+          <div className="dash-pct-side">
+            <div className="dash-label">Prayed through</div>
+            <div className="dash-pct-sub">
+              {done.toLocaleString()} of {total.toLocaleString()} street segments
             </div>
           </div>
-          <button className="primary" onClick={() => nav(`/walk/${walk.id}`)}>
-            Resume
+        </div>
+        {/* Dashed rule, filled from the left — the design's own progress treatment. */}
+        <div className="dash-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100}
+             aria-valuenow={pct ?? 0} aria-label="Share of Blacksburg prayed through">
+          <i style={{ width: `${Math.min(100, Math.max(0, pct ?? 0))}%` }} />
+        </div>
+      </section>
+
+      <section className="dash-map">
+        {mapBlocked ? (
+          <div className="dash-map-blocked" role="status">
+            <strong>The town map is not public yet</strong>
+            <p>{mapBlocked}</p>
+          </div>
+        ) : (
+          <MapView segments={segments} theme="dark" height="100%"
+                   ariaLabel={`Town progress map: ${done.toLocaleString()} of ${total.toLocaleString()} street segments prayed through`} />
+        )}
+        <div className="dash-legend">
+          <span><i className="lg-done" /> Covered</span>
+          <span><i className="lg-todo" /> Still to walk</span>
+        </div>
+        {!mapBlocked && (
+          <button className="dash-explore" onClick={() => setExpanded(true)}>
+            Explore ↗
           </button>
+        )}
+      </section>
+
+      <section className="dash-metrics">
+        <button className="dash-metric" onClick={() => setDefs(!defs)}
+                aria-expanded={defs}>
+          <span className="dash-metric-v">
+            {(m?.estimated_households_prayed_for.value ?? 0).toLocaleString()}
+          </span>
+          <span className="dash-label">Households</span>
+        </button>
+        <button className="dash-metric" onClick={() => setDefs(!defs)}
+                aria-expanded={defs}>
+          <span className="dash-metric-v">{done.toLocaleString()}</span>
+          <span className="dash-label">Streets</span>
+        </button>
+        <button className="dash-metric" onClick={() => setDefs(!defs)}
+                aria-expanded={defs}>
+          <span className="dash-metric-v">
+            {(m?.total_miles_walked.value ?? 0).toLocaleString()}
+          </span>
+          <span className="dash-label">Miles</span>
+        </button>
+      </section>
+
+      <p className="dash-shared">Counted for the whole town, not for you.</p>
+
+      {defs && m && (
+        <div className="dash-defs">
+          <dl>
+            <dt>Households</dt><dd>{m.estimated_households_prayed_for.definition}</dd>
+            <dt>Streets</dt>
+            <dd>
+              Street <em>segments</em>, not whole streets — one street is usually many
+              segments. {done.toLocaleString()} of {total.toLocaleString()} recorded.
+            </dd>
+            <dt>Miles</dt><dd>{m.total_miles_walked.definition}</dd>
+            <dt>Percentage</dt><dd>{m.percent_prayed_for.definition}</dd>
+            {map && (
+              <>
+                <dt>What the map does not show</dt>
+                <dd>{map.excludes.join(' · ')}</dd>
+              </>
+            )}
+          </dl>
+          <button className="dash-defs-close" onClick={() => setDefs(false)}>Close</button>
         </div>
       )}
 
-      {error && <p className="error" role="alert">{error}</p>}
-
-      {m && (
-        <>
-          <section className="metrics">
-            <Metric
-              label="of Blacksburg prayed for"
-              value={m.percent_prayed_for.value.toFixed(1)} unit="%"
-              extra={`${m.percent_prayed_for.numerator_miles} of ${m.percent_prayed_for.denominator_miles} required miles`}
-              definition={m.percent_prayed_for.definition} />
-            <Metric
-              label="total miles walked"
-              value={m.total_miles_walked.value.toLocaleString()}
-              extra={`${m.completed_walks} walks by ${m.distinct_walkers} people`}
-              definition={m.total_miles_walked.definition} />
-            <Metric
-              label="estimated households prayed for"
-              value={m.estimated_households_prayed_for.value.toLocaleString()}
-              extra={`of ${m.estimated_households_prayed_for.total.toLocaleString()} estimated · ${m.estimated_households_prayed_for.held_for_review.toLocaleString()} held for review`}
-              definition={m.estimated_households_prayed_for.definition} />
-          </section>
-
-          <div className="actions">
-            {/* One primary way in. It leads to a recommendation, not a form. */}
-            <button className="primary big" onClick={() => nav('/mission')}>
-              Find my next walk
-            </button>
-            <button className="secondary big" onClick={() => nav('/progress')}>
-              See the progress map
-            </button>
-          </div>
-
-          {!me && (
-            <p className="fine">
-              You can look around without signing in. We ask who you are when you
-              accept a walk, so it counts toward the total and the streets are held
-              for you.
-            </p>
-          )}
-
-          <p className="fine">
-            Network {m.network_version} · {m.required_segments_complete.toLocaleString()} of{' '}
-            {m.required_segments_total.toLocaleString()} required segments recorded.
+      <div className="dash-cta">
+        <button onClick={() => nav('/mission')}>
+          <span>Begin today's walk</span>
+          <span aria-hidden="true">→</span>
+        </button>
+        {!me && (
+          <p className="dash-fine">
+            You can look around without signing in. We ask who you are when you accept
+            a walk, so the streets are held for you.
           </p>
-        </>
+        )}
+      </div>
+
+      {/* Requirement 10: expands in place. No route, no history entry, no second
+          destination — Escape or the close button and you are exactly where you were. */}
+      {expanded && (
+        <div className="dash-expand" role="dialog" aria-modal="true"
+             aria-label="Town progress map">
+          <MapView segments={segments} theme="dark" height="100%"
+                   ariaLabel="Town progress map, expanded" />
+          <div className="dash-legend expanded">
+            <span><i className="lg-done" /> Covered</span>
+            <span><i className="lg-todo" /> Still to walk</span>
+          </div>
+          <button className="dash-collapse" onClick={() => setExpanded(false)}
+                  autoFocus>
+            Close ✕
+          </button>
+        </div>
       )}
     </div>
   )

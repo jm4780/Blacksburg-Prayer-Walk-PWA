@@ -3,9 +3,9 @@
 A mobile-first Progressive Web App that helps people systematically prayer-walk every
 eligible public street and major trail in the Town of Blacksburg, Virginia.
 
-**Core experience:** Open the app and see how far the town has come. Say how much time
-you have. Get a specific walk, on a real map, with directions to where it starts. Pray
-while walking. Confirm the streets covered. Watch the town gradually fill in.
+**Core experience:** Open the app and see how far the town has come, on the town's own
+map. Say how much time you have. Get a specific walk, with directions to where it
+starts. Pray while walking. Confirm the streets covered. Watch the town fill in.
 
 ## Project status
 
@@ -19,6 +19,7 @@ while walking. Confirm the streets covered. Watch the town gradually fill in.
 | 3 | Functional PWA integration (vertical slice) | ✅ Complete |
 | 3.1 | Pilot deployment + campus validation | ✅ Complete |
 | 3.5 | Product realignment: real map, time slider, mission recommendations | ✅ Complete |
+| 3.6 | Dashboard rebuilt from the approved visual direction ("Mission control") | ✅ Complete |
 | 4 | Pilot (3–5 people) | **GO** — **public release still blocked on licensing gate G1** |
 
 **Canonical network `v1.3` · `bbg-net-v1.3-e1284e6001ff54f5` · routing engine `2.1.1`**
@@ -60,7 +61,8 @@ Tests:
 ```bash
 python3 -m pytest                                  # 132 backend tests
 cd web && npm test                                 # 16 component tests
-cd web && node e2e/slice.mjs                       # 87 end-to-end assertions
+cd web && node e2e/slice.mjs                       # 95 end-to-end assertions
+cd web && node e2e/verify-build.mjs                # 13 build-identity checks
 cd web && node e2e/admin.mjs <admin-token>         # 12 admin-interface checks
 
 # The admin token cannot be granted over HTTP by design. Mint one before starting
@@ -98,7 +100,8 @@ docs/        every decision, with the evidence for it
 - [`docs/15-pilot-deployment.md`](docs/15-pilot-deployment.md) — the deployment runbook: environment, migrations, health checks, backup, rollback.
 - [`docs/16-try-it-on-your-phone.md`](docs/16-try-it-on-your-phone.md) — no-experience-needed guide to trying it on a phone via GitHub Codespaces.
 - [`docs/17-mission-planning-review.md`](docs/17-mission-planning-review.md) — engineering review of the mission-planning realignment.
-- [`docs/18-phase-3-5-mission-build.md`](docs/18-phase-3-5-mission-build.md) — **current**: the real map, the time slider, mission recommendations, before/after screenshots, known limitations.
+- [`docs/18-phase-3-5-mission-build.md`](docs/18-phase-3-5-mission-build.md) — the real map, the time slider, mission recommendations, before/after screenshots, known limitations.
+- [`docs/19-dashboard-mission-control.md`](docs/19-dashboard-mission-control.md) — **current**: the Dashboard rebuilt from the approved design, the town map absorbed into it, and the follow-ups it created.
 
 ## Two things to know before deploying
 

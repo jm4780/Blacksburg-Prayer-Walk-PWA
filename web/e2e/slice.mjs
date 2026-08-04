@@ -93,28 +93,61 @@ async function mapReady(timeout = 30000) {
     () => window.__bpwMap && window.__bpwMap.isStyleLoaded(), null, { timeout })
 }
 
+/** Ready, and actually holding the town network — not just mounted. */
+async function mapHasSegments(timeout = 40000) {
+  await mapReady(timeout)
+  await page.waitForFunction(() => {
+    try { return window.__bpwMap.querySourceFeatures('segments').length > 0 }
+    catch { return false }
+  }, null, { timeout })
+}
+
 // ---------------------------------------------------------------------------
 log('\n1    arrive with no account')
 await page.goto('/')
-await page.getByRole('heading', { name: 'Blacksburg Prayer Walk' }).waitFor({ timeout: 15000 })
-check('no sign-up wall — the app opens on the dashboard',
+await page.locator('.dash-pct-value').waitFor({ timeout: 30000 })
+check('no sign-up wall — the app opens on mission control',
   await page.getByLabel('First name').count() === 0)
 check('no "walking as" bar before there is anybody to name',
   await page.locator('.whoami').count() === 0)
+check('the shared mission is stated first',
+  /every household in Blacksburg/i.test(await page.locator('.dash-mission').innerText()))
 
-log('\n2    the town dashboard, signed out')
-await page.locator('.metric').first().waitFor({ timeout: 20000 })
-const metricLabels = await page.locator('.metric-label').allTextContents()
-check('three metrics present', metricLabels.length === 3, metricLabels.join(' | '))
-check('households metric says "estimated"',
-  metricLabels.some((t) => /estimated households/i.test(t)), metricLabels.join(' | '))
-await page.locator('.metric').first().getByRole('button').click()
-check('metric definition is available',
-  (await page.locator('.definition').first().innerText()).length > 60)
-const startPct = Number((await page.locator('.metric-value').first().innerText()).replace('%', ''))
+log('\n2    mission control, signed out')
+const metricLabels = await page.locator('.dash-metrics .dash-label').allTextContents()
+check('three supporting metrics present', metricLabels.length === 3, metricLabels.join(' | '))
+check('households leads the metric row',
+  /households/i.test(metricLabels[0]), metricLabels.join(' | '))
+check('the numbers are declared as the town\'s, not the visitor\'s',
+  /whole town, not for you/i.test(await page.locator('.dash-shared').innerText()))
+
+// The town map is part of this screen now, not a place you navigate to.
+await mapHasSegments()
+const townDrawn = await page.evaluate(
+  () => window.__bpwMap.querySourceFeatures('segments').length)
+check('the town map is embedded in the dashboard', townDrawn > 100, `${townDrawn}`)
+check('no separate progress destination is offered',
+  await page.getByRole('button', { name: /progress map/i }).count() === 0
+  && await page.getByRole('button', { name: 'Progress', exact: true }).count() === 0)
+
+// Requirement 10: expands in place, no second destination.
+const routeBefore = await page.evaluate(() => window.location.hash)
+await page.getByRole('button', { name: /Explore/ }).click()
+check('Explore expands the map in place', await page.locator('.dash-expand').count() === 1)
+check('expanding creates no new destination',
+  await page.evaluate(() => window.location.hash) === routeBefore)
+await page.getByRole('button', { name: /Close/ }).click()
+check('and collapses back', await page.locator('.dash-expand').count() === 0)
+
+// Phase 3's commitment: every number carries its definition.
+await page.locator('.dash-metric').first().click()
+check('metric definitions are still reachable',
+  (await page.locator('.dash-defs').innerText()).length > 120)
+await page.getByRole('button', { name: 'Close', exact: true }).click()
+const startPct = Number(await page.locator('.dash-pct-value').innerText())
 
 log('\n3    ask for a walk — still no account')
-await page.getByRole('button', { name: 'Find my next walk' }).click()
+await page.getByRole('button', { name: /Begin today's walk/ }).click()
 await page.locator('.mission h2').waitFor({ timeout: 90000 })
 const geoAtRecommend = await page.evaluate(
   () => ({ once: window.__getCurrentPositionCalls, watches: window.__watchIds.length }))
@@ -328,21 +361,30 @@ check('feedback accepted and acknowledged', true)
 
 log('\n12   the town total moves')
 await page.getByRole('button', { name: 'Back to home' }).click()
-await page.getByRole('heading', { name: /Hello, Ada/ }).waitFor({ timeout: 20000 })
-await page.locator('.metric-value').first().waitFor()
-const endPct = Number((await page.locator('.metric-value').first().innerText()).replace('%', ''))
-check('percentage prayed for went up', endPct > startPct, `${startPct}% -> ${endPct}%`)
+// The value renders as an em dash until the metrics land; Number('—') is NaN.
+await page.waitForFunction(() => {
+  const el = document.querySelector('.dash-pct-value')
+  return el && !Number.isNaN(Number(el.textContent))
+}, null, { timeout: 30000 })
+const endPct = Number(await page.locator('.dash-pct-value').innerText())
+check('percentage prayed through went up', endPct > startPct, `${startPct}% -> ${endPct}%`)
 
-log('\n     progress map (§16)')
-await page.getByRole('button', { name: 'Progress', exact: true }).click()
-await mapReady()
+log('\n     the town map, in place (§16)')
+await mapHasSegments()
 const required = await page.evaluate(
   () => window.__bpwMap.querySourceFeatures('segments').length)
-check('progress map renders required geometry', required > 100, `${required} features`)
-check('map states what it excludes', await page.locator('details.fine').count() === 1)
-const legend = await page.locator('.legend').innerText()
-check('legend explains the colours',
-  /Prayed for/i.test(legend) && /Not yet/i.test(legend), legend)
+check('the map renders required geometry', required > 100, `${required} features`)
+const legend = await page.locator('.dash-legend').first().innerText()
+check('legend explains the treatment',
+  /Covered/i.test(legend) && /Still to walk/i.test(legend), legend)
+await page.locator('.dash-metric').first().click()
+check('what the map excludes is still stated',
+  /excl|not show|private|highway/i.test(await page.locator('.dash-defs').innerText()))
+// A bookmark to the old destination must land somewhere sensible, not nowhere.
+await page.goto('/#/progress')
+await page.locator('.dash-pct-value').waitFor({ timeout: 20000 })
+check('the old /progress link redirects to mission control',
+  await page.evaluate(() => window.location.hash) === '#/')
 
 log('\n     PWA installability')
 const manifest = await page.evaluate(async () => {

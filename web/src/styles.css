@@ -355,3 +355,228 @@ button.link {
 .bar-t { background: #eeece5; border-radius: 3px; height: 10px; }
 .bar-t i { display: block; height: 10px; background: var(--green); border-radius: 3px; }
 .bar-v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* ===========================================================================
+   Mission control — design "01 — Mission control".
+   Scoped to `.dash` so the rest of the app, which is still light, is untouched.
+   The approved direction is dark throughout; the other screens follow later.
+   =========================================================================== */
+.dash {
+  --d-bg: #14171A;
+  --d-panel: #1B1F22;
+  --d-paper: #F7F5F1;
+  --d-ink: #E7E4DE;
+  --d-muted: #8B9392;
+  --d-dim: #9AA0A0;
+  --d-faint: #7E8686;
+  --d-green: #5E9B7E;
+  --d-orange: #E4712C;
+  --d-rule: rgba(247, 245, 241, .12);
+  --d-rule-2: rgba(247, 245, 241, .18);
+
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  background: var(--d-bg); color: var(--d-ink);
+  font-family: Archivo, system-ui, -apple-system, sans-serif;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* The design's uppercase mono label, used in five places. */
+.dash .dash-label {
+  font: 500 11px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--d-muted);
+}
+
+.dash-resume {
+  flex: none; display: flex; align-items: center; justify-content: space-between;
+  margin: 8px 16px 0; padding: 10px 14px; width: calc(100% - 32px);
+  background: rgba(228, 113, 44, .14); border: 1px solid rgba(228, 113, 44, .5);
+  border-radius: 10px; color: var(--d-paper); font: inherit; cursor: pointer;
+  text-align: left;
+}
+.dash-resume strong { display: block; font: 600 14px/1.2 Archivo, sans-serif; }
+.dash-resume em { font: 400 12px/1.4 Archivo, sans-serif; color: var(--d-dim);
+                  font-style: normal; }
+.dash-resume-go { font: 600 13px/1 Archivo, sans-serif; color: var(--d-orange);
+                  white-space: nowrap; }
+
+.dash-head {
+  flex: none; display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px 0;
+}
+.dash-brand { font: 800 17px/1 Archivo, sans-serif; letter-spacing: -.01em;
+              color: var(--d-paper); }
+.dash-place { font: 500 11px/1 'IBM Plex Mono', ui-monospace, monospace;
+              letter-spacing: .14em; text-transform: uppercase; color: var(--d-muted); }
+
+.dash-mission { flex: none; padding: 26px 24px 0; }
+.dash-mission p {
+  margin: 10px 0 0; font: 600 19px/1.35 Archivo, sans-serif; color: var(--d-paper);
+  text-wrap: pretty;
+}
+
+.dash-error { flex: none; margin: 12px 24px 0; color: var(--d-orange);
+              font: 500 13px/1.4 Archivo, sans-serif; }
+
+.dash-pct { flex: none; padding: 26px 24px 0; }
+.dash-pct-row { display: flex; align-items: flex-end; justify-content: space-between; }
+.dash-pct-num { display: flex; align-items: flex-end; gap: 6px; }
+.dash-pct-value { font: 700 96px/.82 Archivo, sans-serif; letter-spacing: -.045em;
+                  color: var(--d-paper); font-variant-numeric: tabular-nums; }
+.dash-pct-sign { font: 700 32px/1 Archivo, sans-serif; color: var(--d-faint);
+                 padding-bottom: 8px; }
+.dash-pct-side { text-align: right; padding-bottom: 10px; }
+.dash-pct-sub { font: 400 14px/1.3 Archivo, sans-serif; color: var(--d-dim);
+                margin-top: 7px; }
+
+.dash-bar {
+  position: relative; height: 14px; border-radius: 2px; overflow: hidden;
+  margin-top: 18px;
+  background: repeating-linear-gradient(90deg, #33393B 0 4px, transparent 4px 9px);
+}
+.dash-bar i {
+  position: absolute; inset: 0 auto 0 0; display: block;
+  background: repeating-linear-gradient(90deg, #E8E4DB 0 4px, transparent 4px 9px);
+  transition: width .5s ease;
+}
+
+/* The map takes whatever vertical room the fixed rows above and below leave. */
+.dash-map {
+  flex: 1 1 auto; position: relative; min-height: 140px;
+  margin-top: 22px; background: var(--d-panel);
+  border-top: 1px solid var(--d-rule); border-bottom: 1px solid var(--d-rule);
+}
+.dash-map .mapwrap { border: 0; border-radius: 0; height: 100% !important; }
+.dash-map-blocked { padding: 20px 24px; }
+.dash-map-blocked strong { display: block; color: var(--d-paper);
+                           font: 600 15px/1.3 Archivo, sans-serif; margin-bottom: 6px; }
+.dash-map-blocked p { margin: 0; font: 400 13px/1.5 Archivo, sans-serif;
+                      color: var(--d-dim); }
+
+.dash-legend {
+  position: absolute; left: 16px; bottom: 14px; z-index: 3;
+  display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.dash-legend span { display: flex; align-items: center; gap: 10px;
+                    font: 500 12px/1 Archivo, sans-serif; color: var(--d-paper); }
+.dash-legend i { width: 26px; flex: none; }
+.dash-legend .lg-done { height: 5px; border-radius: 3px; background: var(--d-green); }
+.dash-legend .lg-todo { height: 0; border-top: 3px dashed #6E7676; }
+
+.dash-explore, .dash-collapse {
+  position: absolute; right: 14px; bottom: 14px; z-index: 3;
+  height: 36px; padding: 0 14px; border-radius: 999px;
+  background: rgba(20, 23, 26, .86); border: 1px solid var(--d-rule-2);
+  color: var(--d-paper); font: 500 13px/1 Archivo, sans-serif; cursor: pointer;
+}
+
+.dash-metrics {
+  flex: none; margin: 20px 24px 0; display: grid; grid-template-columns: 1fr 1fr 1fr;
+}
+.dash-metric {
+  display: block; text-align: left; background: none; border: 0; padding: 0 14px;
+  color: inherit; font: inherit; cursor: pointer;
+}
+.dash-metric:first-child { padding-left: 0; padding-right: 14px; }
+.dash-metric + .dash-metric { border-left: 1px solid var(--d-rule-2); }
+.dash-metric-v { display: block; font: 700 24px/1.1 Archivo, sans-serif;
+                 letter-spacing: -.02em; color: var(--d-paper);
+                 font-variant-numeric: tabular-nums; }
+.dash-metric .dash-label { display: block; margin-top: 8px; font-size: 10px;
+                           letter-spacing: .12em; line-height: 1.4; }
+
+.dash-shared { flex: none; margin: 10px 24px 0;
+               font: 400 13px/1.4 Archivo, sans-serif; color: var(--d-muted); }
+
+.dash-defs {
+  flex: none; margin: 12px 24px 0; padding: 14px; max-height: 34vh; overflow-y: auto;
+  background: var(--d-panel); border: 1px solid var(--d-rule); border-radius: 10px;
+}
+.dash-defs dl { margin: 0; }
+.dash-defs dt { font: 600 12px/1.2 Archivo, sans-serif; color: var(--d-paper);
+                margin-top: 10px; }
+.dash-defs dt:first-child { margin-top: 0; }
+.dash-defs dd { margin: 4px 0 0; font: 400 12px/1.5 Archivo, sans-serif;
+                color: var(--d-dim); }
+.dash-defs-close { margin-top: 12px; background: none; border: 1px solid var(--d-rule-2);
+                   color: var(--d-paper); border-radius: 8px; padding: .45rem .8rem;
+                   font: 500 12px/1 Archivo, sans-serif; cursor: pointer; }
+
+.dash-cta { flex: none; padding: 20px 24px calc(26px + env(safe-area-inset-bottom)); }
+.dash-cta button {
+  width: 100%; height: 64px; border: 0; border-radius: 10px; cursor: pointer;
+  background: var(--d-orange); color: var(--d-paper);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+  font: 600 18px/1 Archivo, sans-serif;
+}
+.dash-cta button:active { filter: brightness(.92); }
+.dash-fine { margin: 10px 0 0; font: 400 12px/1.45 Archivo, sans-serif;
+             color: var(--d-muted); }
+
+.dash-expand {
+  position: fixed; inset: 0; z-index: 60; background: var(--d-panel);
+  padding-top: env(safe-area-inset-top);
+}
+.dash-expand .mapwrap { border: 0; border-radius: 0; height: 100% !important; }
+.dash-legend.expanded { bottom: calc(58px + env(safe-area-inset-bottom)); }
+.dash-collapse { bottom: calc(14px + env(safe-area-inset-bottom)); }
+.dash-excludes {
+  position: absolute; left: 14px; bottom: calc(14px + env(safe-area-inset-bottom));
+  z-index: 3; max-width: 60%;
+  font: 400 11px/1.4 Archivo, sans-serif; color: var(--d-dim);
+  background: rgba(20, 23, 26, .86); border: 1px solid var(--d-rule);
+  border-radius: 8px; padding: .4rem .6rem;
+}
+.dash-excludes ul { margin: .4rem 0 0; padding-left: 1rem; }
+
+/* MapLibre's own chrome, restyled for the dark panel. */
+.mapwrap.dark { background: #1B1F22; }
+.mapwrap.dark .maplibregl-ctrl-group { background: rgba(20, 23, 26, .86);
+                                       border: 1px solid rgba(247, 245, 241, .18); }
+.mapwrap.dark .maplibregl-ctrl-group button span { filter: invert(1); }
+.mapwrap.dark .map-recenter { background: rgba(20, 23, 26, .86);
+                              color: #F7F5F1; border-color: rgba(247, 245, 241, .18); }
+.mapwrap.dark .maplibregl-ctrl-attrib { background: rgba(20, 23, 26, .7); }
+.mapwrap.dark .maplibregl-ctrl-attrib a { color: #9AA0A0; }
+
+/* MapView ships its own Recenter pill bottom-left — exactly where the design puts
+   the legend. The compact dashboard map is a fixed overview nobody pans, so it does
+   not need one; the expanded view does, moved clear of the legend. */
+.dash-map .map-recenter { display: none; }
+.dash-expand .dash-collapse {
+  top: calc(14px + env(safe-area-inset-top)); bottom: auto; left: 14px; right: auto;
+}
+.dash-expand .map-recenter {
+  bottom: auto; top: calc(60px + env(safe-area-inset-top)); left: 14px;
+}
+.mapwrap.dark .map-degraded {
+  background: rgba(20, 23, 26, .9); border-color: rgba(247, 245, 241, .18);
+  color: #C6C3BC; font-family: Archivo, sans-serif;
+}
+/* The degraded-basemap banner sits top-left by default, where the expanded overlay
+   puts Close and Recenter. Drop it below them. */
+.dash-expand .map-degraded {
+  top: calc(106px + env(safe-area-inset-top)); left: 14px; right: 14px;
+}
+
+/* The design is drawn for a 390x844 phone. On a shorter screen — an iPhone SE, or any
+   phone once the "walk in progress" bar appears — the fixed rows add up to more than
+   the viewport and the primary action ends up below the fold. Scale the two biggest
+   consumers rather than let that happen: the 96px number and the vertical rhythm. */
+@media (max-height: 720px) {
+  .dash-pct-value { font-size: 64px; }
+  .dash-pct-sign { font-size: 24px; padding-bottom: 5px; }
+  .dash-mission { padding-top: 16px; }
+  .dash-mission p { font-size: 17px; margin-top: 8px; }
+  .dash-pct { padding-top: 16px; }
+  .dash-bar { margin-top: 12px; height: 10px; }
+  .dash-map { margin-top: 14px; min-height: 120px; }
+  .dash-metrics { margin-top: 14px; }
+  .dash-metric-v { font-size: 21px; }
+  .dash-cta { padding: 14px 24px calc(18px + env(safe-area-inset-bottom)); }
+  .dash-cta button { height: 56px; font-size: 17px; }
+  .dash-shared { margin-top: 8px; font-size: 12px; }
+}

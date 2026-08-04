@@ -66,9 +66,14 @@ if (LEGACY) {
 } else {
   // ---- the Phase 3.5 flow --------------------------------------------------
   await p.goto('/')
-  await p.locator('.metric').first().waitFor({ timeout: 30000 })
-  await shot('01-first-screen')                       // dashboard, signed out
-  await p.getByRole('button', { name: 'Find my next walk' }).click()
+  await p.locator('.dash-pct-value').waitFor({ timeout: 30000 })
+  await mapSettled()
+  await shot('01-first-screen')                       // mission control, signed out
+  await p.getByRole('button', { name: /Explore/ }).click()
+  await mapSettled()
+  await shot('01b-map-expanded')
+  await p.getByRole('button', { name: /Close/ }).click()
+  await p.getByRole('button', { name: /Begin today's walk/ }).click()
   await p.locator('.mission h2').waitFor({ timeout: 120000 })
   await mapSettled()
   await shot('02-dashboard')                          // kept name for pairing
@@ -106,9 +111,8 @@ if (LEGACY) {
   await p.getByRole('button', { name: 'Submit contribution' }).click()
   await p.getByRole('heading', { name: 'Thank you' }).waitFor({ timeout: 40000 })
   await p.getByRole('button', { name: 'Back to home' }).click()
-  await p.getByRole('button', { name: 'Progress', exact: true }).click()
   await mapSettled()
-  await shot('08-progress')
+  await shot('08-progress')                           // the town total, moved
 }
 
 await b.close()

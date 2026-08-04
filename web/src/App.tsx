@@ -20,7 +20,6 @@ import Confirm from './screens/Confirm'
 import Dashboard from './screens/Dashboard'
 import Generate from './screens/Generate'
 import Mission from './screens/Mission'
-import Progress from './screens/Progress'
 
 export type Nav = (route: string) => void
 
@@ -63,6 +62,13 @@ export default function App() {
   const adopt = useCallback((p: ParticipantOut) => { setMe(p); refreshWalk() },
     [refreshWalk])
 
+  // Requirements 3 and 9: the town map is no longer a separate destination — it lives
+  // on the dashboard. The route survives only as a redirect, so a bookmark or a link
+  // shared during the pilot still lands somewhere sensible.
+  useEffect(() => {
+    if (route.startsWith('/progress')) nav('/')
+  }, [route, nav])
+
   function switchPerson() {
     // Drops the opaque token only. The participant record, and everything walked
     // under it, stays on the server and is recovered by signing in with the same
@@ -100,19 +106,22 @@ export default function App() {
                    onDone={() => { setWalk(null); refreshWalk() }} />
         : gate('This walk belongs to somebody. Sign in to record it.')
     }
-    if (route.startsWith('/progress')) return <Progress />
     if (route.startsWith('/admin')) {
       return me ? <Admin me={me} /> : gate('Administration requires an account.')
     }
     return <Dashboard nav={nav} me={me} walk={walk} />
   })()
 
+  // Mission control is full-bleed by design: it owns the whole viewport and carries
+  // its own header. The shared chrome would sit on top of it.
+  const bare = route === '/' || route === '' || route.startsWith('/progress')
+  if (bare) return <><main>{screen}</main><BuildBadge /></>
+
   return (
     <div className="app">
       <header className="topbar">
         <button className="brand" onClick={() => nav('/')}>Blacksburg Prayer Walk</button>
         <nav>
-          <button onClick={() => nav('/progress')}>Progress</button>
           {me?.is_admin && <button onClick={() => nav('/admin')}>Admin</button>}
         </nav>
       </header>

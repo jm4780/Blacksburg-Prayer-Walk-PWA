@@ -44,6 +44,14 @@ import type { LineString } from '../types'
 
 mlConfig.WORKER_URL = workerUrl
 
+/**
+ * Set once a basemap fetch has demonstrably failed. Later maps in the same session
+ * skip the six-second discovery and start on the fallback immediately — otherwise
+ * tapping "Explore" on a blocked network shows an empty panel for six seconds while
+ * a second map independently rediscovers what the first one already knows.
+ */
+let basemapKnownDead = false
+
 export interface SegmentFeature {
   id: string
   coordinates: [number, number][]
@@ -66,6 +74,13 @@ interface Props {
   fitTo?: LineString | null
   /** Zoom in close enough that individual streets are separable by thumb. */
   editing?: boolean
+  /**
+   * `dark` matches the approved design's map treatment: solid green for covered
+   * ground, dashed grey for what is still to walk, on a dark panel. The distinction
+   * is not only colour — dashed vs solid survives being printed, being screenshotted
+   * in greyscale, and the ~8% of men who will not reliably separate those two hues.
+   */
+  theme?: 'light' | 'dark'
   ariaLabel: string
 }
 
@@ -77,10 +92,13 @@ const STYLE_URL = (import.meta as any).env?.VITE_BASEMAP_STYLE
   ?? 'https://tiles.openfreemap.org/styles/liberty'
 
 /** Last-resort style used when the vector basemap cannot be reached. */
-const FALLBACK_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {},
-  layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#f2f1ec' } }],
+function fallbackStyle(theme: 'light' | 'dark'): StyleSpecification {
+  return {
+    version: 8,
+    sources: {},
+    layers: [{ id: 'bg', type: 'background',
+               paint: { 'background-color': FALLBACK_BG[theme] } }],
+  }
 }
 
 const COLORS: Record<SegmentFeature['state'], string> = {
@@ -93,10 +111,22 @@ const COLORS: Record<SegmentFeature['state'], string> = {
   added: '#2f7d4f',
 }
 
+/** Palette for the dark Mission-control dashboard (design "01 — Mission control"). */
+const DARK_COLORS: Record<SegmentFeature['state'], string> = {
+  ...COLORS,
+  done: '#5E9B7E',      // "Covered"
+  todo: '#6E7676',      // "Still to walk" — drawn dashed, see `theme` below
+  held: '#E4712C',
+  planned: '#5E9B7E',
+}
+
+const FALLBACK_BG = { light: '#f2f1ec', dark: '#1B1F22' }
+
 export default function MapView({
   route, segments, start, onSegmentTap, onMapTap, height = 340, fitTo = null,
-  editing = false, ariaLabel,
+  editing = false, theme = 'light', ariaLabel,
 }: Props) {
+  const palette = theme === 'dark' ? DARK_COLORS : COLORS
   const container = useRef<HTMLDivElement>(null)
   const map = useRef<MLMap | null>(null)
   const [ready, setReady] = useState(false)
@@ -108,13 +138,18 @@ export default function MapView({
   const [basemapFailed, setBasemapFailed] = useState(false)
   const [userMoved, setUserMoved] = useState(false)
   const fittedKey = useRef<string>('')
+  // The map is created once, in an effect with no dependencies, but the failure
+  // handlers inside it fire later and need the current theme.
+  const themeRef = useRef(theme)
+  themeRef.current = theme
 
   // ---------------------------------------------------------------- lifecycle
   useEffect(() => {
     if (!container.current || map.current) return
+    const bornDead = basemapKnownDead
     const m = new MLMap({
       container: container.current,
-      style: STYLE_URL,
+      style: bornDead ? fallbackStyle(themeRef.current) : STYLE_URL,
       center: BLACKSBURG,
       zoom: 12,
       attributionControl: { compact: true },
@@ -130,18 +165,21 @@ export default function MapView({
 
     // A style that never arrives would otherwise leave a blank screen with a route
     // that never draws, because the layers are added on 'load'.
-    const failTimer = window.setTimeout(() => {
+    if (bornDead) setBasemapFailed(true)
+    const failTimer = bornDead ? 0 : window.setTimeout(() => {
       if (!m.isStyleLoaded()) {
+        basemapKnownDead = true
         setBasemapFailed(true)
-        try { m.setStyle(FALLBACK_STYLE) } catch { /* already gone */ }
+        try { m.setStyle(fallbackStyle(themeRef.current)) } catch { /* already gone */ }
       }
     }, 6000)
 
     m.on('error', (e: any) => {
       // Tile 404s are noise; a failed *style* is not.
       if (e?.error?.status && e.error.status >= 400 && !m.isStyleLoaded()) {
+        basemapKnownDead = true
         setBasemapFailed(true)
-        try { m.setStyle(FALLBACK_STYLE) } catch { /* already gone */ }
+        try { m.setStyle(fallbackStyle(themeRef.current)) } catch { /* already gone */ }
       }
     })
     m.on('load', () => { window.clearTimeout(failTimer); setReady(true) })
@@ -159,7 +197,14 @@ export default function MapView({
     // is the route drawn, did the viewport move, is this street tappable — and cannot
     // ask a WebGL canvas anything at all. Read-only, and nothing in the app uses it.
     ;(window as any).__bpwMap = m
-    return () => { window.clearTimeout(failTimer); m.remove(); map.current = null }
+    return () => {
+      window.clearTimeout(failTimer)
+      // Clear the test handle if it still points at this instance, so a probe after
+      // unmount fails loudly instead of quietly querying a dead map's empty sources.
+      if ((window as any).__bpwMap === m) delete (window as any).__bpwMap
+      m.remove()
+      map.current = null
+    }
   }, [])
 
   // ------------------------------------------------------------------ sources
@@ -176,7 +221,7 @@ export default function MapView({
       features: (segments ?? []).map((s) => ({
         type: 'Feature' as const,
         id: s.id,
-        properties: { id: s.id, state: s.state, color: COLORS[s.state] },
+        properties: { id: s.id, state: s.state, color: palette[s.state] },
         geometry: { type: 'LineString' as const, coordinates: s.coordinates },
       })),
     }
@@ -208,11 +253,26 @@ export default function MapView({
         },
       })
     }
+    // Unwalked ground is dashed as well as grey, so "covered" and "still to walk"
+    // are distinguishable without relying on colour.
+    if (theme === 'dark' && m.getLayer('segments-todo-dash') === undefined) {
+      m.addLayer({
+        id: 'segments-todo-dash', type: 'line', source: 'segments',
+        filter: ['==', ['get', 'state'], 'todo'],
+        layout: { 'line-cap': 'butt' },
+        paint: {
+          'line-color': DARK_COLORS.todo, 'line-width': 2, 'line-dasharray': [2, 2.2],
+        },
+      })
+      m.setPaintProperty('segments-line', 'line-opacity',
+        ['case', ['==', ['get', 'state'], 'todo'], 0, 1])
+    }
     if (!m.getLayer('route-line')) {
       m.addLayer({
         id: 'route-line', type: 'line', source: 'route',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': '#1f3d2b', 'line-width': 5, 'line-opacity': 0.95 },
+        paint: { 'line-color': theme === 'dark' ? '#5E9B7E' : '#1f3d2b',
+                 'line-width': 5, 'line-opacity': 0.95 },
       })
     }
     // The tap layer. Invisible, 24px wide, above everything — this is what makes
@@ -227,12 +287,14 @@ export default function MapView({
       m.addLayer({
         id: 'start-dot', type: 'circle', source: 'startpt',
         paint: {
-          'circle-radius': 8, 'circle-color': '#b5801f',
-          'circle-stroke-width': 3, 'circle-stroke-color': '#fff',
+          'circle-radius': 8, 'circle-color': theme === 'dark' ? '#E4712C' : '#b5801f',
+          'circle-stroke-width': 3,
+          'circle-stroke-color': theme === 'dark' ? '#14171A' : '#fff',
         },
       })
     }
-  }, [ready, styleEpoch, routeKey, segKey, start?.lat, start?.lon, segments, route, start])
+  }, [ready, styleEpoch, routeKey, segKey, start?.lat, start?.lon, segments, route,
+      start, theme, palette])
 
   // -------------------------------------------------------------------- taps
   useEffect(() => {
@@ -264,14 +326,18 @@ export default function MapView({
     const b = pts.reduce((acc, p) => acc.extend(p as any),
       new LngLatBounds(pts[0] as any, pts[0] as any))
     m.fitBounds(b, {
-      // Generous bottom padding: the mission card sits over the map on a phone.
-      padding: { top: 48, bottom: 72, left: 40, right: 40 },
+      // Generous bottom padding on the light screens: the mission card sits over the
+      // map on a phone. The dashboard panel is short and wide and the map is the
+      // content, so it fills the frame instead of floating in the middle of it.
+      padding: theme === 'dark'
+        ? { top: 10, bottom: 10, left: 10, right: 10 }
+        : { top: 48, bottom: 72, left: 40, right: 40 },
       // Editing needs streets far enough apart to tell one from another.
       maxZoom: editing ? 17.5 : 16,
       duration: animate ? 500 : 0,
     })
     setUserMoved(false)
-  }, [route, segments, start, editing, fitTo])
+  }, [route, segments, start, editing, fitTo, theme])
 
   useEffect(() => {
     if (!ready) return
@@ -283,7 +349,7 @@ export default function MapView({
   }, [ready, fitKey, routeKey, segKey, fit, userMoved])
 
   return (
-    <div className="mapwrap" style={{ height }}>
+    <div className={theme === 'dark' ? 'mapwrap dark' : 'mapwrap'} style={{ height }}>
       <div ref={container} className="maplibre" role="application"
            aria-label={ariaLabel} data-ready={ready ? 'true' : 'false'} />
       <button type="button" className="map-recenter" onClick={() => fit(true)}
