@@ -150,6 +150,7 @@ export default function Dashboard({ nav, me, walk }: {
         ) : (
           <MapView segments={segments} context="town" height="100%"
                    fitTo={frame} parks={map?.open_space} boundary={map?.boundary}
+                   townRoads={map?.context}
                    ariaLabel={`Town progress map: ${milesDone} of ${milesTotal} miles prayed for`} />
         )}
         <div className="dash-legend">
@@ -236,6 +237,7 @@ export default function Dashboard({ nav, me, walk }: {
              aria-label="Town progress map">
           <MapView segments={segments} context="atlas" height="100%"
                    parks={map?.open_space} boundary={map?.boundary}
+                   townRoads={map?.context}
                    ariaLabel="Town progress map, expanded" />
           <div className="dash-legend expanded">
             <span><i className="lg-done" /> Covered</span>

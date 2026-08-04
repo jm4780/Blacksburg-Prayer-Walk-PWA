@@ -15,19 +15,27 @@
  * exactly one honest place to go — the width ramp — and if it does not belong there,
  * it does not belong on the map.
  *
- * The second idea is that there is no basemap. Blacksburg is drawn from the town's own
- * walkable-obligation network, not from a vendor's tiles with our lines painted over
- * them. That is the actual reason the old map felt borrowed: it was. Consequences,
- * all deliberate:
+ * The second idea is that the basemap is ours. Blacksburg is drawn from the town's own
+ * data, not from a vendor's tiles with our lines painted over them — which is the
+ * actual reason the old map felt borrowed.
  *
- *   - the prayer data is structurally the subject, because it is the only subject
+ * But there IS a basemap, and that correction cost a round. The first cut drew only
+ * the required segments, which is not a quiet basemap but no basemap, and the result
+ * was a network diagram with the bypass and the whole non-obligation street fabric
+ * missing. **Removing the world is not the same as letting the prayer data lead it.**
+ * The ground now carries the town's public roads, its parks and its boundary, drawn
+ * dark enough to sit underneath without ever competing.
+ *
+ * Consequences, all deliberate:
+ *
+ *   - the prayer data leads through contrast, against a world that is present
  *   - it renders identically offline, which matters for a tool used outdoors
  *   - no third-party host can change how this product looks, or stop it working
  *   - nobody else's map looks like this, because nobody else has this dataset
  *
- * What we give up: buildings, land use, and water, none of which we publish. Water is
- * the real loss — it is how people orient in unfamiliar ground. Parks and the town
- * boundary carry that load instead. See docs/20 §3.
+ * What we give up: buildings, land use and water. Water is the real loss — it is how
+ * people orient in unfamiliar ground, and the town publishes none we can fetch. See
+ * docs/20 §2.
  */
 
 // ---------------------------------------------------------------- ground
@@ -39,9 +47,17 @@
 export const GROUND = {
   land: '#0D1113',
   /** Public open space. Presence, not decoration: a park should be felt, not read. */
-  park: '#121819',
+  park: '#141B19',
   /** The edge of the obligation. Not a border — a limit on what we claim. */
   boundary: '#242B2D',
+  /**
+   * The town itself: every public road that is not part of the obligation, including
+   * US 460 and its ramps. This is the layer whose absence made the map read as a
+   * network diagram instead of a place. Removing the world is not the same as
+   * letting the prayer data lead it — the world just has to be quiet.
+   */
+  context: '#252C2F',
+  contextMajor: '#333C40',
 } as const
 
 // ------------------------------------------------------------- prayer ink
@@ -77,7 +93,7 @@ export const INK = {
   /** Today's assignment, when it is not the subject. */
   assigned: '#9A8A76',
   /** Still to walk. Present, legible, and deliberately receding. */
-  remaining: '#414A4D',
+  remaining: '#4A5457',
   /** Held by another walker right now. Visible so it is not offered twice. */
   held: '#6E6455',
   /** The one saturated mark on the map. Points only, never lines. */
@@ -132,26 +148,53 @@ export const CLASS_WEIGHT: Record<string, number> = {
  * mass, and at walking scale thick enough to read at arm's length in sunlight.
  */
 export const WIDTH_STOPS: Array<[number, number]> = [
-  [10, 0.9],
-  [12, 1.6],
-  [14, 3.0],
-  [16, 5.5],
-  [18, 9.0],
+  [10, 1.0],
+  [12, 1.8],
+  [14, 3.2],
+  [16, 5.8],
+  [18, 9.5],
+]
+
+/**
+ * Context roads — the town under the mission.
+ *
+ * These are NOT always thinner than the prayer overlays, and deliberately so: US 460
+ * at z18 is 7.6 px where a remaining sidewalk is 3.7 px, because width belongs to road
+ * class and 460 really is bigger than a sidewalk. Making the bypass hairline to keep
+ * it "under" the mission would be a lie about the town.
+ *
+ * The hierarchy is carried by luminance instead, which is the founding rule of this
+ * system. The brightest thing on the ground (`contextMajor`, relative luminance 0.043)
+ * sits at roughly half the dimmest prayer state (`remaining`, 0.085), and every state
+ * above that pulls further away — covered is 0.249, the subject 0.865. A wide road can
+ * therefore never out-rank a narrow obligation, at any zoom.
+ */
+export const CONTEXT_WIDTH: Array<[number, number]> = [
+  [10, 0.4],
+  [12, 0.7],
+  [14, 1.3],
+  [16, 2.4],
+  [18, 4.0],
 ]
 
 /** Covered and assigned ground is drawn heavier than context. */
 export const STATE_WEIGHT = {
-  subject: 1.9,
-  covered: 1.15,
-  assigned: 1.15,
-  remaining: 0.8,
-  held: 0.95,
+  // Halved from the first cut. The references draw the route as a thin, precise line
+  // and win attention through contrast against a quiet ground, not through mass. A
+  // heavy stroke reads as emphasis at first glance and as clumsiness at second.
+  subject: 0.95,
+  covered: 0.7,
+  assigned: 0.7,
+  remaining: 0.55,
+  held: 0.6,
 } as const
 
 /** The halo under covered and assigned ground. Not a glow — a suggestion of depth. */
 export const HALO = {
-  widthFactor: 3.4,
-  opacity: { subject: 0.10 },
+  // Tighter and fainter: separation from the ground beneath, not a glow around the
+  // line. At 3.4x and 0.10 it was reading as a halo, which is decoration.
+  widthFactor: 2.6,
+  opacity: { subject: 0.07 },
 } as const
 
 // ---------------------------------------------------------------- labels

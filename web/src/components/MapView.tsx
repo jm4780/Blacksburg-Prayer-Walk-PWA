@@ -72,9 +72,10 @@ interface Props {
   onSegmentTap?: (id: string) => void
   /** Tap anywhere to choose a point. Used by the "start from here" picker. */
   onMapTap?: (p: { lat: number; lon: number }) => void
-  /** Public open space and the town outline, when the context draws them. */
+  /** Public open space, the town outline, and the rest of the town's public roads. */
   parks?: any
   boundary?: any
+  townRoads?: any
   /** Pre-system rendering, for screens not yet migrated to a map context. */
   theme?: 'light' | 'dark'
   height?: number | string
@@ -142,7 +143,7 @@ const FALLBACK_BG = { light: '#f2f1ec', dark: '#1B1F22' }
 export default function MapView({
   route, segments, start, onSegmentTap, onMapTap, height = 340, fitTo = null,
   editing = false, theme = 'light', controls = true, context, parks, boundary,
-  ariaLabel,
+  townRoads, ariaLabel,
 }: Props) {
   const spec = context ? CONTEXTS[context] : null
   const dark = Boolean(context) || theme === 'dark'
@@ -171,9 +172,10 @@ export default function MapView({
   useEffect(() => {
     if (!container.current || map.current) return
     const bornDead = basemapKnownDead
-    // With a map context, there is no basemap to fetch: Blacksburg is drawn from our
-    // own network, so the style is complete before the first frame and there is no
-    // tile host to fail. That is the point of the system, not a side effect.
+    // With a map context there is no basemap to *fetch* — but there is a basemap.
+    // Blacksburg's roads, parks and boundary are drawn from our own data, so the style
+    // is complete before the first frame and no tile host can fail or restyle us.
+    // That is the point of the system, not a side effect.
     const m = new MLMap({
       container: container.current,
       style: specRef.current ? baseStyle()
@@ -273,6 +275,8 @@ export default function MapView({
       upsertSource(m, 'pw-segments', segFC)
       upsertSource(m, 'pw-route', routeFC)
       upsertSource(m, 'pw-parks', parks ?? { type: 'FeatureCollection', features: [] })
+      upsertSource(m, 'pw-context',
+        townRoads ?? { type: 'FeatureCollection', features: [] })
       upsertSource(m, 'pw-boundary', boundary
         ? { type: 'Feature', properties: {}, geometry: boundary }
         : { type: 'FeatureCollection', features: [] })
@@ -380,7 +384,7 @@ export default function MapView({
       })
     }
   }, [ready, styleEpoch, routeKey, segKey, start?.lat, start?.lon, segments, route,
-      start, dark, palette, context])
+      start, dark, palette, context, parks, boundary, townRoads])
 
   // -------------------------------------------------------------------- taps
   useEffect(() => {

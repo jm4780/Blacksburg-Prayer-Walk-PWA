@@ -125,6 +125,7 @@ export default function MapSystem() {
                 context={ctx}
                 parks={map?.open_space}
                 boundary={map?.boundary}
+                townRoads={map?.context}
                 height={260}
                 onSegmentTap={ctx === 'editing' ? () => {} : undefined}
                 ariaLabel={`${ctx} context specimen`} />

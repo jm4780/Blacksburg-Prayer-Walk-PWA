@@ -22,8 +22,8 @@
  *              this scale a name is a smudge.
  */
 import {
-  CLASS_WEIGHT, CONTROL, GROUND, HALO, INK, INK_OPACITY, LABELS, STATE_WEIGHT,
-  TEXTURE, WIDTH_STOPS,
+  CLASS_WEIGHT, CONTEXT_WIDTH, CONTROL, GROUND, HALO, INK, INK_OPACITY, LABELS,
+  STATE_WEIGHT, TEXTURE, WIDTH_STOPS,
 } from './tokens'
 
 export type MapContext =
@@ -42,6 +42,11 @@ export interface ContextSpec {
   boundary: boolean
   /** Show public open space. */
   parks: boolean
+  /**
+   * The rest of the town's public roads. Orientation, not obligation — this is the
+   * layer whose absence made the map read as a network diagram.
+   */
+  context: boolean
   /** Zoom buttons. */
   controls: boolean
   /** Multiplier on every line width — the single knob for "how loud is this screen". */
@@ -56,27 +61,27 @@ export interface ContextSpec {
 
 export const CONTEXTS: Record<MapContext, ContextSpec> = {
   // A picture. Nothing here is navigated, so nothing here is a control.
-  town:      { subject: 'covered',
+  town:      { context: true, subject: 'covered',
                labels: false, boundary: false, parks: true,  controls: false,
                emphasis: 1.0, hit: 0,  maxZoom: 15,   remainingOpacity: 0.45 },
   // A decision. The route is the subject and its streets are named.
-  briefing:  { subject: 'assigned',
+  briefing:  { context: true, subject: 'assigned',
                labels: true,  boundary: false, parks: true,  controls: false,
                emphasis: 1.1, hit: 0,  maxZoom: 16,   remainingOpacity: 0.3 },
   // In use. Loudest weights, least context, most contrast.
-  walking:   { subject: 'assigned',
+  walking:   { context: true, subject: 'assigned',
                labels: true,  boundary: false, parks: false, controls: true,
                emphasis: 1.35, hit: 0, maxZoom: 17,   remainingOpacity: 0.22 },
   // Plan against record. Both states present at once, deliberately.
-  recording: { subject: 'assigned',
+  recording: { context: true, subject: 'assigned',
                labels: true,  boundary: false, parks: false, controls: true,
                emphasis: 1.2, hit: 0,  maxZoom: 17,   remainingOpacity: 0.3 },
   // Selection by thumb. Context lifted so nearby streets are findable.
-  editing:   { subject: 'assigned',
+  editing:   { context: true, subject: 'assigned',
                labels: true,  boundary: false, parks: false, controls: true,
                emphasis: 1.15, hit: 26, maxZoom: 17.5, remainingOpacity: 0.55 },
   // The whole obligation.
-  atlas:     { subject: 'covered',
+  atlas:     { context: true, subject: 'covered',
                labels: false, boundary: true,  parks: true,  controls: true,
                emphasis: 1.0, hit: 0,  maxZoom: 15,   remainingOpacity: 0.5 },
 }
@@ -115,7 +120,9 @@ function widthFor(state: keyof typeof STATE_WEIGHT, emphasis: number): Expr {
 
 const isState = (s: string): Expr => ['==', ['get', 'state'], s]
 
-/** The empty style. There is no basemap; land is a paint colour, not a tile. */
+/** The style before our data lands. The basemap is ours — every ground layer below is
+ *  drawn from the town's own roads, parks and boundary, so land is a paint colour and
+ *  never a fetched tile. Empty of vendors, not empty of world. */
 export function baseStyle(): any {
   return {
     version: 8,
@@ -148,6 +155,26 @@ export function prayerLayers(ctx: MapContext): any[] {
     layers.push({
       id: 'pw-parks', type: 'fill', source: 'pw-parks',
       paint: { 'fill-color': GROUND.park, 'fill-opacity': 1 },
+    })
+  }
+
+  // --- the town itself ---------------------------------------------------------
+  // Drawn before anything that carries meaning, so it can never sit on top of the
+  // mission. Major roads — US 460, the ramps — get a little more light, because they
+  // are what somebody actually orients by.
+  if (c.context) {
+    layers.push({
+      id: 'pw-context', type: 'line', source: 'pw-context',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': ['case', ['get', 'major'], GROUND.contextMajor, GROUND.context],
+        'line-width': [
+          'interpolate', ['linear'], ['zoom'],
+          ...CONTEXT_WIDTH.flatMap(([z, v]) =>
+            [z, ['case', ['get', 'major'], v * 1.9, v]]),
+        ],
+        'line-opacity': 0.85,
+      },
     })
   }
 

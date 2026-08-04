@@ -16,6 +16,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -59,6 +60,12 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="Blacksburg Prayer Walk", version="0.3.0",
               description=__doc__, lifespan=lifespan)
+
+# The progress map is 1.4 MB of GeoJSON and was going out uncompressed — measured
+# byte-identical with `Accept-Encoding: gzip`. It compresses about 8x, and it is now
+# fetched on the landing screen by every first-time visitor, on a phone, outdoors.
+# Flagged as the top follow-up in docs/18, docs/19 and docs/20; this is it.
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 app.add_middleware(CORSMiddleware, allow_origins=settings().origins,
                    allow_credentials=False,

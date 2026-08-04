@@ -81,7 +81,8 @@ api/app/     FastAPI: identity, missions, route generation, walks, reservations,
              progress, admin. Every prayer-specific word in the product lives here.
 web/         React + TypeScript + Vite PWA, mobile-first
 web/src/map/ the Prayer Walk map design system — tokens, contexts, layer order.
-             No vendor basemap: the town is drawn from its own network (docs/20)
+             The basemap is ours: Blacksburg's public roads, parks and boundary
+             are drawn from the town's own data, not a vendor's tiles (docs/20)
 docs/        every decision, with the evidence for it
 ```
 
@@ -105,7 +106,7 @@ docs/        every decision, with the evidence for it
 - [`docs/17-mission-planning-review.md`](docs/17-mission-planning-review.md) — engineering review of the mission-planning realignment.
 - [`docs/18-phase-3-5-mission-build.md`](docs/18-phase-3-5-mission-build.md) — the real map, the time slider, mission recommendations, before/after screenshots, known limitations.
 - [`docs/19-dashboard-mission-control.md`](docs/19-dashboard-mission-control.md) — the Dashboard rebuilt from the approved design, the town map absorbed into it, and the follow-ups it created.
-- [`docs/20-map-design-system.md`](docs/20-map-design-system.md) — **current**: the cartographic language. No basemap — Blacksburg is drawn from its own network. Specimen sheet at `#/map-system`.
+- [`docs/20-map-design-system.md`](docs/20-map-design-system.md) — **current**: the cartographic language. The basemap is ours — Blacksburg's roads, parks and boundary drawn from the town's own data, with the prayer overlays leading by contrast rather than by weight. Specimen sheet at `#/map-system`.
 
 ## Two things to know before deploying
 

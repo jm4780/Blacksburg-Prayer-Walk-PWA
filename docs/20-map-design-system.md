@@ -37,16 +37,34 @@ base is monochrome and almost textureless, and colour survives only as a dot.
 
 ---
 
-## 2. There is no basemap
+## 2. The basemap is ours
 
-Blacksburg is drawn from the town's own walkable-obligation network. There are no
-vector tiles, no tile host, no third-party style.
+Blacksburg is drawn from the town's own data. There are no vector tiles, no tile host,
+no third-party style — but there **is** a basemap, and getting that wrong is the one
+correction this system has already had to make.
 
-This is the structural fix for "it feels borrowed". Consequences, all of them
-deliberate:
+The first cut drew only the 1,582 required segments and nothing else. That is not a
+quiet basemap, it is no basemap, and the result was a network diagram: the bypass, the
+ramps, the campus service roads and the whole non-obligation street fabric simply
+absent. You cannot orient yourself in a town whose landmarks have been deleted, and
+**removing the world is not the same as letting the prayer data lead it.** The prayer
+data has to be the hero through contrast and hierarchy, against a world that is
+present and quiet.
 
-- **The prayer data is the subject because it is the only subject.** Nothing underneath
-  it is competing, because there is nothing underneath it.
+The ground now carries 1,102 public roads outside the obligation — including US 460
+and its ramps, which is what anybody in Blacksburg actually navigates by — plus 96
+public parks and the town boundary, all drawn dark enough to sit under the mission
+without competing with it.
+
+Private drives stay out: 224 of them, plus everything marked PRIVATE or GATED. They
+lead to individual houses, nobody navigates by them, and drawing them would put
+residential specificity on a public map to no purpose.
+
+Consequences of owning the basemap, all of them deliberate:
+
+- **The prayer data leads by contrast, not by subtraction.** The town is underneath it,
+  drawn at a luminance that cannot compete: the brightest context road is darker than
+  the dimmest prayer state, at every zoom, by construction.
 - **It renders identically offline.** This is a tool used outdoors on whatever signal a
   phone has, and the map is now part of the app rather than something the app fetches.
 - **No third party can change how this product looks**, or take it away.
@@ -61,14 +79,18 @@ The map has no runtime dependency on anything outside our origin.
 
 ### What we give up
 
-Buildings, land use and water. Buildings (10,156 polygons, 12.9 MB) and land use
-(11,398, 9.3 MB) are excluded on both payload and philosophy: they are exactly the
-"visual noise" the brief asks to remove.
+Buildings, land use and water.
 
-**Water is the real loss**, and it should be recorded as a loss rather than dressed up.
-Water is how people orient in unfamiliar ground. The town publishes no hydrography
-layer we currently fetch; parks and the boundary carry that load instead, imperfectly.
-If orientation turns out to be a pilot complaint, water is the first thing to add.
+Buildings (10,156 polygons, 12.9 MB) and land use (11,398, 9.3 MB) stay out on both
+payload and philosophy — they are exactly the visual noise the brief asks to remove,
+and neither is something anybody navigates by.
+
+**Water is a genuine loss, and it is recorded as one rather than dressed up.** Water is
+how people orient in unfamiliar ground, and both references keep it. The town publishes
+no hydrography among the datasets we fetch — landuse has no water class, and
+Blacksburg's water is creeks rather than anything that would read at town scale. Roads,
+parks and the boundary carry the orientation load instead. If a pilot walker says they
+cannot place themselves, water is the first thing to go looking for.
 
 ---
 
@@ -77,7 +99,9 @@ If orientation turns out to be a pilot complaint, water is the first thing to ad
 | Element | Value | Reasoning |
 |---|---|---|
 | Land | `#0D1113` | Near-black, very slightly cool. Darker than the app's card so the map reads as a surface you look *at*, not a panel of the interface. |
-| Park | `#121819` | Public open space only — 96 Town-owned polygons of 375; the rest are HOA and private, which are neither walkable nor ours to draw. A park should be felt, not read. |
+| Park | `#141B19` | Public open space only — 96 Town-owned polygons of 375; the rest are HOA and private, which are neither walkable nor ours to draw. A park should be felt, not read. |
+| Town roads | `#252C2F` | Public roads outside the obligation. Present so the town is recognisable, dark enough never to compete. |
+| Major roads | `#333C40`, ×1.9 width | US 460, the ramps, the arterials. A little more light, because these are what somebody orients by. |
 | Boundary | `#242B2D`, 1.2 px, dashed | Not a border. The limit of what we claim. |
 
 Parks are simplified hard on the way out of the API — a background wash at town scale,
@@ -115,18 +139,31 @@ way between two neighbourhoods.
 
 | State | Ink | Weight | Texture | Opacity |
 |---|---|---|---|---|
-| **Subject** (whichever the context is about) | `#F2EFE9` | ×1.9 + halo | solid | 1.0 |
-| Covered, when not the subject | `#7E8C86` | ×1.15 | solid | 0.85 |
-| Assigned, when not the subject | `#9A8A76` | ×1.15 | solid | 0.85 |
-| Remaining | `#414A4D` | ×0.80 | dash 2 / 2.4 | 0.9 |
-| Held by another walker | `#6E6455` | ×0.95 | dot 0.6 / 1.8 | 0.7 |
-| Dropped from a plan (editing) | `#414A4D` | ×1.04 | dash 1.2 / 1.6 | 0.7 |
+| **Subject** (whichever the context is about) | `#F2EFE9` | ×0.95 + halo | solid | 1.0 |
+| Covered, when not the subject | `#7E8C86` | ×0.70 | solid | 0.85 |
+| Assigned, when not the subject | `#9A8A76` | ×0.70 | solid | 0.85 |
+| Remaining | `#4A5457` | ×0.55 | dash 2 / 2.4 | 0.9 |
+| Held by another walker | `#6E6455` | ×0.60 | dot 0.6 / 1.8 | 0.7 |
+| Dropped from a plan (editing) | `#4A5457` | ×0.72 | dash 1.2 / 1.6 | 0.7 |
 | Start point | `#E4712C` | 5.5 px dot | — | 1.0 |
+
+**The overlay weights were halved after the first cut.** A ×1.9 subject under a 3.4×
+halo read as a thick white noodle laid across the town. Both references draw the route
+as a thin, precise line and win attention through contrast against a quiet ground, not
+through mass — a heavy stroke reads as emphasis at first glance and as clumsiness at
+the second. The halo came down with it, 3.4× → 2.6× and α 0.10 → 0.07: it is there to
+separate the line from the ground beneath, not to glow around it.
+
+`remaining` moved the other way, `#414A4D` → `#4A5457`. Once real town roads sat under
+the overlays, a street somebody is *obliged* to walk and a street that is merely there
+were within a few points of each other. Obligation has to stay legible as obligation,
+so remaining gets the light back that context roads never get.
 
 Draw order **is** the hierarchy, made literal:
 
 ```
-ground → parks → boundary → remaining → held → subject halo → subject → labels → tap targets
+ground → parks → town roads → boundary → remaining → held
+       → subject halo → subject → labels → tap targets
 ```
 
 Nothing above can be obscured by anything below, so the most important thing on the map
@@ -161,7 +198,9 @@ One cartography, six settings. Every screen gets its map from `CONTEXTS` in
 `style.ts`, so this is one artefact with six configurations rather than six maps that
 happen to resemble each other.
 
-| Context | Screen | Subject | Labels | Emphasis | Context let through | Tap | Max z | Controls |
+Every context draws the town roads: you always need to know where you are.
+
+| Context | Screen | Subject | Labels | Emphasis | Obligation let through | Tap | Max z | Controls |
 |---|---|---|---|---|---|---|---|---|
 | `town` | Dashboard | covered | — | ×1.00 | α 0.45 | — | 15 | — |
 | `briefing` | Mission assignment | assigned | ✓ | ×1.10 | α 0.30 | — | 16 | — |
@@ -240,10 +279,11 @@ because the brief said not to redesign application screens.
 1. **No water.** §2 above. The first thing to add if orientation is a pilot complaint.
 2. **Motion is specified but not implemented.** The tokens are in place; the
    line-dasharray animation for route draw-in is not written.
-3. **The map payload is now 1.36 MB uncompressed** — up from 1.25 MB, because
-   `road_class`, `path_type` and 96 park polygons were added. The server still does not
-   gzip. This was the top follow-up in docs/19 and it is now more urgent, not less:
-   one line of `GZipMiddleware` takes this to roughly 200 KB.
+3. **The payload is fixed.** `GZipMiddleware` is in — flagged as the top follow-up in
+   docs/18, docs/19 and the first cut of this document, and now done. The bare network
+   went from 1.36 MB uncompressed to **375 KB**, which is what made the geographic
+   context affordable: with roads and parks the response is 1.9 MB raw but **437 KB on
+   the wire**, still a third of what the network alone used to cost.
 4. **A silent-failure trap worth knowing about.** MapLibre rejects a `['zoom']`
    expression nested inside another operator — and rejects it through the map's error
    event rather than by throwing, so the layer simply never appears. Four of the nine

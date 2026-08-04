@@ -36,6 +36,70 @@ from ..services.network_state import network_service
 router = APIRouter(prefix="/api/progress", tags=["progress"])
 
 
+# Road classes worth drawing as context. US 460 and its ramps are the single most
+# recognisable thing in Blacksburg; the Smart Road and the service drives orient the
+# campus edge. Everything here is a public road.
+_CONTEXT_CLASSES = {"Primary", "Ramp", "Service Drive", "Local", "Arterial",
+                    "Secondary", "Collector"}
+
+
+@lru_cache
+def _context_roads() -> dict:
+    """Roads that are NOT part of the obligation, drawn only so the town is legible.
+
+    The map drew the 1,582 required segments and nothing else, which made Blacksburg
+    look like a network diagram rather than a place — the bypass, the ramps and the
+    campus service roads simply absent. You cannot orient yourself in a town whose
+    landmarks have been deleted, and removing the world is not the same as letting the
+    prayer data lead it.
+
+    **Public roads only.** The 224 private drives and everything marked PRIVATE or
+    GATED are left out: they lead to individual houses, they add nothing anybody
+    navigates by, and drawing them would put residential specificity on a public map
+    to no purpose.
+
+    These carry no id and no name. They are never selectable, never routable, never
+    counted. The one attribute is whether a road is big enough to navigate by, which
+    is all the cartography needs to know to decide how faintly to draw it.
+    """
+    import glob
+
+    from ...routing import network as net_mod
+    files = sorted(glob.glob(os.path.join(net_mod.OUT_ROOT, "*", "segments.geojson")))
+    if not files:
+        return {"type": "FeatureCollection", "features": []}
+    try:
+        with open(files[-1]) as f:
+            fc = json.load(f)
+    except (OSError, ValueError):
+        return {"type": "FeatureCollection", "features": []}
+
+    feats = []
+    for feat in fc.get("features", []):
+        p = feat.get("properties") or {}
+        if p.get("role") == "REQUIRED":
+            continue                      # drawn as prayer data, not as ground
+        if p.get("access_type") in ("PRIVATE", "GATED"):
+            continue
+        rc = p.get("road_class")
+        keep = rc in _CONTEXT_CLASSES or p.get("role") == "OPTIONAL_CONNECTOR"
+        if not keep:
+            continue
+        g = feat.get("geometry") or {}
+        if g.get("type") != "LineString":
+            continue
+        feats.append({
+            "type": "Feature",
+            # Half the precision. This is a background wash; six decimal places of a
+            # road nobody can tap is bytes a phone downloads on a hillside.
+            "geometry": {"type": "LineString",
+                         "coordinates": [[round(x, 5), round(y, 5)]
+                                         for x, y in g["coordinates"]]},
+            "properties": {"major": rc in ("Primary", "Arterial", "Ramp")},
+        })
+    return {"type": "FeatureCollection", "features": feats}
+
+
 @lru_cache
 def _open_space() -> dict | None:
     """Public parks, for map context (Prayer Walk map system, docs/20 §3).
@@ -163,6 +227,7 @@ def progress_map(db: Session = Depends(get_db), _: bool = Depends(geometry_or_40
         "features": feats,
         "boundary": _boundary(),
         "open_space": _open_space(),
+        "context": _context_roads(),
         "excludes": ["household points", "residential addresses",
                      "per-segment household counts", "participant identity",
                      "parallel campus walkways (ALTERNATIVE)",
