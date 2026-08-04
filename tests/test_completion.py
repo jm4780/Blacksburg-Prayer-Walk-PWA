@@ -9,6 +9,7 @@ from __future__ import annotations
 import pytest
 
 from .conftest import DOWNTOWN, auth, network_version, register
+from .test_privacy import MAP_FEATURE_PROPERTIES
 
 
 @pytest.fixture(scope="module")
@@ -294,7 +295,10 @@ def test_reservations_never_expose_who_holds_them(client, h):
     # map telling you what it leaves out. Assert on the features themselves.
     assert "participant" not in str(body["features"]).lower()
     for f in body["features"]:
-        assert set(f["properties"]) == {"id", "name", "kind", "done", "held"}
+        # One allow-list, defined once. This assertion is about identity never
+        # leaking through a map feature; what the permitted set *is* belongs with
+        # the other privacy guarantees, not duplicated here where it would drift.
+        assert set(f["properties"]) == MAP_FEATURE_PROPERTIES
     client.post(f"/api/walks/{w['id']}/discard", headers=h)
 
 

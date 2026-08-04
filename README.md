@@ -20,6 +20,7 @@ starts. Pray while walking. Confirm the streets covered. Watch the town fill in.
 | 3.1 | Pilot deployment + campus validation | ✅ Complete |
 | 3.5 | Product realignment: real map, time slider, mission recommendations | ✅ Complete |
 | 3.6 | Dashboard rebuilt from the approved visual direction ("Mission control") | ✅ Complete |
+| 3.7 | The Prayer Walk map design system — a self-hosted cartography | ✅ Complete |
 | 4 | Pilot (3–5 people) | **GO** — **public release still blocked on licensing gate G1** |
 
 **Canonical network `v1.3` · `bbg-net-v1.3-e1284e6001ff54f5` · routing engine `2.1.1`**
@@ -78,7 +79,9 @@ api/routing/ the routing engine (cluster-first -> GRASP -> local search) and
              mission discovery, both domain-neutral — no prayer concepts below here
 api/app/     FastAPI: identity, missions, route generation, walks, reservations,
              progress, admin. Every prayer-specific word in the product lives here.
-web/         React + TypeScript + Vite PWA, mobile-first, MapLibre GL
+web/         React + TypeScript + Vite PWA, mobile-first
+web/src/map/ the Prayer Walk map design system — tokens, contexts, layer order.
+             No vendor basemap: the town is drawn from its own network (docs/20)
 docs/        every decision, with the evidence for it
 ```
 
@@ -101,7 +104,8 @@ docs/        every decision, with the evidence for it
 - [`docs/16-try-it-on-your-phone.md`](docs/16-try-it-on-your-phone.md) — no-experience-needed guide to trying it on a phone via GitHub Codespaces.
 - [`docs/17-mission-planning-review.md`](docs/17-mission-planning-review.md) — engineering review of the mission-planning realignment.
 - [`docs/18-phase-3-5-mission-build.md`](docs/18-phase-3-5-mission-build.md) — the real map, the time slider, mission recommendations, before/after screenshots, known limitations.
-- [`docs/19-dashboard-mission-control.md`](docs/19-dashboard-mission-control.md) — **current**: the Dashboard rebuilt from the approved design, the town map absorbed into it, and the follow-ups it created.
+- [`docs/19-dashboard-mission-control.md`](docs/19-dashboard-mission-control.md) — the Dashboard rebuilt from the approved design, the town map absorbed into it, and the follow-ups it created.
+- [`docs/20-map-design-system.md`](docs/20-map-design-system.md) — **current**: the cartographic language. No basemap — Blacksburg is drawn from its own network. Specimen sheet at `#/map-system`.
 
 ## Two things to know before deploying
 

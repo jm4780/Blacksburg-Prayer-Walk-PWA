@@ -97,8 +97,14 @@ async function mapReady(timeout = 30000) {
 async function mapHasSegments(timeout = 40000) {
   await mapReady(timeout)
   await page.waitForFunction(() => {
-    try { return window.__bpwMap.querySourceFeatures('segments').length > 0 }
-    catch { return false }
+    // The map system renames sources; screens not yet migrated still use the old id.
+    try {
+      const m = window.__bpwMap
+      for (const id of ['pw-segments', 'segments']) {
+        try { if (m.querySourceFeatures(id).length > 0) return true } catch {}
+      }
+      return false
+    } catch { return false }
   }, null, { timeout })
 }
 
@@ -128,7 +134,7 @@ check('and are never claimed as the reader\'s own',
 // The town map is part of this screen now, not a place you navigate to.
 await mapHasSegments()
 const townDrawn = await page.evaluate(
-  () => window.__bpwMap.querySourceFeatures('segments').length)
+  () => window.__bpwMap.querySourceFeatures('pw-segments').length)
 check('the town map is embedded in the dashboard', townDrawn > 100, `${townDrawn}`)
 check('no separate progress destination is offered',
   await page.getByRole('button', { name: /progress map/i }).count() === 0
@@ -376,7 +382,7 @@ check('percentage prayed through went up', endPct > startPct, `${startPct}% -> $
 log('\n     the town map, in place (§16)')
 await mapHasSegments()
 const required = await page.evaluate(
-  () => window.__bpwMap.querySourceFeatures('segments').length)
+  () => window.__bpwMap.querySourceFeatures('pw-segments').length)
 check('the map renders required geometry', required > 100, `${required} features`)
 const legend = await page.locator('.dash-legend').first().innerText()
 check('legend explains the treatment',

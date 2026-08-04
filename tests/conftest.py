@@ -54,6 +54,11 @@ def client(request):
         c._db_path = path
         yield c
 
+    # And again on the way out. `network_service()` is lru_cached and shared across
+    # modules, so a slate cached under one module's database can key identically under
+    # the next one's — same network id, same empty-state fingerprint — and be served
+    # against a database that knows nothing about it.
+    mission_service.invalidate()
     os.unlink(path)
 
 

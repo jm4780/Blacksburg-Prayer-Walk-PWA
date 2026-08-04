@@ -40,6 +40,8 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 // the worker itself imports, which a plain `?url` copy would leave dangling — and
 // hands back the hashed path to give MapLibre.
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
+import { CONTEXTS, type MapContext, baseStyle, prayerLayers } from '../map/style'
+import { MOTION } from '../map/tokens'
 import type { LineString } from '../types'
 
 mlConfig.WORKER_URL = workerUrl
@@ -56,6 +58,11 @@ export interface SegmentFeature {
   id: string
   coordinates: [number, number][]
   state: 'done' | 'todo' | 'held' | 'planned' | 'selected' | 'removed' | 'added'
+  /** Drives the width ramp. Road class may only nudge — see src/map/tokens.ts. */
+  roadClass?: string | null
+  pathType?: string | null
+  /** Drives labels, which appear only for mission and covered streets. */
+  name?: string | null
 }
 
 interface Props {
@@ -65,6 +72,11 @@ interface Props {
   onSegmentTap?: (id: string) => void
   /** Tap anywhere to choose a point. Used by the "start from here" picker. */
   onMapTap?: (p: { lat: number; lon: number }) => void
+  /** Public open space and the town outline, when the context draws them. */
+  parks?: any
+  boundary?: any
+  /** Pre-system rendering, for screens not yet migrated to a map context. */
+  theme?: 'light' | 'dark'
   height?: number | string
   /**
    * What to frame, when that is not the drawn content. Editing a walk shows the whole
@@ -80,12 +92,12 @@ interface Props {
    */
   controls?: boolean
   /**
-   * `dark` matches the approved design's map treatment: solid green for covered
-   * ground, dashed grey for what is still to walk, on a dark panel. The distinction
-   * is not only colour — dashed vs solid survives being printed, being screenshotted
-   * in greyscale, and the ~8% of men who will not reliably separate those two hues.
+   * Which of the map system's six contexts this is. Governs weights, labels, controls,
+   * tap targets and how much unwalked ground is let through — see src/map/style.ts.
+   * Omitted, the map falls back to the pre-system light rendering used by the screens
+   * that have not been migrated yet.
    */
-  theme?: 'light' | 'dark'
+  context?: MapContext
   ariaLabel: string
 }
 
@@ -129,9 +141,12 @@ const FALLBACK_BG = { light: '#f2f1ec', dark: '#1B1F22' }
 
 export default function MapView({
   route, segments, start, onSegmentTap, onMapTap, height = 340, fitTo = null,
-  editing = false, theme = 'light', controls = true, ariaLabel,
+  editing = false, theme = 'light', controls = true, context, parks, boundary,
+  ariaLabel,
 }: Props) {
-  const palette = theme === 'dark' ? DARK_COLORS : COLORS
+  const spec = context ? CONTEXTS[context] : null
+  const dark = Boolean(context) || theme === 'dark'
+  const palette = dark ? DARK_COLORS : COLORS
   const container = useRef<HTMLDivElement>(null)
   const map = useRef<MLMap | null>(null)
   const [ready, setReady] = useState(false)
@@ -145,18 +160,24 @@ export default function MapView({
   const fittedKey = useRef<string>('')
   // The map is created once, in an effect with no dependencies, but the failure
   // handlers inside it fire later and need the current theme.
-  const themeRef = useRef(theme)
-  themeRef.current = theme
+  const themeRef = useRef<'light' | 'dark'>(dark ? 'dark' : 'light')
+  themeRef.current = dark ? 'dark' : 'light'
+  const specRef = useRef(spec)
+  specRef.current = spec
   const controlsRef = useRef(controls)
-  controlsRef.current = controls
+  controlsRef.current = spec ? spec.controls : controls
 
   // ---------------------------------------------------------------- lifecycle
   useEffect(() => {
     if (!container.current || map.current) return
     const bornDead = basemapKnownDead
+    // With a map context, there is no basemap to fetch: Blacksburg is drawn from our
+    // own network, so the style is complete before the first frame and there is no
+    // tile host to fail. That is the point of the system, not a side effect.
     const m = new MLMap({
       container: container.current,
-      style: bornDead ? fallbackStyle(themeRef.current) : STYLE_URL,
+      style: specRef.current ? baseStyle()
+        : bornDead ? fallbackStyle(themeRef.current) : STYLE_URL,
       center: BLACKSBURG,
       zoom: 12,
       attributionControl: { compact: true },
@@ -174,8 +195,8 @@ export default function MapView({
 
     // A style that never arrives would otherwise leave a blank screen with a route
     // that never draws, because the layers are added on 'load'.
-    if (bornDead) setBasemapFailed(true)
-    const failTimer = bornDead ? 0 : window.setTimeout(() => {
+    if (bornDead && !specRef.current) setBasemapFailed(true)
+    const failTimer = (bornDead || specRef.current) ? 0 : window.setTimeout(() => {
       if (!m.isStyleLoaded()) {
         basemapKnownDead = true
         setBasemapFailed(true)
@@ -230,7 +251,13 @@ export default function MapView({
       features: (segments ?? []).map((s) => ({
         type: 'Feature' as const,
         id: s.id,
-        properties: { id: s.id, state: s.state, color: palette[s.state] },
+        properties: {
+          id: s.id, state: s.state, color: palette[s.state],
+          // The system's width ramp and label filter read these.
+          road_class: s.roadClass ?? null,
+          path_type: s.pathType ?? null,
+          name: s.name ?? null,
+        },
         geometry: { type: 'LineString' as const, coordinates: s.coordinates },
       })),
     }
@@ -239,6 +266,38 @@ export default function MapView({
       features: route
         ? [{ type: 'Feature' as const, properties: {}, geometry: route }]
         : [],
+    }
+
+    if (spec) {
+      // --- the Prayer Walk map system -----------------------------------------
+      upsertSource(m, 'pw-segments', segFC)
+      upsertSource(m, 'pw-route', routeFC)
+      upsertSource(m, 'pw-parks', parks ?? { type: 'FeatureCollection', features: [] })
+      upsertSource(m, 'pw-boundary', boundary
+        ? { type: 'Feature', properties: {}, geometry: boundary }
+        : { type: 'FeatureCollection', features: [] })
+      upsertSource(m, 'startpt', {
+        type: 'FeatureCollection',
+        features: start
+          ? [{ type: 'Feature', properties: {},
+               geometry: { type: 'Point', coordinates: [start.lon, start.lat] } }]
+          : [],
+      })
+      for (const layer of prayerLayers(context!)) {
+        if (!m.getLayer(layer.id)) m.addLayer(layer)
+      }
+      if (!m.getLayer('start-dot')) {
+        m.addLayer({
+          id: 'start-dot', type: 'circle', source: 'startpt',
+          paint: {
+            // The one saturated mark on the map. A point, never a line — it cannot
+            // be mistaken for a street, and it carries further than colour on a line.
+            'circle-radius': 5.5, 'circle-color': '#E4712C',
+            'circle-stroke-width': 2.5, 'circle-stroke-color': '#0D1113',
+          },
+        })
+      }
+      return
     }
 
     upsertSource(m, 'segments', segFC)
@@ -270,7 +329,7 @@ export default function MapView({
     // contradicts the percentage sitting above it. Covered ground is drawn heavy,
     // lit from beneath by a soft halo; everything else recedes to a thin dashed
     // context layer.
-    if (theme === 'dark' && m.getLayer('segments-todo-dash') === undefined) {
+    if (dark && m.getLayer('segments-todo-dash') === undefined) {
       m.addLayer({
         id: 'segments-todo-dash', type: 'line', source: 'segments',
         filter: ['==', ['get', 'state'], 'todo'],
@@ -298,7 +357,7 @@ export default function MapView({
       m.addLayer({
         id: 'route-line', type: 'line', source: 'route',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': theme === 'dark' ? '#5E9B7E' : '#1f3d2b',
+        paint: { 'line-color': dark ? '#5E9B7E' : '#1f3d2b',
                  'line-width': 5, 'line-opacity': 0.95 },
       })
     }
@@ -314,14 +373,14 @@ export default function MapView({
       m.addLayer({
         id: 'start-dot', type: 'circle', source: 'startpt',
         paint: {
-          'circle-radius': 8, 'circle-color': theme === 'dark' ? '#E4712C' : '#b5801f',
+          'circle-radius': 8, 'circle-color': dark ? '#E4712C' : '#b5801f',
           'circle-stroke-width': 3,
-          'circle-stroke-color': theme === 'dark' ? '#14171A' : '#fff',
+          'circle-stroke-color': dark ? '#14171A' : '#fff',
         },
       })
     }
   }, [ready, styleEpoch, routeKey, segKey, start?.lat, start?.lon, segments, route,
-      start, theme, palette])
+      start, dark, palette, context])
 
   // -------------------------------------------------------------------- taps
   useEffect(() => {
@@ -330,8 +389,9 @@ export default function MapView({
     const handler = (e: any) => {
       // A segment hit wins over a bare map tap: on the picker there are no segment
       // layers, and where both exist the street is the more specific answer.
-      if (onSegmentTap && m.getLayer('segments-hit')) {
-        const hits = m.queryRenderedFeatures(e.point, { layers: ['segments-hit'] })
+      const hitLayer = specRef.current ? 'pw-hit' : 'segments-hit'
+      if (onSegmentTap && m.getLayer(hitLayer)) {
+        const hits = m.queryRenderedFeatures(e.point, { layers: [hitLayer] })
         if (hits.length) { onSegmentTap(String(hits[0].properties?.id)); return }
       }
       if (onMapTap) onMapTap({ lat: e.lngLat.lat, lon: e.lngLat.lng })
@@ -356,15 +416,15 @@ export default function MapView({
       // Generous bottom padding on the light screens: the mission card sits over the
       // map on a phone. The dashboard panel is short and wide and the map is the
       // content, so it fills the frame instead of floating in the middle of it.
-      padding: theme === 'dark'
+      padding: dark
         ? { top: 10, bottom: 10, left: 10, right: 10 }
         : { top: 48, bottom: 72, left: 40, right: 40 },
       // Editing needs streets far enough apart to tell one from another.
-      maxZoom: editing ? 17.5 : 16,
-      duration: animate ? 500 : 0,
+      maxZoom: spec ? spec.maxZoom : editing ? 17.5 : 16,
+      duration: animate ? MOTION.cameraMs : 0,
     })
     setUserMoved(false)
-  }, [route, segments, start, editing, fitTo, theme])
+  }, [route, segments, start, editing, fitTo, dark, spec])
 
   useEffect(() => {
     if (!ready) return
@@ -376,7 +436,7 @@ export default function MapView({
   }, [ready, fitKey, routeKey, segKey, fit, userMoved])
 
   return (
-    <div className={theme === 'dark' ? 'mapwrap dark' : 'mapwrap'} style={{ height }}>
+    <div className={dark ? 'mapwrap dark' : 'mapwrap'} style={{ height }}>
       <div ref={container} className="maplibre" role="application"
            aria-label={ariaLabel} data-ready={ready ? 'true' : 'false'} />
       <button type="button" className="map-recenter" onClick={() => fit(true)}

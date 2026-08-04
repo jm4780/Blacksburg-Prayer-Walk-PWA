@@ -19,6 +19,7 @@ import Admin from './screens/Admin'
 import Confirm from './screens/Confirm'
 import Dashboard from './screens/Dashboard'
 import Generate from './screens/Generate'
+import MapSystem from './screens/MapSystem'
 import Mission from './screens/Mission'
 
 export type Nav = (route: string) => void
@@ -86,6 +87,9 @@ export default function App() {
   )
 
   const screen = (() => {
+    // The map system's specimen sheet. Not in any navigation — a reference for
+    // whoever is working on the cartography, not a screen for walkers.
+    if (route.startsWith('/map-system')) return <MapSystem />
     if (route.startsWith('/mission')) {
       return <Mission nav={nav} me={me} onIdentity={adopt} onWalk={setWalk} />
     }
@@ -115,6 +119,7 @@ export default function App() {
   // Mission control is full-bleed by design: it owns the whole viewport and carries
   // its own header. The shared chrome would sit on top of it.
   const bare = route === '/' || route === '' || route.startsWith('/progress')
+    || route.startsWith('/map-system')
   if (bare) return <><main>{screen}</main><BuildBadge /></>
 
   return (

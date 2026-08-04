@@ -62,7 +62,10 @@ export default function Dashboard({ nav, me, walk }: {
       id: f.properties.id,
       coordinates: f.geometry.coordinates,
       state: f.properties.done ? 'done' : f.properties.held ? 'held' : 'todo',
-    })), [map])
+      roadClass: (f.properties as any).road_class ?? null,
+      pathType: (f.properties as any).path_type ?? null,
+      name: f.properties.name ?? null,
+    } as SegmentFeature)), [map])
 
   // Point the map at the progress, pulled back until it is clearly a minority of the
   // view. See progressFrame.ts for why neither "whole town" nor "tight on covered"
@@ -145,8 +148,8 @@ export default function Dashboard({ nav, me, walk }: {
             <p>{mapBlocked}</p>
           </div>
         ) : (
-          <MapView segments={segments} theme="dark" height="100%"
-                   fitTo={frame} controls={false}
+          <MapView segments={segments} context="town" height="100%"
+                   fitTo={frame} parks={map?.open_space} boundary={map?.boundary}
                    ariaLabel={`Town progress map: ${milesDone} of ${milesTotal} miles prayed for`} />
         )}
         <div className="dash-legend">
@@ -231,7 +234,8 @@ export default function Dashboard({ nav, me, walk }: {
       {expanded && (
         <div className="dash-expand" role="dialog" aria-modal="true"
              aria-label="Town progress map">
-          <MapView segments={segments} theme="dark" height="100%"
+          <MapView segments={segments} context="atlas" height="100%"
+                   parks={map?.open_space} boundary={map?.boundary}
                    ariaLabel="Town progress map, expanded" />
           <div className="dash-legend expanded">
             <span><i className="lg-done" /> Covered</span>

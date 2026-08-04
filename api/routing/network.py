@@ -92,6 +92,11 @@ class Segment:
     # Town neighbourhood this segment sits in. Presentation only — see
     # pipeline/build/neighborhoods.py and docs/17 §7.
     neighborhood: str | None
+    # Cartography only. These drive the map's width ramp and nothing else: the routing
+    # engine has never consulted road class and must not start. Like `neighborhood`,
+    # they are outside the checksum, so v1.3 routes still replay. See docs/20 §4.
+    road_class: str | None
+    path_type: str | None
     is_derived: bool
     coords: list  # WGS84 [[lon,lat],...] for visualisation only
     # [(canonical segment id, fraction of it this walkway runs alongside)]. Non-empty
@@ -204,6 +209,8 @@ def load(date: str = "2026-08-03", quiet: bool = False) -> Network:
             campus_corridor=p.get("campus_corridor"),
             connector_class=p.get("connector_class"),
             neighborhood=p.get("neighborhood"),
+            road_class=p.get("road_class"),
+            path_type=p.get("path_type"),
             is_derived=p["source"]["dataset"] == "DERIVED",
             coords=g["coordinates"] if g["type"] == "LineString" else [],
             satisfies=list(p.get("satisfies") or []),

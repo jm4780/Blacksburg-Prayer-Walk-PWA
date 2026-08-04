@@ -68,10 +68,36 @@ def responses(client, h, admin_h):
 
 
 # ----------------------------------------------------- structural expectations
-def test_map_features_carry_only_five_properties(client, h):
+# Exactly what a map feature may carry. An allow-list, not a deny-list: a new field
+# added to Segment must be argued for here before it can reach the browser, rather
+# than arriving by accident because nobody thought to forbid it.
+#
+# `road_class` and `path_type` were admitted for the map design system's width ramp
+# (docs/20 §4). Both describe a public road's classification — Arterial, Local, Trail,
+# Sidewalk. Neither is residential, neither identifies anybody, and neither is derived
+# from the address data.
+MAP_FEATURE_PROPERTIES = {"id", "name", "kind", "done", "held",
+                          "road_class", "path_type"}
+
+
+def test_map_features_carry_only_permitted_properties(client, h):
     body = client.get("/api/progress/map", headers=h).json()
     for f in body["features"]:
-        assert set(f["properties"]) == {"id", "name", "kind", "done", "held"}
+        assert set(f["properties"]) == MAP_FEATURE_PROPERTIES
+
+
+def test_open_space_carries_no_attributes_at_all(client, h):
+    """Parks are drawn as ground, so they need geometry and nothing else.
+
+    The source carries owner type, acreage and identifiers. None of it is rendered,
+    so none of it is published — the shape is the whole contribution.
+    """
+    body = client.get("/api/progress/map", headers=h).json()
+    space = body.get("open_space")
+    if space is None:
+        return  # snapshot absent in this environment; nothing to leak
+    for f in space["features"]:
+        assert f["properties"] == {}, f["properties"]
 
 
 def test_map_never_carries_a_household_count(client, h):

@@ -37,6 +37,54 @@ router = APIRouter(prefix="/api/progress", tags=["progress"])
 
 
 @lru_cache
+def _open_space() -> dict | None:
+    """Public parks, for map context (Prayer Walk map system, docs/20 §3).
+
+    Only Town-owned open space — 96 of the 375 polygons in the source. The rest are
+    HOA and privately owned, which are neither places a walker may go nor things
+    worth drawing on a map about public streets.
+
+    Simplified hard on the way out. This is a background wash at town scale, not a
+    parcel boundary: full precision would triple the payload to render a shape nobody
+    reads. Same snapshot-at-runtime rule as the boundary below — never committed.
+    """
+    import glob
+
+    from ...routing import network as net_mod
+    root = os.path.join(os.path.dirname(net_mod.OUT_ROOT), "snapshots", "openspace")
+    files = sorted(glob.glob(os.path.join(root, "*.geojson")))
+    if not files:
+        return None
+
+    def thin(ring: list) -> list:
+        out = [[round(x, 5), round(y, 5)] for i, (x, y) in enumerate(ring)
+               if i % 3 == 0 or i == len(ring) - 1]
+        # A ring with fewer than four points is not a polygon any more.
+        return out if len(out) >= 4 else [[round(x, 5), round(y, 5)] for x, y in ring]
+
+    try:
+        with open(files[-1]) as f:
+            fc = json.load(f)
+        feats = []
+        for feat in fc.get("features", []):
+            if not str((feat.get("properties") or {}).get("Type", "")).startswith("Town"):
+                continue
+            g = feat.get("geometry") or {}
+            t = g.get("type")
+            if t == "Polygon":
+                coords = [thin(r) for r in g["coordinates"]]
+            elif t == "MultiPolygon":
+                coords = [[thin(r) for r in poly] for poly in g["coordinates"]]
+            else:
+                continue
+            feats.append({"type": "Feature", "properties": {},
+                          "geometry": {"type": t, "coordinates": coords}})
+        return {"type": "FeatureCollection", "features": feats} if feats else None
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+@lru_cache
 def _boundary() -> dict | None:
     """The town outline, for map context (§16).
 
@@ -99,6 +147,10 @@ def progress_map(db: Session = Depends(get_db), _: bool = Depends(geometry_or_40
                 "name": s.display_name,
                 "kind": ("CAMPUS" if s.campus_obligation == "CANONICAL"
                          else s.segment_type),
+                # Cartography, not routing: the map system's width ramp and label
+                # filter read these. See docs/20 §4.
+                "road_class": s.road_class,
+                "path_type": s.path_type,
                 "done": s.id in done,
                 # "held" carries no identity — §12 forbids exposing who holds it.
                 "held": s.id in held and s.id not in done,
@@ -110,6 +162,7 @@ def progress_map(db: Session = Depends(get_db), _: bool = Depends(geometry_or_40
         "network_version": ns.manifest["canonical_network_version"],
         "features": feats,
         "boundary": _boundary(),
+        "open_space": _open_space(),
         "excludes": ["household points", "residential addresses",
                      "per-segment household counts", "participant identity",
                      "parallel campus walkways (ALTERNATIVE)",

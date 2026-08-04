@@ -124,6 +124,8 @@ export interface ProgressMap {
   network_version: string
   features: ProgressFeature[]
   boundary: { type: 'MultiLineString'; coordinates: [number, number][][] } | null
+  /** Public parks, drawn as quiet ground by the map system (docs/20 §3). */
+  open_space: { type: 'FeatureCollection'; features: any[] } | null
   excludes: string[]
 }
 
