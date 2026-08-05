@@ -91,105 +91,124 @@ at load time, in `MapView`:
 
 ```
 bg-land, bg-forest, bg-water, bg-waterway, bg-rail
-  pw-parks                        <- town open space, under the roads
+  pw-parks                        <- town open space, under the roads and the plate
 bg-road-{minor,secondary,primary,trunk,motorway}
-  pw-remaining, pw-held, pw-covered, pw-assigned   <- above every ground line
 bg-waterway-label, bg-road-shield, bg-place-*      <- basemap labels
-  pw-labels, pw-hit                                <- the mission's own names, on top
+bg-town-line, bg-town-edge                         <- the frame
+bg-stage, bg-emphasis                              <- the plate, then the darkening
+  pw-remaining, pw-held, pw-covered, pw-assigned   <- above the entire basemap
+  pw-labels, pw-hit
 ```
 
 Parks slide in under the roads, because a park drawn over a street is a park that has
-erased a street. Prayer lines go above every basemap line but below its labels, so
-CHRISTIANSBURG is never struck through by a street somebody walked. The mission's own
-labels stay on top of everything.
+erased a street — and because that also puts them under the plate, so open space inside
+the town is lifted with the ground it sits on. Everything else the mission owns goes on
+top of the whole basemap, emphasis included; see "Nothing on the ground may reach the
+mission" below for why that is not negotiable.
 
 With the archive live, `pw-context` — the 1,102 town roads the previous cut used as a
 stand-in basemap — is not drawn at all. The archive already carries them at the same
 luminance ramp, and drawing both would double the ink on exactly the layer that has to
 stay quietest. That layer is now the fallback, not the basemap.
 
-### Emphasis
+### Emphasis — three levels
 
 The archive is one corpus, drawn one way, everywhere. That is exactly what makes it
-read as a real place — and it is also why the first version of it had no centre. The
-eye wandered the surrounding road network instead of settling on Blacksburg.
+read as a real place, and it is also why it had no centre. Two rounds of fixing that
+by darkening the region got the eye to stop wandering, but left the map with only two
+levels: a quiet world and a bright overlay. Blacksburg itself had no level of its own —
+only an absence around it, and **an absence is not a place.**
 
-The fix is emphasis, not content. A neutral near-black, `#070707`, at up to 22% alpha,
-feathered across the town boundary. Nothing is filtered, hidden, restyled or moved.
+There are three now:
 
-Three decisions carry it.
+| | | |
+|---|---|---|
+| **03 — the prayer overlay** | untouched | every emphasis layer sits below it |
+| **02 — the mission area** | **+10.5%** | the same archive, on a plate |
+| **01 — the surrounding world** | **−40.6%** | the same archive, quieter |
 
-**It follows the municipal limits, not a shape drawn around them.** The first cut used
-an ellipse, reasoning that washing the town line would draw the town line. That was
-wrong twice over. An ellipse cannot follow a town 9 km across and 10 km tall with a
-notch out of its south-west corner, so the wash arrived early on some sides and late on
-others; and a falloff four kilometres wide has no edge to draw, whatever shape it
-starts from. The boundary is the honest centre line.
+Inside-to-outside went from 1.44 to **2.67**.
 
-**The boundary is public domain, not the town's own GIS.** USGS GovtUnit —
-`GU_IncorporatedPlace`, Census-sourced, 51.35 km². This repository is public and G1
-forbids redistributing Town of Blacksburg geometry, so the federal copy is what gets
-checked in. It is also the *correct* boundary: the municipal limits rather than the
-extent of the obligation, which are not the same thing.
+**One field, read in both directions.** `pipeline/basemap/emphasis.py` emits a
+signed-distance field around the municipal line and hangs two values off every band:
+`a`, how much the ground is darkened, and `l`, how much it is lifted. Two fill layers,
+one geometry, and the crossing between them centred on the boundary rather than either
+side of it.
 
-**It darkens by compositing, not by restyling.** Alpha blending moves every colour the
-same fraction toward the wash, so one number produces all three effects at once, and
-none can drift out of agreement with the others:
+The ramps are deliberately different widths, and the town's own shape is why. It is
+51 km² of sprawl, not a blob — erode it 2 km and 5 km² survives — so a lift that faded
+over kilometres would be a gradient with no shape to it. The plate therefore falls away
+over the last 600 m inside the line and is gone 150 m past it; the darkening starts at
+the line and takes 3.2 km to arrive. **Short plate, long falloff.**
 
-| | |
-|---|---|
-| darker | values fall |
-| lower contrast | differences between them fall by the same fraction |
-| less saturated | chroma collapses toward a neutral |
+Both ramps begin exactly on the line, and that is a correction. An earlier cut started
+the darkening 800 m inside, reasoning that a ramp beginning at the boundary would draw
+a border. Measured, it cost the town's outer kilometre 8.6% — the streets nearest the
+line were the dimmest part of the mission area, which is precisely backwards. Starting
+on the line costs nothing, because smootherstep has zero slope at both ends: **the
+boundary is the flattest point in the entire field**, the one place where nothing is
+changing.
 
-The ramp runs **800 m inside the line to 4 km outside it**, on a smootherstep. It
-starts inside on purpose: a ramp beginning exactly at the boundary would put its first
-millimetre on the municipal edge, which is how you accidentally draw a border. By the
-time it crosses, it is already underway, and there is no coincidence for the eye to
-find. The road ramp also came up about 7%, which is what lets the town read as
-*slightly richer* rather than merely less dimmed.
+**The plate is green-leaning, and that is the difference between a lift and a wash.**
+`#5F9B8A` at 2.4%. Lerping near-black ground toward a neutral grey raises it and
+bleaches it at once — measured, a grey plate took 7–10% of the ground's own saturation
+with it. A lift carrying more chroma than the ground it lands on leaves that alone.
+Inside the town, saturation now goes *up* 2–3%. That is what "richer" has to mean if
+it means anything.
 
-Measured on the rendered dashboard, interface masked, drawn ink only, banded by signed
-distance from the municipal line:
+Measured on the rendered dashboard, banded by signed distance from the line:
 
-| Distance from the town line | Change |
-|---|---|
-| inside, more than 2 km in | **+2.5%** |
-| inside, 1–2 km | +3.1% |
-| inside, 0–1 km | +3.0% |
-| **the line itself** | |
-| outside, 0–1 km | −1.0% |
-| outside, 1–2 km | −16.2% |
-| outside, 2–3 km | −26.9% |
-| outside, 3–4 km | **−35.7%** |
+| Distance from the town line | Luminance | Saturation |
+|---|---|---|
+| inside, more than 2 km in | **+14.2%** | +2.9% |
+| inside, 1–2 km | +10.3% | +2.9% |
+| inside, 0–1 km | +9.2% | +1.9% |
+| **the line** | | |
+| outside, 0–1 km | +6.8% | −1.7% |
+| outside, 1–2 km | −22.4% | −3.9% |
+| outside, 2–3 km | −39.3% | −9.2% |
+| outside, 3–4 km | **−43.7%** | −11.9% |
 
-Aggregate: the town **+2.9%**, everything beyond 2 km **−29.5%**, and the
-inside-to-outside ratio 1.44 → 2.09, a 46% increase. Saturation falls 3–6% in the outer
-bands and rises about 6% inside, so the region desaturates relative to the town as well
-as darkening.
+Isolated, the plate measures **exactly 0.0%** outside the line — no halo — and the
+frame moves the town by +0.4% and the region by nothing at all. The +6.8% in the first
+kilometre outside is the frame's own pixels inside a kilometre-wide band.
 
-The crossing itself is the point: **−1.0% in the first kilometre outside the line.**
-Whatever the map does at the boundary, it does not do it *at* the boundary.
+**The frame.** A 1.4 px hairline at 45% on the municipal line, plus a wide blurred
+inward-offset companion at 10% that reads as the edge of the plate rather than as a
+border. Neither is meant to be noticed; between them they are what stops the plate
+looking like a smudge.
 
-**The seam, measured.** Subtracting the two renders leaves only the wash — identical
-map underneath, so if following the town outline had made the outline traceable, it
-would show here and nothing could hide it. Across the dashboard the wash changes by
-0.011 levels per pixel on average and 0.109 at its steepest, east–west; 0.026 at its
-steepest north–south. A visible step needs about one level over a few pixels. Nine
-times below the threshold at the worst point, and that is a number rather than an
-opinion.
+### Nothing on the ground may reach the mission
 
-One number is worth knowing before touching this: the colour arithmetic says 22% alpha
-should take about 28% off a road, and the render says 30%. A thin line is mostly
-antialiased edge — partial blends sitting in the gamma part of the sRGB curve, where
-the same alpha costs more luminance than it does on either pure colour. **The map is
-made of thin lines, so the rendered number is the real one.** Re-measure on a render;
-do not recalculate.
+The plate and the darkening are the **last two layers of the basemap**, and every
+prayer layer is added above them. `basemap.test.ts` fails the build if that is ever not
+true, because it was not always true and the cost was not obvious.
 
-The wash is drawn twice, above the ground lines and above the basemap labels, because
-the prayer overlays are inserted between them. They are the one thing on the map it
-never touches — a walking view inside the town differs by 0.109 of one display level
-from the map before any of this existed.
+The previous order put the basemap's labels above the prayer lines, so a street
+somebody walked would never be drawn through CHRISTIANSBURG. But the emphasis has to
+sit above the labels to dim them — which put it above the prayer data too. Measured, a
+lift there costs the subject **3.7%** of its luminance and lifts remaining ground by
+**7.6%**: the prayer scale squeezed from both ends, in the one place the mission
+actually lives. A place name occasionally crossed by a street is a much smaller price.
+
+That reordering also uncovered a bug worth recording. The darkening used to be drawn
+**twice** — once over the ground, once over the labels, because the overlays were
+inserted between them. Two passes of 0.22 is one pass of 0.39, so the number in the
+file had never been the number on the screen. There is one pass now.
+
+And the same round found the measurement flattering itself: it chose which pixels to
+average separately for each image, so darkening quietly dropped the dimmest ones out of
+the "after" set and inflated the survivors. That is why an earlier round reported −29.5%
+for a region that had actually gone down 39.7%. **The mask is taken once, from the
+reference image, and applied to both.** Neither bug changed what shipped; both changed
+what was believed about it, which is worse.
+
+The road ramp also came back down. Lifting it 7% globally was how the town was made to
+read brighter before there was a plate to do it, and the cost was a lift the darkening
+then had to cancel — which it could not do in the first kilometre outside the line,
+where the darkening is deliberately near zero. That left a +12% ring of country around
+the town: a halo, built by accident. One mechanism for inside, one for outside, and
+neither fighting the other.
 
 ### Offline
 
@@ -246,16 +265,17 @@ anything on the ground rises above the dimmest prayer state.
 | Water | `#0E161B` | 0.0075 |
 | Rail | `#1A1F22`, dashed | 0.0117 |
 | Waterway | `#17222A` | 0.0144 |
-| Road — minor / tertiary / link | `#21282C` | 0.0202 |
-| Road — secondary | `#262E32` | 0.0260 |
-| Road — primary | `#2B3337` | 0.0316 |
-| Road — trunk | `#2F383C` | 0.0376 |
-| Road — motorway | `#343E43` | 0.0458 |
-| *(the same, outside the town, after the wash)* | | *0.0139 – 0.0316* |
+| Road — minor / tertiary / link | `#20262A` | 0.0186 |
+| Road — secondary | `#252C2F` | 0.0240 |
+| Road — primary | `#2A3134` | 0.0294 |
+| Road — trunk | `#2E3639` | 0.0352 |
+| Road — motorway | `#333C40` | 0.0416 |
+| *(the same, inside the town, on the plate)* | | *0.0210 – 0.0449* |
+| *(the same, out in the region)* | | *0.0121 – 0.0270* |
 | **`INK.remaining` — the dimmest prayer state** | `#4A5457` | **0.0849** |
 
-The top of the ground ramp sits a little over half the bottom of the prayer ramp — 1.85
-to 1, and 2.4 to 1 once the wash is on it. A six-lane interstate crossing the frame can
+The top of the ground ramp sits at about half the bottom of the prayer ramp — 2.0 to 1,
+1.9 to 1 even on the plate, and 3.1 to 1 out in the region. A six-lane interstate crossing the frame can
 therefore never out-rank a cul-de-sac somebody has prayed for, at any zoom, anywhere in
 the region. `basemap.test.ts` asserts it rather than trusting it.
 

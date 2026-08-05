@@ -1,11 +1,27 @@
-"""Generate the emphasis wash — web/public/basemap/emphasis.json.
+"""Generate the emphasis field — web/public/basemap/emphasis.json.
 
 The regional basemap is one corpus, drawn one way, everywhere. That is what makes it
 feel like a real place rather than a town with scenery glued around it, and it is not
-being changed. What this adds is *emphasis*: a falloff that lets the eye settle on
-Blacksburg without ever finding an edge to settle against.
+being changed. What this adds is *emphasis*: three levels where there were two.
 
-Three things about it are deliberate.
+    the surrounding world      the archive, darkened outward from the town
+    the mission area           the same archive, on a lifted plate
+    the prayer overlay         untouched, and still the brightest thing on the map
+
+The middle level is the one that was missing. Darkening the outside alone gives the
+town no stage of its own — only an absence around it — and an absence is not a place.
+So this file emits a signed-distance field around the municipal line and hangs two
+values off every band of it: `a`, how much the ground is darkened, and `l`, how much
+it is lifted. One geometry, two directions, and the crossing between them centred on
+the boundary rather than either side of it.
+
+The two ramps are deliberately different widths, and the town's own shape is why. It
+is 51 km2 of sprawl, not a blob: erode it by 2 km and only 5 km2 survives, so a lift
+that faded over kilometres would leave the plate a gradient with no shape to it. The
+lift therefore feathers over 1 km, centred on the line; the darkening keeps its 4.8 km.
+Short plate, long falloff.
+
+Three more things are deliberate.
 
   IT FOLLOWS THE TOWN, NOT A SHAPE DRAWN AROUND IT. The first cut used an ellipse,
   on the theory that washing the town limits would draw the town limits. That was
@@ -52,17 +68,44 @@ LAT0 = 37.2299
 KM_LAT = 110.57
 KM_LON = 111.32 * math.cos(math.radians(LAT0))
 
-# The falloff, in kilometres from the town boundary. Negative is inside.
+# --- the darkening, in kilometres from the town boundary. Negative is inside. ------
 #
-# It starts *inside* the line on purpose. If the wash began exactly at the boundary,
-# the outermost streets of Blacksburg would be the last fully-bright thing on the map
-# and the first millimetre of falloff would sit right on the municipal edge — which is
-# how you accidentally draw a border. Starting 800 m in means the ramp is already
-# underway when it crosses, and there is no coincidence for the eye to find.
-INNER_KM = -0.8
-# Four kilometres past the line. At the dashboard's framing that is the full width of
-# the visible country to the east and west, and it keeps going beyond the frame.
-OUTER_KM = 4.0
+# Both ramps now begin exactly on the line, and that is a correction. An earlier cut
+# started the darkening 800 m inside it, reasoning that a ramp beginning at the
+# boundary would put its first millimetre on the municipal edge and accidentally draw
+# a border. Measured, that cost the town's outer kilometre 8.6% — the streets closest
+# to the line were the dimmest part of the mission area, which is precisely backwards.
+#
+# Starting on the line costs nothing, because smootherstep has zero slope at both of
+# its ends: the boundary is the flattest point in the entire field, the one place
+# where nothing is changing. There is no coincidence for the eye to find because
+# there is no change there to notice.
+INNER_KM = 0.0
+# Three point two kilometres past the line. It was four while the ramp still began
+# 800 m inside; moving the start onto the line pushed the whole curve outward and the
+# country two to three kilometres out came back 6 points brighter than the version
+# already approved. Shortening the reach by the same 800 m puts the shape back where
+# it was, without touching either end.
+OUTER_KM = 3.2
+
+# --- the plate --------------------------------------------------------------------
+#
+# The plate stops at the line, and that is the second correction this ramp has needed.
+# Letting it fade out over a kilometre of open country measured at +23.9% just outside
+# the boundary — the town wearing a halo, which is exactly what the brief rules out.
+# It now fades over the last 600 m inside and is gone 150 m past the line, so the only
+# thing beyond the boundary is the darkening.
+#
+# 750 m of feather is about 55 px at the dashboard's scale: soft enough to have no
+# edge, tight enough that the plate still has the town's shape. Blacksburg is 51 km2 of
+# sprawl — erode it 600 m and 28 km2 survives — so more than half the town sits at full
+# lift and the rest is the plate's own edge.
+LIFT_FROM = -0.6
+LIFT_TO = 0.15
+# How much the ground under the town comes up. This is a lerp toward `stage` in the
+# style, so the number here is only the ramp; the colour and its alpha live in
+# tokens.ts and blacksburg.json with everything else.
+LIFT = 1.0
 
 # Peak alpha of the wash, and the one number worth arguing about.
 #
@@ -72,17 +115,25 @@ OUTER_KM = 4.0
 # either pure colour. And the map is made of thin lines. So 0.125 calculated at -13%
 # and measured at -17.3%.
 #
-# 0.22 measures at about -30%, which is where "noticeably quieter" starts without the
-# region ceasing to read as the same map. Any change here should be re-measured on a
-# render, not recalculated — see docs/20 §2.
-ALPHA = 0.22
+# And a third thing made it lie, until it was caught: the wash used to be drawn twice,
+# once over the ground and once over the labels, because the prayer overlays were
+# inserted between them. Two passes of 0.22 is one pass of 0.39, so the number in this
+# file was never the number on the screen. Restructuring so the emphasis sits wholly
+# below the overlay left one pass, and the alpha had to come up to match what was
+# already shipped.
+#
+# 0.35 measures at -40%, which is the level already approved. It was 0.39 for as long
+# as the road ramp carried a global +7% lift; taking that back out (the plate does that
+# job now) deepened the region by five points on its own, and the alpha came down to
+# meet it. Any change here should be re-measured on a render, not recalculated —
+# see docs/20 §2.
+ALPHA = 0.35
 
-# Bands across the feather. The step that matters is the largest one, not the average:
-# smootherstep concentrates its change in the middle, so adjacent bands there differ by
-# about twice the mean. Thirty-two over 4.8 km puts the worst case near 0.3 of a display
-# level, spread over roughly 12 px at dashboard zoom. Cheap insurance — the whole file
-# is under 100 KB either way.
-BANDS = 32
+# Band spacing, in kilometres, outward from the line. The first stretch needs fine
+# steps because the lift does all of its work there; the far end of the darkening can
+# be coarse because smootherstep has almost flattened by then. Inside the line nothing
+# varies at all, so the whole town is a single feature.
+STEPS = [(-0.6, 0.6, 0.075), (0.6, 1.6, 0.15), (1.6, 3.2, 0.2)]
 
 # Simplification, in metres, at the inner and outer ends of the ramp. A ring four
 # kilometres out has been smoothed into near-circular arcs by the buffer itself and
@@ -133,46 +184,90 @@ def smootherstep(t):
     return t * t * t * (t * (t * 6 - 15) + 10)
 
 
+def distances():
+    """The signed distances at which rings are cut, inside to outside."""
+    out = []
+    for lo, hi, step in STEPS:
+        d = lo
+        while d < hi - 1e-9:
+            out.append(round(d, 4))
+            d += step
+    out.append(STEPS[-1][1])
+    return out
+
+
+def wash_at(d):
+    """How dark the ground is at signed distance `d` from the line."""
+    return ALPHA * smootherstep((d - INNER_KM) / (OUTER_KM - INNER_KM))
+
+
+def lift_at(d):
+    """How lifted it is. Full inside the plate, gone just outside it."""
+    return LIFT * (1.0 - smootherstep((d - LIFT_FROM) / (LIFT_TO - LIFT_FROM)))
+
+
 def build(src=None):
     town = to_km(load_boundary(src))
-    # Buffering a 1,757-point outline 20 times is the slow part; a light generalisation
-    # first costs nothing visible and makes it quick. 30 m, against a ramp 4.8 km wide.
+    # Buffering a 1,757-point outline forty times is the slow part; a light
+    # generalisation first costs nothing visible and makes it quick.
     town = town.simplify(0.03, preserve_topology=True)
 
+    ds = distances()
     rings = []
-    for i in range(BANDS + 1):
-        t = i / BANDS
-        dist = INNER_KM + (OUTER_KM - INNER_KM) * t
+    for d in ds:
+        # A ring 4 km out has been smoothed into near-circular arcs by the buffer
+        # itself and does not need the boundary's 1,757 points; the ones near the line
+        # carry the plate's shape and keep the most detail. Nothing here is ever drawn
+        # as a line, so the only cost of simplifying is where an invisible step sits.
+        t = (d - ds[0]) / (ds[-1] - ds[0])
         tol = (SIMPLIFY_M[0] + (SIMPLIFY_M[1] - SIMPLIFY_M[0]) * t) / 1000.0
-        # quad_segs is generous: the joins are what a viewer would notice first if the
-        # buffer were coarse, and they are free compared with the boundary itself.
-        g = town.buffer(dist, quad_segs=16, join_style=1).simplify(tol)
+        g = town.buffer(d, quad_segs=16, join_style=1).simplify(tol)
         if g.is_empty:
-            raise SystemExit(f'Ring at {dist:.2f} km collapsed — INNER_KM too negative')
+            raise SystemExit(f'Ring at {d:+.2f} km collapsed — the town is only '
+                             f'{town.area:.0f} km2 and much of it is narrow')
         rings.append(unary_union(g))
 
     features = []
-    for i in range(BANDS):
-        # Each band is an annulus: the next ring out, with this one taken out of it.
-        # Bands never overlap, so alpha never compounds and the ramp stays the ramp.
-        band = rings[i + 1].difference(rings[i])
-        if band.is_empty:
-            continue
-        alpha = ALPHA * smootherstep((i + 0.5) / BANDS)
-        features.append({
-            'type': 'Feature',
-            'properties': {'a': round(alpha, 4)},
-            'geometry': mapping(to_deg(band)),
-        })
 
-    # Everything beyond the feather, at full strength. Generous enough to cover the
-    # archive's own extent and then some: the wash must not run out before the map does.
+    def add(geom, d_mid):
+        if geom.is_empty:
+            return
+        props = {}
+        a = round(wash_at(d_mid), 4)
+        l = round(lift_at(d_mid), 4)
+        # Only carry a value where it does something. The style filters on presence,
+        # so a band with no lift costs nothing in the plate layer and vice versa.
+        if a > 0.0005:
+            props['a'] = a
+        if l > 0.0005:
+            props['l'] = l
+        if props:
+            features.append({'type': 'Feature', 'properties': props,
+                             'geometry': mapping(to_deg(geom))})
+
+    # The town's interior: one feature, full plate, no darkening. This is the part of
+    # the map the whole exercise is pointing at, and it is uniform on purpose.
+    add(rings[0], -1.0)
+
+    for i in range(len(ds) - 1):
+        # Each band is an annulus: the next ring out, with this one taken out of it.
+        # Bands never overlap, so neither value ever compounds.
+        add(rings[i + 1].difference(rings[i]), (ds[i] + ds[i + 1]) / 2)
+
+    # Everything beyond the ramp, at full darkening. Generous enough to cover the
+    # archive's own extent and then some: the field must not run out before the map does.
     from shapely.geometry import box
     world = box(-84.0, 34.0, -76.0, 40.5)
     features.append({
-        'type': 'Feature',
-        'properties': {'a': ALPHA},
+        'type': 'Feature', 'properties': {'a': ALPHA},
         'geometry': mapping(world.difference(to_deg(rings[-1]))),
+    })
+
+    # The line itself, for the frame. Simplified to 25 m: it is drawn under a pixel
+    # wide and every vertex beyond that is bytes nobody can see.
+    features.append({
+        'type': 'Feature', 'properties': {'kind': 'town'},
+        'geometry': mapping(to_deg(town.simplify(0.025).boundary)),
     })
     return {'type': 'FeatureCollection', 'features': features}
 
@@ -191,6 +286,10 @@ if __name__ == '__main__':
     fc = round_coords(build(sys.argv[1] if len(sys.argv) > 1 else None))
     with open(OUT, 'w') as f:
         json.dump(fc, f, separators=(',', ':'))
-    print(f'{OUT}  {len(fc["features"])} bands  '
-          f'alpha 0 -> {ALPHA}  {INNER_KM:+.1f} to {OUTER_KM:+.1f} km  '
+    n_a = sum(1 for f in fc['features'] if 'a' in f['properties'])
+    n_l = sum(1 for f in fc['features'] if 'l' in f['properties'])
+    print(f'{OUT}  {len(fc["features"])} features  '
+          f'({n_a} darkened, {n_l} lifted, 1 outline)  '
+          f'dark {INNER_KM:+.1f}..{OUTER_KM:+.1f} km to alpha {ALPHA}  '
+          f'lift {LIFT_FROM:+.1f}..{LIFT_TO:+.1f} km  '
           f'{os.path.getsize(OUT) / 1024:.0f} KB')

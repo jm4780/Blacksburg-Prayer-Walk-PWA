@@ -313,22 +313,27 @@ export default function MapView({
                geometry: { type: 'Point', coordinates: [start.lon, start.lat] } }]
           : [],
       })
-      // Where the mission sits inside the basemap's own stack. Parks slide in under
-      // the roads, because a park drawn over a street is a park that has erased a
-      // street; prayer lines go above every basemap line but below its labels, so
-      // CHRISTIANSBURG is never struck through by a street somebody walked. The
-      // mission's own labels and its tap targets stay on top of everything.
+      // Where the mission sits inside the basemap's own stack.
+      //
+      // Parks slide in under the roads, because a park drawn over a street is a park
+      // that has erased a street — and because that also puts them under the plate, so
+      // open space inside the town is lifted with the ground it sits on.
+      //
+      // EVERYTHING ELSE GOES ON TOP OF THE WHOLE BASEMAP, EMPHASIS INCLUDED. An
+      // earlier cut inserted the prayer lines below the basemap's labels, to stop a
+      // street somebody walked from being drawn through CHRISTIANSBURG. That was the
+      // wrong trade. The emphasis layers have to sit above the labels to dim them, so
+      // any order that puts labels above the prayer data puts the *emphasis* above it
+      // too — and measured, that costs the subject 3.7% of its luminance while lifting
+      // remaining ground by 7.6%, compressing the prayer scale exactly where the
+      // mission is. The overlay is the hero; nothing on the ground may touch it, and
+      // a name occasionally crossed by a street is a much smaller price.
       const stack = m.getStyle()?.layers ?? []
       const overRoads = stack.find((l) => l.id.startsWith('bg-road-'))?.id
-      const underLabels = stack.find(
-        (l) => l.type === 'symbol' && l.id.startsWith('bg-'))?.id
       const live = Boolean(m.getSource('bpw-base'))
       for (const layer of prayerLayers(context!, live)) {
         if (m.getLayer(layer.id)) continue
-        const before = layer.id === 'pw-parks' ? overRoads
-          : layer.type === 'symbol' || layer.id === 'pw-hit' ? undefined
-          : underLabels
-        m.addLayer(layer, before)
+        m.addLayer(layer, layer.id === 'pw-parks' ? overRoads : undefined)
       }
       if (!m.getLayer('start-dot')) {
         m.addLayer({

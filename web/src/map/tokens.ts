@@ -73,15 +73,19 @@ export const GROUND = {
  * The road ramp is the load-bearing part. Five steps of luminance and nothing else —
  * no hue, no texture, no casing:
  *
- *     minor 0.020  <  secondary 0.026  <  primary 0.032  <  trunk 0.038
- *                                                       <  motorway 0.046
+ *     minor 0.019  <  secondary 0.024  <  primary 0.029  <  trunk 0.035
+ *                                                       <  motorway 0.042
  *
- * and the top of that ladder still sits at a little over half of `INK.remaining`
- * (0.085) — the dimmest prayer state. So a six-lane interstate crossing the frame can
- * never out-rank a cul-de-sac somebody has prayed for, at any zoom, anywhere in the
- * region. The ramp was lifted about 7% from its first cut, which is what lets the town
- * read as slightly richer than the country around it once the wash is applied to
- * everything else.
+ * and the top of that ladder sits at roughly half of `INK.remaining` (0.085) — the
+ * dimmest prayer state. So a six-lane interstate crossing the frame can never out-rank
+ * a cul-de-sac somebody has prayed for, at any zoom, anywhere in the region.
+ *
+ * These went up 7% for one round and have come back down. Lifting the whole ramp was
+ * how the town was made to read brighter before there was a plate to do it, and the
+ * cost was a global lift the wash then had to cancel — which it could not do in the
+ * first kilometre outside the line, where the wash is deliberately near zero. Measured,
+ * that left a +12% ring of country around the town: a halo, built by accident. One
+ * mechanism for inside, one for outside, and neither fighting the other.
  */
 export const BASEMAP = {
   /** National forest. Felt as a mass on the horizon, never read as a shape. */
@@ -92,11 +96,11 @@ export const BASEMAP = {
   /** Norfolk Southern through Christiansburg. Dashed, and almost gone. */
   rail: '#1A1F22',
   road: {
-    minor: '#21282C',
-    secondary: '#262E32',
-    primary: '#2B3337',
-    trunk: '#2F383C',
-    motorway: '#343E43',
+    minor: '#20262A',
+    secondary: '#252C2F',   // = GROUND.context
+    primary: '#2A3134',
+    trunk: '#2E3639',
+    motorway: '#333C40',    // = GROUND.contextMajor
   },
   /**
    * EMPHASIS, NOT CONTENT.
@@ -126,10 +130,58 @@ export const BASEMAP = {
    * The boundary is USGS GovtUnit — Census-sourced, public domain — not the town's own
    * GIS, so it can be checked in without tripping release gate G1 (docs/05).
    *
+   * The alpha reads high because it is honest. It used to be drawn twice — once over
+   * the ground, once over the labels, because the prayer overlays sat between them —
+   * so 0.22 in the file was 0.39 on the screen. There is one pass now, and the number
+   * says what it does.
+   *
    * Geometry: public/basemap/emphasis.json, from pipeline/basemap/emphasis.py.
    */
   wash: '#070707',
-  washAlpha: 0.22,
+  washAlpha: 0.35,
+  /**
+   * THE PLATE.
+   *
+   * The third level, and the one that was missing. Darkening the outside gives the
+   * town no stage of its own — only an absence around it — and an absence is not a
+   * place. This is the same field read the other way: a light neutral at 4% over
+   * everything inside the municipal line, so the ground the mission stands on comes up
+   * as the country around it goes down.
+   *
+   *     land   +14%     park  +12%     forest +13%
+   *     minor  +13%     motorway  +8%
+   *
+   * The colour is green-leaning rather than a neutral grey, and that is the difference
+   * between a lift and a wash. Lerping near-black ground toward a neutral raises it and
+   * bleaches it at the same time — measured, a grey plate took 7-10% of the ground's own
+   * saturation with it. A lift carrying more chroma than the ground it lands on leaves
+   * that alone, which is what "richer" has to mean if it means anything.
+   *
+   * It sits above the roads rather than under them, which is what lets the roads rise
+   * with the land instead of being left behind on a brightening plate. The cost is
+   * 17% of the road-against-land contrast (3.79 to 3.13) — the price of a lerp, and
+   * cheap against having a middle level at all.
+   *
+   * The lift feathers over 1 km against the darkening's 4.8. Blacksburg is 51 km2 of
+   * sprawl: erode it 2 km and 5 km2 is left, so a lift that faded over kilometres
+   * would be a gradient with no shape to it. Short plate, long falloff.
+   *
+   * BOTH OF THESE SIT BELOW EVERY PRAYER LAYER, and that is not a detail. Measured,
+   * a lift above the overlay costs the subject 3.7% and lifts remaining ground 7.6% —
+   * it compresses the prayer scale exactly where the mission is. See MapView.
+   */
+  stage: '#5F9B8A',
+  stageAlpha: 0.024,
+  /**
+   * The frame. Almost nothing: a hairline on the municipal line at 30% opacity, plus
+   * a wide, blurred, inward-offset companion at 10% that reads as the edge of the
+   * plate rather than as a border. Neither is meant to be noticed; between them they
+   * are what stops the plate from looking like a smudge.
+   */
+  line: '#39464C',
+  lineOpacity: 0.45,
+  edge: '#5C6D74',
+  edgeOpacity: 0.1,
   /**
    * Basemap labels are not the design system's labels. A street name on today's walk
    * is `LABELS.color` (0.55) because the walker is about to act on it; CHRISTIANSBURG

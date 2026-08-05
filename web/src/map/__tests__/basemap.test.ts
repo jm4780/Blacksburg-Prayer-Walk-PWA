@@ -97,31 +97,72 @@ describe('regional basemap style', () => {
     expect(JSON.stringify(style.sources)).not.toMatch(/OpenStreetMap/i)
   })
 
-  it('draws basemap labels below the prayer overlays in the stack', () => {
+  it('puts the emphasis last, so nothing on the ground can reach the mission', () => {
     const ids = style.layers.map((l: any) => l.id)
-    const firstSymbol = style.layers.findIndex((l: any) => l.type === 'symbol')
-    const lastLine = style.layers.map((l: any) => l.type).lastIndexOf('line')
-    // MapView inserts prayer lines before the first symbol layer; that only works if
-    // every ground line is below every ground label.
-    expect(lastLine).toBeLessThan(firstSymbol)
     expect(ids[0]).toBe('bg-land')
+    // MapView appends every prayer layer, so "last two" is the same statement as
+    // "below the overlay". A lift above the overlay measures at -3.7% on the subject
+    // and +7.6% on remaining ground, which is the prayer scale being squeezed from
+    // both ends — see the comment in MapView.
+    expect(ids.slice(-2)).toEqual(['bg-stage', 'bg-emphasis'])
+    // And every basemap label is below them, or the region's names would not dim
+    // with the region they name.
+    const lastSymbol = style.layers.map((l: any) => l.type).lastIndexOf('symbol')
+    expect(lastSymbol).toBeLessThan(ids.indexOf('bg-stage'))
   })
 
   // ------------------------------------------------------------ emphasis
   describe('the emphasis wash', () => {
     const ids = style.layers.map((l: any) => l.id)
-    const ground = style.layers.find((l: any) => l.id === 'bg-emphasis-ground')
-    const labels = style.layers.find((l: any) => l.id === 'bg-emphasis-labels')
+    const wash = style.layers.find((l: any) => l.id === 'bg-emphasis')
+    const stage = style.layers.find((l: any) => l.id === 'bg-stage')
 
     it('is one colour at one alpha, in the tokens and in the style', () => {
-      for (const l of [ground, labels]) {
-        expect(l.paint['fill-color']).toBe(BASEMAP.wash)
-        expect(l.paint['fill-opacity']).toEqual(['get', 'a'])
+      expect(wash.paint['fill-color']).toBe(BASEMAP.wash)
+      expect(wash.paint['fill-opacity']).toEqual(['get', 'a'])
+      expect(stage.paint['fill-color']).toBe(BASEMAP.stage)
+      expect(stage.paint['fill-opacity']).toEqual(['*', BASEMAP.stageAlpha, ['get', 'l']])
+      for (const l of [wash, stage]) {
         // Adjacent bands share an edge. Antialiasing each one draws a hairline at
-        // every seam, which is a set of concentric rings around Blacksburg — the
-        // exact thing the falloff exists to avoid.
+        // every seam, which is a set of contours around Blacksburg — the exact thing
+        // the falloff exists to avoid.
         expect(l.paint['fill-antialias']).toBe(false)
       }
+    })
+
+    it('draws the frame quietly enough to be felt rather than read', () => {
+      const line = style.layers.find((l: any) => l.id === 'bg-town-line')
+      const edge = style.layers.find((l: any) => l.id === 'bg-town-edge')
+      expect(line.paint['line-color']).toBe(BASEMAP.line)
+      expect(line.paint['line-opacity']).toBe(BASEMAP.lineOpacity)
+      expect(edge.paint['line-color']).toBe(BASEMAP.edge)
+      expect(edge.paint['line-opacity']).toBe(BASEMAP.edgeOpacity)
+      // Effective luminance over land, which is what the eye actually gets. It has to
+      // stay under the dimmest prayer state or the frame outranks the mission.
+      const land = luminance(GROUND.land)
+      const seen = land + (luminance(BASEMAP.line) - land) * BASEMAP.lineOpacity
+      expect(seen).toBeLessThan(luminance(INK.remaining) * 0.5)
+      // Offset inward, so the soft half reads as the plate's edge, not as a halo.
+      expect(edge.paint['line-offset']).toBeLessThan(0)
+    })
+
+    it('lifts the plate without ever reaching the prayer states', () => {
+      const a = BASEMAP.stageAlpha
+      const c = [1, 3, 5].map((i) => parseInt(BASEMAP.stage.slice(i, i + 2), 16))
+      const over = (hex: string) => '#' + [1, 3, 5]
+        .map((i, k) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - a) + c[k] * a))
+        .map((v) => v.toString(16).padStart(2, '0')).join('')
+      // The whole ground goes up, and every bit of it stays under the floor.
+      const land = luminance(GROUND.land)
+      const floor = land + (luminance(INK.remaining) - land) * INK_OPACITY.remaining
+      for (const hex of [GROUND.land, GROUND.park, BASEMAP.forest, BASEMAP.water,
+                         ...Object.values(BASEMAP.road)]) {
+        expect(luminance(over(hex))).toBeGreaterThan(luminance(hex))
+        expect(luminance(over(hex))).toBeLessThan(floor)
+      }
+      // And it is a lift, not a rebuild: the brightest ground gains under a fifth.
+      expect(luminance(over(BASEMAP.road.motorway)) / luminance(BASEMAP.road.motorway))
+        .toBeLessThan(1.2)
     })
 
     it('is neutral, so it desaturates as well as darkens', () => {
@@ -132,33 +173,32 @@ describe('regional basemap style', () => {
       expect(Math.max(...ch)).toBeLessThan(16)
     })
 
-    it('brackets the basemap without touching the prayer overlays', () => {
-      // MapView inserts prayer lines before the first bg-* symbol layer and prayer
-      // labels at the very top. So the ground wash has to sit above every basemap
-      // line but below that anchor, and the label wash above every basemap label.
+    it('sits above every basemap layer, and below every prayer one', () => {
+      // MapView appends the prayer layers, so the emphasis only has to be last among
+      // the basemap's own.
       const firstBgSymbol = ids.findIndex(
         (id: string, i: number) => style.layers[i].type === 'symbol' && id.startsWith('bg-'))
       const lastLine = style.layers.map((l: any) => l.type).lastIndexOf('line')
-      expect(ids.indexOf('bg-emphasis-ground')).toBeGreaterThan(lastLine)
-      expect(ids.indexOf('bg-emphasis-ground')).toBeLessThan(firstBgSymbol)
-      expect(ids.indexOf('bg-emphasis-labels')).toBe(ids.length - 1)
+      expect(ids.indexOf('bg-emphasis')).toBeGreaterThan(lastLine)
+      expect(ids.indexOf('bg-emphasis')).toBeGreaterThan(firstBgSymbol)
+      expect(ids.indexOf('bg-emphasis')).toBe(ids.length - 1)
     })
 
-    it('takes about a third off the region, and never brightens anything', () => {
+    it('takes a real bite out of the region, and never brightens anything', () => {
       const a = BASEMAP.washAlpha
       const w = [1, 3, 5].map((i) => parseInt(BASEMAP.wash.slice(i, i + 2), 16))
       const over = (hex: string) => '#' + [1, 3, 5]
         .map((i, k) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - a) + w[k] * a))
         .map((v) => v.toString(16).padStart(2, '0')).join('')
       // The roads are what the eye wanders over, so they are what the brief is about.
-      // This is the arithmetic, and the arithmetic understates it: measured on a
-      // render the region lands about 30% down, because a thin line is mostly
-      // antialiased edge and edges sit where the sRGB curve is steep. The bound below
-      // is the calculated figure, which is the one a test can check.
+      // Measured on a render the region lands about 30% down; the arithmetic below
+      // gives a larger figure because it ignores that a thin line is mostly
+      // antialiased edge. The bound is the calculated one, which is what a test can
+      // check without a browser.
       for (const hex of Object.values(BASEMAP.road)) {
         const drop = 1 - luminance(over(hex)) / luminance(hex)
-        expect(drop).toBeGreaterThan(0.22)
-        expect(drop).toBeLessThan(0.36)
+        expect(drop).toBeGreaterThan(0.36)
+        expect(drop).toBeLessThan(0.55)
       }
       // Everything else only has to move the same direction. Land, forest and water
       // sit on the linear part of the sRGB curve, where the same alpha buys less.

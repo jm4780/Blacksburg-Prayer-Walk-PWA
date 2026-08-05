@@ -81,7 +81,7 @@
       "filter": ["in", ["get", "class"], ["literal", ["minor", "link", "tertiary"]]],
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#21282C",
+        "line-color": "#20262A",
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
           12, 0.6, 14, 1.1, 16, 2.0, 18, 3.4
@@ -97,7 +97,7 @@
       "filter": ["==", ["get", "class"], "secondary"],
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#262E32",
+        "line-color": "#252C2F",
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
           10, 0.5, 12, 0.8, 14, 1.5, 16, 2.8, 18, 4.6
@@ -113,7 +113,7 @@
       "filter": ["==", ["get", "class"], "primary"],
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#2B3337",
+        "line-color": "#2A3134",
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
           9, 0.5, 12, 0.95, 14, 1.75, 16, 3.2, 18, 5.4
@@ -129,7 +129,7 @@
       "filter": ["==", ["get", "class"], "trunk"],
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#2F383C",
+        "line-color": "#2E3639",
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
           7, 0.5, 10, 0.9, 12, 1.15, 14, 2.1, 16, 3.9, 18, 6.5
@@ -145,7 +145,7 @@
       "filter": ["==", ["get", "class"], "motorway"],
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#343E43",
+        "line-color": "#333C40",
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
           7, 0.7, 10, 1.1, 12, 1.35, 14, 2.5, 16, 4.6, 18, 7.6
@@ -153,16 +153,6 @@
       }
     },
 
-    {
-      "id": "bg-emphasis-ground",
-      "type": "fill",
-      "source": "bpw-emphasis",
-      "paint": {
-        "fill-color": "#070707",
-        "fill-opacity": ["get", "a"],
-        "fill-antialias": false
-      }
-    },
 
     {
       "id": "bg-waterway-label",
@@ -253,16 +243,58 @@
         "text-padding": 10
       },
       "paint": {
-        "text-color": ["step", ["get", "rank"], "#6F7674", 3, "#5C6362"],
+        "text-color": [
+          "case", ["==", ["get", "name"], "Blacksburg"], "#7F8583",
+          ["step", ["get", "rank"], "#6F7674", 3, "#5C6362"]
+        ],
         "text-halo-color": "#0D1113",
         "text-halo-width": 1.3
       }
     },
 
     {
-      "id": "bg-emphasis-labels",
+      "id": "bg-town-line",
+      "type": "line",
+      "source": "bpw-emphasis",
+      "filter": ["==", ["get", "kind"], "town"],
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#39464C",
+        "line-opacity": 0.45,
+        "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1.0, 12, 1.4, 16, 2.0]
+      }
+    },
+    {
+      "id": "bg-town-edge",
+      "type": "line",
+      "source": "bpw-emphasis",
+      "filter": ["==", ["get", "kind"], "town"],
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#5C6D74",
+        "line-opacity": 0.1,
+        "line-blur": 6,
+        "line-offset": -4,
+        "line-width": ["interpolate", ["linear"], ["zoom"], 9, 4, 12, 8, 16, 14]
+      }
+    },
+
+    {
+      "id": "bg-stage",
       "type": "fill",
       "source": "bpw-emphasis",
+      "filter": ["has", "l"],
+      "paint": {
+        "fill-color": "#5F9B8A",
+        "fill-opacity": ["*", 0.024, ["get", "l"]],
+        "fill-antialias": false
+      }
+    },
+    {
+      "id": "bg-emphasis",
+      "type": "fill",
+      "source": "bpw-emphasis",
+      "filter": ["has", "a"],
       "paint": {
         "fill-color": "#070707",
         "fill-opacity": ["get", "a"],
