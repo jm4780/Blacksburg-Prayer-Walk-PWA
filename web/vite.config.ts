@@ -67,7 +67,7 @@ export default defineConfig({
         // shell and therefore the current build; offline, the last good one is still
         // served, so an installed app still opens on a walk with no signal.
         //
-        // The basemap is in here on purpose. `pmtiles` is the ~6.5 MB regional
+        // The basemap is in here on purpose. `pmtiles` is the ~4.4 MB regional
         // archive and `basemap/*.json` is the style that names it; together they are
         // the whole map, and precaching them is what makes the map work on a walk
         // with no signal. Workbox revisions them, so a rebuilt archive replaces the

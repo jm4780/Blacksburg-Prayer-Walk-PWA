@@ -7,7 +7,7 @@
 # Needs: tippecanoe (apt install tippecanoe), python3 with pyshp, ~2 GB of scratch
 # and a few minutes. Nothing here is committed except this script, extract.py and
 # filters.json — the sources are 500 MB of public-domain shapefiles that anyone can
-# fetch again, and the output is 6.5 MB that lives in the app.
+# fetch again, and the output is 4.4 MB that lives in the app.
 #
 # Every source below is US federal government work and therefore public domain
 # (17 U.S.C. §105). There is deliberately no OpenStreetMap in this pipeline: see
@@ -43,8 +43,8 @@ fetch "$S3/GeographicNames/DomesticNames/DomesticNames_VA_Text.zip" gnis_va.zip
 # zooms they are drawn at.
 fetch "$S3/Small-scale/data/Boundaries/fedlanp010g.shp_nt00966.tar.gz" fedlan.tar.gz
 fetch "$S3/Small-scale/data/Boundaries/citiesx010g_shp_nt00962.tar.gz" cities.tar.gz
-# Incorporated places, for the Blacksburg municipal limits the emphasis falloff is
-# built around. Census-sourced and public domain, which is the whole reason it can be
+# Incorporated places, for the Blacksburg municipal limits the basemap draws as its
+# town boundary. Census-sourced and public domain, which is the whole reason it can be
 # checked in — the Town's own boundary file cannot (docs/05, G1).
 fetch "$S3/GovtUnit/Shape/GOVTUNIT_Virginia_State_Shape.zip" govt_va.zip
 
@@ -80,7 +80,7 @@ tippecanoe -o blacksburg.pmtiles --force \
 cp blacksburg.pmtiles "$OUT"
 echo "wrote $OUT  $(du -h "$OUT" | cut -f1)"
 
-# The emphasis falloff is generated, not downloaded, and it is cheap. Regenerating it
-# here keeps it in step with the archive it sits on top of, and re-caches the municipal
-# boundary it is built around.
-( cd "$(cd "$HERE/../.." && pwd)" && python3 -m pipeline.basemap.emphasis "$WORK/gu/GU_IncorporatedPlace" )
+# The municipal limits, extracted from the GovtUnit download and written next to the
+# archive. Cheap, and regenerating it here re-caches the boundary so a later rebuild
+# does not need the 69 MB statewide file again.
+( cd "$(cd "$HERE/../.." && pwd)" && python3 -m pipeline.basemap.boundary "$WORK/gu/GU_IncorporatedPlace" )

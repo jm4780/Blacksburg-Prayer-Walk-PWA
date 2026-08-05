@@ -315,27 +315,21 @@ export default function MapView({
       })
       // Where the mission sits inside the basemap's own stack.
       //
-      // Parks slide in under the plate, which is under the roads. Under the roads
-      // because a park drawn over a street is a park that has erased a street; under
-      // the plate because open space inside the town has to be lifted along with the
-      // ground it sits on, or it goes dark against a surface that came up without it.
+      // Parks slide in under the roads, because a park drawn over a street is a park
+      // that has erased a street. Everything else goes on top of the whole basemap.
       //
-      // EVERYTHING ELSE GOES ON TOP OF THE WHOLE BASEMAP, EMPHASIS INCLUDED. An
-      // earlier cut inserted the prayer lines below the basemap's labels, to stop a
-      // street somebody walked from being drawn through CHRISTIANSBURG. That was the
-      // wrong trade. The emphasis layers have to sit above the labels to dim them, so
-      // any order that puts labels above the prayer data puts the *emphasis* above it
-      // too — and measured, that costs the subject 3.7% of its luminance while lifting
-      // remaining ground by 7.6%, compressing the prayer scale exactly where the
-      // mission is. The overlay is the hero; nothing on the ground may touch it, and
-      // a name occasionally crossed by a street is a much smaller price.
+      // There used to be a longer argument here about where the emphasis field went,
+      // and it is worth recording that the answer turned out to be nowhere: the field
+      // is gone. What is left is simple. The prayer overlay is the hero and nothing
+      // on the ground may sit above it, which does mean a street somebody walked can
+      // be drawn through CHRISTIANSBURG. That is a much smaller price than a label
+      // drawn through the mission.
       const stack = m.getStyle()?.layers ?? []
-      const underPlate = stack.find(
-        (l) => l.id === 'bg-stage' || l.id.startsWith('bg-road-'))?.id
+      const underRoads = stack.find((l) => l.id.startsWith('bg-road-'))?.id
       const live = Boolean(m.getSource('bpw-base'))
       for (const layer of prayerLayers(context!, live)) {
         if (m.getLayer(layer.id)) continue
-        m.addLayer(layer, layer.id === 'pw-parks' ? underPlate : undefined)
+        m.addLayer(layer, layer.id === 'pw-parks' ? underRoads : undefined)
       }
       if (!m.getLayer('start-dot')) {
         m.addLayer({

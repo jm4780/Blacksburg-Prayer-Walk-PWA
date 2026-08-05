@@ -98,6 +98,35 @@ FRC = {1: 'motorway', 2: 'motorway', 3: 'trunk', 4: 'primary',
 SKIP_MTFCC = {'S1500', 'S1640', 'S1710', 'S1720', 'S1730', 'S1740',
               'S1750', 'S1780', 'S1820', 'S1830'}
 
+# FRC ALONE IS NOT A HIERARCHY, AND BELIEVING IT WAS COST THE MAP ITS CENTRE.
+#
+# Measured on the shipped archive, 12,789 of 14,008 road features in a fifty-kilometre
+# frame — 91% — came back as FRC 4, and were therefore drawn at `primary`: the third
+# brightest rung of a five-rung luminance ramp built on the premise that the rungs mean
+# something. Stanger Street and Drillfield Drive, both on the Virginia Tech campus, are
+# FRC 4. So is every gravel lane in Montgomery County. The other four rungs rendered
+# nothing at all, in the whole region, at any zoom.
+#
+# The consequence was not subtle: the countryside was drawn at exactly the weight of
+# the town, so Blacksburg did not stand out, so three rounds of work went into painting
+# emphasis effects over the map to put back a hierarchy the data had been carrying all
+# along. There was never anything wrong with the ramp. There was something wrong with
+# what was being fed into it.
+#
+# MTFCC is the Census feature class and it is the reliable discriminator at the bottom
+# of the range, where FRC gives up: S1100 is a primary road, S1200 a secondary one,
+# S1400 a local neighbourhood street. FRC is kept for the top, where it is right and
+# MTFCC is coarse — it is what separates I-81 from US 460. Each field is used for the
+# part of the range it actually knows about.
+MTFCC_FLOOR = {
+    'S1400': 'minor',      # local neighbourhood road, rural road, city street
+    'S1200': 'secondary',  # secondary road — state and county highways
+}
+# Only ever demoted, never promoted. If FRC says a segment is an interstate, MTFCC
+# saying "city street" is a disagreement to lose, not a correction to apply.
+RANK = {'motorway': 5, 'trunk': 4, 'primary': 3, 'secondary': 2,
+        'tertiary': 1, 'minor': 0, 'link': 0}
+
 
 def route_ref(rec):
     """"Bus,460" -> "US 460 Bus"; "11,460" -> "US 11/460"; "460,Alt,11" -> "US 460/11".
@@ -137,10 +166,19 @@ def do_roads():
             if mtfcc in SKIP_MTFCC:
                 continue
             cls = 'link' if mtfcc == 'S1630' else FRC.get(rec['tnmfrc'] or 7, 'minor')
+            ref = route_ref(rec)
+            # A SHIELD OUTRANKS A FEATURE CODE. US 460 is MTFCC S1200 — Census calls
+            # it a secondary road, which is true of its construction and false of its
+            # place in the town. It is the thing everyone in Blacksburg orients by,
+            # and demoting it to the rung that holds every county highway in the
+            # region would trade one broken hierarchy for another. Where a road
+            # carries an Interstate, US or primary state route number, FRC keeps it.
+            floor = None if ref else MTFCC_FLOOR.get(mtfcc)
+            if floor and RANK[floor] < RANK[cls]:
+                cls = floor
             geom = lines(sr.shape)
             if geom is None:
                 continue
-            ref = route_ref(rec)
             props = {'class': cls}
             name = (rec['name'] or '').strip()
             # The shield is the name people navigate by: nobody in Blacksburg calls

@@ -50,8 +50,17 @@
  */
 export const GROUND = {
   land: '#0D1113',
-  /** Public open space. Presence, not decoration: a park should be felt, not read. */
-  park: '#141B19',
+  /**
+   * Public open space. Presence, not decoration: a park should be felt, not read.
+   *
+   * Greener and a third brighter than it was. It spent a while at #141B19, which on a
+   * near-black ground is not a colour so much as a rumour of one — and the reason it
+   * was that low was that a green tint was also being used as an emphasis effect, so
+   * anything actually green risked being read as part of it. That effect is gone, and
+   * a park can go back to being a park. Relative luminance 0.017, still five times
+   * under the dimmest prayer state.
+   */
+  park: '#1A261F',
   /** The edge of the obligation. Not a border — a limit on what we claim. */
   boundary: '#242B2D',
   /**
@@ -80,16 +89,23 @@ export const GROUND = {
  * dimmest prayer state. So a six-lane interstate crossing the frame can never out-rank
  * a cul-de-sac somebody has prayed for, at any zoom, anywhere in the region.
  *
+ * A LADDER IS ONLY A LADDER IF SOMETHING IS ON EACH RUNG. For three revisions this one
+ * was not: TNM's functional road class returned 4 for 91% of the region, so `primary`
+ * held twelve thousand county lanes and campus side streets, `secondary`, `tertiary`
+ * and `minor` held nothing at all, and every gravel track in Montgomery County was
+ * drawn at the third-brightest weight the design system has. The countryside came out
+ * exactly as loud as the town. See pipeline/basemap/extract.py, which now classifies
+ * from the Census feature code at the bottom of the range and from FRC at the top.
+ * Nothing in this file changed to fix that, and nothing in this file was ever wrong.
+ *
  * These went up 7% for one round and have come back down. Lifting the whole ramp was
- * how the town was made to read brighter before there was a plate to do it, and the
- * cost was a global lift the wash then had to cancel — which it could not do in the
- * first kilometre outside the line, where the wash is deliberately near zero. Measured,
- * that left a +12% ring of country around the town: a halo, built by accident. One
- * mechanism for inside, one for outside, and neither fighting the other.
+ * how the town was made to read brighter before the mission overlay was doing it, and
+ * the cost was a global lift that had to be cancelled somewhere else. Roads are the
+ * region; the region is drawn one way everywhere.
  */
 export const BASEMAP = {
   /** National forest. Felt as a mass on the horizon, never read as a shape. */
-  forest: '#111713',
+  forest: '#131A15',
   /** The New River and its lakes. Cooler than land, barely lighter. */
   water: '#0E161B',
   waterway: '#17222A',
@@ -103,98 +119,39 @@ export const BASEMAP = {
     motorway: '#333C40',    // = GROUND.contextMajor
   },
   /**
-   * EMPHASIS, NOT CONTENT.
+   * THE MUNICIPAL LIMITS, AND NOTHING ELSE.
    *
-   * The archive is one corpus drawn one way everywhere, which is what makes it read
-   * as a real place instead of a town with scenery glued around it. What it lacked
-   * was a centre. This is that: a neutral near-black, feathered outward from the town
-   * over seven kilometres, drawn over everything the basemap puts down.
+   * There is no emphasis field on this map any more, and removing it is the single
+   * largest thing in this revision. What was there: a near-black wash feathered 3.2 km
+   * outward from the town to darken the country, and a green-leaning "plate" tinted
+   * under the linework inside it to lift the ground the mission stands on. Two ramps,
+   * forty bands, three rounds of tuning, and measurements that said it was working —
+   * a ten display-level step at the line, which is a real number.
    *
-   * It is composited, not restyled, and that is the whole trick. Alpha blending moves
-   * every colour the same fraction toward the wash, so one number produces all three
-   * of the things being asked for at once —
+   * On screen it was a soft green cloud with a findable edge. That is what an effect
+   * painted over a map looks like, however carefully the falloff is shaped, because
+   * the falloff is not the problem: the map is being asked to say something that is
+   * not in it.
    *
-   *     darker           values fall ~30% outside the town
-   *     lower contrast   differences between them fall by the same fraction
-   *     less saturated   chroma collapses toward a neutral
+   * It is in it. Blacksburg is where the mission is, so Blacksburg is where all 1,868
+   * prayer segments are drawn, and nowhere else in fifty kilometres has one. The town
+   * separates itself by the only means a map may use — what is on it — as soon as the
+   * overlay is drawn at a weight that can be seen at all. It was not: a half-pixel
+   * hairline at 45% opacity, which renders as roughly nothing, which is why the town
+   * looked no different from the county and why three rounds went hunting for an
+   * effect to make up the difference. See WIDTH_STOPS and CONTEXTS.town.
    *
-   * — and none of them can drift out of agreement with the others, because there is
-   * only one of them.
+   * So this is all that is left of the emphasis work: the municipal line, drawn once,
+   * as a boundary. Dashed, because that is what a jurisdictional limit is drawn as on
+   * every map that has ever had one, and because a dash carries the shape at a
+   * fraction of a solid line's ink. Under the labels, over the roads, quiet enough to
+   * miss and definite enough to find when looked for.
    *
-   * The falloff follows the actual municipal limits, from 800 m inside the line to
-   * 4 km outside it. It starts inside on purpose: a ramp that began exactly at the
-   * boundary would put its first millimetre right on the municipal edge, which is how
-   * you accidentally draw a border. Four kilometres of smootherstep has nowhere it
-   * visibly begins.
-   *
-   * The boundary is USGS GovtUnit — Census-sourced, public domain — not the town's own
-   * GIS, so it can be checked in without tripping release gate G1 (docs/05).
-   *
-   * The alpha reads high because it is honest. It used to be drawn twice — once over
-   * the ground, once over the labels, because the prayer overlays sat between them —
-   * so 0.22 in the file was 0.39 on the screen. There is one pass now, and the number
-   * says what it does.
-   *
-   * Geometry: public/basemap/emphasis.json, from pipeline/basemap/emphasis.py.
+   * Geometry: public/basemap/boundary.json, from pipeline/basemap/boundary.py — USGS
+   * GovtUnit, Census-sourced, public domain, so it clears release gate G1 (docs/05).
    */
-  wash: '#070707',
-  washAlpha: 0.35,
-  /**
-   * THE PLATE.
-   *
-   * The third level, and the one that was missing. Darkening the outside gives the
-   * town no stage of its own — only an absence around it — and an absence is not a
-   * place. This is the same field read the other way: a light neutral at 4% over
-   * everything inside the municipal line, so the ground the mission stands on comes up
-   * as the country around it goes down.
-   *
-   *     land 13,17,19 -> 23,30,30      park 20,27,25 -> 29,38,35
-   *
-   * A PLATE IS A SURFACE, SO IT GOES UNDER THE LINEWORK. This is the correction that
-   * made the whole thing work, and it is worth stating plainly because two rounds were
-   * spent on the other side of it.
-   *
-   * Drawn OVER the roads, a lift brightens them too — so it is capped by how close the
-   * brightest road may come to the dimmest prayer state, which at any strength that
-   * actually reads leaves almost no headroom. Held to what that ceiling allows, the
-   * surface moved about two display levels: measured, land went 13,17,19 inside to
-   * 13,17,19 immediately outside. Two bytes is not a plate, it is a rumour of one.
-   *
-   * Drawn UNDER them, the roads never move at all, the invariant is untouchable, and
-   * the surface is free to carry the whole effect — about eleven display levels, which
-   * is what two surfaces meeting actually looks like. Road-against-land contrast inside
-   * the town falls, and that is not a side effect: ground rising toward the linework
-   * that sits on it is exactly what "raised" means.
-   *
-   * The darkening goes the other way, over everything, because it is atmosphere rather
-   * than surface. One is a thing the map is made of; the other is the air in front of
-   * it. They are not the same kind of object and they do not belong in the same place.
-   *
-   * It sits above the roads rather than under them, which is what lets the roads rise
-   * with the land instead of being left behind on a brightening plate. The cost is
-   * 17% of the road-against-land contrast (3.79 to 3.13) — the price of a lerp, and
-   * cheap against having a middle level at all.
-   *
-   * The lift feathers over 1 km against the darkening's 4.8. Blacksburg is 51 km2 of
-   * sprawl: erode it 2 km and 5 km2 is left, so a lift that faded over kilometres
-   * would be a gradient with no shape to it. Short plate, long falloff.
-   *
-   * BOTH OF THESE SIT BELOW EVERY PRAYER LAYER, and that is not a detail. Measured,
-   * a lift above the overlay costs the subject 3.7% and lifts remaining ground 7.6% —
-   * it compresses the prayer scale exactly where the mission is. See MapView.
-   */
-  stage: '#546B63',
-  stageAlpha: 0.14,
-  /**
-   * The frame. Almost nothing: a hairline on the municipal line at 30% opacity, plus
-   * a wide, blurred, inward-offset companion at 10% that reads as the edge of the
-   * plate rather than as a border. Neither is meant to be noticed; between them they
-   * are what stops the plate from looking like a smudge.
-   */
-  line: '#39464C',
-  lineOpacity: 0.14,
-  edge: '#5C6D74',
-  edgeOpacity: 0.05,
+  line: '#3D4A50',
+  lineOpacity: 0.34,
   /**
    * Basemap labels are not the design system's labels. A street name on today's walk
    * is `LABELS.color` (0.55) because the walker is about to act on it; CHRISTIANSBURG
@@ -306,11 +263,26 @@ export const CLASS_WEIGHT: Record<string, number> = {
 
 /**
  * Base width in pixels at each zoom, before the class multiplier. The curve is steep:
- * at town scale lines must be thin enough that 1,582 of them do not become a solid
+ * at town scale lines must be thin enough that 1,868 of them do not become a solid
  * mass, and at walking scale thick enough to read at arm's length in sunlight.
+ *
+ * THE BOTTOM OF THIS RAMP WAS BELOW A PIXEL, AND THAT WAS A BUG, NOT A SETTING.
+ *
+ * At the dashboard's z10.8 the base was 1.32 px. Multiply by the weight of the state
+ * that covers the whole town — remaining, 0.4 — and the mission network was being
+ * asked to render at 0.53 px, then composited at 45% opacity on top of that. A line
+ * narrower than a pixel does not draw thin; it draws as a fraction of one pixel's
+ * coverage, so that is about an eighth of a line's worth of ink. The result is what
+ * the last three rounds were actually looking at: a town indistinguishable from the
+ * county around it, on a map whose entire hierarchy is supposed to come from the fact
+ * that the mission is drawn in one and not the other.
+ *
+ * 1.5 puts the thinnest state on the map at just under a pixel at z10, and the rest
+ * of the curve is unchanged. Nothing here is a preference; a line that is meant to be
+ * read may not be drawn narrower than the display can draw.
  */
 export const WIDTH_STOPS: Array<[number, number]> = [
-  [10, 1.0],
+  [10, 1.5],
   [12, 1.8],
   [14, 3.2],
   [16, 5.8],

@@ -5,7 +5,7 @@
     "bpw:note": "The ground the mission is drawn on. Every colour here is checked against src/map/tokens.ts by src/map/__tests__/basemap.test.ts — the brightest thing on this basemap must stay below the dimmest prayer state, or the map starts arguing with itself.",
     "bpw:source": "USGS The National Map (Transportation, Hydrography, Small-scale) and GNIS. Public domain — 17 U.S.C. 105. No OpenStreetMap geometry.",
     "bpw:extent": "-81.00,36.80 to -79.80,37.65 — roughly 50 km around Blacksburg.",
-    "bpw:emphasis": "Three levels. bg-stage is a surface: a green-leaning tint UNDER the linework, feathered across the municipal line, so the ground inside the town rises about ten display levels while no road moves at all. bg-emphasis is atmosphere: a neutral near-black OVER everything, falling off 3.2 km outward. Both sit below every prayer layer. Geometry from pipeline/basemap/emphasis.py."
+    "bpw:emphasis": "There is none, and that is deliberate. No plate, no wash, no vignette — the region is one corpus drawn one way everywhere, and Blacksburg separates itself because the prayer overlay is drawn there and nowhere else. The only thing this basemap says about the town is bg-town-line: the municipal limits, drawn once, as a boundary. Geometry from pipeline/basemap/boundary.py."
   },
   "glyphs": "/fonts/{fontstack}/{range}.pbf",
   "sources": {
@@ -14,9 +14,9 @@
       "url": "pmtiles:///basemap/blacksburg.pmtiles",
       "attribution": "<a href=\"https://www.usgs.gov/programs/national-geospatial-program/national-map\">USGS National Map</a>"
     },
-    "bpw-emphasis": {
+    "bpw-boundary": {
       "type": "geojson",
-      "data": "/basemap/emphasis.json"
+      "data": "/basemap/boundary.json"
     }
   },
   "layers": [
@@ -31,7 +31,7 @@
       "type": "fill",
       "source": "bpw-base",
       "source-layer": "land",
-      "paint": { "fill-color": "#111713", "fill-opacity": 1 }
+      "paint": { "fill-color": "#131A15", "fill-opacity": 1 }
     },
 
     {
@@ -41,18 +41,6 @@
       "source-layer": "water",
       "paint": { "fill-color": "#0E161B", "fill-opacity": 1 }
     },
-    {
-      "id": "bg-stage",
-      "type": "fill",
-      "source": "bpw-emphasis",
-      "filter": ["has", "l"],
-      "paint": {
-        "fill-color": "#546B63",
-        "fill-opacity": ["*", 0.14, ["get", "l"]],
-        "fill-antialias": false
-      }
-    },
-
     {
       "id": "bg-waterway",
       "type": "line",
@@ -94,6 +82,7 @@
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
         "line-color": "#20262A",
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.45, 13.5, 1],
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
           12, 0.6, 14, 1.1, 16, 2.0, 18, 3.4
@@ -110,6 +99,7 @@
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
         "line-color": "#252C2F",
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 10, 0.4, 12, 1],
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
           10, 0.5, 12, 0.8, 14, 1.5, 16, 2.8, 18, 4.6
@@ -165,6 +155,19 @@
       }
     },
 
+
+    {
+      "id": "bg-town-line",
+      "type": "line",
+      "source": "bpw-boundary",
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#3D4A50",
+        "line-opacity": 0.34,
+        "line-dasharray": [4, 5],
+        "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.8, 12, 1.1, 16, 1.5]
+      }
+    },
 
     {
       "id": "bg-waterway-label",
@@ -261,45 +264,6 @@
         ],
         "text-halo-color": "#0D1113",
         "text-halo-width": 1.3
-      }
-    },
-
-    {
-      "id": "bg-town-line",
-      "type": "line",
-      "source": "bpw-emphasis",
-      "filter": ["==", ["get", "kind"], "town"],
-      "layout": { "line-cap": "round", "line-join": "round" },
-      "paint": {
-        "line-color": "#39464C",
-        "line-opacity": 0.14,
-        "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1.0, 12, 1.4, 16, 2.0]
-      }
-    },
-    {
-      "id": "bg-town-edge",
-      "type": "line",
-      "source": "bpw-emphasis",
-      "filter": ["==", ["get", "kind"], "town"],
-      "layout": { "line-cap": "round", "line-join": "round" },
-      "paint": {
-        "line-color": "#5C6D74",
-        "line-opacity": 0.05,
-        "line-blur": 6,
-        "line-offset": -4,
-        "line-width": ["interpolate", ["linear"], ["zoom"], 9, 4, 12, 8, 16, 14]
-      }
-    },
-
-    {
-      "id": "bg-emphasis",
-      "type": "fill",
-      "source": "bpw-emphasis",
-      "filter": ["has", "a"],
-      "paint": {
-        "fill-color": "#070707",
-        "fill-opacity": ["get", "a"],
-        "fill-antialias": false
       }
     }
   ]

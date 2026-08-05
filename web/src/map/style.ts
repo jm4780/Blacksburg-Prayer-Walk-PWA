@@ -61,9 +61,17 @@ export interface ContextSpec {
 
 export const CONTEXTS: Record<MapContext, ContextSpec> = {
   // A picture. Nothing here is navigated, so nothing here is a control.
+  //
+  // THIS IS THE SCREEN THAT CARRIES THE HIERARCHY, and its numbers are the mechanism.
+  // The dashboard sits at z10.8 with the whole region in frame, and the only thing
+  // that distinguishes Blacksburg from fifty kilometres of Montgomery County is that
+  // the mission is drawn on it. At emphasis 1.0 and 45% the mission was a half-pixel
+  // ghost and the town was not distinguishable at all — which is what an emphasis
+  // field was then invented to compensate for. 1.45 and 75% is the compensation done
+  // honestly, in the layer that is actually supposed to be saying it.
   town:      { context: true, subject: 'covered',
                labels: false, boundary: false, parks: true,  controls: false,
-               emphasis: 1.0, hit: 0,  maxZoom: 15,   remainingOpacity: 0.45 },
+               emphasis: 1.45, hit: 0, maxZoom: 15,   remainingOpacity: 0.75 },
   // A decision. The route is the subject and its streets are named.
   briefing:  { context: true, subject: 'assigned',
                labels: true,  boundary: false, parks: true,  controls: false,
@@ -83,7 +91,7 @@ export const CONTEXTS: Record<MapContext, ContextSpec> = {
   // The whole obligation.
   atlas:     { context: true, subject: 'covered',
                labels: false, boundary: true,  parks: true,  controls: true,
-               emphasis: 1.0, hit: 0,  maxZoom: 15,   remainingOpacity: 0.5 },
+               emphasis: 1.35, hit: 0, maxZoom: 15,   remainingOpacity: 0.7 },
 }
 
 // ---------------------------------------------------------------- helpers

@@ -11,7 +11,8 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { BASEMAP, GROUND, INK, INK_OPACITY } from '../tokens'
+import { BASEMAP, GROUND, INK, INK_OPACITY, STATE_WEIGHT, WIDTH_STOPS } from '../tokens'
+import { CONTEXTS } from '../style'
 
 // Read, not imported: `public/` is served verbatim by Vite and must never end up in
 // the bundle. Resolved from the vitest root, which is `web/`.
@@ -97,121 +98,153 @@ describe('regional basemap style', () => {
     expect(JSON.stringify(style.sources)).not.toMatch(/OpenStreetMap/i)
   })
 
-  it('puts surface under the linework and atmosphere over it', () => {
+  it('draws the ground, then the linework, then the names', () => {
     const ids = style.layers.map((l: any) => l.id)
     expect(ids[0]).toBe('bg-land')
-    // The plate is a surface: under every line and every label, so it can carry the
-    // whole effect without touching a single road. Held above them it is capped by the
-    // prayer invariant and moves the ground about two display levels, which is not a
-    // plate. See tokens.ts.
-    const firstLine = style.layers.findIndex((l: any) => l.type === 'line')
-    expect(ids.indexOf('bg-stage')).toBeLessThan(firstLine)
-    // The darkening is atmosphere: over everything, including the labels, or the
-    // region's names would not dim with the region they name.
-    expect(ids[ids.length - 1]).toBe('bg-emphasis')
-    const lastSymbol = style.layers.map((l: any) => l.type).lastIndexOf('symbol')
-    expect(lastSymbol).toBeLessThan(ids.indexOf('bg-emphasis'))
+    // Nothing is drawn after the last name. The basemap's job finishes where the
+    // mission's begins, and MapView appends the prayer layers on top of all of it.
+    expect(style.layers[style.layers.length - 1].type).toBe('symbol')
   })
 
-  // ------------------------------------------------------------ emphasis
-  describe('the emphasis wash', () => {
+  // ---------------------------------------------------- no effects, anywhere
+  describe('the region', () => {
     const ids = style.layers.map((l: any) => l.id)
-    const wash = style.layers.find((l: any) => l.id === 'bg-emphasis')
-    const stage = style.layers.find((l: any) => l.id === 'bg-stage')
 
-    it('is one colour at one alpha, in the tokens and in the style', () => {
-      expect(wash.paint['fill-color']).toBe(BASEMAP.wash)
-      expect(wash.paint['fill-opacity']).toEqual(['get', 'a'])
-      expect(stage.paint['fill-color']).toBe(BASEMAP.stage)
-      expect(stage.paint['fill-opacity']).toEqual(['*', BASEMAP.stageAlpha, ['get', 'l']])
-      for (const l of [wash, stage]) {
-        // Adjacent bands share an edge. Antialiasing each one draws a hairline at
-        // every seam, which is a set of contours around Blacksburg — the exact thing
-        // the falloff exists to avoid.
-        expect(l.paint['fill-antialias']).toBe(false)
+    /**
+     * THIS TEST IS A TOMBSTONE, AND IT IS THE MOST IMPORTANT ONE IN THE FILE.
+     *
+     * Three separate rounds of work put an emphasis field on this map: a near-black
+     * wash feathered outward from the town to darken the county, and a tinted plate
+     * under the linework to lift the ground inside it. Each round measured well — the
+     * last one moved the surface ten display levels at the municipal line, which is a
+     * real, defensible number — and each round looked, on screen, like a soft green
+     * cloud with an edge you could find.
+     *
+     * The lesson was not "tune it further". It was that the town does not need to be
+     * pointed at. All 1,868 prayer segments are inside the municipal limits and none
+     * of the fifty kilometres around it has one, so the moment the overlay is drawn at
+     * a weight the display can render, Blacksburg is the only lit thing in frame. The
+     * field existed to compensate for a mission network that was being drawn at half a
+     * pixel. Fix the half pixel and there is nothing left to compensate for.
+     *
+     * So: no fill on this basemap may be anything but a thing that is actually there.
+     * Land, forest and water are places. A gradient around the town is a gesture.
+     */
+    it('carries no wash, no plate, no vignette — only what is on the ground', () => {
+      for (const l of style.layers) {
+        if (l.type !== 'fill' && l.type !== 'background') continue
+        expect(['bg-land', 'bg-forest', 'bg-water'], `unexpected fill ${l.id}`)
+          .toContain(l.id)
       }
+      // And no data-driven alpha anywhere, which is the shape every version of the
+      // field took: one geometry carrying a per-feature opacity ramp.
+      expect(JSON.stringify(style.layers)).not.toMatch(/\["get","[al]"\]/)
     })
 
-    it('draws the frame quietly enough to be felt rather than read', () => {
-      const line = style.layers.find((l: any) => l.id === 'bg-town-line')
-      const edge = style.layers.find((l: any) => l.id === 'bg-town-edge')
-      expect(line.paint['line-color']).toBe(BASEMAP.line)
-      expect(line.paint['line-opacity']).toBe(BASEMAP.lineOpacity)
-      expect(edge.paint['line-color']).toBe(BASEMAP.edge)
-      expect(edge.paint['line-opacity']).toBe(BASEMAP.edgeOpacity)
-      // Effective luminance over land, which is what the eye actually gets. It has to
-      // stay under the dimmest prayer state or the frame outranks the mission.
+    it('is one corpus drawn one way everywhere', () => {
+      // Every layer that renders the region reads the archive. The only exception is
+      // the municipal line, which is a boundary rather than a feature of the ground.
+      for (const l of style.layers) {
+        if (!l.source) continue
+        expect(l.source, l.id).toBe(l.id === 'bg-town-line' ? 'bpw-boundary' : 'bpw-base')
+      }
+    })
+  })
+
+  // ---------------------------------------------------- the municipal limits
+  describe('the town line', () => {
+    const ids = style.layers.map((l: any) => l.id)
+    const line = () => layer('bg-town-line')
+
+    it('is the tokens, and is drawn as a jurisdictional boundary', () => {
+      expect(line().paint['line-color']).toBe(BASEMAP.line)
+      expect(line().paint['line-opacity']).toBe(BASEMAP.lineOpacity)
+      // Dashed. It is what a municipal limit is drawn as on every map that has ever
+      // had one, and it carries the shape for a fraction of a solid line's ink.
+      expect(line().paint['line-dasharray'].length).toBe(2)
+    })
+
+    it('stays under the mission it encloses', () => {
+      // Effective luminance over land, which is what the eye actually gets. A frame
+      // that outranks the dimmest prayer state is a frame drawing attention to itself.
       const land = luminance(GROUND.land)
       const seen = land + (luminance(BASEMAP.line) - land) * BASEMAP.lineOpacity
-      expect(seen).toBeLessThan(luminance(INK.remaining) * 0.5)
-      // Offset inward, so the soft half reads as the plate's edge, not as a halo.
-      expect(edge.paint['line-offset']).toBeLessThan(0)
+      expect(seen).toBeLessThan(luminance(INK.remaining) * 0.6)
     })
 
-    it('lifts the surface, and cannot reach the prayer states because it is under them', () => {
-      const a = BASEMAP.stageAlpha
-      const c = [1, 3, 5].map((i) => parseInt(BASEMAP.stage.slice(i, i + 2), 16))
-      const over = (hex: string) => '#' + [1, 3, 5]
-        .map((i, k) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - a) + c[k] * a))
-        .map((v) => v.toString(16).padStart(2, '0')).join('')
-      // Only the fills are under it; the roads are above and never move.
+    it('is the only thing the basemap says about the town', () => {
+      const about = style.layers.filter((l: any) => /town|blacksburg/i.test(
+        l.id + JSON.stringify(l.filter ?? '')))
+      // bg-place-town is the region's place names, Blacksburg among them; the line is
+      // the limits. Anything else naming the town is an effect wearing a layer id.
+      expect(about.map((l: any) => l.id).sort())
+        .toEqual(['bg-place-town', 'bg-town-line'])
+    })
+
+    it('sits over the roads and under the names', () => {
+      // Over the roads because a boundary is not hidden by traffic; under the names
+      // because a name is the last thing a map says.
+      const lastRoad = Math.max(...style.layers
+        .map((l: any, i: number) => (l.type === 'line' && l.id.startsWith('bg-road-') ? i : -1)))
+      const firstSymbol = style.layers.findIndex((l: any) => l.type === 'symbol')
+      expect(ids.indexOf('bg-town-line')).toBeGreaterThan(lastRoad)
+      expect(ids.indexOf('bg-town-line')).toBeLessThan(firstSymbol)
+    })
+  })
+
+  // ------------------------------------------ what makes Blacksburg Blacksburg
+  describe('the mission overlay', () => {
+    /** Base width at a zoom, interpolating WIDTH_STOPS the way MapLibre does. */
+    const base = (z: number) => {
+      const s = WIDTH_STOPS
+      if (z <= s[0][0]) return s[0][1]
+      if (z >= s[s.length - 1][0]) return s[s.length - 1][1]
+      const i = s.findIndex(([zz]) => zz > z) - 1
+      const t = (z - s[i][0]) / (s[i + 1][0] - s[i][0])
+      return s[i][1] + (s[i + 1][1] - s[i][1]) * t
+    }
+
+    /**
+     * The dashboard's own zoom, measured on a Pixel 7 with the region fitted. The
+     * number matters because it is the one place the map has to carry the whole story
+     * in a single glance, and it is the far end of the width ramp.
+     */
+    const DASHBOARD_Z = 10.79
+
+    it('draws the town at a width the display can actually render', () => {
+      // A line narrower than a pixel does not draw thin. It draws as a fraction of one
+      // pixel's coverage, and then the layer opacity is applied on top of that. The
+      // shipped map asked for 0.53 px at 45% and got roughly an eighth of a line —
+      // which is why Blacksburg looked exactly like the county around it, and why
+      // three rounds of work went looking for an emphasis effect to make up for it.
+      const c = CONTEXTS.town
+      const px = base(DASHBOARD_Z) * STATE_WEIGHT.remaining * c.emphasis
+      expect(px).toBeGreaterThan(0.9)
+      // Ink on the page: width times opacity. Below about 0.6 the network stops
+      // reading as a fabric and starts reading as noise.
+      expect(px * c.remainingOpacity).toBeGreaterThan(0.6)
+    })
+
+    it('keeps the states apart while doing it', () => {
+      // Turning remaining up must not let it approach covered ground. The gap is the
+      // whole point of the dashboard: what has been prayed for against what has not.
+      const c = CONTEXTS.town
+      const remaining = base(DASHBOARD_Z) * STATE_WEIGHT.remaining * c.emphasis
+        * c.remainingOpacity
+      const covered = base(DASHBOARD_Z) * STATE_WEIGHT.subject * c.emphasis
+        * INK_OPACITY.subject
+      expect(covered / remaining).toBeGreaterThan(2.5)
+      // And by luminance, which is where this system's hierarchy actually lives.
+      expect(luminance(INK.subject) / luminance(INK.remaining)).toBeGreaterThan(8)
+    })
+
+    it('outranks the brightest thing the basemap can put under it', () => {
+      // The town's streets and the county's streets are the same geometry class. The
+      // only difference is that one set has the mission drawn on it, so that set has
+      // to win, at the dashboard's opacity, against the loudest road in the archive.
       const land = luminance(GROUND.land)
-      const floor = land + (luminance(INK.remaining) - land) * INK_OPACITY.remaining
-      for (const hex of [GROUND.land, GROUND.park, BASEMAP.forest, BASEMAP.water]) {
-        expect(luminance(over(hex))).toBeGreaterThan(luminance(hex))
-        // Real headroom, not a squeak past: the surface is nowhere near the mission.
-        expect(floor / luminance(over(hex))).toBeGreaterThan(3)
-      }
-      // And it has to actually move: a plate that shifts the ground by a couple of
-      // display levels is the version that did not read.
-      const before = [1, 3, 5].map((i) => parseInt(GROUND.land.slice(i, i + 2), 16))
-      const after = [1, 3, 5].map((i) => parseInt(over(GROUND.land).slice(i, i + 2), 16))
-      const step = (after.reduce((a, b) => a + b) - before.reduce((a, b) => a + b)) / 3
-      expect(step).toBeGreaterThan(7)
-    })
-
-    it('is neutral, so it desaturates as well as darkens', () => {
-      const ch = [1, 3, 5].map((i) => parseInt(BASEMAP.wash.slice(i, i + 2), 16))
-      expect(Math.max(...ch) - Math.min(...ch)).toBe(0)
-      // And near enough to black that it darkens roughly in proportion rather than
-      // flattening the dark end of the ramp into a single tone.
-      expect(Math.max(...ch)).toBeLessThan(16)
-    })
-
-    it('sits above every basemap layer, and below every prayer one', () => {
-      // MapView appends the prayer layers, so the emphasis only has to be last among
-      // the basemap's own.
-      const firstBgSymbol = ids.findIndex(
-        (id: string, i: number) => style.layers[i].type === 'symbol' && id.startsWith('bg-'))
-      const lastLine = style.layers.map((l: any) => l.type).lastIndexOf('line')
-      expect(ids.indexOf('bg-emphasis')).toBeGreaterThan(lastLine)
-      expect(ids.indexOf('bg-emphasis')).toBeGreaterThan(firstBgSymbol)
-      expect(ids.indexOf('bg-emphasis')).toBe(ids.length - 1)
-      expect(ids.indexOf('bg-stage')).toBeLessThan(lastLine)
-    })
-
-    it('takes a real bite out of the region, and never brightens anything', () => {
-      const a = BASEMAP.washAlpha
-      const w = [1, 3, 5].map((i) => parseInt(BASEMAP.wash.slice(i, i + 2), 16))
-      const over = (hex: string) => '#' + [1, 3, 5]
-        .map((i, k) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - a) + w[k] * a))
-        .map((v) => v.toString(16).padStart(2, '0')).join('')
-      // The roads are what the eye wanders over, so they are what the brief is about.
-      // Measured on a render the region lands about 30% down; the arithmetic below
-      // gives a larger figure because it ignores that a thin line is mostly
-      // antialiased edge. The bound is the calculated one, which is what a test can
-      // check without a browser.
-      for (const hex of Object.values(BASEMAP.road)) {
-        const drop = 1 - luminance(over(hex)) / luminance(hex)
-        expect(drop).toBeGreaterThan(0.36)
-        expect(drop).toBeLessThan(0.55)
-      }
-      // Everything else only has to move the same direction. Land, forest and water
-      // sit on the linear part of the sRGB curve, where the same alpha buys less.
-      for (const hex of [GROUND.land, BASEMAP.forest, BASEMAP.water, BASEMAP.waterway,
-                         BASEMAP.rail, ...Object.values(BASEMAP.label)]) {
-        expect(luminance(over(hex))).toBeLessThanOrEqual(luminance(hex))
-      }
+      const seen = land + (luminance(INK.remaining) - land) * CONTEXTS.town.remainingOpacity
+      expect(seen / luminance(BASEMAP.road.motorway)).toBeGreaterThan(1.4)
     })
   })
 })
