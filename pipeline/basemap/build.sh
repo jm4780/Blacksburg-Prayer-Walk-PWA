@@ -43,11 +43,16 @@ fetch "$S3/GeographicNames/DomesticNames/DomesticNames_VA_Text.zip" gnis_va.zip
 # zooms they are drawn at.
 fetch "$S3/Small-scale/data/Boundaries/fedlanp010g.shp_nt00966.tar.gz" fedlan.tar.gz
 fetch "$S3/Small-scale/data/Boundaries/citiesx010g_shp_nt00962.tar.gz" cities.tar.gz
+# Incorporated places, for the Blacksburg municipal limits the emphasis falloff is
+# built around. Census-sourced and public domain, which is the whole reason it can be
+# checked in — the Town's own boundary file cannot (docs/05, G1).
+fetch "$S3/GovtUnit/Shape/GOVTUNIT_Virginia_State_Shape.zip" govt_va.zip
 
 echo "unpack"
 unzip -o -q -j tran_va.zip "Shape/Trans_RoadSegment_*" "Shape/Trans_RailFeature.*" -d tran
 unzip -o -q -j nhd_0505.zip "Shape/NHDFlowline.*" "Shape/NHDWaterbody.*" "Shape/NHDArea.*" -d nhd
 unzip -o -q gnis_va.zip -d gnis
+unzip -o -q -j govt_va.zip "Shape/GU_IncorporatedPlace.*" -d gu
 mkdir -p ss && tar xzf fedlan.tar.gz -C ss && tar xzf cities.tar.gz -C ss
 
 echo "extract"
@@ -76,5 +81,6 @@ cp blacksburg.pmtiles "$OUT"
 echo "wrote $OUT  $(du -h "$OUT" | cut -f1)"
 
 # The emphasis falloff is generated, not downloaded, and it is cheap. Regenerating it
-# here keeps it in step with the archive it sits on top of.
-( cd "$(cd "$HERE/../.." && pwd)" && python3 -m pipeline.basemap.emphasis )
+# here keeps it in step with the archive it sits on top of, and re-caches the municipal
+# boundary it is built around.
+( cd "$(cd "$HERE/../.." && pwd)" && python3 -m pipeline.basemap.emphasis "$WORK/gu/GU_IncorporatedPlace" )

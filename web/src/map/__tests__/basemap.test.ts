@@ -144,20 +144,21 @@ describe('regional basemap style', () => {
       expect(ids.indexOf('bg-emphasis-labels')).toBe(ids.length - 1)
     })
 
-    it('takes about a fifth off the region, and never brightens anything', () => {
+    it('takes about a third off the region, and never brightens anything', () => {
       const a = BASEMAP.washAlpha
       const w = [1, 3, 5].map((i) => parseInt(BASEMAP.wash.slice(i, i + 2), 16))
       const over = (hex: string) => '#' + [1, 3, 5]
         .map((i, k) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - a) + w[k] * a))
         .map((v) => v.toString(16).padStart(2, '0')).join('')
       // The roads are what the eye wanders over, so they are what the brief is about.
-      // Measured against the ramp as it now stands; against the ramp before this
-      // refinement — which is what somebody comparing screenshots sees — the region
-      // lands 14-19% down, because the ramp itself came up about 7% at the same time.
+      // This is the arithmetic, and the arithmetic understates it: measured on a
+      // render the region lands about 30% down, because a thin line is mostly
+      // antialiased edge and edges sit where the sRGB curve is steep. The bound below
+      // is the calculated figure, which is the one a test can check.
       for (const hex of Object.values(BASEMAP.road)) {
         const drop = 1 - luminance(over(hex)) / luminance(hex)
-        expect(drop).toBeGreaterThan(0.15)
-        expect(drop).toBeLessThan(0.25)
+        expect(drop).toBeGreaterThan(0.22)
+        expect(drop).toBeLessThan(0.36)
       }
       // Everything else only has to move the same direction. Land, forest and water
       // sit on the linear part of the sRGB curve, where the same alpha buys less.

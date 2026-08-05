@@ -110,22 +110,26 @@ export const BASEMAP = {
    * every colour the same fraction toward the wash, so one number produces all three
    * of the things being asked for at once —
    *
-   *     darker           values fall ~18% at the edge of the dashboard frame
+   *     darker           values fall ~30% outside the town
    *     lower contrast   differences between them fall by the same fraction
    *     less saturated   chroma collapses toward a neutral
    *
    * — and none of them can drift out of agreement with the others, because there is
    * only one of them.
    *
-   * The falloff is an ellipse centred on the town, not the town boundary. Washing the
-   * boundary would *draw* the boundary, which is the one thing the brief rules out;
-   * seven kilometres of smootherstep has nowhere it visibly begins. It also keeps
-   * Town of Blacksburg geometry out of this public repository, which G1 requires.
+   * The falloff follows the actual municipal limits, from 800 m inside the line to
+   * 4 km outside it. It starts inside on purpose: a ramp that began exactly at the
+   * boundary would put its first millimetre right on the municipal edge, which is how
+   * you accidentally draw a border. Four kilometres of smootherstep has nowhere it
+   * visibly begins.
+   *
+   * The boundary is USGS GovtUnit — Census-sourced, public domain — not the town's own
+   * GIS, so it can be checked in without tripping release gate G1 (docs/05).
    *
    * Geometry: public/basemap/emphasis.json, from pipeline/basemap/emphasis.py.
    */
   wash: '#070707',
-  washAlpha: 0.125,
+  washAlpha: 0.22,
   /**
    * Basemap labels are not the design system's labels. A street name on today's walk
    * is `LABELS.color` (0.55) because the walker is about to act on it; CHRISTIANSBURG
