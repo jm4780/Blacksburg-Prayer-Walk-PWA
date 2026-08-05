@@ -66,7 +66,20 @@ export default defineConfig({
         // index.html is now NetworkFirst: online, every launch fetches the current
         // shell and therefore the current build; offline, the last good one is still
         // served, so an installed app still opens on a walk with no signal.
-        globPatterns: ['**/*.{js,css,svg}'],
+        //
+        // The basemap is in here on purpose. `pmtiles` is the ~6.5 MB regional
+        // archive and `basemap/*.json` is the style that names it; together they are
+        // the whole map, and precaching them is what makes the map work on a walk
+        // with no signal. Workbox revisions them, so a rebuilt archive replaces the
+        // old one instead of accumulating.
+        //
+        // The archive is read by src/map/basemap.ts, which is written to accept the
+        // full 200 response a precache returns to a range request — pmtiles' own
+        // FetchSource throws on that, which would break the map offline and only
+        // offline. See the comment there before changing either side.
+        globPatterns: ['**/*.{js,css,svg,pmtiles}', 'basemap/*.json'],
+        // Default is 2 MiB, which silently drops the archive from the manifest.
+        maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,

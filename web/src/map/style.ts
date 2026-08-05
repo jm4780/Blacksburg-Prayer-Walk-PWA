@@ -120,14 +120,21 @@ function widthFor(state: keyof typeof STATE_WEIGHT, emphasis: number): Expr {
 
 const isState = (s: string): Expr => ['==', ['get', 'state'], s]
 
-/** The style before our data lands. The basemap is ours — every ground layer below is
- *  drawn from the town's own roads, parks and boundary, so land is a paint colour and
- *  never a fetched tile. Empty of vendors, not empty of world. */
+/**
+ * The map with no basemap under it.
+ *
+ * Used when `/basemap/blacksburg.pmtiles` cannot be reached at all — a first run with
+ * no network and a cold service worker, or a deployment that has not shipped the
+ * archive. The town's own roads, parks and boundary still draw on top of it, so the
+ * degraded map is the map this product had before the archive existed: correct, and
+ * missing the region.
+ *
+ * Glyphs are served from our own origin, so even the fallback has no third-party
+ * runtime dependency — see docs/20 §2.
+ */
 export function baseStyle(): any {
   return {
     version: 8,
-    // Glyphs are needed for labels. Served from our own origin so the map has no
-    // third-party runtime dependency at all — see docs/20 §2.
     glyphs: '/fonts/{fontstack}/{range}.pbf',
     sources: {},
     layers: [
@@ -147,7 +154,7 @@ export function baseStyle(): any {
  * Nothing above can be obscured by anything below it, so the most important thing on
  * the map is also, structurally, the last thing drawn.
  */
-export function prayerLayers(ctx: MapContext): any[] {
+export function prayerLayers(ctx: MapContext, basemap = false): any[] {
   const c = CONTEXTS[ctx]
   const layers: any[] = []
 
@@ -162,7 +169,12 @@ export function prayerLayers(ctx: MapContext): any[] {
   // Drawn before anything that carries meaning, so it can never sit on top of the
   // mission. Major roads — US 460, the ramps — get a little more light, because they
   // are what somebody actually orients by.
-  if (c.context) {
+  //
+  // Skipped when the regional basemap is live: the archive already carries every
+  // public road in Blacksburg, at the same luminance ramp, and drawing both would
+  // double the ink on exactly the layer that has to stay quietest. This layer is
+  // now the town's stand-in for a basemap that could not be fetched.
+  if (c.context && !basemap) {
     layers.push({
       id: 'pw-context', type: 'line', source: 'pw-context',
       layout: { 'line-cap': 'round', 'line-join': 'round' },
@@ -193,12 +205,15 @@ export function prayerLayers(ctx: MapContext): any[] {
   layers.push({
     id: 'pw-remaining', type: 'line', source: 'pw-segments',
     filter: isState('todo'),
-    layout: { 'line-cap': 'butt', 'line-join': 'round' },
+    // Round now that the line is solid. Butt caps kept the old dashes crisp; on a
+    // solid hairline they leave a visible nick at every segment junction, and the
+    // network is stored as thousands of short segments.
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: {
       'line-color': INK.remaining,
       'line-width': widthFor('remaining', c.emphasis),
       'line-opacity': c.remainingOpacity,
-      'line-dasharray': TEXTURE.remaining as number[],
+      ...(TEXTURE.remaining ? { 'line-dasharray': TEXTURE.remaining } : null),
     },
   })
 

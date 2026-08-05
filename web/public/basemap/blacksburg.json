@@ -1,0 +1,246 @@
+{
+  "version": 8,
+  "name": "Prayer Walk — Blacksburg regional basemap",
+  "metadata": {
+    "bpw:note": "The ground the mission is drawn on. Every colour here is checked against src/map/tokens.ts by src/map/__tests__/basemap.test.ts — the brightest thing on this basemap must stay below the dimmest prayer state, or the map starts arguing with itself.",
+    "bpw:source": "USGS The National Map (Transportation, Hydrography, Small-scale) and GNIS. Public domain — 17 U.S.C. 105. No OpenStreetMap geometry.",
+    "bpw:extent": "-81.00,36.80 to -79.80,37.65 — roughly 50 km around Blacksburg."
+  },
+  "glyphs": "/fonts/{fontstack}/{range}.pbf",
+  "sources": {
+    "bpw-base": {
+      "type": "vector",
+      "url": "pmtiles:///basemap/blacksburg.pmtiles",
+      "attribution": "<a href=\"https://www.usgs.gov/programs/national-geospatial-program/national-map\">USGS National Map</a>"
+    }
+  },
+  "layers": [
+    {
+      "id": "bg-land",
+      "type": "background",
+      "paint": { "background-color": "#0D1113" }
+    },
+
+    {
+      "id": "bg-forest",
+      "type": "fill",
+      "source": "bpw-base",
+      "source-layer": "land",
+      "paint": { "fill-color": "#111713", "fill-opacity": 1 }
+    },
+
+    {
+      "id": "bg-water",
+      "type": "fill",
+      "source": "bpw-base",
+      "source-layer": "water",
+      "paint": { "fill-color": "#0E161B", "fill-opacity": 1 }
+    },
+    {
+      "id": "bg-waterway",
+      "type": "line",
+      "source": "bpw-base",
+      "source-layer": "waterway",
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#17222A",
+        "line-width": [
+          "interpolate", ["linear"], ["zoom"],
+          8, ["case", ["to-boolean", ["get", "major"]], 0.8, 0.3],
+          11, ["case", ["to-boolean", ["get", "major"]], 1.6, 0.5],
+          14, ["case", ["to-boolean", ["get", "major"]], 2.4, 1.0],
+          17, ["case", ["to-boolean", ["get", "major"]], 4.4, 1.8]
+        ]
+      }
+    },
+
+    {
+      "id": "bg-rail",
+      "type": "line",
+      "source": "bpw-base",
+      "source-layer": "rail",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#1A1F22",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.5, 14, 0.8, 17, 1.3],
+        "line-dasharray": [2.5, 3]
+      }
+    },
+
+    {
+      "id": "bg-road-minor",
+      "type": "line",
+      "source": "bpw-base",
+      "source-layer": "roads",
+      "minzoom": 12,
+      "filter": ["in", ["get", "class"], ["literal", ["minor", "link", "tertiary"]]],
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#20262A",
+        "line-width": [
+          "interpolate", ["linear"], ["zoom"],
+          12, 0.6, 14, 1.1, 16, 2.0, 18, 3.4
+        ]
+      }
+    },
+    {
+      "id": "bg-road-secondary",
+      "type": "line",
+      "source": "bpw-base",
+      "source-layer": "roads",
+      "minzoom": 10,
+      "filter": ["==", ["get", "class"], "secondary"],
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#252C2F",
+        "line-width": [
+          "interpolate", ["linear"], ["zoom"],
+          10, 0.5, 12, 0.8, 14, 1.5, 16, 2.8, 18, 4.6
+        ]
+      }
+    },
+    {
+      "id": "bg-road-primary",
+      "type": "line",
+      "source": "bpw-base",
+      "source-layer": "roads",
+      "minzoom": 9,
+      "filter": ["==", ["get", "class"], "primary"],
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#2A3134",
+        "line-width": [
+          "interpolate", ["linear"], ["zoom"],
+          9, 0.5, 12, 0.95, 14, 1.75, 16, 3.2, 18, 5.4
+        ]
+      }
+    },
+    {
+      "id": "bg-road-trunk",
+      "type": "line",
+      "source": "bpw-base",
+      "source-layer": "roads",
+      "minzoom": 7,
+      "filter": ["==", ["get", "class"], "trunk"],
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#2E3639",
+        "line-width": [
+          "interpolate", ["linear"], ["zoom"],
+          7, 0.5, 10, 0.9, 12, 1.15, 14, 2.1, 16, 3.9, 18, 6.5
+        ]
+      }
+    },
+    {
+      "id": "bg-road-motorway",
+      "type": "line",
+      "source": "bpw-base",
+      "source-layer": "roads",
+      "minzoom": 7,
+      "filter": ["==", ["get", "class"], "motorway"],
+      "layout": { "line-cap": "round", "line-join": "round" },
+      "paint": {
+        "line-color": "#333C40",
+        "line-width": [
+          "interpolate", ["linear"], ["zoom"],
+          7, 0.7, 10, 1.1, 12, 1.35, 14, 2.5, 16, 4.6, 18, 7.6
+        ]
+      }
+    },
+
+    {
+      "id": "bg-waterway-label",
+      "type": "symbol",
+      "source": "bpw-base",
+      "source-layer": "waterway",
+      "minzoom": 11,
+      "filter": ["all", ["has", "name"], ["to-boolean", ["get", "major"]]],
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": ["get", "name"],
+        "text-font": ["Prayer Walk Regular"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 11, 9, 15, 11],
+        "text-letter-spacing": 0.12,
+        "text-max-angle": 32,
+        "symbol-spacing": 420
+      },
+      "paint": {
+        "text-color": "#414E52",
+        "text-halo-color": "#0D1113",
+        "text-halo-width": 1.1
+      }
+    },
+    {
+      "id": "bg-road-shield",
+      "type": "symbol",
+      "source": "bpw-base",
+      "source-layer": "roads",
+      "minzoom": 11,
+      "filter": ["all", ["has", "ref"], ["in", ["get", "class"], ["literal", ["motorway", "trunk", "primary"]]]],
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": ["get", "ref"],
+        "text-font": ["Prayer Walk Regular"],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 11, 9, 15, 11.5],
+        "text-letter-spacing": 0.05,
+        "text-max-angle": 30,
+        "text-padding": 6,
+        "symbol-spacing": 340
+      },
+      "paint": {
+        "text-color": "#5A6265",
+        "text-halo-color": "#0D1113",
+        "text-halo-width": 1.4
+      }
+    },
+    {
+      "id": "bg-place-terrain",
+      "type": "symbol",
+      "source": "bpw-base",
+      "source-layer": "place",
+      "minzoom": 11.5,
+      "maxzoom": 14,
+      "filter": ["==", ["get", "kind"], "terrain"],
+      "layout": {
+        "text-field": ["get", "name"],
+        "text-font": ["Prayer Walk Regular"],
+        "text-size": 9.5,
+        "text-letter-spacing": 0.16,
+        "text-max-width": 8,
+        "text-padding": 8
+      },
+      "paint": {
+        "text-color": "#4E5654",
+        "text-halo-color": "#0D1113",
+        "text-halo-width": 1.1
+      }
+    },
+    {
+      "id": "bg-place-town",
+      "type": "symbol",
+      "source": "bpw-base",
+      "source-layer": "place",
+      "minzoom": 8,
+      "maxzoom": 14,
+      "filter": ["==", ["get", "kind"], "town"],
+      "layout": {
+        "text-field": ["get", "name"],
+        "text-font": ["Prayer Walk Regular"],
+        "text-transform": ["step", ["get", "rank"], "uppercase", 3, "none"],
+        "text-size": [
+          "interpolate", ["linear"], ["zoom"],
+          8, ["step", ["get", "rank"], 10, 2, 9, 3, 8],
+          13, ["step", ["get", "rank"], 13, 2, 11.5, 3, 10]
+        ],
+        "text-letter-spacing": ["step", ["get", "rank"], 0.2, 3, 0.08],
+        "text-max-width": 7,
+        "text-padding": 10
+      },
+      "paint": {
+        "text-color": ["step", ["get", "rank"], "#6F7674", 3, "#5C6362"],
+        "text-halo-color": "#0D1113",
+        "text-halo-width": 1.3
+      }
+    }
+  ]
+}

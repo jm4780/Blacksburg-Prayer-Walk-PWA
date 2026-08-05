@@ -39,58 +39,104 @@ base is monochrome and almost textureless, and colour survives only as a dot.
 
 ## 2. The basemap is ours
 
-Blacksburg is drawn from the town's own data. There are no vector tiles, no tile host,
-no third-party style — but there **is** a basemap, and getting that wrong is the one
-correction this system has already had to make.
+Not a vendor's tiles with our lines painted over them — that is the actual reason the
+old map felt borrowed — but a single Protomaps `.pmtiles` archive we build, style and
+serve ourselves. This is what `docs/02-technical-plan.md` §1.1 specified before a line
+of code existed, and it is now what runs:
 
-The first cut drew only the 1,582 required segments and nothing else. That is not a
+```
+web/public/basemap/blacksburg.pmtiles    6.5 MB, one file, our origin
+web/public/basemap/blacksburg.json       the style, in this system's palette
+web/src/map/basemap.ts                   the pmtiles:// protocol handler
+```
+
+Getting here cost two corrections, both worth recording.
+
+**The first cut drew only the 1,582 required segments and nothing else.** That is not a
 quiet basemap, it is no basemap, and the result was a network diagram: the bypass, the
 ramps, the campus service roads and the whole non-obligation street fabric simply
 absent. You cannot orient yourself in a town whose landmarks have been deleted, and
-**removing the world is not the same as letting the prayer data lead it.** The prayer
-data has to be the hero through contrast and hierarchy, against a world that is
-present and quiet.
+**removing the world is not the same as letting the prayer data lead it.**
 
-The ground now carries 1,102 public roads outside the obligation — including US 460
-and its ramps, which is what anybody in Blacksburg actually navigates by — plus 96
-public parks and the town boundary, all drawn dark enough to sit under the mission
-without competing with it.
+**The second cut drew the town's own roads, parks and boundary.** A real town — ending
+at a hard line, floating in a void. Blacksburg is not an island, and a map that stops
+at the town limit tells a walker nothing about which way Christiansburg is, where the
+New River runs, or which ridge they are looking at. The town publishes the town, and
+nothing beyond it, so no amount of styling was going to fix that.
 
-Private drives stay out: 224 of them, plus everything marked PRIVATE or GATED. They
-lead to individual houses, nobody navigates by them, and drawing them would put
-residential specificity on a public map to no purpose.
+The ground now carries a region: roughly 50 km in every direction, `-81.00,36.80` to
+`-79.80,37.65`. Every road class from interstate to residential, the New River and its
+tributaries, the two arms of Jefferson National Forest, the Norfolk Southern main line,
+and the place names — Christiansburg, Radford, Salem, Riner, Brush Mountain — that let
+somebody say *where* they are rather than only *what street*.
 
-Consequences of owning the basemap, all of them deliberate:
+### Where the data comes from, and why it is not OpenStreetMap
 
-- **The prayer data leads by contrast, not by subtraction.** The town is underneath it,
-  drawn at a luminance that cannot compete: the brightest context road is darker than
-  the dimmest prayer state, at every zoom, by construction.
-- **It renders identically offline.** This is a tool used outdoors on whatever signal a
-  phone has, and the map is now part of the app rather than something the app fetches.
-- **No third party can change how this product looks**, or take it away.
-- **Nobody else's map looks like this**, because nobody else has this dataset. That is
-  the recognisability the brief asks for, and it is earned structurally rather than
-  applied as a skin.
+The archive is built entirely from **US federal public-domain sources**: USGS The
+National Map (Transportation and Hydrography), the USGS Small-scale collection
+(federal lands, cities) and GNIS. There is no OpenStreetMap geometry in it, and the
+attribution on the map says USGS because that is what is true.
+
+That is not an accident of what happened to be reachable. `docs/01-data-audit.md` §2.4
+already ruled that the canonical network is built **without OSM geometry**, so that
+ODbL share-alike can never reach the town data. Building the basemap from the same
+public-domain family keeps that clean: the archive carries no licence obligation of
+its own, and unlike the town GIS it is not blocked behind release gate G1 — it is the
+one piece of this map that could be published tomorrow.
+
+### Layer stack
+
+Prayer data is not baked into the archive. It is inserted into the basemap's own stack
+at load time, in `MapView`:
+
+```
+bg-land, bg-forest, bg-water, bg-waterway, bg-rail
+  pw-parks                        <- town open space, under the roads
+bg-road-{minor,secondary,primary,trunk,motorway}
+  pw-remaining, pw-held, pw-covered, pw-assigned   <- above every ground line
+bg-waterway-label, bg-road-shield, bg-place-*      <- basemap labels
+  pw-labels, pw-hit                                <- the mission's own names, on top
+```
+
+Parks slide in under the roads, because a park drawn over a street is a park that has
+erased a street. Prayer lines go above every basemap line but below its labels, so
+CHRISTIANSBURG is never struck through by a street somebody walked. The mission's own
+labels stay on top of everything.
+
+With the archive live, `pw-context` — the 1,102 town roads the previous cut used as a
+stand-in basemap — is not drawn at all. The archive already carries them at the same
+luminance ramp, and drawing both would double the ink on exactly the layer that has to
+stay quietest. That layer is now the fallback, not the basemap.
+
+### Offline
+
+One file, precached by the service worker, and one subtlety that is easy to get wrong.
+
+PMTiles is normally read with HTTP range requests. A Workbox precache answers *any*
+request for a precached URL with the whole file and status 200 — range header or not —
+and pmtiles' own `FetchSource` treats that as a misconfigured host and throws. The
+stock source therefore works online and fails the moment the app goes offline, which
+is the one situation this app exists to survive.
+
+`ArchiveSource` in `web/src/map/basemap.ts` reads that 200 as what it is: the entire
+archive, delivered early. Online with a cold cache it uses ranges and pulls a few tens
+of kilobytes; offline it takes the whole file once and never touches the network
+again. `web/e2e/basemap.mjs` forces the 200 path and asserts the map still has tiles.
 
 Labels need SDF glyphs, which is the one thing a self-hosted vector map cannot fake.
 `web/scripts/build-glyphs.mjs` renders Archivo into `public/fonts/Prayer Walk Regular/`
 — two ranges, 76 KB, latin only, which is every character in a Blacksburg street name.
 The map has no runtime dependency on anything outside our origin.
 
-### What we give up
+### What we still leave out
 
-Buildings, land use and water.
+Buildings and land use. Buildings (10,156 polygons, 12.9 MB) and land use (11,398,
+9.3 MB) stay out on both payload and philosophy — they are exactly the visual noise the
+brief asks to remove, and neither is something anybody navigates by.
 
-Buildings (10,156 polygons, 12.9 MB) and land use (11,398, 9.3 MB) stay out on both
-payload and philosophy — they are exactly the visual noise the brief asks to remove,
-and neither is something anybody navigates by.
-
-**Water is a genuine loss, and it is recorded as one rather than dressed up.** Water is
-how people orient in unfamiliar ground, and both references keep it. The town publishes
-no hydrography among the datasets we fetch — landuse has no water class, and
-Blacksburg's water is creeks rather than anything that would read at town scale. Roads,
-parks and the boundary carry the orientation load instead. If a pilot walker says they
-cannot place themselves, water is the first thing to go looking for.
+Water was the previous gap and is closed: NHD gives the New River, the reservoirs and
+every named creek, drawn from the feature's own `visibility` scale so the water thins
+out the way a cartographer would thin it rather than the way a tile budget would.
 
 ---
 
@@ -100,9 +146,39 @@ cannot place themselves, water is the first thing to go looking for.
 |---|---|---|
 | Land | `#0D1113` | Near-black, very slightly cool. Darker than the app's card so the map reads as a surface you look *at*, not a panel of the interface. |
 | Park | `#141B19` | Public open space only — 96 Town-owned polygons of 375; the rest are HOA and private, which are neither walkable nor ours to draw. A park should be felt, not read. |
-| Town roads | `#252C2F` | Public roads outside the obligation. Present so the town is recognisable, dark enough never to compete. |
-| Major roads | `#333C40`, ×1.9 width | US 460, the ramps, the arterials. A little more light, because these are what somebody orients by. |
+| Town roads | `#252C2F` | Public roads outside the obligation. The fallback layer, drawn only when the archive cannot be reached. |
+| Major roads | `#333C40`, ×1.9 width | Same, for US 460 and the ramps. |
 | Boundary | `#242B2D`, 1.2 px, dashed | Not a border. The limit of what we claim. |
+
+### The regional ramp
+
+Five steps of luminance and nothing else — no hue, no texture, no casing. Defined in
+`BASEMAP` in `tokens.ts`, duplicated in the style document, and held together by
+`web/src/map/__tests__/basemap.test.ts`, which fails the build if the two drift or if
+anything on the ground rises above the dimmest prayer state.
+
+| Element | Value | Relative luminance |
+|---|---|---|
+| Forest | `#111713` | 0.0078 |
+| Water | `#0E161B` | 0.0075 |
+| Rail | `#1A1F22`, dashed | 0.0117 |
+| Waterway | `#17222A` | 0.0144 |
+| Road — minor / tertiary / link | `#20262A` | 0.0186 |
+| Road — secondary | `#252C2F` | 0.0240 |
+| Road — primary | `#2A3134` | 0.0294 |
+| Road — trunk | `#2E3639` | 0.0352 |
+| Road — motorway | `#333C40` | 0.0416 |
+| **`INK.remaining` — the dimmest prayer state** | `#4A5457` | **0.0849** |
+
+The top of the ground ramp sits at roughly half the bottom of the prayer ramp. A
+six-lane interstate crossing the frame can therefore never out-rank a cul-de-sac
+somebody has prayed for, at any zoom, anywhere in the region.
+
+Basemap labels run on their own quieter scale — town `#6F7674` (0.176), hamlet
+`#5C6362`, ridge `#4E5654`, shield `#5A6265` — all below `INK.covered` (0.249), so a
+place name can never look more important than a mile that has been walked. They stop
+at zoom 14: below that they orient, above it the walker is reading street names on
+today's route and CHRISTIANSBURG is in the way.
 
 Parks are simplified hard on the way out of the API — a background wash at town scale,
 not a parcel boundary. 226 KB of source becomes 50 KB.
@@ -276,7 +352,10 @@ because the brief said not to redesign application screens.
 
 **Known gaps:**
 
-1. **No water.** §2 above. The first thing to add if orientation is a pilot complaint.
+1. **The archive is a checked-in build artifact.** `pipeline/basemap/build.sh`
+   rebuilds it from public USGS downloads in a few minutes, but nothing runs it
+   automatically and nothing notices when the sources move on. Six months from now,
+   somebody has to remember.
 2. **Motion is specified but not implemented.** The tokens are in place; the
    line-dasharray animation for route draw-in is not written.
 3. **The payload is fixed.** `GZipMiddleware` is in — flagged as the top follow-up in
@@ -297,6 +376,9 @@ because the brief said not to redesign application screens.
 ```
 web/src/map/tokens.ts        the system. Colours, weights, textures, motion, controls
 web/src/map/style.ts         construction: contexts, layer order, expressions
+web/src/map/basemap.ts       the pmtiles:// protocol and its offline-safe source
+web/public/basemap/          the archive and its style document
+pipeline/basemap/build.sh    how to rebuild the archive from USGS
 web/src/screens/MapSystem.tsx  the specimen sheet, at #/map-system
 web/scripts/build-glyphs.mjs  Archivo → SDF glyph ranges, into our own origin
 api/routing/network.py        road_class + path_type on Segment (cartography only)

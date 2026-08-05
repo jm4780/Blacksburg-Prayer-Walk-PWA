@@ -52,6 +52,9 @@ class FakeMap {
 vi.mock('maplibre-gl', () => ({
   Map: FakeMap,
   config: {},
+  // The `pmtiles://` handler for the self-hosted basemap. Registered at MapView's
+  // module scope, so it has to exist on the mock or nothing imports.
+  addProtocol: vi.fn(),
   NavigationControl: class {},
   LngLatBounds: class {
     pts: any[] = []

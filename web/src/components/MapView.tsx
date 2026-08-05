@@ -18,9 +18,10 @@
  *                 is the fastest way to make a map feel broken. "Recenter" puts them
  *                 back deliberately.
  *
- *   DEGRADES.     If the basemap tiles fail — offline, blocked, host down — the map
- *                 falls back to a plain background and the route still draws. A
- *                 missing basemap should cost context, not the whole screen.
+ *   DEGRADES.     If the basemap fails — a first run with no network and a cold
+ *                 service worker, a deployment missing the archive — the map falls
+ *                 back to a plain background and the route still draws. A missing
+ *                 basemap should cost context, not the whole screen.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 // maplibre-gl v6 ships named exports only — there is no default export to import.
@@ -40,11 +41,15 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 // the worker itself imports, which a plain `?url` copy would leave dangling — and
 // hands back the hashed path to give MapLibre.
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
+import { DEFAULT_STYLE_URL, registerBasemapProtocol } from '../map/basemap'
 import { CONTEXTS, type MapContext, baseStyle, prayerLayers } from '../map/style'
 import { MOTION } from '../map/tokens'
 import type { LineString } from '../types'
 
 mlConfig.WORKER_URL = workerUrl
+// `pmtiles://` source URLs, for the self-hosted regional basemap. Registered at
+// module scope so it is in place before any style names the archive.
+registerBasemapProtocol()
 
 /**
  * Set once a basemap fetch has demonstrably failed. Later maps in the same session
@@ -104,19 +109,31 @@ interface Props {
 
 const BLACKSBURG: [number, number] = [-80.4139, 37.2296]
 
-// Overridable per deployment. The default is a free, key-less OpenStreetMap-derived
-// vector style. Attribution is required and is rendered by the attribution control.
-const STYLE_URL = (import.meta as any).env?.VITE_BASEMAP_STYLE
-  ?? 'https://tiles.openfreemap.org/styles/liberty'
+// Overridable per deployment. The default is our own style document, naming our own
+// `.pmtiles` archive on our own origin: no API key, no tile host, no vendor account.
+// Attribution comes from the style's source and is rendered by the attribution
+// control — the corpus is USGS public domain, see public/basemap/blacksburg.json.
+const STYLE_URL = (import.meta as any).env?.VITE_BASEMAP_STYLE ?? DEFAULT_STYLE_URL
 
-/** Last-resort style used when the vector basemap cannot be reached. */
-function fallbackStyle(theme: 'light' | 'dark'): StyleSpecification {
-  return {
-    version: 8,
-    sources: {},
-    layers: [{ id: 'bg', type: 'background',
-               paint: { 'background-color': FALLBACK_BG[theme] } }],
-  }
+/**
+ * Our basemap is dark, because the map system is dark. A deployment that points
+ * `VITE_BASEMAP_STYLE` somewhere else owns its own ground, and the screens that have
+ * not been migrated to a map context go back to their light palette.
+ *
+ * This is what stops the pre-system screens — Mission, Confirm, the walk itself —
+ * drawing a light-grey "still to walk" line on near-black ground.
+ */
+const OWN_BASEMAP = STYLE_URL === DEFAULT_STYLE_URL
+
+/**
+ * Last-resort style used when the basemap cannot be reached. Same land colour, same
+ * glyphs, no tiles: the screen degrades to the map this product had before the
+ * archive existed, rather than to a blank rectangle.
+ */
+function fallbackStyle(darkGround: boolean): StyleSpecification {
+  const s = baseStyle()
+  if (!darkGround) s.layers[0].paint['background-color'] = FALLBACK_BG.light
+  return s as StyleSpecification
 }
 
 const COLORS: Record<SegmentFeature['state'], string> = {
@@ -133,12 +150,13 @@ const COLORS: Record<SegmentFeature['state'], string> = {
 const DARK_COLORS: Record<SegmentFeature['state'], string> = {
   ...COLORS,
   done: '#5E9B7E',      // "Covered"
-  todo: '#6E7676',      // "Still to walk" — drawn dashed, see `theme` below
+  todo: '#6E7676',      // "Still to walk"
   held: '#E4712C',
   planned: '#5E9B7E',
 }
 
-const FALLBACK_BG = { light: '#f2f1ec', dark: '#1B1F22' }
+/** Ground for a screen that has neither a map context nor our own basemap. */
+const FALLBACK_BG = { light: '#f2f1ec' }
 
 export default function MapView({
   route, segments, start, onSegmentTap, onMapTap, height = 340, fitTo = null,
@@ -146,8 +164,13 @@ export default function MapView({
   townRoads, ariaLabel,
 }: Props) {
   const spec = context ? CONTEXTS[context] : null
+  // Two different questions, and conflating them was tempting. `dark` is about the
+  // *screen*: the map system's contexts fill the frame, so they fit tight. `darkGround`
+  // is about the *ground*: our basemap is near-black, so every line drawn on it needs
+  // the dark palette even on a screen that still floats a white card over the map.
   const dark = Boolean(context) || theme === 'dark'
-  const palette = dark ? DARK_COLORS : COLORS
+  const darkGround = dark || OWN_BASEMAP
+  const palette = darkGround ? DARK_COLORS : COLORS
   const container = useRef<HTMLDivElement>(null)
   const map = useRef<MLMap | null>(null)
   const [ready, setReady] = useState(false)
@@ -161,8 +184,8 @@ export default function MapView({
   const fittedKey = useRef<string>('')
   // The map is created once, in an effect with no dependencies, but the failure
   // handlers inside it fire later and need the current theme.
-  const themeRef = useRef<'light' | 'dark'>(dark ? 'dark' : 'light')
-  themeRef.current = dark ? 'dark' : 'light'
+  const groundRef = useRef(darkGround)
+  groundRef.current = darkGround
   const specRef = useRef(spec)
   specRef.current = spec
   const controlsRef = useRef(controls)
@@ -172,14 +195,15 @@ export default function MapView({
   useEffect(() => {
     if (!container.current || map.current) return
     const bornDead = basemapKnownDead
-    // With a map context there is no basemap to *fetch* — but there is a basemap.
-    // Blacksburg's roads, parks and boundary are drawn from our own data, so the style
-    // is complete before the first frame and no tile host can fail or restyle us.
-    // That is the point of the system, not a side effect.
+    // The basemap is a static file on our own origin — one `.pmtiles` archive and one
+    // style document, both precached by the service worker. So this fetch is local,
+    // works offline, and no tile host can fail or restyle us. That is the point of
+    // the architecture, not a side effect.
     const m = new MLMap({
       container: container.current,
-      style: specRef.current ? baseStyle()
-        : bornDead ? fallbackStyle(themeRef.current) : STYLE_URL,
+      style: bornDead
+        ? fallbackStyle(groundRef.current)
+        : STYLE_URL,
       center: BLACKSBURG,
       zoom: 12,
       attributionControl: { compact: true },
@@ -197,22 +221,24 @@ export default function MapView({
 
     // A style that never arrives would otherwise leave a blank screen with a route
     // that never draws, because the layers are added on 'load'.
-    if (bornDead && !specRef.current) setBasemapFailed(true)
-    const failTimer = (bornDead || specRef.current) ? 0 : window.setTimeout(() => {
-      if (!m.isStyleLoaded()) {
-        basemapKnownDead = true
-        setBasemapFailed(true)
-        try { m.setStyle(fallbackStyle(themeRef.current)) } catch { /* already gone */ }
-      }
-    }, 6000)
+    if (bornDead) setBasemapFailed(true)
+    const giveUp = () => {
+      basemapKnownDead = true
+      setBasemapFailed(true)
+      try {
+        m.setStyle(fallbackStyle(groundRef.current))
+      } catch { /* already gone */ }
+    }
+    // Shorter than the six seconds a remote tile host earned: the style and the
+    // archive are both same-origin static files, so if they have not arrived by now
+    // they are not coming.
+    const failTimer = bornDead ? 0 : window.setTimeout(() => {
+      if (!m.isStyleLoaded()) giveUp()
+    }, 3000)
 
     m.on('error', (e: any) => {
       // Tile 404s are noise; a failed *style* is not.
-      if (e?.error?.status && e.error.status >= 400 && !m.isStyleLoaded()) {
-        basemapKnownDead = true
-        setBasemapFailed(true)
-        try { m.setStyle(fallbackStyle(themeRef.current)) } catch { /* already gone */ }
-      }
+      if (e?.error?.status && e.error.status >= 400 && !m.isStyleLoaded()) giveUp()
     })
     m.on('load', () => { window.clearTimeout(failTimer); setReady(true) })
     m.on('styledata', () => {
@@ -287,8 +313,22 @@ export default function MapView({
                geometry: { type: 'Point', coordinates: [start.lon, start.lat] } }]
           : [],
       })
-      for (const layer of prayerLayers(context!)) {
-        if (!m.getLayer(layer.id)) m.addLayer(layer)
+      // Where the mission sits inside the basemap's own stack. Parks slide in under
+      // the roads, because a park drawn over a street is a park that has erased a
+      // street; prayer lines go above every basemap line but below its labels, so
+      // CHRISTIANSBURG is never struck through by a street somebody walked. The
+      // mission's own labels and its tap targets stay on top of everything.
+      const stack = m.getStyle()?.layers ?? []
+      const overRoads = stack.find((l) => l.id.startsWith('bg-road-'))?.id
+      const underLabels = stack.find(
+        (l) => l.type === 'symbol' && l.id.startsWith('bg-'))?.id
+      const live = Boolean(m.getSource('bpw-base'))
+      for (const layer of prayerLayers(context!, live)) {
+        if (m.getLayer(layer.id)) continue
+        const before = layer.id === 'pw-parks' ? overRoads
+          : layer.type === 'symbol' || layer.id === 'pw-hit' ? undefined
+          : underLabels
+        m.addLayer(layer, before)
       }
       if (!m.getLayer('start-dot')) {
         m.addLayer({
@@ -361,7 +401,7 @@ export default function MapView({
       m.addLayer({
         id: 'route-line', type: 'line', source: 'route',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': dark ? '#5E9B7E' : '#1f3d2b',
+        paint: { 'line-color': darkGround ? '#5E9B7E' : '#1f3d2b',
                  'line-width': 5, 'line-opacity': 0.95 },
       })
     }
@@ -377,14 +417,14 @@ export default function MapView({
       m.addLayer({
         id: 'start-dot', type: 'circle', source: 'startpt',
         paint: {
-          'circle-radius': 8, 'circle-color': dark ? '#E4712C' : '#b5801f',
+          'circle-radius': 8, 'circle-color': darkGround ? '#E4712C' : '#b5801f',
           'circle-stroke-width': 3,
-          'circle-stroke-color': dark ? '#14171A' : '#fff',
+          'circle-stroke-color': darkGround ? '#14171A' : '#fff',
         },
       })
     }
   }, [ready, styleEpoch, routeKey, segKey, start?.lat, start?.lon, segments, route,
-      start, dark, palette, context, parks, boundary, townRoads])
+      start, dark, darkGround, palette, context, parks, boundary, townRoads])
 
   // -------------------------------------------------------------------- taps
   useEffect(() => {
@@ -440,7 +480,7 @@ export default function MapView({
   }, [ready, fitKey, routeKey, segKey, fit, userMoved])
 
   return (
-    <div className={dark ? 'mapwrap dark' : 'mapwrap'} style={{ height }}>
+    <div className={darkGround ? 'mapwrap dark' : 'mapwrap'} style={{ height }}>
       <div ref={container} className="maplibre" role="application"
            aria-label={ariaLabel} data-ready={ready ? 'true' : 'false'} />
       <button type="button" className="map-recenter" onClick={() => fit(true)}

@@ -178,9 +178,12 @@ button.link {
 
 .legend { display: flex; flex-wrap: wrap; gap: .9rem; margin: .6rem 0; font-size: .8rem; }
 .legend i { display: inline-block; width: 18px; height: 3px; margin-right: .35rem; vertical-align: middle; }
-.legend .done { background: var(--done); }
-.legend .todo { background: var(--todo); }
-.legend .held { background: var(--held); }
+/* These mirror DARK_COLORS in MapView. The pre-system screens draw on the regional
+   basemap now, which is near-black, so the map switched to the dark palette and the
+   legend has to follow it — a legend that does not match the map is worse than none. */
+.legend .done { background: #5E9B7E; }
+.legend .todo { background: #6E7676; }
+.legend .held { background: #E4712C; }
 .legend .picked { background: var(--gold); }
 .legend .dropped { background: var(--todo); }
 .legend .boundary { background: #b9b5a8; }
@@ -458,18 +461,23 @@ button.link {
 .dash-map-blocked p { margin: 0; font: 400 13px/1.5 Archivo, sans-serif;
                       color: var(--d-dim); }
 
+/* Both rows clear the attribution line, which now has something in it: the basemap
+   is real, and crediting it is not optional. */
 .dash-legend {
-  position: absolute; left: 16px; bottom: 14px; z-index: 3;
+  position: absolute; left: 16px; bottom: 32px; z-index: 3;
   display: flex; flex-direction: column; gap: 8px; pointer-events: none;
 }
 .dash-legend span { display: flex; align-items: center; gap: 10px;
                     font: 500 11px/1 Archivo, sans-serif; color: var(--d-dim); }
 .dash-legend i { width: 26px; flex: none; }
-.dash-legend .lg-done { height: 5px; border-radius: 3px; background: #F2EFE9; }
-.dash-legend .lg-todo { height: 0; border-top: 3px dashed #414A4D; }
+/* The swatches are the map's own weights, at the map's own colours. Covered is
+   heavier and warm white; still-to-walk is a thin solid grey, not a dash — see
+   TEXTURE in src/map/tokens.ts for why the dashes went. */
+.dash-legend .lg-done { height: 4px; border-radius: 2px; background: #F2EFE9; }
+.dash-legend .lg-todo { height: 2px; border-radius: 1px; background: #4A5457; }
 
 .dash-explore, .dash-collapse {
-  position: absolute; right: 14px; bottom: 14px; z-index: 3;
+  position: absolute; right: 14px; bottom: 32px; z-index: 3;
   height: 32px; padding: 0 12px; border-radius: 999px;
   background: rgba(20, 23, 26, .55);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
@@ -478,10 +486,17 @@ button.link {
   letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
 }
 .dash-explore:active, .dash-collapse:active { color: var(--d-paper); }
-/* Legally required once a basemap loads, and nothing more than that. */
-.mapwrap.dark .maplibregl-ctrl-attrib { background: rgba(20, 23, 26, .45); }
-.mapwrap.dark .maplibregl-ctrl-attrib, 
-.mapwrap.dark .maplibregl-ctrl-attrib a { color: #6E7676; font-size: 10px; }
+/* Required once a basemap loads, and nothing more than that. Pinned to the very
+   bottom edge on its own line so the legend and the Explore pill sit above it
+   rather than across it. */
+.mapwrap.dark .maplibregl-ctrl-bottom-right { bottom: 0; right: 0; }
+/* Margin and colour only. MapLibre's own padding is what reserves room for the
+   compact (i) toggle; override it and the button sits on top of the credit. */
+.mapwrap.dark .maplibregl-ctrl-attrib {
+  background: rgba(20, 23, 26, .45); margin: 0; border-radius: 4px 0 0 0;
+}
+.mapwrap.dark .maplibregl-ctrl-attrib,
+.mapwrap.dark .maplibregl-ctrl-attrib a { color: #6E7676; font-size: 9.5px; }
 /* The expanded view is navigated, so it keeps its zoom buttons — but quietly. */
 .mapwrap.dark .maplibregl-ctrl-group {
   background: rgba(20, 23, 26, .55); border: 1px solid var(--d-rule);
@@ -555,8 +570,6 @@ button.link {
 .mapwrap.dark .maplibregl-ctrl-group button span { filter: invert(1); }
 .mapwrap.dark .map-recenter { background: rgba(20, 23, 26, .86);
                               color: #F7F5F1; border-color: rgba(247, 245, 241, .18); }
-.mapwrap.dark .maplibregl-ctrl-attrib { background: rgba(20, 23, 26, .7); }
-.mapwrap.dark .maplibregl-ctrl-attrib a { color: #9AA0A0; }
 
 /* MapView ships its own Recenter pill bottom-left — exactly where the design puts
    the legend. The compact dashboard map is a fixed overview nobody pans, so it does

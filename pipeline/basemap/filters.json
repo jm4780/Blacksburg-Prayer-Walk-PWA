@@ -1,0 +1,31 @@
+{
+  "roads": ["any",
+    ["all", ["in", "class", "motorway", "trunk"], [">=", "$zoom", 7]],
+    ["all", ["in", "class", "primary"], [">=", "$zoom", 9]],
+    ["all", ["in", "class", "secondary"], [">=", "$zoom", 10]],
+    ["all", ["in", "class", "tertiary"], [">=", "$zoom", 11]],
+    ["all", ["in", "class", "minor", "link"], [">=", "$zoom", 12]]
+  ],
+  "rail": [">=", "$zoom", 10],
+  "water": ["any",
+    [">=", "$zoom", 13],
+    ["all", [">=", "$zoom", 11], ["<=", "minz", 11]],
+    ["all", [">=", "$zoom", 10], ["<=", "minz", 10]],
+    ["all", [">=", "$zoom", 9], ["<=", "minz", 9]],
+    ["all", [">=", "$zoom", 7], ["<=", "minz", 7]]
+  ],
+  "waterway": ["any",
+    [">=", "$zoom", 13],
+    ["all", [">=", "$zoom", 11], ["<=", "minz", 11]],
+    ["all", [">=", "$zoom", 10], ["<=", "minz", 10]],
+    ["all", [">=", "$zoom", 9], ["<=", "minz", 9]],
+    ["all", [">=", "$zoom", 7], ["<=", "minz", 7]]
+  ],
+  "place": ["any",
+    ["all", ["==", "kind", "terrain"], [">=", "$zoom", 11]],
+    ["all", ["<=", "rank", 1], [">=", "$zoom", 8]],
+    ["all", ["<=", "rank", 2], [">=", "$zoom", 9]],
+    ["all", ["<=", "rank", 3], [">=", "$zoom", 11]],
+    [">=", "$zoom", 12]
+  ]
+}
