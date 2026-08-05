@@ -108,6 +108,71 @@ stand-in basemap — is not drawn at all. The archive already carries them at th
 luminance ramp, and drawing both would double the ink on exactly the layer that has to
 stay quietest. That layer is now the fallback, not the basemap.
 
+### Emphasis
+
+The archive is one corpus, drawn one way, everywhere. That is exactly what makes it
+read as a real place — and it is also why the first version of it had no centre. The
+eye wandered the surrounding road network instead of settling on Blacksburg.
+
+The fix is emphasis, not content. A neutral near-black, `#070707`, at up to 12.5%
+alpha, feathered outward from the town, drawn over everything the basemap puts down.
+Nothing is filtered, hidden, restyled or moved.
+
+Two decisions carry it.
+
+**It is an ellipse, not the town boundary.** Washing the town limits would *draw* the
+town limits — a shape you can trace, which is the one thing this must not produce.
+The falloff is centred on the town and runs from 3 km to 8 km on a smootherstep, so
+there is nowhere it visibly begins. It also keeps Town of Blacksburg geometry out of
+this public repository, which G1 requires anyway.
+
+The radii are set against the frame the dashboard actually draws — ±7.3 km east-west,
+±5.4 km north-south, measured off the live map — not against the town's own
+dimensions. The first cut used 4.2→11 km, which never engaged inside the frame at all
+and produced a refinement nobody could see.
+
+**It darkens by compositing, not by restyling.** Alpha blending moves every colour the
+same fraction toward the wash, so one number produces all three of the things being
+asked for, and none of them can drift out of agreement with the others:
+
+| | |
+|---|---|
+| darker | values fall |
+| lower contrast | differences between them fall by the same fraction |
+| less saturated | chroma collapses toward a neutral |
+
+At the same time the road ramp came up about 7%, which is what lets the town read as
+slightly richer rather than merely less dimmed.
+
+Measured on the rendered dashboard, interface masked out, drawn ink only:
+
+| Distance from centre | Change |
+|---|---|
+| 0–3 km (downtown, campus) | **+2.8%** |
+| 3.0–4.5 km (outer neighbourhoods) | +3.3% |
+| 4.5–6.0 km (crossover) | −5.9% |
+| 6.0–7.5 km | **−17.0%** |
+| 7.5–9.0 km | **−19.8%** |
+
+Inside-to-outside contrast went from 1.51 to 1.87, a 24% increase. The crossover
+sits at about 4.5 km, which is where the obligation ends.
+
+**The seam, measured.** Subtracting the two renders leaves only the wash. Across the
+dashboard it changes by 0.007 levels per pixel on average and 0.066 at the steepest
+point; a visible step needs about one level over a few pixels. There is no edge to
+find, and that is a number rather than an opinion.
+
+One number is worth knowing before touching this: the colour arithmetic says 12.5%
+alpha should take about 13% off a road, and the render says 18%. A thin line is mostly
+antialiased edge — partial blends sitting in the gamma part of the sRGB curve, where
+the same alpha costs far more luminance than it does on either pure colour. **The map
+is made of thin lines, so the rendered number is the real one.** Re-measure on a
+render; do not recalculate.
+
+The wash is drawn twice, above the ground lines and above the basemap labels, because
+the prayer overlays are inserted between them. They are the one thing on the map it
+never touches.
+
 ### Offline
 
 One file, precached by the service worker, and one subtlety that is easy to get wrong.
@@ -163,16 +228,18 @@ anything on the ground rises above the dimmest prayer state.
 | Water | `#0E161B` | 0.0075 |
 | Rail | `#1A1F22`, dashed | 0.0117 |
 | Waterway | `#17222A` | 0.0144 |
-| Road — minor / tertiary / link | `#20262A` | 0.0186 |
-| Road — secondary | `#252C2F` | 0.0240 |
-| Road — primary | `#2A3134` | 0.0294 |
-| Road — trunk | `#2E3639` | 0.0352 |
-| Road — motorway | `#333C40` | 0.0416 |
+| Road — minor / tertiary / link | `#21282C` | 0.0202 |
+| Road — secondary | `#262E32` | 0.0260 |
+| Road — primary | `#2B3337` | 0.0316 |
+| Road — trunk | `#2F383C` | 0.0376 |
+| Road — motorway | `#343E43` | 0.0458 |
+| *(the same, outside the town, after the wash)* | | *0.0160 – 0.0350* |
 | **`INK.remaining` — the dimmest prayer state** | `#4A5457` | **0.0849** |
 
-The top of the ground ramp sits at roughly half the bottom of the prayer ramp. A
-six-lane interstate crossing the frame can therefore never out-rank a cul-de-sac
-somebody has prayed for, at any zoom, anywhere in the region.
+The top of the ground ramp sits a little over half the bottom of the prayer ramp — 1.85
+to 1, and 2.4 to 1 once the wash is on it. A six-lane interstate crossing the frame can
+therefore never out-rank a cul-de-sac somebody has prayed for, at any zoom, anywhere in
+the region. `basemap.test.ts` asserts it rather than trusting it.
 
 Basemap labels run on their own quieter scale — town `#6F7674` (0.176), hamlet
 `#5C6362`, ridge `#4E5654`, shield `#5A6265` — all below `INK.covered` (0.249), so a
@@ -377,8 +444,9 @@ because the brief said not to redesign application screens.
 web/src/map/tokens.ts        the system. Colours, weights, textures, motion, controls
 web/src/map/style.ts         construction: contexts, layer order, expressions
 web/src/map/basemap.ts       the pmtiles:// protocol and its offline-safe source
-web/public/basemap/          the archive and its style document
+web/public/basemap/          the archive, its style document, the emphasis falloff
 pipeline/basemap/build.sh    how to rebuild the archive from USGS
+pipeline/basemap/emphasis.py the falloff geometry — radii, alpha, easing
 web/src/screens/MapSystem.tsx  the specimen sheet, at #/map-system
 web/scripts/build-glyphs.mjs  Archivo → SDF glyph ranges, into our own origin
 api/routing/network.py        road_class + path_type on Segment (cartography only)

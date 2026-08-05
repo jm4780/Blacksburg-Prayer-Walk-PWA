@@ -74,3 +74,7 @@ tippecanoe -o blacksburg.pmtiles --force \
 
 cp blacksburg.pmtiles "$OUT"
 echo "wrote $OUT  $(du -h "$OUT" | cut -f1)"
+
+# The emphasis falloff is generated, not downloaded, and it is cheap. Regenerating it
+# here keeps it in step with the archive it sits on top of.
+( cd "$(cd "$HERE/../.." && pwd)" && python3 -m pipeline.basemap.emphasis )

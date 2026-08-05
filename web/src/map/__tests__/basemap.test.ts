@@ -106,4 +106,65 @@ describe('regional basemap style', () => {
     expect(lastLine).toBeLessThan(firstSymbol)
     expect(ids[0]).toBe('bg-land')
   })
+
+  // ------------------------------------------------------------ emphasis
+  describe('the emphasis wash', () => {
+    const ids = style.layers.map((l: any) => l.id)
+    const ground = style.layers.find((l: any) => l.id === 'bg-emphasis-ground')
+    const labels = style.layers.find((l: any) => l.id === 'bg-emphasis-labels')
+
+    it('is one colour at one alpha, in the tokens and in the style', () => {
+      for (const l of [ground, labels]) {
+        expect(l.paint['fill-color']).toBe(BASEMAP.wash)
+        expect(l.paint['fill-opacity']).toEqual(['get', 'a'])
+        // Adjacent bands share an edge. Antialiasing each one draws a hairline at
+        // every seam, which is a set of concentric rings around Blacksburg — the
+        // exact thing the falloff exists to avoid.
+        expect(l.paint['fill-antialias']).toBe(false)
+      }
+    })
+
+    it('is neutral, so it desaturates as well as darkens', () => {
+      const ch = [1, 3, 5].map((i) => parseInt(BASEMAP.wash.slice(i, i + 2), 16))
+      expect(Math.max(...ch) - Math.min(...ch)).toBe(0)
+      // And near enough to black that it darkens roughly in proportion rather than
+      // flattening the dark end of the ramp into a single tone.
+      expect(Math.max(...ch)).toBeLessThan(16)
+    })
+
+    it('brackets the basemap without touching the prayer overlays', () => {
+      // MapView inserts prayer lines before the first bg-* symbol layer and prayer
+      // labels at the very top. So the ground wash has to sit above every basemap
+      // line but below that anchor, and the label wash above every basemap label.
+      const firstBgSymbol = ids.findIndex(
+        (id: string, i: number) => style.layers[i].type === 'symbol' && id.startsWith('bg-'))
+      const lastLine = style.layers.map((l: any) => l.type).lastIndexOf('line')
+      expect(ids.indexOf('bg-emphasis-ground')).toBeGreaterThan(lastLine)
+      expect(ids.indexOf('bg-emphasis-ground')).toBeLessThan(firstBgSymbol)
+      expect(ids.indexOf('bg-emphasis-labels')).toBe(ids.length - 1)
+    })
+
+    it('takes about a fifth off the region, and never brightens anything', () => {
+      const a = BASEMAP.washAlpha
+      const w = [1, 3, 5].map((i) => parseInt(BASEMAP.wash.slice(i, i + 2), 16))
+      const over = (hex: string) => '#' + [1, 3, 5]
+        .map((i, k) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - a) + w[k] * a))
+        .map((v) => v.toString(16).padStart(2, '0')).join('')
+      // The roads are what the eye wanders over, so they are what the brief is about.
+      // Measured against the ramp as it now stands; against the ramp before this
+      // refinement — which is what somebody comparing screenshots sees — the region
+      // lands 14-19% down, because the ramp itself came up about 7% at the same time.
+      for (const hex of Object.values(BASEMAP.road)) {
+        const drop = 1 - luminance(over(hex)) / luminance(hex)
+        expect(drop).toBeGreaterThan(0.15)
+        expect(drop).toBeLessThan(0.25)
+      }
+      // Everything else only has to move the same direction. Land, forest and water
+      // sit on the linear part of the sRGB curve, where the same alpha buys less.
+      for (const hex of [GROUND.land, BASEMAP.forest, BASEMAP.water, BASEMAP.waterway,
+                         BASEMAP.rail, ...Object.values(BASEMAP.label)]) {
+        expect(luminance(over(hex))).toBeLessThanOrEqual(luminance(hex))
+      }
+    })
+  })
 })

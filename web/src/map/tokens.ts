@@ -73,13 +73,15 @@ export const GROUND = {
  * The road ramp is the load-bearing part. Five steps of luminance and nothing else —
  * no hue, no texture, no casing:
  *
- *     minor 0.019  <  secondary 0.024  <  primary 0.029  <  trunk 0.035
- *                                                       <  motorway 0.042
+ *     minor 0.020  <  secondary 0.026  <  primary 0.032  <  trunk 0.038
+ *                                                       <  motorway 0.046
  *
- * and the top of that ladder is `contextMajor`, which the system already guarantees
- * sits at roughly half of `INK.remaining` (0.085) — the dimmest prayer state. So a
- * six-lane interstate crossing the frame can never out-rank a cul-de-sac somebody has
- * prayed for, at any zoom, anywhere in the region.
+ * and the top of that ladder still sits at a little over half of `INK.remaining`
+ * (0.085) — the dimmest prayer state. So a six-lane interstate crossing the frame can
+ * never out-rank a cul-de-sac somebody has prayed for, at any zoom, anywhere in the
+ * region. The ramp was lifted about 7% from its first cut, which is what lets the town
+ * read as slightly richer than the country around it once the wash is applied to
+ * everything else.
  */
 export const BASEMAP = {
   /** National forest. Felt as a mass on the horizon, never read as a shape. */
@@ -90,12 +92,40 @@ export const BASEMAP = {
   /** Norfolk Southern through Christiansburg. Dashed, and almost gone. */
   rail: '#1A1F22',
   road: {
-    minor: '#20262A',
-    secondary: '#252C2F',   // = GROUND.context
-    primary: '#2A3134',
-    trunk: '#2E3639',
-    motorway: '#333C40',    // = GROUND.contextMajor
+    minor: '#21282C',
+    secondary: '#262E32',
+    primary: '#2B3337',
+    trunk: '#2F383C',
+    motorway: '#343E43',
   },
+  /**
+   * EMPHASIS, NOT CONTENT.
+   *
+   * The archive is one corpus drawn one way everywhere, which is what makes it read
+   * as a real place instead of a town with scenery glued around it. What it lacked
+   * was a centre. This is that: a neutral near-black, feathered outward from the town
+   * over seven kilometres, drawn over everything the basemap puts down.
+   *
+   * It is composited, not restyled, and that is the whole trick. Alpha blending moves
+   * every colour the same fraction toward the wash, so one number produces all three
+   * of the things being asked for at once —
+   *
+   *     darker           values fall ~18% at the edge of the dashboard frame
+   *     lower contrast   differences between them fall by the same fraction
+   *     less saturated   chroma collapses toward a neutral
+   *
+   * — and none of them can drift out of agreement with the others, because there is
+   * only one of them.
+   *
+   * The falloff is an ellipse centred on the town, not the town boundary. Washing the
+   * boundary would *draw* the boundary, which is the one thing the brief rules out;
+   * seven kilometres of smootherstep has nowhere it visibly begins. It also keeps
+   * Town of Blacksburg geometry out of this public repository, which G1 requires.
+   *
+   * Geometry: public/basemap/emphasis.json, from pipeline/basemap/emphasis.py.
+   */
+  wash: '#070707',
+  washAlpha: 0.125,
   /**
    * Basemap labels are not the design system's labels. A street name on today's walk
    * is `LABELS.color` (0.55) because the walker is about to act on it; CHRISTIANSBURG
