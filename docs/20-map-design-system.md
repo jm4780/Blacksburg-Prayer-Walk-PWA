@@ -90,12 +90,13 @@ Prayer data is not baked into the archive. It is inserted into the basemap's own
 at load time, in `MapView`:
 
 ```
-bg-land, bg-forest, bg-water, bg-waterway, bg-rail
+bg-land, bg-forest, bg-water
   pw-parks                        <- town open space, under the roads and the plate
-bg-road-{minor,secondary,primary,trunk,motorway}
+bg-stage                                           <- the plate. A SURFACE.
+bg-waterway, bg-rail, bg-road-{minor..motorway}
 bg-waterway-label, bg-road-shield, bg-place-*      <- basemap labels
-bg-town-line, bg-town-edge                         <- the frame
-bg-stage, bg-emphasis                              <- the plate, then the darkening
+bg-town-line, bg-town-edge                         <- the frame, all but invisible
+bg-emphasis                                        <- the darkening. ATMOSPHERE.
   pw-remaining, pw-held, pw-covered, pw-assigned   <- above the entire basemap
   pw-labels, pw-hit
 ```
@@ -135,6 +136,24 @@ signed-distance field around the municipal line and hangs two values off every b
 one geometry, and the crossing between them centred on the boundary rather than either
 side of it.
 
+**But the two layers do not live in the same place, and that is the whole thing.**
+
+> **A plate is a surface, so it goes UNDER the linework.
+> The darkening is atmosphere, so it goes OVER everything.**
+
+Two rounds were spent on the wrong side of that. Drawn over the roads, a lift
+brightens them too — so it is capped by how close the brightest road may come to the
+dimmest prayer state, and held to what that ceiling allows the ground moved about
+**two display levels**. Measured on the render: land went 13,17,19 inside the line to
+13,17,19 immediately outside it. Two levels is not a plate; it is a rumour of one, and
+no amount of tuning was going to fix a mechanism.
+
+Drawn under them the roads never move at all, the invariant is untouchable, and the
+surface is free to carry the whole effect — **about ten levels**, which is what two
+surfaces meeting actually looks like. Road-against-land contrast inside the town falls,
+and that is not a side effect to apologise for: ground rising toward the linework that
+sits on it is exactly what "raised" means.
+
 The ramps are deliberately different widths, and the town's own shape is why. It is
 51 km² of sprawl, not a blob — erode it 2 km and 5 km² survives — so a lift that faded
 over kilometres would be a gradient with no shape to it. The plate therefore falls away
@@ -156,7 +175,25 @@ with it. A lift carrying more chroma than the ground it lands on leaves that alo
 Inside the town, saturation now goes *up* 2–3%. That is what "richer" has to mean if
 it means anything.
 
-Measured on the rendered dashboard, banded by signed distance from the line:
+**Measure the surface, not the ink.** Every measurement before this one averaged the
+pixels *brighter* than bare ground — the roads — and threw the surface away. That is
+the wrong instrument for a plate, and it is why two rounds of tuning kept reporting
+healthy numbers for something nobody could see. The unit below is display levels of
+bare land, because that is what a surface is made of.
+
+| Surface, bare land | Bytes |
+|---|---|
+| inside the line | **23.0** |
+| immediately outside | 13.0 |
+| 1.5–3 km out | 11.3 |
+| beyond 3 km | 11.0 |
+
+The whole transition happens within 250 m either side of the line: about 50 px at map
+scale, soft, and the two surfaces on either side of it are plainly different things.
+The frame is down to a 14% hairline with a 5% companion, because with a step that size
+the plate defines its own shape and the line has almost nothing left to do.
+
+Measured on the same render, banded by signed distance from the line:
 
 | Distance from the town line | Luminance | Saturation |
 |---|---|---|

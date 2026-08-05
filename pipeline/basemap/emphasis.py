@@ -90,18 +90,17 @@ OUTER_KM = 3.2
 
 # --- the plate --------------------------------------------------------------------
 #
-# The plate stops at the line, and that is the second correction this ramp has needed.
-# Letting it fade out over a kilometre of open country measured at +23.9% just outside
-# the boundary — the town wearing a halo, which is exactly what the brief rules out.
-# It now fades over the last 600 m inside and is gone 150 m past the line, so the only
-# thing beyond the boundary is the darkening.
+# 700 m of feather, sitting slightly inside the line but crossing it: about 50 px at
+# the dashboard's scale. That is the plate's own edge, and it has to be on the boundary
+# rather than short of it — the whole effect is two surfaces meeting, and they cannot
+# meet anywhere else without the shape stopping being the town's.
 #
-# 750 m of feather is about 55 px at the dashboard's scale: soft enough to have no
-# edge, tight enough that the plate still has the town's shape. Blacksburg is 51 km2 of
-# sprawl — erode it 600 m and 28 km2 survives — so more than half the town sits at full
-# lift and the rest is the plate's own edge.
-LIFT_FROM = -0.6
-LIFT_TO = 0.15
+# An earlier cut stopped the lift 150 m short of the line, out of a fear of halos. That
+# fear was correct for a lift drawn OVER the linework, which brightens roads and reads
+# as a glow. It does not apply to a tint drawn UNDER it: a surface that fades across
+# its own border is just a soft edge.
+LIFT_FROM = -0.4
+LIFT_TO = 0.3
 # How much the ground under the town comes up. This is a lerp toward `stage` in the
 # style, so the number here is only the ramp; the colour and its alpha live in
 # tokens.ts and blacksburg.json with everything else.
@@ -133,7 +132,7 @@ ALPHA = 0.35
 # steps because the lift does all of its work there; the far end of the darkening can
 # be coarse because smootherstep has almost flattened by then. Inside the line nothing
 # varies at all, so the whole town is a single feature.
-STEPS = [(-0.6, 0.6, 0.075), (0.6, 1.6, 0.15), (1.6, 3.2, 0.2)]
+STEPS = [(-0.4, 0.4, 0.05), (0.4, 1.6, 0.15), (1.6, 3.2, 0.2)]
 
 # Simplification, in metres, at the inner and outer ends of the ramp. A ring four
 # kilometres out has been smoothed into near-circular arcs by the buffer itself and
@@ -247,7 +246,7 @@ def build(src=None):
 
     # The town's interior: one feature, full plate, no darkening. This is the part of
     # the map the whole exercise is pointing at, and it is uniform on purpose.
-    add(rings[0], -1.0)
+    add(rings[0], -0.8)
 
     for i in range(len(ds) - 1):
         # Each band is an annulus: the next ring out, with this one taken out of it.

@@ -148,14 +148,27 @@ export const BASEMAP = {
    * everything inside the municipal line, so the ground the mission stands on comes up
    * as the country around it goes down.
    *
-   *     land   +14%     park  +12%     forest +13%
-   *     minor  +13%     motorway  +8%
+   *     land 13,17,19 -> 23,30,30      park 20,27,25 -> 29,38,35
    *
-   * The colour is green-leaning rather than a neutral grey, and that is the difference
-   * between a lift and a wash. Lerping near-black ground toward a neutral raises it and
-   * bleaches it at the same time — measured, a grey plate took 7-10% of the ground's own
-   * saturation with it. A lift carrying more chroma than the ground it lands on leaves
-   * that alone, which is what "richer" has to mean if it means anything.
+   * A PLATE IS A SURFACE, SO IT GOES UNDER THE LINEWORK. This is the correction that
+   * made the whole thing work, and it is worth stating plainly because two rounds were
+   * spent on the other side of it.
+   *
+   * Drawn OVER the roads, a lift brightens them too — so it is capped by how close the
+   * brightest road may come to the dimmest prayer state, which at any strength that
+   * actually reads leaves almost no headroom. Held to what that ceiling allows, the
+   * surface moved about two display levels: measured, land went 13,17,19 inside to
+   * 13,17,19 immediately outside. Two bytes is not a plate, it is a rumour of one.
+   *
+   * Drawn UNDER them, the roads never move at all, the invariant is untouchable, and
+   * the surface is free to carry the whole effect — about eleven display levels, which
+   * is what two surfaces meeting actually looks like. Road-against-land contrast inside
+   * the town falls, and that is not a side effect: ground rising toward the linework
+   * that sits on it is exactly what "raised" means.
+   *
+   * The darkening goes the other way, over everything, because it is atmosphere rather
+   * than surface. One is a thing the map is made of; the other is the air in front of
+   * it. They are not the same kind of object and they do not belong in the same place.
    *
    * It sits above the roads rather than under them, which is what lets the roads rise
    * with the land instead of being left behind on a brightening plate. The cost is
@@ -170,8 +183,8 @@ export const BASEMAP = {
    * a lift above the overlay costs the subject 3.7% and lifts remaining ground 7.6% —
    * it compresses the prayer scale exactly where the mission is. See MapView.
    */
-  stage: '#5F9B8A',
-  stageAlpha: 0.024,
+  stage: '#546B63',
+  stageAlpha: 0.14,
   /**
    * The frame. Almost nothing: a hairline on the municipal line at 30% opacity, plus
    * a wide, blurred, inward-offset companion at 10% that reads as the edge of the
@@ -179,9 +192,9 @@ export const BASEMAP = {
    * are what stops the plate from looking like a smudge.
    */
   line: '#39464C',
-  lineOpacity: 0.45,
+  lineOpacity: 0.14,
   edge: '#5C6D74',
-  edgeOpacity: 0.1,
+  edgeOpacity: 0.05,
   /**
    * Basemap labels are not the design system's labels. A street name on today's walk
    * is `LABELS.color` (0.55) because the walker is about to act on it; CHRISTIANSBURG

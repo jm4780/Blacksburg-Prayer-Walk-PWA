@@ -315,9 +315,10 @@ export default function MapView({
       })
       // Where the mission sits inside the basemap's own stack.
       //
-      // Parks slide in under the roads, because a park drawn over a street is a park
-      // that has erased a street — and because that also puts them under the plate, so
-      // open space inside the town is lifted with the ground it sits on.
+      // Parks slide in under the plate, which is under the roads. Under the roads
+      // because a park drawn over a street is a park that has erased a street; under
+      // the plate because open space inside the town has to be lifted along with the
+      // ground it sits on, or it goes dark against a surface that came up without it.
       //
       // EVERYTHING ELSE GOES ON TOP OF THE WHOLE BASEMAP, EMPHASIS INCLUDED. An
       // earlier cut inserted the prayer lines below the basemap's labels, to stop a
@@ -329,11 +330,12 @@ export default function MapView({
       // mission is. The overlay is the hero; nothing on the ground may touch it, and
       // a name occasionally crossed by a street is a much smaller price.
       const stack = m.getStyle()?.layers ?? []
-      const overRoads = stack.find((l) => l.id.startsWith('bg-road-'))?.id
+      const underPlate = stack.find(
+        (l) => l.id === 'bg-stage' || l.id.startsWith('bg-road-'))?.id
       const live = Boolean(m.getSource('bpw-base'))
       for (const layer of prayerLayers(context!, live)) {
         if (m.getLayer(layer.id)) continue
-        m.addLayer(layer, layer.id === 'pw-parks' ? overRoads : undefined)
+        m.addLayer(layer, layer.id === 'pw-parks' ? underPlate : undefined)
       }
       if (!m.getLayer('start-dot')) {
         m.addLayer({

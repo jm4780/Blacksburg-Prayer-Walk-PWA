@@ -97,18 +97,20 @@ describe('regional basemap style', () => {
     expect(JSON.stringify(style.sources)).not.toMatch(/OpenStreetMap/i)
   })
 
-  it('puts the emphasis last, so nothing on the ground can reach the mission', () => {
+  it('puts surface under the linework and atmosphere over it', () => {
     const ids = style.layers.map((l: any) => l.id)
     expect(ids[0]).toBe('bg-land')
-    // MapView appends every prayer layer, so "last two" is the same statement as
-    // "below the overlay". A lift above the overlay measures at -3.7% on the subject
-    // and +7.6% on remaining ground, which is the prayer scale being squeezed from
-    // both ends — see the comment in MapView.
-    expect(ids.slice(-2)).toEqual(['bg-stage', 'bg-emphasis'])
-    // And every basemap label is below them, or the region's names would not dim
-    // with the region they name.
+    // The plate is a surface: under every line and every label, so it can carry the
+    // whole effect without touching a single road. Held above them it is capped by the
+    // prayer invariant and moves the ground about two display levels, which is not a
+    // plate. See tokens.ts.
+    const firstLine = style.layers.findIndex((l: any) => l.type === 'line')
+    expect(ids.indexOf('bg-stage')).toBeLessThan(firstLine)
+    // The darkening is atmosphere: over everything, including the labels, or the
+    // region's names would not dim with the region they name.
+    expect(ids[ids.length - 1]).toBe('bg-emphasis')
     const lastSymbol = style.layers.map((l: any) => l.type).lastIndexOf('symbol')
-    expect(lastSymbol).toBeLessThan(ids.indexOf('bg-stage'))
+    expect(lastSymbol).toBeLessThan(ids.indexOf('bg-emphasis'))
   })
 
   // ------------------------------------------------------------ emphasis
@@ -146,23 +148,26 @@ describe('regional basemap style', () => {
       expect(edge.paint['line-offset']).toBeLessThan(0)
     })
 
-    it('lifts the plate without ever reaching the prayer states', () => {
+    it('lifts the surface, and cannot reach the prayer states because it is under them', () => {
       const a = BASEMAP.stageAlpha
       const c = [1, 3, 5].map((i) => parseInt(BASEMAP.stage.slice(i, i + 2), 16))
       const over = (hex: string) => '#' + [1, 3, 5]
         .map((i, k) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - a) + c[k] * a))
         .map((v) => v.toString(16).padStart(2, '0')).join('')
-      // The whole ground goes up, and every bit of it stays under the floor.
+      // Only the fills are under it; the roads are above and never move.
       const land = luminance(GROUND.land)
       const floor = land + (luminance(INK.remaining) - land) * INK_OPACITY.remaining
-      for (const hex of [GROUND.land, GROUND.park, BASEMAP.forest, BASEMAP.water,
-                         ...Object.values(BASEMAP.road)]) {
+      for (const hex of [GROUND.land, GROUND.park, BASEMAP.forest, BASEMAP.water]) {
         expect(luminance(over(hex))).toBeGreaterThan(luminance(hex))
-        expect(luminance(over(hex))).toBeLessThan(floor)
+        // Real headroom, not a squeak past: the surface is nowhere near the mission.
+        expect(floor / luminance(over(hex))).toBeGreaterThan(3)
       }
-      // And it is a lift, not a rebuild: the brightest ground gains under a fifth.
-      expect(luminance(over(BASEMAP.road.motorway)) / luminance(BASEMAP.road.motorway))
-        .toBeLessThan(1.2)
+      // And it has to actually move: a plate that shifts the ground by a couple of
+      // display levels is the version that did not read.
+      const before = [1, 3, 5].map((i) => parseInt(GROUND.land.slice(i, i + 2), 16))
+      const after = [1, 3, 5].map((i) => parseInt(over(GROUND.land).slice(i, i + 2), 16))
+      const step = (after.reduce((a, b) => a + b) - before.reduce((a, b) => a + b)) / 3
+      expect(step).toBeGreaterThan(7)
     })
 
     it('is neutral, so it desaturates as well as darkens', () => {
@@ -182,6 +187,7 @@ describe('regional basemap style', () => {
       expect(ids.indexOf('bg-emphasis')).toBeGreaterThan(lastLine)
       expect(ids.indexOf('bg-emphasis')).toBeGreaterThan(firstBgSymbol)
       expect(ids.indexOf('bg-emphasis')).toBe(ids.length - 1)
+      expect(ids.indexOf('bg-stage')).toBeLessThan(lastLine)
     })
 
     it('takes a real bite out of the region, and never brightens anything', () => {
