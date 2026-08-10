@@ -1,2 +1,6 @@
 # Derived geometry. Rebuilt by the pipeline; never a redistributable asset.
 data/out/*.geojson
+__pycache__/
+*.pyc
+node_modules/
+web/dist/
