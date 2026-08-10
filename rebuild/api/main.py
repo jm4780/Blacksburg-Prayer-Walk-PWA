@@ -10,12 +10,14 @@ then dropped.
 
 from __future__ import annotations
 
+import os
 import time
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import db, engines
@@ -285,3 +287,21 @@ async def timing(request: Request, call_next):
     resp = await call_next(request)
     resp.headers["X-Elapsed-Ms"] = f"{(time.time() - t0) * 1000:.1f}"
     return resp
+
+
+# --------------------------------------------------------------------------
+# the app itself
+# --------------------------------------------------------------------------
+# Serving the built PWA from the API means one process on one port, which is
+# what makes this openable on a phone: a phone has no localhost of ours, so
+# every extra port is another thing to expose and another thing to go wrong.
+#
+# Mounted last, on purpose. A mount at "/" swallows everything, so every /api
+# route above must already be registered.
+_DIST = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "web", "dist")
+
+if os.path.isdir(_DIST):
+    # html=True serves index.html for unknown paths, which a single-page app
+    # needs. StaticFiles honours Range requests, so the 4.4 MB .pmtiles archive
+    # streams in pieces rather than all at once.
+    app.mount("/", StaticFiles(directory=_DIST, html=True), name="app")

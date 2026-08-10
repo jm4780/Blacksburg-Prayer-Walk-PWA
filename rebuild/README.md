@@ -10,6 +10,13 @@ how long you have. Get a loop that starts and ends where you are and takes in
 streets nobody has covered. Walk it. Confirm what you actually walked. The town
 map moves.
 
+## Open it on a phone
+
+[`docs/on-your-phone.md`](docs/on-your-phone.md). No install: a few buttons on
+GitHub, wait ten minutes, open a link. One process serves the app, the map and
+the API on a single port, so there is one thing to expose and one thing to
+start.
+
 ## Run it
 
 ```bash
@@ -17,11 +24,12 @@ map moves.
 python3 rebuild/data/pipeline/extract_network.py     # build the network
 python3 rebuild/db/load_network.py                   # schema + load
 
-# api
+# app and api together on :8000
+cd rebuild/web && npm install && npm run build
 cd rebuild && python3 -m uvicorn api.main:app --port 8000
 
-# app
-cd rebuild/web && npm install && npm run dev         # :5173, proxies /api
+# or, while working on the front end, with hot reload on :5173
+cd rebuild/web && npm run dev
 ```
 
 Tests:

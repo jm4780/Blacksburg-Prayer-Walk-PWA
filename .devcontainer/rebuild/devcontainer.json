@@ -1,0 +1,38 @@
+{
+  "name": "Blacksburg Prayer Walk (rebuild)",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" }
+  },
+
+  // Runs once, when the Codespace is created. Installs PostGIS, builds the
+  // street network from the map archive in this repository, loads it, and
+  // builds the app. Several minutes, mostly npm.
+  "postCreateCommand": "bash .devcontainer/rebuild/setup.sh",
+
+  // Runs every time you open it. Starts the database and the app.
+  "postAttachCommand": "bash .devcontainer/rebuild/start.sh",
+
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "Prayer Walk (rebuild)",
+      "onAutoForward": "openBrowser",
+      // Public, because a phone is not signed in to this Codespace and a
+      // private port would just show it a login page.
+      //
+      // Public means anyone with the address can open it. The address is long
+      // and random, it dies with the Codespace, and the app holds no personal
+      // data: no account, no password, and no location is ever stored. Fine for
+      // trying it on a phone. Not how a real deployment should run.
+      "visibility": "public"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "dbaeumer.vscode-eslint"]
+    }
+  }
+}

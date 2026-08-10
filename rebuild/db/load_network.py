@@ -1,87 +1,89 @@
-"""Load the extracted network into Postgres/PostGIS.
+"""Apply the schema and load the extracted network into Postgres/PostGIS.
 
-Usage:  python3 rebuild/db/load_network.py [dsn]
+Connects over a DSN like everything else, so it runs as any user on any host.
+It used to shell out to `su postgres -c psql`, which works only as root on a
+machine where the postgres system account exists, and fails on a Codespace.
+
+    python3 rebuild/db/load_network.py
+    BPW_DSN=postgresql://user@host/db python3 rebuild/db/load_network.py
 """
+from __future__ import annotations
+
 import json
 import os
-import subprocess
-import sys
+
+import psycopg
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 GEOJSON = os.path.join(REPO, "rebuild", "data", "out", "network.geojson")
 SCHEMA = os.path.join(REPO, "rebuild", "db", "schema.sql")
-DB = os.environ.get("BBG_DB", "bbg")
+
+DSN = os.environ.get("BPW_DSN", "postgresql://postgres@localhost:5432/bbg")
+
+COLUMNS = (
+    "seg_id", "name", "ref", "class", "length_m",
+    "node_a", "node_b", "homes", "carriageway", "geom",
+)
 
 
-def psql(sql: str, quiet: bool = True):
-    args = ["su", "postgres", "-c", f"psql -v ON_ERROR_STOP=1 -q -d {DB} -c {json.dumps(sql)}"]
-    if not quiet:
-        args = ["su", "postgres", "-c", f"psql -v ON_ERROR_STOP=1 -d {DB} -tAc {json.dumps(sql)}"]
-    out = subprocess.run(args, capture_output=True, text=True)
-    if out.returncode:
-        raise SystemExit(out.stderr.strip())
-    return out.stdout.strip()
+def main() -> None:
+    with open(GEOJSON) as fh:
+        fc = json.load(fh)
+    features = fc["features"]
 
+    with psycopg.connect(DSN, autocommit=False) as conn:
+        with conn.cursor() as cur:
+            cur.execute(open(SCHEMA).read())
+            print("schema applied")
 
-def main():
-    subprocess.run(
-        ["su", "postgres", "-c", f"psql -v ON_ERROR_STOP=1 -q -d {DB} -f {SCHEMA}"], check=True
-    )
-    print("schema applied")
+            # Coverage points at segments, so it goes first. Walks are kept:
+            # a rebuild renumbers seg_ids, and silently dropping somebody's
+            # walk history to reload a file would be the wrong trade.
+            cur.execute("truncate coverage, walk_segment, segment restart identity cascade")
 
-    fc = json.load(open(GEOJSON))
-    psql("truncate coverage, walk_segment, walk, segment restart identity cascade;")
-
-    rows = []
-    for f in fc["features"]:
-        p = f["properties"]
-        geom = json.dumps(f["geometry"])
-        rows.append(
-            "\t".join(
-                [
-                    str(p["seg_id"]),
-                    p["name"].replace("\t", " "),
-                    p["ref"] or "\\N",
-                    p["class"],
-                    str(p["length_m"]),
-                    p["node_a"],
-                    p["node_b"],
-                    # Null unless the authoritative fetch supplied a real count.
-                    # Never zero: zero is a claim that nobody lives there.
-                    ("\\N" if p.get("homes") is None else str(p["homes"])),
-                    ("\\N" if p.get("carriageway") is None else str(p["carriageway"])),
-                    geom,
-                ]
+            # Staged through a temp table because geometry arrives as GeoJSON
+            # text and COPY cannot convert it on the way in.
+            cur.execute(
+                "create temp table _seg_in ("
+                " seg_id int, name text, ref text, class text, length_m float8,"
+                " node_a text, node_b text, homes int, carriageway int, geojson text"
+                ") on commit drop"
             )
-        )
+            with cur.copy(
+                f"copy _seg_in ({', '.join(COLUMNS[:-1])}, geojson) from stdin"
+            ) as copy:
+                for f in features:
+                    p = f["properties"]
+                    copy.write_row(
+                        (
+                            p["seg_id"],
+                            p["name"],
+                            p.get("ref"),
+                            p["class"],
+                            p["length_m"],
+                            p["node_a"],
+                            p["node_b"],
+                            # Null, never zero. A zero would claim nobody lives
+                            # on that street. See contracts.md section 6.
+                            p.get("homes"),
+                            p.get("carriageway"),
+                            json.dumps(f["geometry"]),
+                        )
+                    )
 
-    tsv = "\n".join(rows) + "\n"
-    tmp = "/tmp/bbg_segments.tsv"
-    with open(tmp, "w") as fh:
-        fh.write(tsv)
-    os.chmod(tmp, 0o644)
+            cur.execute(
+                f"insert into segment ({', '.join(COLUMNS)}) "
+                f"select {', '.join(COLUMNS[:-1])}, "
+                " st_setsrid(st_geomfromgeojson(geojson), 4326) from _seg_in"
+            )
+            cur.execute("select count(*), round((sum(length_m)/1609.34)::numeric,2) from segment")
+            n, drawn = cur.fetchone()
+            cur.execute("select count(*), round((sum(length_m)/1609.34)::numeric,2) from street_unit")
+            units, countable = cur.fetchone()
+        conn.commit()
 
-    # \copy is a psql meta-command, so the load runs from a script file rather
-    # than -c. Temp table and copy must share one session.
-    script = "/tmp/bbg_load.sql"
-    with open(script, "w") as fh:
-        fh.write(
-            "create temp table _seg_in (seg_id int, name text, ref text, class text,\n"
-            " length_m float8, node_a text, node_b text, homes int, carriageway int,\n"
-            " geojson text);\n"
-            f"\\copy _seg_in from '{tmp}' with (format text)\n"
-            "insert into segment (seg_id,name,ref,class,length_m,node_a,node_b,homes,carriageway,geom)\n"
-            "select seg_id,name,ref,class,length_m,node_a,node_b,homes,carriageway,\n"
-            " st_setsrid(st_geomfromgeojson(geojson),4326) from _seg_in;\n"
-        )
-    os.chmod(script, 0o644)
-    subprocess.run(
-        ["su", "postgres", "-c", f"psql -v ON_ERROR_STOP=1 -q -d {DB} -f {script}"], check=True
-    )
-
-    n = psql("select count(*) from segment;", quiet=False)
-    mi = psql("select round((sum(length_m)/1609.34)::numeric,2) from segment;", quiet=False)
-    print(f"loaded {n} segments, {mi} mi")
+    print(f"loaded {n} segments, {drawn} mi drawn")
+    print(f"       {units} countable units, {countable} mi countable")
 
 
 if __name__ == "__main__":
