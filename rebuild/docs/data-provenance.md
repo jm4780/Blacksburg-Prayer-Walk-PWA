@@ -39,7 +39,8 @@ buffers, so a "feature" is not a stable object. An edge is. The z13/4096
 quantisation grid aligns exactly across tile boundaries, so the same physical
 edge lands on identical integer coordinates in every tile carrying it, and a set
 keyed on the endpoint pair deduplicates it exactly. 5,015 tile features collapse
-to 12,228 distinct edges, which chain into 1,553 segments.
+to 12,228 distinct edges, which chain into 1,598 segments (1,489 countable
+units once divided roads are paired).
 
 Coordinate precision is about 0.95 m at z13. That is fine for street centrelines.
 
@@ -100,8 +101,8 @@ looks right for the wrong reason.
 
 - Percent-complete is a percentage **of this network**, not of the legal town
   street inventory. It is internally consistent, so the map fills in correctly
-  and no street is ever counted twice, but the denominator is about 15% too big.
-- Some streets on the map should not be walked. Roughly 20 miles of what the app
+  and no street is ever counted twice, but the denominator is about 9.5% too big.
+- Some streets on the map should not be walked. Roughly 13 miles of what the app
   calls coverable is private.
 - Some real streets are missing, mostly short unnamed ones.
 
@@ -134,7 +135,7 @@ There is no home count, and the app shows none.
 
 No address-point source is reachable: not Town GIS, not county parcels, not
 VGIN, not TIGER, not OpenStreetMap. `segment.homes` is null on every one of the
-1,553 rows, the API returns null, and the interface renders nothing where the
+1,598 rows, the API returns null, and the interface renders nothing where the
 count would go.
 
 It renders **nothing**, never a zero. A zero is a claim that nobody lives on that

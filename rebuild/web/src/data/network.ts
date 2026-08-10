@@ -11,22 +11,39 @@ import { kv } from './idb'
 import type { Segment } from '../types'
 
 const SEGMENTS_KEY = 'network:segments'
+const FINGERPRINT_KEY = 'network:fingerprint'
 const COVERED_KEY = 'coverage:ids'
 const COVERED_AT_KEY = 'coverage:fetched_at'
 
+/** Enough to tell one build of the street file from another. Segment ids are
+ *  stable within a build and not across one, so a change here means the ids on
+ *  this phone may no longer point at the streets they used to. */
+export function fingerprint(segments: Segment[]): string {
+  const metres = segments.reduce((sum, s) => sum + s.length_m, 0)
+  return `${segments.length}:${Math.round(metres)}`
+}
+
 export async function loadSegments(): Promise<{ segments: Segment[]; fromCache: boolean }> {
   const cached = await kv.get<Segment[]>(SEGMENTS_KEY)
-  if (cached && cached.length) {
-    // Refresh quietly in the background; the map does not wait for it.
-    void api
-      .network()
-      .then((r) => kv.set(SEGMENTS_KEY, r.segments))
-      .catch(() => {})
-    return { segments: cached, fromCache: true }
-  }
+  if (cached && cached.length) return { segments: cached, fromCache: true }
   const r = await api.network()
   await kv.set(SEGMENTS_KEY, r.segments)
+  await kv.set(FINGERPRINT_KEY, fingerprint(r.segments))
   return { segments: r.segments, fromCache: false }
+}
+
+/** Fetch the street file again and say whether the town rebuilt it. */
+export async function refreshSegments(): Promise<{ segments: Segment[]; changed: boolean } | null> {
+  try {
+    const r = await api.network()
+    const fresh = fingerprint(r.segments)
+    const previous = await kv.get<string>(FINGERPRINT_KEY)
+    await kv.set(SEGMENTS_KEY, r.segments)
+    await kv.set(FINGERPRINT_KEY, fresh)
+    return { segments: r.segments, changed: Boolean(previous) && previous !== fresh }
+  } catch {
+    return null
+  }
 }
 
 export async function loadCoverage(): Promise<{ covered: number[]; fromCache: boolean; at: string | null }> {

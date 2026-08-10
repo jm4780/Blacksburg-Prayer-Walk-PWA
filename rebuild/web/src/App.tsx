@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MapView } from './map/MapView'
 import { BLACKSBURG } from './map/style'
 import { api, ApiError } from './data/api'
-import { loadCoverage, loadSegments } from './data/network'
+import { loadCoverage, loadSegments, refreshSegments } from './data/network'
 import { bboxOf, claimedByProximity, metresBetween } from './state/geo'
 import { clearWalk, deviceId, displayName, emptyWalk, loadWalk, newId, saveWalk, setDisplayName } from './state/walk'
 import { enqueue, flushOnce, startFlushLoop, subscribe } from './state/outbox'
@@ -37,12 +37,26 @@ export function App() {
     void (async () => {
       setWalk(await loadWalk())
       setName(await displayName())
+      let current: WalkState | null = null
       try {
         const { segments } = await loadSegments()
         if (live) setSegments(segments)
       } catch {
         setNotice('The street map has not downloaded yet. Open the app once with signal and it will keep working after that.')
       }
+      // Street ids hold within a build of the town's street file and not
+      // across one, so a rebuilt file has to be said out loud to anyone with a
+      // walk already under way.
+      void refreshSegments().then(async (fresh) => {
+        if (!fresh || !live) return
+        setSegments(fresh.segments)
+        current = await loadWalk()
+        if (fresh.changed && current.phase !== 'idle') {
+          setNotice(
+            "The town's street file was rebuilt while you were out. Check the streets below before you send this walk.",
+          )
+        }
+      })
       const cov = await loadCoverage()
       if (!live) return
       setCovered(new Set(cov.covered))
