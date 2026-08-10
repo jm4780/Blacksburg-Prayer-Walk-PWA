@@ -1,0 +1,658 @@
+<title>Blacksburg Prayer Walk</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<style>
+  /* Colours are lifted verbatim from rebuild/web/src/design/tokens.ts, which is
+     the app's design system. Nothing here is a new palette.
+
+     The rule the whole look hangs on: the map is greyscale except for three
+     things. The route you are being sent along, a street already prayed for,
+     and where you are standing. Everything else separates by value.
+
+     Deliberately one theme. This is a night-legible instrument you hold in the
+     street, not a document, so it commits to dark and paints every colour
+     explicitly rather than borrowing the viewer's ground. */
+  :root {
+    --ground: #0d1113;
+    --ground-raised: #141a1d;
+    --ground-sunk: #090c0e;
+    --hairline: #202829;
+
+    --unprayed: #414b51;
+    --boundary: #4e5c63;
+
+    --route: #4d8df0;
+    --prayed: #e0a03a;
+    --prayed-lift: #f3c77e;
+    --prayed-note: #ad8339;
+    --walker: #f2f8f9;
+
+    --ink: #e8edee;
+    --ink-quiet: #96a0a3;
+    --ink-faint: #7c868a;
+
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    overscroll-behavior: none;
+  }
+
+  #app {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    background: var(--ground);
+  }
+
+  /* ---- map ------------------------------------------------------------ */
+  #mapwrap { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+  /* The town figure sits over live map. It needs its own ground under it or
+     the type collides with street geometry. */
+  #top {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 14px 20px 30px;
+    background: linear-gradient(
+      to bottom,
+      var(--ground) 0%, var(--ground) 62%,
+      rgba(13, 17, 19, 0.82) 78%, rgba(13, 17, 19, 0) 100%);
+    pointer-events: none;
+  }
+  #pct {
+    margin: 0; font-size: 46px; line-height: 1; font-weight: 700;
+    letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+  }
+  #pctlabel {
+    margin: 6px 0 0; font-size: 10.5px; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  #pctsub {
+    margin: 5px 0 0; font-size: 13px; color: var(--ink-quiet);
+    font-variant-numeric: tabular-nums;
+  }
+  #top.compact #pct { font-size: 22px; }
+  #top.compact #pctlabel, #top.compact #pctsub { display: none; }
+
+  /* ---- sheet ----------------------------------------------------------- */
+  #sheet {
+    flex: 0 0 auto;
+    background: var(--ground);
+    padding: 16px 20px calc(18px + env(safe-area-inset-bottom));
+    display: flex; flex-direction: column; gap: 12px;
+    max-height: 62%;
+    border-top: 1px solid var(--hairline);
+  }
+  h1 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+  p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--ink-quiet); }
+  .fine { font-size: 12.5px; color: var(--ink-faint); line-height: 1.4; }
+
+  .figure { display: flex; gap: 26px; align-items: baseline; }
+  .figure b {
+    display: block; font-size: 27px; font-weight: 700;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.01em; color: var(--ink);
+  }
+  .figure span {
+    display: block; font-size: 10px; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--ink-faint); margin-top: 3px;
+  }
+
+  .mins { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .min {
+    background: var(--ground-raised); border: 1px solid var(--hairline);
+    border-radius: 10px; color: var(--ink); padding: 11px 0;
+    font: inherit; font-variant-numeric: tabular-nums; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    min-height: 52px;
+  }
+  .min b { font-size: 19px; font-weight: 700; }
+  .min i { font-style: normal; font-size: 9.5px; letter-spacing: 0.1em; color: var(--ink-faint); }
+  .min[aria-pressed="true"] { border-color: var(--route); }
+
+  button.act {
+    font: inherit; font-size: 17px; font-weight: 700; cursor: pointer;
+    border-radius: 12px; padding: 17px 16px; border: 1px solid transparent;
+    min-height: 56px; width: 100%;
+  }
+  .primary { background: var(--ink); color: #0b0f10; }
+  .primary:disabled { background: transparent; border-color: var(--hairline); color: var(--ink-faint); }
+  .quiet { background: none; color: var(--ink-quiet); border: none; font-weight: 500; font-size: 15px; padding: 12px; }
+  .danger { background: none; color: var(--prayed-note); border: none; font-weight: 500; font-size: 14px; padding: 10px; }
+  button:focus-visible { outline: 2px solid var(--route); outline-offset: 2px; }
+
+  .notice {
+    background: var(--ground-raised); border-left: 2px solid var(--route);
+    padding: 11px 13px; border-radius: 0 8px 8px 0;
+  }
+  .notice p { color: var(--ink-quiet); font-size: 13.5px; }
+
+  /* ---- street list ----------------------------------------------------- */
+  ul { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+  li { border-top: 1px solid var(--hairline); }
+  .row {
+    display: grid; grid-template-columns: 26px 1fr auto auto; gap: 11px;
+    align-items: center; width: 100%; background: none; border: none;
+    color: var(--ink); font: inherit; text-align: left;
+    padding: 13px 0; min-height: 52px; cursor: pointer;
+  }
+  .tick {
+    width: 21px; height: 21px; border-radius: 6px;
+    border: 1.5px solid var(--ink-faint); position: relative;
+  }
+  .row[aria-checked="true"] .tick { background: var(--ink); border-color: var(--ink); }
+  .row[aria-checked="true"] .tick::after {
+    content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px;
+    border: solid #0b0f10; border-width: 0 2px 2px 0; transform: rotate(42deg);
+  }
+  .nm { font-size: 15.5px; }
+  .note { font-size: 12px; color: var(--prayed-note); }
+  .mi { font-size: 13px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+
+  .hide { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="app">
+  <div id="mapwrap">
+    <canvas id="map"></canvas>
+    <div id="top">
+      <p id="pct">0.0%</p>
+      <p id="pctlabel">of Blacksburg's streets prayed for</p>
+      <p id="pctsub">0 of 0 streets</p>
+    </div>
+  </div>
+  <div id="sheet"></div>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function () {
+  "use strict";
+  var D = JSON.parse(document.getElementById("data").textContent);
+  var SEGS = D.segments.map(function (s) {
+    return { id: s[0], name: s[1], pts: s[2], len: s[3], cw: s[4] };
+  });
+  var BY_ID = {};
+  SEGS.forEach(function (s) { BY_ID[s.id] = s; });
+
+  // A divided road is one road. Both lines share a carriageway id, so walking
+  // either side prays for the road, and the total counts it once.
+  function unitOf(s) { return s.cw == null ? s.id : s.cw; }
+  var UNIT_LEN = {};
+  SEGS.forEach(function (s) {
+    var u = unitOf(s);
+    UNIT_LEN[u] = Math.max(UNIT_LEN[u] || 0, s.len);
+  });
+  var TOTAL_UNITS = Object.keys(UNIT_LEN).length;
+  var TOTAL_M = Object.keys(UNIT_LEN).reduce(function (a, k) { return a + UNIT_LEN[k]; }, 0);
+
+  var KEY = "bpw.covered.v1";
+  var covered = new Set();
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) JSON.parse(raw).forEach(function (id) { covered.add(id); });
+  } catch (e) { /* private mode: the walk still works, it just will not persist */ }
+  function saveCovered() {
+    try { localStorage.setItem(KEY, JSON.stringify(Array.from(covered))); } catch (e) {}
+  }
+  function isCovered(s) { return covered.has(unitOf(s)); }
+
+  // ---- geometry -----------------------------------------------------------
+  var LAT0 = 37.2296, KX = Math.cos(LAT0 * Math.PI / 180);
+  function mBetween(a, b) {
+    var dx = (a[0] - b[0]) * KX * 111320, dy = (a[1] - b[1]) * 110540;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+  function distToSeg(p, a, b) {
+    var ax = a[0] * KX, ay = a[1], bx = b[0] * KX, by = b[1], px = p[0] * KX, py = p[1];
+    var dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy;
+    var t = L ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L)) : 0;
+    var qx = ax + t * dx, qy = ay + t * dy;
+    return Math.sqrt(Math.pow((px - qx) / KX, 2) + Math.pow(py - qy, 2)) * 111320 *
+      Math.sqrt(1); // degrees back to metres, near enough at this latitude
+  }
+  function distToLine(p, pts) {
+    var best = Infinity;
+    for (var i = 0; i < pts.length - 1; i++) {
+      var d = distToSeg(p, pts[i], pts[i + 1]);
+      if (d < best) best = d;
+    }
+    return best;
+  }
+
+  // ---- view ---------------------------------------------------------------
+  var cv = document.getElementById("map"), ctx = cv.getContext("2d");
+  var view = { cx: -80.4139, cy: 37.2296, ppd: 9000 }; // pixels per degree of latitude
+  var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  var W = 0, H = 0;
+
+  function resize() {
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+  function proj(lon, lat) {
+    return [W / 2 + (lon - view.cx) * KX * view.ppd, H / 2 - (lat - view.cy) * view.ppd];
+  }
+  function fitTo(pts, padTop, padBottom) {
+    if (!pts.length) return;
+    var w = 1e9, e = -1e9, s = 1e9, n = -1e9;
+    pts.forEach(function (p) {
+      if (p[0] < w) w = p[0]; if (p[0] > e) e = p[0];
+      if (p[1] < s) s = p[1]; if (p[1] > n) n = p[1];
+    });
+    // Fit into the band of map that is actually visible, not the whole canvas:
+    // the sheet covers the bottom of the screen and the town figure the top, so
+    // fitting to H would push half the route under furniture.
+    var usableH = Math.max(90, H - padTop - padBottom);
+    var zx = (W * 0.86) / Math.max((e - w) * KX, 1e-6);
+    var zy = usableH / Math.max(n - s, 1e-6);
+    view.ppd = Math.max(2200, Math.min(20000, Math.min(zx, zy)));
+    view.cx = (w + e) / 2;
+    // Screen y grows downward while latitude grows upward, so shifting the
+    // content down the screen means adding to the centre latitude.
+    view.cy = (s + n) / 2 + ((padTop + usableH / 2) - H / 2) / view.ppd;
+    draw();
+  }
+
+  var routeSet = new Set(), routeIds = [], claimed = new Set(), walker = null;
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#0d1113"; ctx.fillRect(0, 0, W, H);
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+
+    // town limit, so the map is a town and not a floating web of lines
+    ctx.beginPath();
+    D.limits.forEach(function (p, i) {
+      var q = proj(p[0], p[1]);
+      if (i) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]);
+    });
+    ctx.closePath();
+    ctx.strokeStyle = "#4e5c63"; ctx.lineWidth = 1; ctx.globalAlpha = 0.55;
+    ctx.stroke(); ctx.globalAlpha = 1;
+
+    var scale = view.ppd / 9000;
+    var wUn = Math.max(0.8, 1.5 * scale), wPr = Math.max(1.1, 2.1 * scale),
+        wRt = Math.min(6.5, Math.max(2.4, 4.0 * scale));
+
+    // Three passes so the meaning stacks in the right order: streets nobody has
+    // walked underneath, prayed streets above them, the route on top of both.
+    [0, 1, 2].forEach(function (pass) {
+      ctx.beginPath();
+      var any = false;
+      for (var i = 0; i < SEGS.length; i++) {
+        var s = SEGS[i];
+        var onRoute = routeSet.has(s.id);
+        var pr = isCovered(s) || claimed.has(s.id);
+        var want = pass === 2 ? onRoute : pass === 1 ? (pr && !onRoute) : (!pr && !onRoute);
+        if (!want) continue;
+        var pts = s.pts, first = proj(pts[0][0], pts[0][1]);
+        // cheap cull: skip anything comfortably off screen
+        if (first[0] < -400 || first[0] > W + 400 || first[1] < -400 || first[1] > H + 400) {
+          var last = proj(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+          if (last[0] < -400 || last[0] > W + 400 || last[1] < -400 || last[1] > H + 400) continue;
+        }
+        ctx.moveTo(first[0], first[1]);
+        for (var j = 1; j < pts.length; j++) {
+          var q = proj(pts[j][0], pts[j][1]);
+          ctx.lineTo(q[0], q[1]);
+        }
+        any = true;
+      }
+      if (!any) return;
+      ctx.strokeStyle = pass === 2 ? "#4d8df0" : pass === 1 ? "#e0a03a" : "#414b51";
+      ctx.lineWidth = pass === 2 ? wRt : pass === 1 ? wPr : wUn;
+      ctx.stroke();
+    });
+
+    // streets ticked off on this walk, lifted so progress is visible as it happens
+    if (claimed.size) {
+      ctx.beginPath();
+      claimed.forEach(function (id) {
+        var s = BY_ID[id]; if (!s) return;
+        var pts = s.pts, f = proj(pts[0][0], pts[0][1]);
+        ctx.moveTo(f[0], f[1]);
+        for (var j = 1; j < pts.length; j++) {
+          var q = proj(pts[j][0], pts[j][1]); ctx.lineTo(q[0], q[1]);
+        }
+      });
+      ctx.strokeStyle = "#f3c77e"; ctx.lineWidth = wRt; ctx.stroke();
+    }
+
+    if (walker) {
+      var w = proj(walker[0], walker[1]);
+      ctx.beginPath(); ctx.arc(w[0], w[1], 9, 0, 7);
+      ctx.fillStyle = "#f2f8f9"; ctx.fill();
+      ctx.lineWidth = 3; ctx.strokeStyle = "#0d1113"; ctx.stroke();
+    }
+  }
+
+  // pan and pinch
+  var pts = {}, lastD = 0;
+  cv.addEventListener("pointerdown", function (e) {
+    cv.setPointerCapture(e.pointerId);
+    pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+  });
+  cv.addEventListener("pointermove", function (e) {
+    if (!pts[e.pointerId]) return;
+    var ids = Object.keys(pts);
+    var prev = pts[e.pointerId];
+    if (ids.length === 1) {
+      view.cx -= (e.clientX - prev.x) / (view.ppd * KX);
+      view.cy += (e.clientY - prev.y) / view.ppd;
+    }
+    pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+    if (ids.length === 2) {
+      var a = pts[ids[0]], b = pts[ids[1]];
+      var d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (lastD) view.ppd = Math.max(1500, Math.min(90000, view.ppd * (d / lastD)));
+      lastD = d;
+    }
+    draw();
+  });
+  function up(e) { delete pts[e.pointerId]; if (Object.keys(pts).length < 2) lastD = 0; }
+  cv.addEventListener("pointerup", up);
+  cv.addEventListener("pointercancel", up);
+
+  // ---- counters -----------------------------------------------------------
+  function coveredM() {
+    var seen = new Set(), m = 0;
+    covered.forEach(function (u) { if (!seen.has(u)) { seen.add(u); m += UNIT_LEN[u] || 0; } });
+    return m;
+  }
+  function renderTop(compact) {
+    var m = coveredM();
+    document.getElementById("top").className = compact ? "compact" : "";
+    document.getElementById("pct").textContent = (100 * m / TOTAL_M).toFixed(1) + "%";
+    document.getElementById("pctsub").textContent =
+      covered.size.toLocaleString() + " of " + TOTAL_UNITS.toLocaleString() + " streets  \u00b7  " +
+      // Half a mile walked should not read as "0 of 149 miles". Below ten,
+      // show the decimal; above it, the decimal is noise.
+      (m / 1609.34 < 10 ? (m / 1609.34).toFixed(1) : (m / 1609.34).toFixed(0)) +
+      " of " + (TOTAL_M / 1609.34).toFixed(0) + " miles";
+  }
+
+  // ---- route --------------------------------------------------------------
+  var minutes = 30, route = null, startChosen = false;
+  function pickRoute(from) {
+    var best = null, bestD = Infinity;
+    D.routes.forEach(function (r) {
+      if (r.m !== minutes) return;
+      var d = mBetween(from, r.s);
+      if (d < bestD) { bestD = d; best = r; }
+    });
+    return best ? { r: best, away: bestD } : null;
+  }
+  function setRoute(sel) {
+    route = sel;
+    routeIds = sel ? sel.r.ids.slice() : [];
+    routeSet = new Set(routeIds);
+    var pl = [];
+    routeIds.forEach(function (id) { if (BY_ID[id]) pl = pl.concat(BY_ID[id].pts); });
+    if (pl.length) fitTo(pl, 120, 40);
+  }
+
+  // ---- streets, grouped by name -------------------------------------------
+  function groups(ids) {
+    var out = [], by = {};
+    ids.forEach(function (id) {
+      var s = BY_ID[id]; if (!s) return;
+      if (!by[s.name]) { by[s.name] = { name: s.name, ids: [], m: 0, done: 0 }; out.push(by[s.name]); }
+      var g = by[s.name];
+      if (g.ids.indexOf(id) >= 0) return;
+      g.ids.push(id); g.m += s.len; if (isCovered(s)) g.done++;
+    });
+    return out;
+  }
+  function listEl(gs, checkedSet, onToggle) {
+    var ul = document.createElement("ul");
+    gs.forEach(function (g) {
+      var on = g.ids.every(function (i) { return checkedSet.has(i); });
+      var some = !on && g.ids.some(function (i) { return checkedSet.has(i); });
+      var li = document.createElement("li");
+      var b = document.createElement("button");
+      b.className = "row"; b.setAttribute("role", "checkbox");
+      b.setAttribute("aria-checked", on ? "true" : some ? "mixed" : "false");
+      var note = g.done === g.ids.length ? "prayed" : g.done ? "part prayed" : "";
+      b.innerHTML = '<span class="tick"></span><span class="nm"></span>' +
+        '<span class="note"></span><span class="mi"></span>';
+      b.children[1].textContent = g.name;
+      b.children[2].textContent = note;
+      b.children[3].textContent = (g.m / 1609.34 < 0.05 ? "<0.1" : (g.m / 1609.34).toFixed(1)) + " mi";
+      b.onclick = function () { onToggle(g, !on); };
+      li.appendChild(b); ul.appendChild(li);
+    });
+    return ul;
+  }
+
+  // ---- screens ------------------------------------------------------------
+  var sheet = document.getElementById("sheet"), phase = "plan", watchId = null, lock = null;
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function render() {
+    sheet.innerHTML = "";
+    renderTop(phase === "walk" || phase === "confirm");
+    if (phase === "plan") return renderPlan();
+    if (phase === "walk") return renderWalk();
+    if (phase === "confirm") return renderConfirm();
+    if (phase === "done") return renderDone();
+  }
+
+  function renderPlan() {
+    if (route) {
+      var f = el("div", "figure");
+      var a = el("div"); a.appendChild(el("b", null, (route.r.len / 1609.34).toFixed(1)));
+      a.appendChild(el("span", null, "miles, back where you started"));
+      f.appendChild(a);
+      sheet.appendChild(f);
+      var newM = 0, seen = new Set();
+      routeIds.forEach(function (id) {
+        var s = BY_ID[id]; if (!s || isCovered(s)) return;
+        var u = unitOf(s); if (seen.has(u)) return; seen.add(u); newM += s.len;
+      });
+      sheet.appendChild(el("p", null,
+        groups(routeIds).length + " streets  \u00b7  " + (newM / 1609.34).toFixed(1) +
+        " miles nobody has prayed for yet"));
+      // The loops are worked out ahead of time from points across the town, so
+      // the nearest one can begin a little way off. Say how far rather than let
+      // somebody set off and wonder why the blue line is not under their feet.
+      if (route.away > 250) {
+        sheet.appendChild(el("p", "fine",
+          "It starts about " + (route.away / 1609.34).toFixed(1) +
+          " miles from you. Walk to the blue line, or tap the map somewhere else."));
+      }
+      if (newM / Math.max(route.r.len, 1) < 0.15) {
+        var n = el("div", "notice");
+        n.appendChild(el("p", null,
+          "The streets around here have all been prayed for. Move the map and tap a " +
+          "different part of town to start somewhere else."));
+        sheet.appendChild(n);
+      }
+    } else {
+      sheet.appendChild(el("h1", null, "How long do you have?"));
+    }
+
+    var mins = el("div", "mins");
+    [20, 30, 45, 60].forEach(function (m) {
+      var b = el("button", "min");
+      b.setAttribute("aria-pressed", m === minutes ? "true" : "false");
+      b.appendChild(el("b", null, String(m)));
+      b.appendChild(el("i", null, "MIN"));
+      b.onclick = function () { minutes = m; plan(); };
+      mins.appendChild(b);
+    });
+    sheet.appendChild(mins);
+
+    var go = el("button", "act primary", "Start walking");
+    go.disabled = !route;
+    go.onclick = startWalk;
+    sheet.appendChild(go);
+
+    var fine = el("p", "fine",
+      "Your location stays on this phone. Nothing about where you go is sent anywhere.");
+    sheet.appendChild(fine);
+  }
+
+  function renderWalk() {
+    var f = el("div", "figure");
+    var doneStreets = groups(Array.from(claimed)).length;
+    var m = 0, seen = new Set();
+    claimed.forEach(function (id) {
+      var s = BY_ID[id]; if (!s) return;
+      var u = unitOf(s); if (seen.has(u)) return; seen.add(u); m += s.len;
+    });
+    var a = el("div"); a.appendChild(el("b", null, String(doneStreets)));
+    a.appendChild(el("span", null, "of " + groups(routeIds).length + " streets"));
+    var b2 = el("div"); b2.appendChild(el("b", null, (m / 1609.34).toFixed(1)));
+    b2.appendChild(el("span", null, "miles"));
+    f.appendChild(a); f.appendChild(b2);
+    sheet.appendChild(f);
+
+    sheet.appendChild(el("p", null, "Follow the blue line. Streets tick off as you pass them."));
+    var fin = el("button", "act primary", "Finish walk");
+    fin.onclick = function () { phase = "confirm"; render(); };
+    sheet.appendChild(fin);
+    sheet.appendChild(el("p", "fine",
+      "Your location stays on this phone. Nothing is sent while you walk."));
+    sheet.appendChild(listEl(groups(routeIds), claimed, toggleGroup));
+  }
+
+  function toggleGroup(g, on) {
+    g.ids.forEach(function (id) { on ? claimed.add(id) : claimed.delete(id); });
+    render(); draw();
+  }
+
+  function renderConfirm() {
+    sheet.appendChild(el("h1", null, "Did you walk these?"));
+    var m = 0, seen = new Set();
+    claimed.forEach(function (id) {
+      var s = BY_ID[id]; if (!s) return;
+      var u = unitOf(s); if (seen.has(u)) return; seen.add(u); m += s.len;
+    });
+    sheet.appendChild(el("p", null,
+      groups(Array.from(claimed)).length + " streets  \u00b7  " + (m / 1609.34).toFixed(1) +
+      " miles. Take off anything you did not walk."));
+    var go = el("button", "act primary", "Add these streets to the map");
+    go.disabled = claimed.size === 0;
+    go.onclick = commit;
+    sheet.appendChild(go);
+    var away = el("button", "act danger", "Throw this walk away");
+    away.onclick = function () { claimed = new Set(); stopWatch(); phase = "plan"; plan(); };
+    sheet.appendChild(away);
+    sheet.appendChild(listEl(groups(routeIds), claimed, toggleGroup));
+  }
+
+  function commit() {
+    claimed.forEach(function (id) {
+      var s = BY_ID[id]; if (s) covered.add(unitOf(s));
+    });
+    saveCovered();
+    stopWatch();
+    phase = "done"; render(); draw();
+  }
+
+  function renderDone() {
+    sheet.appendChild(el("h1", null, "Added."));
+    sheet.appendChild(el("p", null,
+      "Those streets are on your map now. They stay there, on this phone, " +
+      "however many times you open it."));
+    var again = el("button", "act primary", "Walk again");
+    again.onclick = function () { claimed = new Set(); phase = "plan"; plan(); };
+    sheet.appendChild(again);
+    var reset = el("button", "act quiet", "Clear everything and start over");
+    reset.onclick = function () {
+      if (!confirm("Clear every street you have walked on this phone?")) return;
+      covered = new Set(); saveCovered(); claimed = new Set(); phase = "plan"; plan();
+    };
+    sheet.appendChild(reset);
+  }
+
+  // ---- location -----------------------------------------------------------
+  function startWatch() {
+    if (!navigator.geolocation || watchId != null) return;
+    watchId = navigator.geolocation.watchPosition(function (p) {
+      var firstFix = walker === null;
+      walker = [p.coords.longitude, p.coords.latitude];
+      // The app opens with a loop already drawn, from the middle of town,
+      // because a phone takes a few seconds to say where it is. When it does,
+      // replan from where the walker actually stands. Once, and never over a
+      // walk already under way or a start they chose themselves.
+      if (firstFix && phase === "plan" && !startChosen) { plan(); return; }
+      if (phase === "walk") {
+        // A street ticks off when the walker passes close to it, judged against
+        // this fix's own accuracy. Only streets on the route are eligible, so a
+        // wandering fix cannot claim the parallel street one block over.
+        var tol = Math.min(38, Math.max(16, (p.coords.accuracy || 25) * 0.75));
+        var changed = false;
+        routeIds.forEach(function (id) {
+          if (claimed.has(id)) return;
+          var s = BY_ID[id]; if (!s) return;
+          if (distToLine(walker, s.pts) <= tol) { claimed.add(id); changed = true; }
+        });
+        if (changed) render();
+      }
+      draw();
+    }, function () { /* denied or unavailable: everything still works by hand */ },
+      { enableHighAccuracy: true, maximumAge: 4000, timeout: 20000 });
+  }
+  function stopWatch() {
+    if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (lock) { try { lock.release(); } catch (e) {} lock = null; }
+  }
+
+  function startWalk() {
+    phase = "walk";
+    startWatch();
+    if (navigator.wakeLock) {
+      navigator.wakeLock.request("screen").then(function (l) { lock = l; }).catch(function () {});
+    }
+    render();
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && phase === "walk" && navigator.wakeLock && !lock) {
+      navigator.wakeLock.request("screen").then(function (l) { lock = l; }).catch(function () {});
+    }
+  });
+
+  // ---- start --------------------------------------------------------------
+  function plan() {
+    var from = walker || [view.cx, view.cy];
+    setRoute(pickRoute(from));
+    phase = "plan";
+    render();
+    draw();
+  }
+
+  // Tapping the map moves the start, which is how someone standing anywhere
+  // gets a walk from where they are rather than from where the app guessed.
+  cv.addEventListener("click", function (e) {
+    if (phase !== "plan") return;
+    var r = cv.getBoundingClientRect();
+    var lon = view.cx + (e.clientX - r.left - W / 2) / (view.ppd * KX);
+    var lat = view.cy - (e.clientY - r.top - H / 2) / view.ppd;
+    startChosen = true;
+    setRoute(pickRoute([lon, lat]));
+    render(); draw();
+  });
+
+  window.addEventListener("resize", resize);
+  resize();
+  startWatch();
+  fitTo(D.limits, 130, 40);
+  plan();
+})();
+</script>
