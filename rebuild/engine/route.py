@@ -480,8 +480,8 @@ class _Solver:
         self.hi = target_m * (1.0 + BAND)
         # Aim at the target, not at the ceiling: someone with 30 minutes has 30
         # minutes, and a route that always lands at +14% is a route that lies.
-        self.aim = target_m * 0.96
-        self.cap = target_m * 1.10
+        self.aim = target_m * 0.95
+        self.cap = target_m * 1.05
         self.covered = covered
         self.rng = rng
         self.deadline = deadline
