@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MapView } from './map/MapView'
 import { BLACKSBURG } from './map/style'
 import { api, ApiError } from './data/api'
-import { loadCoverage, loadSegments, refreshSegments } from './data/network'
+import { loadCoverage, loadProgress, loadSegments, refreshSegments } from './data/network'
 import { bboxOf, claimedByProximity, metresBetween } from './state/geo'
 import { clearWalk, deviceId, displayName, emptyWalk, loadWalk, newId, saveWalk, setDisplayName } from './state/walk'
 import { enqueue, flushOnce, startFlushLoop, subscribe } from './state/outbox'
@@ -21,6 +21,7 @@ export function App() {
   const [segments, setSegments] = useState<Segment[]>([])
   const [covered, setCovered] = useState<Set<number>>(new Set())
   const [coverageStale, setCoverageStale] = useState(false)
+  const [progressStale, setProgressStale] = useState(false)
   const [progress, setProgress] = useState<Progress | null>(null)
   const [walk, setWalk] = useState<WalkState | null>(null)
   const [queue, setQueue] = useState<OutboxItem[]>([])
@@ -37,7 +38,6 @@ export function App() {
     void (async () => {
       setWalk(await loadWalk())
       setName(await displayName())
-      let current: WalkState | null = null
       try {
         const { segments } = await loadSegments()
         if (live) setSegments(segments)
@@ -50,8 +50,8 @@ export function App() {
       void refreshSegments().then(async (fresh) => {
         if (!fresh || !live) return
         setSegments(fresh.segments)
-        current = await loadWalk()
-        if (fresh.changed && current.phase !== 'idle') {
+        const inProgress = await loadWalk()
+        if (fresh.changed && inProgress.phase !== 'idle') {
           setNotice(
             "The town's street file was rebuilt while you were out. Check the streets below before you send this walk.",
           )
@@ -61,11 +61,9 @@ export function App() {
       if (!live) return
       setCovered(new Set(cov.covered))
       setCoverageStale(cov.fromCache)
-      try {
-        setProgress(await api.progress())
-      } catch {
-        /* the counters simply stay quiet offline */
-      }
+      const p = await loadProgress()
+      if (p.progress) setProgress(p.progress)
+      setProgressStale(p.fromCache)
     })()
     const unsub = subscribe(setQueue)
     const stopLoop = startFlushLoop()
@@ -84,23 +82,6 @@ export function App() {
 
   const segById = useMemo(() => new Map(segments.map((s) => [s.seg_id, s])), [segments])
 
-  // With no signal the counters are worked out from the copies already on the
-  // phone rather than left blank. Same arithmetic the server does.
-  const shownProgress = useMemo<Progress | null>(() => {
-    if (progress) return progress
-    if (!segments.length) return null
-    const total_m = segments.reduce((sum, s) => sum + s.length_m, 0)
-    const covered_m = segments.reduce((sum, s) => (covered.has(s.seg_id) ? sum + s.length_m : sum), 0)
-    return {
-      segments_covered: covered.size,
-      segments_total: segments.length,
-      covered_m,
-      total_m,
-      percent: total_m ? Math.round((covered_m / total_m) * 10000) / 100 : 0,
-      homes_covered: null,
-      homes_total: null,
-    }
-  }, [progress, segments, covered])
 
   const update = useCallback((patch: Partial<WalkState>) => {
     setWalk((prev) => {
@@ -115,11 +96,9 @@ export function App() {
     const cov = await loadCoverage()
     setCovered(new Set(cov.covered))
     setCoverageStale(cov.fromCache)
-    try {
-      setProgress(await api.progress())
-    } catch {
-      /* keep the last numbers */
-    }
+    const p = await loadProgress()
+    if (p.progress) setProgress(p.progress)
+    setProgressStale(p.fromCache)
   }, [])
 
   // When a queued walk lands, the town map moves.
@@ -224,15 +203,27 @@ export function App() {
     [walk, segById, update, chooseMinutes],
   )
 
+  /** Tick or untick a whole street at once. One state write, not one per
+   *  segment: the per-segment handler closes over `walk`, so calling it in a
+   *  loop would have every call read the same stale list and only the last
+   *  would survive. */
+  const setClaimed = useCallback(
+    (ids: number[], on: boolean) => {
+      if (!walk) return
+      const touched = new Set(ids)
+      const kept = walk.claimed.filter((id) => !touched.has(id))
+      update({ claimed: on ? [...kept, ...ids] : kept })
+    },
+    [walk, update],
+  )
+
   /** Add every stretch of a named street. The list below can trim it back. */
   const addByName = useCallback(
     (name: string) => {
-      if (!walk) return
-      const has = new Set(walk.claimed)
-      const add = segments.filter((s) => s.name === name && !has.has(s.seg_id)).map((s) => s.seg_id)
-      if (add.length) update({ claimed: [...walk.claimed, ...add] })
+      const ids = segments.filter((s) => s.name === name).map((s) => s.seg_id)
+      if (ids.length) setClaimed(ids, true)
     },
-    [walk, segments, update],
+    [segments, setClaimed],
   )
 
   const startWalking = useCallback(() => {
@@ -359,7 +350,7 @@ export function App() {
           walk?.phase === 'walking' || walk?.phase === 'confirming' ? 'top top-compact' : 'top'
         }
       >
-        <TownCounters progress={shownProgress} stale={coverageStale} />
+        <TownCounters progress={progress} stale={progressStale || coverageStale} />
       </div>
 
       {walk?.phase === 'idle' && (
@@ -385,6 +376,7 @@ export function App() {
           onManual={goManual}
           onStartWalking={startWalking}
           onToggle={(id) => tapSegment({ seg_id: id, name: '' })}
+          onToggleMany={setClaimed}
           onAddByName={addByName}
           onCancel={discard}
         />
@@ -399,6 +391,7 @@ export function App() {
           routeSegments={routeSegments}
           covered={covered}
           onToggle={(id) => tapSegment({ seg_id: id, name: '' })}
+          onToggleMany={setClaimed}
           onFinish={finishWalk}
         />
       )}
@@ -414,6 +407,7 @@ export function App() {
           suggestedSegments={suggestedSegments}
           covered={covered}
           onToggle={(id) => tapSegment({ seg_id: id, name: '' })}
+          onToggleMany={setClaimed}
           onMatch={matchTrace}
           onConfirm={confirmWalk}
           onDiscard={discard}

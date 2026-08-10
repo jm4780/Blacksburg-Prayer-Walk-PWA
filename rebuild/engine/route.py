@@ -30,13 +30,40 @@ insertion, then local search** — using the standard RPP → TSP transformation
      inserting required arcs (in either orientation) until the budget is met.
   4. Improve with **2-opt** (sequence reversal, orientations flipped) and
      **or-opt** (relocate one arc), then re-fill the freed budget. Iterate.
-  5. Perturb with **ruin and recreate** — tear a short run of serviced arcs
-     out and let insertion rebuild it — which is what escapes the local
-     minimum where a street gets walked twice for no reason.
-  6. Repeat from several seeded restarts, each seeded on a *different* arc so
-     the restarts try different neighbourhoods, and keep the best solution
-     under the contract's lexicographic objective:
-     (in the length band, then max new_m, then max contiguity, then shorter).
+  5. Perturb with **ruin and recreate** — tear out whatever the walk services
+     inside its longest doubled-back stretch and let insertion rebuild it.
+     This is the move that turns an out-and-back into a loop.
+  6. Re-route the deadhead with **go-around repair**: shortest-path connectors
+     are why an insertion solver doubles back at all (the cheapest way to the
+     next street is usually the street you just walked), so any walk with a
+     long repeated run is re-expanded on weights that treble ground already
+     covered, and the result kept only if it scores better.
+  7. Repeat from several seeded restarts, seeded at points spread across the
+     whole candidate list so the restarts try different neighbourhoods rather
+     than re-deriving the one nearest the start, and keep the best solution
+     under the lexicographic objective in `_Solver.score`:
+     (close to the asked-for time, then shape, then max new_m, then
+     contiguity, then shorter).
+
+SHAPE
+-----
+Contiguity alone does not describe a good walk. A 1.5 mile thread with two
+dead-end spurs is perfectly contiguous — one connected block — and is still a
+walk nobody wants: it is dull, it gives no signal about where to turn round,
+and out at the edge of town it puts someone on a rural road with no footway.
+Three terms, all from data already in the graph, carry the rest:
+
+* **Compactness** — 4·pi·hull_area / length². A loop encloses ground, a thread
+  encloses none. Walks a person judged good measure 0.36-0.57; ones they
+  rejected, 0.22-0.30.
+* **Repeated runs** — scored by the length of each contiguous doubled-back
+  stretch, not by the total. 120 m back out of a cul-de-sac is unavoidable and
+  costs nothing; 1.6 km back along one rural road is the failure.
+* **Rural connectors** — corridors (see `RouteGraph._corridors`) longer than
+  400 m are kept out of the set the walk deliberately services, while staying
+  fully available as links. This is contract §3.5's "prefer segments that
+  share junctions with many others over long isolated stretches", in the only
+  proxy the graph supports.
 
 Every step preserves closure — the walk starts and ends at the depot node by
 construction, so priority 1 is structural rather than something we hope for.
@@ -47,13 +74,13 @@ the graph entirely, so they cannot appear even as deadhead.
 The start point snaps to the nearest junction, and the walk never leaves that
 junction's connected component: 95% of the town's street length is in one
 component, and padding a route by teleporting across town would be a lie. A
-start in one of the 19 tiny components gets the best short loop that component
-allows, or an honest empty route if it allows none.
+start in one of the dozens of tiny components gets the best short loop that
+component allows, or an honest empty route if it allows none.
 
-Repeated street is not automatically waste. 608 of the 1,553 segments are
-bridges — cul-de-sac stems, the one road into a subdivision — and the only way
-back over a bridge is back over it. `route_stats()` reports forced and
-avoidable repeat mileage separately for exactly this reason.
+Repeated street is not automatically waste. Well over a third of this town's
+segments are bridges — cul-de-sac stems, the one road into a subdivision — and
+the only way back over a bridge is back over it. `route_stats()` reports
+forced and avoidable repeat mileage separately for exactly this reason.
 
 Pace: 3.0 mph = 80.47 m/min. A prayer walk is a strolling pace with stops, not
 a fitness walk; 3.0 mph is the standard casual figure and errs slightly fast,
@@ -91,8 +118,8 @@ SAFE_MOTORWAY_REF = "US 460 Bus"      # Main St downtown; walkable
 _UNCOVERED_DISCOUNT = 0.85   # deadhead prefers streets we still need
 _MAX_CANDIDATES = 110        # required arcs considered per route
 _NEAR_TOUR = 60              # arcs evaluated per insertion (nearest to tour)
-_RESTARTS = 16
-_RUIN_ITERS = 20           # ruin-and-recreate passes per restart
+_RESTARTS = 12
+_RUIN_ITERS = 14           # ruin-and-recreate passes per restart
 _TIME_BUDGET_S = 2.0         # hard wall; contract asks for < 3 s
 _MAX_REPEATS = 3             # times one arc may be walked while padding
 _INF = float("inf")
@@ -480,8 +507,8 @@ class _Solver:
         self.hi = target_m * (1.0 + BAND)
         # Aim at the target, not at the ceiling: someone with 30 minutes has 30
         # minutes, and a route that always lands at +14% is a route that lies.
-        self.aim = target_m * 0.95
-        self.cap = target_m * 1.05
+        self.aim = target_m * 0.96
+        self.cap = target_m * 1.10
         self.covered = covered
         self.rng = rng
         self.deadline = deadline
@@ -1151,30 +1178,30 @@ def route_stats(route: dict, network: Any, start_lonlat: Sequence[float] | None 
         seg = g.segments[s]
         extra = seg["length_m"] * (n - 1)
         ei = g.edge_of_seg.get(s)
-        # Forced = the segment is a bridge: a cul-de-sac stem or the single road
-        # into a subdivision. There is no way back except back over it. 608 of
-        # this network's 1553 segments are bridges (107 km of 252 km), so a
-        # walk with repeats is usually obeying the town, not wasting the walker.
+        # Forced = the segment is a bridge: a cul-de-sac stem or the single
+        # road into a subdivision. There is no way back except back over it.
+        # Well over a third of this network is bridges by length, so a walk
+        # with repeats is usually obeying the town, not wasting the walker.
         forced_repeat = ei is not None and g.is_bridge[ei]
         if forced_repeat:
             forced += extra
         else:
             avoidable += extra
     runs = _repeat_runs(g, route["seg_ids"])
-    serviced_isolated = sum(
-        g.segments[s]["length_m"] * (n - 1 if n > 1 else 0) + (
-            g.segments[s]["length_m"] if n > 1 else 0.0)
+    # Metres spent going up and back down a rural connector — the specific
+    # failure this engine was rebuilt to stop. Passing along one *once*, as the
+    # only link to a neighbourhood, is not counted: that is what links are for.
+    paced_connector = sum(
+        g.segments[s]["length_m"] * n
         for s, n in counts.items()
-        if s in g.edge_of_seg and g.isolated[g.edge_of_seg[s]]
+        if n > 1 and s in g.edge_of_seg and g.isolated[g.edge_of_seg[s]]
     )
     return {
         "compactness": round(_compactness(route), 3),
         "shape_penalty": round(_shape_penalty(g, route), 3),
         "max_repeat_run_m": round(max(runs), 1) if runs else 0.0,
         "repeat_runs": len(runs),
-        # Rural-connector metres the walk paced up and back rather than passed
-        # through — the specific failure mode, isolated as a number.
-        "paced_connector_m": round(serviced_isolated, 1),
+        "paced_connector_m": round(paced_connector, 1),
         "repeat_m": round(forced + avoidable, 2),
         "repeat_forced_m": round(forced, 2),     # dead ends: unavoidable
         "repeat_avoidable_m": round(avoidable, 2),

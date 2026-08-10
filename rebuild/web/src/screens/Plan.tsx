@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { StreetList } from '../components/StreetList'
-import { formatMiles } from '../state/geo'
+import { countStreets, formatMiles } from '../state/geo'
 import type { Segment, WalkState } from '../types'
 
 const LENGTHS = [20, 30, 45, 60]
@@ -19,6 +19,7 @@ export function Plan({
   onManual,
   onStartWalking,
   onToggle,
+  onToggleMany,
   onAddByName,
   onCancel,
 }: {
@@ -35,6 +36,7 @@ export function Plan({
   onManual: () => void
   onStartWalking: () => void
   onToggle: (seg_id: number) => void
+  onToggleMany: (seg_ids: number[], on: boolean) => void
   onAddByName: (name: string) => void
   onCancel: () => void
 }) {
@@ -86,7 +88,7 @@ export function Plan({
         )}
         {claimedSegments.length > 0 && (
           <p className="stat-line">
-            {claimedSegments.length} streets · {formatMiles(pickedMetres)} miles
+            {countStreets(claimedSegments)} streets · {formatMiles(pickedMetres)} miles
           </p>
         )}
         <StreetList
@@ -94,6 +96,7 @@ export function Plan({
           checked={picked}
           covered={covered}
           onToggle={onToggle}
+          onToggleMany={onToggleMany}
         />
         <button className="btn btn-primary" onClick={onStartWalking} disabled={claimedSegments.length === 0}>
           Start walking
@@ -138,8 +141,8 @@ export function Plan({
       {walk.route && (
         <>
           <p className="stat-line">
-            {formatMiles(walk.route.length_m)} miles · {routeSegments.length} streets ·{' '}
-            {walk.route.new_seg_ids.length} nobody has prayed for yet
+            {formatMiles(walk.route.length_m)} miles · {countStreets(routeSegments)} streets ·{' '}
+            {formatMiles(walk.route.new_m)} miles nobody has prayed for yet
           </p>
           <p className="stat-line">It ends where it starts.</p>
         </>

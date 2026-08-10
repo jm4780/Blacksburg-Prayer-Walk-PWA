@@ -1,5 +1,5 @@
 import { StreetList } from '../components/StreetList'
-import { formatMiles } from '../state/geo'
+import { countStreets, formatMiles } from '../state/geo'
 import type { Segment, WalkState } from '../types'
 
 /** The only screen that can put anything on the town map, and only on a tap. */
@@ -13,6 +13,7 @@ export function Confirm({
   suggestedSegments,
   covered,
   onToggle,
+  onToggleMany,
   onMatch,
   onConfirm,
   onDiscard,
@@ -26,23 +27,32 @@ export function Confirm({
   suggestedSegments: Segment[]
   covered: Set<number>
   onToggle: (seg_id: number) => void
+  onToggleMany: (seg_ids: number[], on: boolean) => void
   onMatch: () => void
   onConfirm: () => void
   onDiscard: () => void
 }) {
   const claimed = new Set(walk.claimed)
   const metres = claimedSegments.reduce((sum, s) => sum + s.length_m, 0)
-  const fresh = claimedSegments.filter((s) => !covered.has(s.seg_id)).length
+  const freshMetres = claimedSegments
+    .filter((s) => !covered.has(s.seg_id))
+    .reduce((sum, s) => sum + s.length_m, 0)
 
   return (
     <div className="sheet">
       <h1>Did you walk these?</h1>
       <p>
-        {claimedSegments.length} streets · {formatMiles(metres)} miles · {fresh} of them new to the town map.
-        Take off anything you did not walk.
+        {countStreets(claimedSegments)} streets · {formatMiles(metres)} miles · {formatMiles(freshMetres)} miles of it
+        new to the town map. Take off anything you did not walk.
       </p>
 
-      <StreetList segments={claimedSegments} checked={claimed} covered={covered} onToggle={onToggle} />
+      <StreetList
+        segments={claimedSegments}
+        checked={claimed}
+        covered={covered}
+        onToggle={onToggle}
+        onToggleMany={onToggleMany}
+      />
 
       {suggestedSegments.length > 0 && (
         <>
@@ -53,6 +63,7 @@ export function Confirm({
             checked={claimed}
             covered={covered}
             onToggle={onToggle}
+            onToggleMany={onToggleMany}
           />
         </>
       )}

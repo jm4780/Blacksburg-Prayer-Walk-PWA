@@ -1,6 +1,6 @@
 """Route engine tests — contracts.md §3, in the contract's priority order.
 
-These run against the real 1,553-segment Blacksburg network, not a fixture. A
+These run against the real Blacksburg street network, not a fixture. A
 route engine that passes on a toy grid and strands someone on Prices Fork Rd
 has not passed anything.
 

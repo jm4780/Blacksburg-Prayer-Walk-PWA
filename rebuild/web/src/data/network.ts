@@ -8,7 +8,7 @@
 
 import { api } from './api'
 import { kv } from './idb'
-import type { Segment } from '../types'
+import type { Progress, Segment } from '../types'
 
 const SEGMENTS_KEY = 'network:segments'
 const FINGERPRINT_KEY = 'network:fingerprint'
@@ -43,6 +43,27 @@ export async function refreshSegments(): Promise<{ segments: Segment[]; changed:
     return { segments: r.segments, changed: Boolean(previous) && previous !== fresh }
   } catch {
     return null
+  }
+}
+
+const PROGRESS_KEY = 'progress:last'
+
+/**
+ * The town's own count of itself, kept for when there is no signal.
+ *
+ * The app deliberately does not work this figure out for itself. The town
+ * counts a divided road once, not once per side, and only the server knows
+ * which segments are two halves of the same street. A number this app added up
+ * on its own would quietly disagree with the number on everyone else's screen.
+ */
+export async function loadProgress(): Promise<{ progress: Progress | null; fromCache: boolean }> {
+  try {
+    const p = await api.progress()
+    await kv.set(PROGRESS_KEY, p)
+    return { progress: p, fromCache: false }
+  } catch {
+    const cached = (await kv.get<Progress>(PROGRESS_KEY)) ?? null
+    return { progress: cached, fromCache: true }
   }
 }
 

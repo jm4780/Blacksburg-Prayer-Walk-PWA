@@ -273,12 +273,20 @@ button {
   list-style: none;
   margin: 0;
   padding: 0;
+  /* The sheet is a flex column, so the list was a shrinkable item: with four
+     streets in it, it collapsed to two and a sliver while empty sheet sat
+     underneath. It takes its own height, up to a cap, and the sheet scrolls. */
+  flex: 0 0 auto;
   max-height: 46vh;
   overflow-y: auto;
   border-top: 1px solid var(--c-hairline);
-  /* This list scrolls inside a sheet that also scrolls. A closed bottom edge is
-     the only thing telling you the list ends here and not at the sheet. */
-  border-bottom: 1px solid var(--c-hairline);
+  /* This list scrolls inside a sheet that also scrolls, so it has to say where
+     it ends. A hard edge cut the next row in half and left a stray empty band
+     between two rules, which reads as a rendering fault rather than as more
+     list. The fade lands in the dead space under a row's text, so a list short
+     enough not to scroll loses nothing. */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent 100%);
 }
 
 /* Was a flex row where the "already prayed for" badge stole width from the
@@ -364,6 +372,44 @@ button {
 
 .street[aria-checked='true'] .name {
   color: var(--c-ink);
+}
+
+/* Part of a street ticked: a road split across many junctions where the walker
+   covered some of it. Half filled, not a lie in either direction. */
+.street[aria-checked='mixed'] .tick {
+  border-color: var(--c-prayed);
+  background: linear-gradient(
+    to right,
+    var(--c-prayed) 0 50%,
+    transparent 50% 100%
+  );
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Some stretches of this street ticked, not all: a bar, not a tick. */
+.street[aria-checked='mixed'] .tick {
+  border-color: var(--c-prayed);
+}
+
+.street[aria-checked='mixed'] .tick::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 8px;
+  height: 2px;
+  background: var(--c-prayed);
 }
 
 /* "ALREADY PRAYED FOR" set in tracked amber caps out-shouted the street name it

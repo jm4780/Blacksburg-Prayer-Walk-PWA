@@ -101,14 +101,22 @@ def _coverage_ready() -> str:
 
 _network_body: bytes | None = None
 _network_etag: str | None = None
+_network_body_version: int = -1
 
 
 @app.get("/api/network")
 def network(request: Request) -> Response:
-    """Every segment with its geometry. Immutable between builds, so it is
-    cached hard on both ends."""
-    global _network_body, _network_etag
-    if _network_body is None:
+    """Every segment with its geometry.
+
+    Cached hard on both ends, and thrown away the moment the town's street file
+    is rebuilt underneath us. The ETag carries the build, so a phone holding an
+    old copy is told to take a new one rather than being handed a 304 for street
+    ids that no longer mean what they meant.
+    """
+    global _network_body, _network_etag, _network_body_version
+    segments_now = db.load_network()
+    if _network_body is None or _network_body_version != db.network_version:
+        _network_body_version = db.network_version
         segments = [
             {
                 "seg_id": s["seg_id"],
@@ -116,10 +124,10 @@ def network(request: Request) -> Response:
                 "length_m": s["length_m"],
                 "geometry": s["geometry"],
             }
-            for s in db.load_network()
+            for s in segments_now
         ]
         _network_body = db.json_dumps({"segments": segments}).encode()
-        _network_etag = f'W/"net-{len(segments)}-{len(_network_body)}"'
+        _network_etag = f'W/"net-{db.network_version}-{len(segments)}-{len(_network_body)}"'
 
     if request.headers.get("if-none-match") == _network_etag:
         return Response(status_code=304, headers={"ETag": _network_etag or ""})
@@ -127,7 +135,9 @@ def network(request: Request) -> Response:
     return Response(
         content=_network_body,
         media_type="application/json",
-        headers={"ETag": _network_etag or "", "Cache-Control": "public, max-age=604800"},
+        # Short, because the street file can be rebuilt and the ETag is what
+        # makes a revalidation cheap.
+        headers={"ETag": _network_etag or "", "Cache-Control": "public, max-age=300"},
     )
 
 

@@ -91,6 +91,13 @@ export function bboxOf(coords: [number, number][]): [number, number, number, num
   return [minX, minY, maxX, maxY]
 }
 
+/** How many streets a walker would say that is. The network splits a road at
+ *  every junction, so counting segments would tell someone they walked
+ *  twenty-five streets when they walked one. */
+export function countStreets(segments: { name: string }[]): number {
+  return new Set(segments.map((s) => s.name)).size
+}
+
 export function metresToMiles(m: number): number {
   return m / 1609.344
 }

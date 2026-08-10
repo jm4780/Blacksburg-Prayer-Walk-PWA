@@ -46,14 +46,18 @@ function json(data: unknown, status = 200) {
 beforeEach(async () => {
   posted = []
   cleanup()
+  // Let the previous render's writes land before the database is thrown away,
+  // otherwise a stray save recreates the walk this test is meant to start
+  // without.
+  await new Promise((r) => setTimeout(r, 25))
   _resetForTests()
-  await new Promise((r) => setTimeout(r, 0))
   await new Promise<void>((resolve) => {
     const req = indexedDB.deleteDatabase('prayer-walk')
     req.onsuccess = () => resolve()
     req.onerror = () => resolve()
     req.onblocked = () => resolve()
   })
+  await new Promise((r) => setTimeout(r, 5))
   vi.stubGlobal('fetch', async (url: string, init?: RequestInit) => {
     const path = String(url)
     if (init?.method === 'POST') {

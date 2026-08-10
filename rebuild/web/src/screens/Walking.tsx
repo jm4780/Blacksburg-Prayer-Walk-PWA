@@ -1,5 +1,5 @@
 import { StreetList } from '../components/StreetList'
-import { formatMiles } from '../state/geo'
+import { countStreets, formatMiles } from '../state/geo'
 import type { Segment, WalkState } from '../types'
 
 export function Walking({
@@ -10,6 +10,7 @@ export function Walking({
   routeSegments,
   covered,
   onToggle,
+  onToggleMany,
   onFinish,
 }: {
   walk: WalkState
@@ -19,12 +20,13 @@ export function Walking({
   routeSegments: Segment[]
   covered: Set<number>
   onToggle: (seg_id: number) => void
+  onToggleMany: (seg_ids: number[], on: boolean) => void
   onFinish: () => void
 }) {
   const claimed = new Set(walk.claimed)
   const metres = claimedSegments.reduce((sum, s) => sum + s.length_m, 0)
   const list = routeSegments.length ? routeSegments : claimedSegments
-  const target = routeSegments.length || claimedSegments.length
+  const target = countStreets(routeSegments.length ? routeSegments : claimedSegments)
 
   return (
     <div className="sheet">
@@ -47,7 +49,13 @@ export function Walking({
             : 'Tap each street as you finish it.'}
       </p>
 
-      <StreetList segments={list} checked={claimed} covered={covered} onToggle={onToggle} />
+      <StreetList
+        segments={list}
+        checked={claimed}
+        covered={covered}
+        onToggle={onToggle}
+        onToggleMany={onToggleMany}
+      />
 
       <button className="btn btn-primary" onClick={onFinish}>
         Finish walk
