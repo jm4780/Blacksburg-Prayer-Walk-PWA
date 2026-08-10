@@ -49,6 +49,8 @@ export type WalkState = {
   route: RouteResult | null
   /** Streets the walker has claimed on this walk. */
   claimed: number[]
+  /** Streets the matcher offered but was not sure about. Shown unticked. */
+  suggested: number[]
   /** True when the walker is picking streets by hand rather than by location. */
   manual: boolean
   /** Kept on the device only. Never sent anywhere except POST /api/match. */

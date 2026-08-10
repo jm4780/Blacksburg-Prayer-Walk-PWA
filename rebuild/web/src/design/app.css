@@ -48,12 +48,27 @@ button {
 
 /* ---------------------------------------------------------------- header */
 
+/* The counters are typography, not a card. That means no plate and no shadow,
+   but it does not mean setting live map labels and 52px numerals in the same
+   pixels: the old scrim was opaque for the top 12% only, so the caption and the
+   stat line were laid straight over road geometry and, at the default view, over
+   the "US 460 Bus" shield. The scrim below holds solid through every line of
+   type and only then falls away, over enough distance that no edge is visible. */
+
 .top {
   position: relative;
   z-index: 2;
-  padding: calc(env(safe-area-inset-top, 0px) + var(--s-md)) var(--s-lg) var(--s-md);
+  padding: calc(env(safe-area-inset-top, 0px) + var(--s-md)) var(--s-lg) var(--s-xl);
   pointer-events: none;
-  background: linear-gradient(var(--c-ground-sunk) 12%, transparent);
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--c-ground-sunk-rgb) / 1) 0%,
+    rgb(var(--c-ground-sunk-rgb) / 1) 52%,
+    rgb(var(--c-ground-sunk-rgb) / 0.94) 64%,
+    rgb(var(--c-ground-sunk-rgb) / 0.72) 76%,
+    rgb(var(--c-ground-sunk-rgb) / 0.38) 88%,
+    rgb(var(--c-ground-sunk-rgb) / 0) 100%
+  );
 }
 
 .counter {
@@ -76,17 +91,18 @@ button {
 
 .label {
   font-size: var(--t-label);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--c-ink-faint);
+  color: var(--c-ink-quiet);
   margin: var(--s-xs) 0 0;
 }
 
 .stat-line {
   margin: var(--s-sm) 0 0;
-  color: var(--c-ink-quiet);
-  font-size: var(--t-small);
+  color: var(--c-ink-faint);
+  font-size: var(--t-micro);
   font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
 }
 
 .prayed-swatch {
@@ -108,12 +124,34 @@ button {
 
 /* ----------------------------------------------------------------- sheet */
 
+/* Same failure as the header, upside down: the old fade reached full opacity
+   only 18% into the sheet, which is below the headline, so amber prayed streets
+   ran through "Pray for Blacksburg, one street at a time." and through the
+   walk's own figures. The sheet now carries its own fade tail above the content
+   and is solid from the first line of type down. */
+
+/* The fade has to live in the sheet's own background, in absolute lengths, not
+   in a pseudo-element: .sheet is a scroll container, so an ::before hung above
+   its top edge is clipped away by overflow and the sheet meets the map on a
+   hard black line instead.
+
+   The old fade reached full opacity 18% into the sheet, which is below the
+   headline, so amber prayed streets ran through "Pray for Blacksburg, one
+   street at a time." and through the walk's own figures. Now it is solid by
+   32px, and the first line of type starts at 34px. */
 .sheet {
   position: relative;
   z-index: 2;
   margin-top: auto;
-  padding: var(--s-lg) var(--s-lg) calc(env(safe-area-inset-bottom, 0px) + var(--s-lg));
-  background: linear-gradient(transparent, var(--c-ground-sunk) 18%);
+  padding: var(--s-xl) var(--s-lg) calc(env(safe-area-inset-bottom, 0px) + var(--s-lg));
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--c-ground-sunk-rgb) / 0) 0px,
+    rgb(var(--c-ground-sunk-rgb) / 0.35) 12px,
+    rgb(var(--c-ground-sunk-rgb) / 0.8) 24px,
+    rgb(var(--c-ground-sunk-rgb) / 1) 32px,
+    rgb(var(--c-ground-sunk-rgb) / 1) 100%
+  );
   display: flex;
   flex-direction: column;
   gap: var(--s-md);
@@ -137,7 +175,8 @@ button {
 .btn {
   display: block;
   width: 100%;
-  padding: 17px var(--s-md);
+  min-height: 52px;
+  padding: 15px var(--s-md);
   border: 1px solid var(--c-hairline);
   border-radius: var(--r-md);
   background: var(--c-ground-raised);
@@ -152,8 +191,16 @@ button {
   background: var(--c-hairline);
 }
 
+/* opacity:0.4 on a white primary produced a solid mid-grey slab that read as
+   the most emphatic thing on the screen while being the one thing you could not
+   press. A disabled control has to fall to the bottom of the value ladder, not
+   the middle of it. */
 .btn[disabled] {
-  opacity: 0.4;
+  cursor: default;
+  background: transparent;
+  border-color: var(--c-hairline);
+  color: var(--c-ink-faint);
+  font-weight: 500;
 }
 
 .btn-primary {
@@ -167,15 +214,27 @@ button {
   background: transparent;
   border-color: transparent;
   color: var(--c-ink-quiet);
+  min-height: 48px;
   padding: 12px;
 }
 
+/* A boxed button and a borderless one at identical widths read as a broken
+   pair, and "Pick streets myself" wrapped to two lines inside its half. The
+   real action takes the room it needs; the escape hatch takes what is left. */
 .btn-row {
   display: flex;
   gap: var(--s-sm);
+  align-items: stretch;
 }
-.btn-row > * {
-  flex: 1;
+.btn-row > .btn {
+  flex: 1 1 auto;
+}
+.btn-row > .btn-quiet {
+  flex: 0 0 auto;
+  width: auto;
+  padding-left: var(--s-md);
+  padding-right: var(--s-md);
+  white-space: nowrap;
 }
 
 .choices {
@@ -217,14 +276,23 @@ button {
   max-height: 46vh;
   overflow-y: auto;
   border-top: 1px solid var(--c-hairline);
+  /* This list scrolls inside a sheet that also scrolls. A closed bottom edge is
+     the only thing telling you the list ends here and not at the sheet. */
+  border-bottom: 1px solid var(--c-hairline);
 }
 
+/* Was a flex row where the "already prayed for" badge stole width from the
+   street name, so names wrapped to two lines, and the distance then landed on a
+   different x on every row. Fixed columns give the distances one right-hand
+   axis to hang from and stop the name from ever being squeezed. */
 .street {
-  display: flex;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto 4.25em;
   align-items: center;
   gap: var(--s-md);
   width: 100%;
-  padding: 13px 2px;
+  min-height: 52px;
+  padding: 12px 2px;
   border: 0;
   border-bottom: 1px solid var(--c-hairline);
   background: transparent;
@@ -232,15 +300,40 @@ button {
   cursor: pointer;
 }
 
+.streets li:last-child .street {
+  border-bottom: 0;
+}
+
+/* The "find a street by name" results are the same row without a tick and with
+   a longer figure, so they get their own two-column track rather than being
+   forced through the checklist's. */
+.street-add {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.street-add .name {
+  grid-column: 1;
+}
+.street-add .dist {
+  grid-column: 2;
+}
+
 .street .name {
-  flex: 1;
+  grid-column: 2;
   font-size: var(--t-body);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .street .dist {
+  grid-column: 4;
+  justify-self: end;
   color: var(--c-ink-faint);
-  font-size: var(--t-small);
+  font-size: var(--t-micro);
   font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  white-space: nowrap;
 }
 
 .tick {
@@ -273,11 +366,29 @@ button {
   color: var(--c-ink);
 }
 
+/* "ALREADY PRAYED FOR" set in tracked amber caps out-shouted the street name it
+   was annotating and was wide enough to break the row. It is a footnote on the
+   town's state, so it is set as one: a short lowercase word carrying the prayed
+   colour at its dim value, never wrapping. The full phrase stays in the DOM for
+   screen readers. */
 .street .already {
+  grid-column: 3;
   font-size: var(--t-label);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--c-prayed-dim);
+  white-space: nowrap;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* --------------------------------------------------------------- notices */
@@ -335,18 +446,44 @@ button {
   font: inherit;
 }
 
+/* Two figures on one baseline grid, set the same way as the town counter above
+   them: number, then a small caps label under it. They used to run inline as
+   "0 of 7 streets   0.0 miles" with no alignment axis and no scrim, over live
+   amber map lines. */
 .walking-figures {
-  display: flex;
-  align-items: baseline;
-  gap: var(--s-lg);
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  column-gap: var(--s-xl);
+  align-items: end;
 }
 
 .walking-figures .unit {
-  font-size: var(--t-small);
+  display: block;
+  font-size: var(--t-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--c-ink-faint);
-  margin-left: 4px;
+  margin: var(--s-xs) 0 0;
   font-weight: 400;
-  letter-spacing: 0;
+}
+
+/* While a walk is running, the walk's own numbers are the subject and the
+   town's running total is context. It used to be the other way round: a 52px
+   town percentage sat above a 28px figure for the thing you were doing. */
+.top-compact .counter {
+  font-size: var(--t-counter-small);
+  letter-spacing: -0.02em;
+  color: var(--c-ink-quiet);
+}
+
+.top-compact .label {
+  font-size: var(--t-label);
+  color: var(--c-ink-faint);
+}
+
+.top-compact .stat-line {
+  display: none;
 }
 
 .pill {

@@ -49,6 +49,7 @@ def main():
                     # Null unless the authoritative fetch supplied a real count.
                     # Never zero: zero is a claim that nobody lives there.
                     ("\\N" if p.get("homes") is None else str(p["homes"])),
+                    ("\\N" if p.get("carriageway") is None else str(p["carriageway"])),
                     geom,
                 ]
             )
@@ -66,10 +67,11 @@ def main():
     with open(script, "w") as fh:
         fh.write(
             "create temp table _seg_in (seg_id int, name text, ref text, class text,\n"
-            " length_m float8, node_a text, node_b text, homes int, geojson text);\n"
+            " length_m float8, node_a text, node_b text, homes int, carriageway int,\n"
+            " geojson text);\n"
             f"\\copy _seg_in from '{tmp}' with (format text)\n"
-            "insert into segment (seg_id,name,ref,class,length_m,node_a,node_b,homes,geom)\n"
-            "select seg_id,name,ref,class,length_m,node_a,node_b,homes,\n"
+            "insert into segment (seg_id,name,ref,class,length_m,node_a,node_b,homes,carriageway,geom)\n"
+            "select seg_id,name,ref,class,length_m,node_a,node_b,homes,carriageway,\n"
             " st_setsrid(st_geomfromgeojson(geojson),4326) from _seg_in;\n"
         )
     os.chmod(script, 0o644)

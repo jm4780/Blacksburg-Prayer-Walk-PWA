@@ -155,6 +155,7 @@ export function App() {
       started_at: null,
       route: null,
       claimed: [],
+      suggested: [],
       trace: [],
       manual: false,
       start: null,
@@ -235,10 +236,18 @@ export function App() {
     setNotice(null)
     try {
       const { proposals } = await api.match(walk.trace)
+      // Anything the matcher is sure of gets ticked. Anything it is unsure of
+      // is put in front of the walker unticked, for them to decide. The engine
+      // draws that line itself at a confidence of 0.5.
       const strong = proposals.filter((p) => p.confidence >= 0.5).map((p) => p.seg_id)
-      const merged = Array.from(new Set([...walk.claimed, ...strong]))
-      update({ claimed: merged })
+      const claimed = Array.from(new Set([...walk.claimed, ...strong]))
+      const weak = proposals
+        .filter((p) => p.confidence < 0.5 && !claimed.includes(p.seg_id))
+        .map((p) => p.seg_id)
+      update({ claimed, suggested: Array.from(new Set([...walk.suggested, ...weak])) })
       if (proposals.length === 0) setNotice('Nothing in your track matched a street closely enough to be sure.')
+      else if (strong.length === 0 && weak.length > 0)
+        setNotice('These are the closest streets to your track. Tick the ones you actually walked.')
     } catch (e) {
       setNotice(
         e instanceof ApiError && e.status === 503
@@ -290,6 +299,17 @@ export function App() {
     [walk, segById],
   )
 
+  const suggestedSegments = useMemo(
+    () =>
+      walk
+        ? (walk.suggested
+            .filter((id) => !walk.claimed.includes(id))
+            .map((id) => segById.get(id))
+            .filter(Boolean) as Segment[])
+        : [],
+    [walk, segById],
+  )
+
   const routeSegments = useMemo(
     () =>
       walk?.route
@@ -320,7 +340,11 @@ export function App() {
         <QueueBar online={online} queue={queue} />
       )}
 
-      <div className="top">
+      <div
+        className={
+          walk?.phase === 'walking' || walk?.phase === 'confirming' ? 'top top-compact' : 'top'
+        }
+      >
         <TownCounters progress={shownProgress} stale={coverageStale} />
       </div>
 
@@ -373,6 +397,7 @@ export function App() {
           name={name}
           onName={setName}
           claimedSegments={claimedSegments}
+          suggestedSegments={suggestedSegments}
           covered={covered}
           onToggle={(id) => tapSegment({ seg_id: id, name: '' })}
           onMatch={matchTrace}

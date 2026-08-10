@@ -29,7 +29,11 @@ export function StreetList({
           >
             <span className="tick" />
             <span className="name">{s.name}</span>
-            {covered.has(s.seg_id) && <span className="already">already prayed for</span>}
+            {covered.has(s.seg_id) && (
+              <span className="already">
+                prayed<span className="sr-only"> for already</span>
+              </span>
+            )}
             <span className="dist">{formatMiles(s.length_m)} mi</span>
           </button>
         </li>

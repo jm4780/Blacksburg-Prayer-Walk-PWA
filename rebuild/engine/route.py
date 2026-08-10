@@ -91,11 +91,28 @@ SAFE_MOTORWAY_REF = "US 460 Bus"      # Main St downtown; walkable
 _UNCOVERED_DISCOUNT = 0.85   # deadhead prefers streets we still need
 _MAX_CANDIDATES = 110        # required arcs considered per route
 _NEAR_TOUR = 60              # arcs evaluated per insertion (nearest to tour)
-_RESTARTS = 8
-_RUIN_ITERS = 14           # ruin-and-recreate passes per restart
-_TIME_BUDGET_S = 1.8         # hard wall; contract asks for < 3 s
+_RESTARTS = 16
+_RUIN_ITERS = 20           # ruin-and-recreate passes per restart
+_TIME_BUDGET_S = 2.0         # hard wall; contract asks for < 3 s
 _MAX_REPEATS = 3             # times one arc may be walked while padding
 _INF = float("inf")
+
+# -- shape of the walk (contracts §3.4, §3.5) --------------------------------
+# Connected is not the same as compact: a 1.5 mile thread with two spurs is
+# perfectly connected and is still a bad walk. These terms are what stop it.
+_CORRIDOR_M = 400.0          # a run of street with no real junction in it for
+                             # this long is a rural connector, not a
+                             # neighbourhood street
+_ISOLATED_PRIZE = 0.20       # how much a rural connector is worth to *service*;
+                             # it stays fully usable as a link
+_REPEAT_FREE_FRAC = 0.10     # repeated street below this share of the walk is free
+_RUN_FREE_M = 250.0          # a cul-de-sac out-and-back this long is fine
+_COMPACT_TARGET = 0.35       # 4·pi·hull_area / length², measured on good routes
+_W_RUN = 1.5                 # weights on the three shape terms
+_W_REPEAT = 1.0
+_W_COMPACT = 1.0
+_SHAPE_BUCKET = 0.05         # quantised, so shape only outranks new_m when the
+                             # difference is real
 
 _EARTH_M_PER_DEG = 111_320.0
 
@@ -236,6 +253,9 @@ class RouteGraph:
         self.degree: list[int] = [len(a) for a in self.adj]
         self.component: list[int] = self._components()
         self.is_bridge: list[bool] = self._bridges()
+        self.corridor: list[int] = []
+        self.corridor_m: list[float] = []
+        self.isolated: list[bool] = self._corridors()
 
     # -- construction helpers
 
@@ -311,6 +331,49 @@ class RouteGraph:
                     if low[u] > disc[p]:
                         bridge[pe] = True
         return bridge
+
+    def _corridors(self) -> list[bool]:
+        """Group segments into corridors and flag the long isolated ones.
+
+        A *corridor* is a maximal run of street with no real junction inside
+        it — merge across every node where exactly two segment-ends meet. One
+        named road is therefore many corridors downtown (a junction every
+        block) and one long corridor out at the town edge.
+
+        Contracts §3.5 asks for "segments that share junctions with many
+        others (a grid) over long isolated stretches". Without sidewalk data,
+        this is the proxy the graph can actually support, and unlike a rule on
+        single segments it generalises: Glade Rd west is 13 short segments and
+        no per-segment rule catches it, while its corridor is 1.2 km with
+        nothing joining it. 72 km of this town's 252 km sits in corridors over
+        400 m, and that is the part a walker should be *passing through*
+        rather than pacing.
+        """
+        n_e = len(self.e_seg)
+        corr = [-1] * n_e
+        cid = 0
+        for e0 in range(n_e):
+            if corr[e0] != -1:
+                continue
+            corr[e0] = cid
+            stack = [e0]
+            while stack:
+                e = stack.pop()
+                for node in (self.e_u[e], self.e_v[e]):
+                    if self.degree[node] != 2:
+                        continue                  # a real junction ends the corridor
+                    for _, e2 in self.adj[node]:
+                        if corr[e2] == -1:
+                            corr[e2] = cid
+                            stack.append(e2)
+            cid += 1
+        lengths = [0.0] * cid
+        for e in range(n_e):
+            lengths[corr[e]] += self.e_len[e]
+        self.corridor = corr
+        self.corridor_m = [lengths[corr[e]] for e in range(n_e)]
+        self.n_corridors = cid
+        return [m > _CORRIDOR_M for m in self.corridor_m]
 
     # -- queries
 
@@ -428,7 +491,14 @@ class _Solver:
             for sid, l in zip(g.e_seg, g.e_len)
         ]
         self.is_new = [sid not in covered for sid in g.e_seg]
+        # A rural connector is worth a fifth of its metres to *walk down and
+        # back*; it stays worth full price when picked up in passing.
+        self.prize = [
+            p * (_ISOLATED_PRIZE if iso else 1.0)
+            for p, iso in zip(g.e_prize, g.isolated)
+        ]
         self._sp: dict[int, tuple[dict, dict, dict, dict]] = {}
+        self._real: dict[int, dict] = {}
         self.cut = max(self.hi, 400.0)
         self.filler: list[int] = []   # any walkable arc in reach, for padding
 
@@ -441,10 +511,23 @@ class _Solver:
             self._sp[node] = r
         return r
 
+    def real_from(self, node: int) -> dict:
+        """Distances from ``node`` to everywhere in reach, as a plain dict.
+
+        The inner loops look up hundreds of thousands of distances, so they
+        take this dict once per source node and index it directly rather than
+        paying for a method call each time.
+        """
+        r = self._real.get(node)
+        if r is None:
+            r = self.sp(node)[1]
+            self._real[node] = r
+        return r
+
     def d(self, a: int, b: int) -> float:
         if a == b:
             return 0.0
-        return self.sp(a)[1].get(b, _INF)
+        return self.real_from(a).get(b, _INF)
 
     def dnew(self, a: int, b: int) -> float:
         """Uncovered metres picked up while deadheading a -> b."""
@@ -487,6 +570,17 @@ class _Solver:
         reach.sort(key=lambda t: (t[0], g.e_seg[t[1]]))
         req = [ei for _, ei in reach if g.e_seg[ei] not in self.covered]
         self.filler = [ei for _, ei in reach][: _MAX_CANDIDATES * 3]
+
+        # Rural connectors are a link, not a destination: walking one down and
+        # back is a mile of two-lane road with nothing to see and no signal
+        # about where to turn round. Keep them out of the set we deliberately
+        # service — they stay fully available as deadhead, and anything the
+        # walk does pass through still counts as claimed. Only if the
+        # neighbourhood is *made* of them (a start out on the town edge) do
+        # they come back, because then they are all there is.
+        grid = [ei for ei in req if not g.isolated[ei]]
+        if sum(g.e_len[ei] for ei in grid) >= self.lo * 0.6:
+            req = grid
         return req[:_MAX_CANDIDATES]
 
     # -- insertion mechanics
@@ -508,25 +602,34 @@ class _Solver:
         u0, v0 = g.e_u[ei], g.e_v[ei]
         L = g.e_len[ei]
         starts, ends = self._endpoints(sol)
+        real_from = self.real_from
+        room = cap - sol.length
+        ends_u, ends_v = (real_from(u0), real_from(v0))
         best = None
+        best_delta = _INF
         for pos in range(len(sol.arcs) + 1):
             p, n = starts[pos], ends[pos]
-            base = self.d(p, n)
+            from_p = real_from(p)
+            base = 0.0 if p == n else from_p.get(n, _INF)
             if base == _INF:
                 continue
-            for a, b in ((u0, v0), (v0, u0)) if u0 != v0 else ((u0, v0),):
-                d1 = self.d(p, a)
+            if u0 == v0:
+                orientations = ((u0, v0, ends_u),)
+            else:
+                orientations = ((u0, v0, ends_v), (v0, u0, ends_u))
+            for a, b, from_b in orientations:
+                d1 = 0.0 if p == a else from_p.get(a, _INF)
                 if d1 == _INF:
                     continue
-                d2 = self.d(b, n)
+                d2 = 0.0 if b == n else from_b.get(n, _INF)
                 if d2 == _INF:
                     continue
                 delta = d1 + L + d2 - base
-                if sol.length + delta > cap:
+                if delta > room or delta >= best_delta - 1e-9:
                     continue
-                if best is None or delta < best[0] - 1e-9:
-                    bonus = self.dnew(p, a) + self.dnew(b, n) - self.dnew(p, n)
-                    best = (delta, pos, a, b, max(bonus, 0.0))
+                bonus = self.dnew(p, a) + self.dnew(b, n) - self.dnew(p, n)
+                best = (delta, pos, a, b, max(bonus, 0.0))
+                best_delta = delta
         return best
 
     def insert(self, sol: _Sol, ei: int, delta: float, pos: int, a: int, b: int):
@@ -558,16 +661,22 @@ class _Solver:
             touch.add(a)
             touch.add(b)
         g = self.g
+        e_u, e_v, e_seg = g.e_u, g.e_v, g.e_seg
+        maps = [self.real_from(t) for t in touch]
         scored = []
         for ei in pool:
+            u, v = e_u[ei], e_v[ei]
             best = _INF
-            for t in touch:
-                dd = min(self.d(t, g.e_u[ei]), self.d(t, g.e_v[ei]))
+            for m in maps:
+                dd = m.get(u, _INF)
+                d2 = m.get(v, _INF)
+                if d2 < dd:
+                    dd = d2
                 if dd < best:
                     best = dd
                     if best <= 0.0:
                         break
-            scored.append((best, g.e_seg[ei], ei))
+            scored.append((best, e_seg[ei], ei))
         scored.sort()
         return [ei for _, _, ei in scored[:limit]]
 
@@ -596,7 +705,7 @@ class _Solver:
                 if bi is None:
                     continue
                 delta, pos, a, b, bonus = bi
-                gain = g.e_prize[ei] + bonus
+                gain = self.prize[ei] + bonus
                 # Cost per new metre. A cul-de-sac's return trip is already
                 # inside `delta`, so it is priced, not punished — Blacksburg has
                 # 470 dead ends and walking out of one is correct. The only
@@ -667,14 +776,54 @@ class _Solver:
             if not (a or b):
                 return
 
-    def ruin(self, sol: _Sol) -> None:
-        """Remove a short consecutive run of serviced arcs (ruin & recreate)."""
+    def ruin(self, sol: _Sol, route: dict | None = None) -> None:
+        """Tear part of the walk out so insertion can rebuild it differently.
+
+        Two thirds of the time this is *aimed*: it removes whatever the walk
+        was servicing inside its longest doubled-back stretch, which is the
+        move that turns an out-and-back into a loop. The rest of the time it
+        removes a random run, to keep the search from getting stuck on one
+        idea.
+        """
         if not sol.arcs:
             return
+        if route is not None and self.rng.random() < 0.67:
+            doomed = self._arcs_in_worst_run(sol, route)
+            if doomed:
+                for i in sorted(doomed, reverse=True):
+                    self.remove(sol, i)
+                return
         k = min(self.rng.randint(1, 3), len(sol.arcs))
         i = self.rng.randrange(len(sol.arcs) - k + 1)
         for _ in range(k):
             self.remove(sol, i)
+
+    def _arcs_in_worst_run(self, sol: _Sol, route: dict) -> list[int]:
+        """Serviced arcs sitting inside the walk's longest repeated stretch."""
+        spans = getattr(self, "_spans", None)
+        if not spans or len(spans) != len(sol.arcs):
+            return []
+        seg_ids = route["seg_ids"]
+        counts: dict[int, int] = {}
+        for s in seg_ids:
+            counts[s] = counts.get(s, 0) + 1
+        best = (0.0, 0, 0)
+        run_m, run_from = 0.0, 0
+        for i, s in enumerate(seg_ids):
+            if counts[s] > 1:
+                if run_m == 0.0:
+                    run_from = i
+                run_m += self.g.segments[s]["length_m"]
+            elif run_m:
+                if run_m > best[0]:
+                    best = (run_m, run_from, i)
+                run_m = 0.0
+        if run_m > best[0]:
+            best = (run_m, run_from, len(seg_ids))
+        if best[0] <= _RUN_FREE_M:
+            return []
+        _, lo_i, hi_i = best
+        return [j for j, (a, b) in enumerate(spans) if a < hi_i and b > lo_i]
 
     # -- budget filling
 
@@ -682,7 +831,6 @@ class _Solver:
         """Top the walk back up to the target with more uncovered street."""
         used = set(sol.counts)
         pool = [ei for ei in req if ei not in used]
-        g = self.g
         while pool and sol.length < self.aim:
             if time.monotonic() > self.deadline:
                 return
@@ -692,7 +840,7 @@ class _Solver:
                 if bi is None:
                     continue
                 delta, pos, a, b, bonus = bi
-                ratio = delta / max(g.e_prize[ei] + bonus, 1.0)
+                ratio = delta / max(self.prize[ei] + bonus, 1.0)
                 if best is None or ratio < best[0]:
                     best = (ratio, ei, delta, pos, a, b)
             if best is None:
@@ -716,7 +864,8 @@ class _Solver:
                 return
             need = self.target - sol.length
             best = None
-            for ei in self._near_tour(sol, self.filler, _NEAR_TOUR * 2):
+            pool = [e for e in self.filler if not self.g.isolated[e]] or self.filler
+            for ei in self._near_tour(sol, pool, _NEAR_TOUR * 2):
                 if sol.counts.get(ei, 0) >= _MAX_REPEATS:
                     continue
                 bi = self.best_insertion(sol, ei, self.cap)
@@ -735,14 +884,58 @@ class _Solver:
 
     # -- expansion
 
-    def expand(self, sol: _Sol) -> dict:
+    def expand(self, sol: _Sol, go_around: bool = False) -> dict:
+        """Turn the arc sequence into an actual walk.
+
+        Deadhead between serviced arcs is normally the shortest path, which is
+        why an insertion solver alone can only ever double back: the cheapest
+        way to the next street is usually the street you just walked. With
+        ``go_around`` the connectors are re-routed as they are laid down, on
+        weights that treble the cost of ground already covered — so if there is
+        a way round the block within reach, the walk takes it. Costs one
+        Dijkstra per connector, so it is only run on walks that are actually
+        doubling back (see ``finish``), and the result is only kept if it
+        scores better.
+        """
         g = self.g
         seg_ids: list[int] = []
         coords: list[tuple[float, float]] = []
         at = self.anchor
+        used: dict[int, int] = {}
+        # Detours lengthen the walk, and the walker asked for a time, not a
+        # shape. Going round the block is only allowed while it fits.
+        slack = [max(0.0, self.cap - sol.length)]
+
+        def connector(frm: int, to: int) -> list[int]:
+            plain = self.path_edges(frm, to)
+            if not go_around or not plain:
+                return plain
+            if not any(used.get(e) for e in plain):
+                return plain                       # not retracing anything
+            base = sum(g.e_len[e] for e in plain)
+            w = [self.weight[e] * (1.0 + 2.0 * used.get(e, 0))
+                 for e in range(len(g.e_seg))]
+            _, _, prev, _ = g.dijkstra(frm, w, base * 3.0 + 300.0)
+            alt, cur = [], to
+            while cur != frm:
+                step = prev.get(cur)
+                if step is None:
+                    return plain
+                p, e = step
+                alt.append(e)
+                cur = p
+            alt.reverse()
+            # Only worth it if the detour is a detour, not an expedition,
+            # and only while there is budget left to pay for it.
+            alt_m = sum(g.e_len[e] for e in alt)
+            if alt_m > base * 2.5 + 200.0 or alt_m - base > slack[0]:
+                return plain
+            slack[0] -= (alt_m - base)
+            return alt
 
         def walk_edge(ei: int, frm: int):
             nonlocal at
+            used[ei] = used.get(ei, 0) + 1
             seg = g.segments[g.e_seg[ei]]
             c = seg["coords"]
             if g.e_u[ei] != frm:                  # walking it from node_b to node_a
@@ -754,13 +947,19 @@ class _Solver:
             seg_ids.append(seg["seg_id"])
             at = g.e_v[ei] if g.e_u[ei] == frm else g.e_u[ei]
 
+        # Where each serviced arc (and the deadhead that reaches it) lands in
+        # the walk, so ruin-and-recreate can aim at a specific stretch of it.
+        spans: list[tuple[int, int]] = []
         for ei, a, b in sol.arcs:
-            for pe in self.path_edges(at, a):
+            first = len(seg_ids)
+            for pe in connector(at, a):
                 walk_edge(pe, at)
             walk_edge(ei, a)
+            spans.append((first, len(seg_ids)))
             at = b
-        for pe in self.path_edges(at, self.anchor):
+        for pe in connector(at, self.anchor):
             walk_edge(pe, at)
+        self._spans = spans
 
         alon, alat = g.node_lonlat[self.anchor]
         if not coords:
@@ -784,15 +983,105 @@ class _Solver:
     # -- objective (contract §3, lexicographic)
 
     def score(self, route: dict) -> tuple:
+        """The contract's priorities, in order, as a sortable key.
+
+        Closure is structural, so priority 1 needs no term. Then the length
+        band, then *shape*, then new metres, then contiguity, then shorter.
+
+        Shape sits above new_m deliberately, and it is quantised so that it
+        only overrules new_m when the difference is real. A 2.4 mile walk that
+        is 62% new street but spends a mile of it pacing a rural road is worse
+        than a 2.4 mile walk that is 80% new street around one neighbourhood,
+        and before this term the engine could not tell them apart.
+        """
         L = route["length_m"]
-        if L < self.lo:
-            band = self.lo - L
-        elif L > self.hi:
-            band = L - self.hi
-        else:
-            band = 0.0
+        dev = abs(L - self.target) / self.target if self.target else 0.0
+        # Inside ±10% counts as hitting the time asked for; past that each 5%
+        # is a step worse, and outside the contract's ±15% band is a cliff no
+        # amount of good shape can climb back over. The free window stops the
+        # engine buying shape with the walker's time, without making it
+        # chase the exact metre at the cost of a worse walk.
+        band = round(max(0.0, dev - 0.10) / 0.05)
+        if dev > BAND:
+            band += 100
+        shape = _shape_penalty(self.g, route)
         cont = _contiguity_ids(self.g, route["new_seg_ids"])
-        return (round(band, 2), -round(route["new_m"], 2), -round(cont, 4), L)
+        return (
+            band,
+            round(shape / _SHAPE_BUCKET),
+            -round(route["new_m"], 2),
+            -round(cont, 4),
+            L,
+        )
+
+
+# --------------------------------------------------------------------- shape --
+
+
+def _repeat_runs(g: RouteGraph, seg_ids: Sequence[int]) -> list[float]:
+    """Lengths of the contiguous stretches the walk covers more than once.
+
+    Run length is what matters, not the total. A 120 m out-and-back into a
+    cul-de-sac is unavoidable and fine. A 1.6 km out-and-back along one rural
+    road is the walk failing: it is dull, and it gives the walker no signal
+    about where to turn around.
+    """
+    counts: dict[int, int] = {}
+    for s in seg_ids:
+        counts[s] = counts.get(s, 0) + 1
+    runs: list[float] = []
+    cur = 0.0
+    for s in seg_ids:
+        seg = g.segments.get(s)
+        if seg is not None and counts[s] > 1:
+            cur += seg["length_m"]
+        elif cur:
+            runs.append(cur)
+            cur = 0.0
+    if cur:
+        runs.append(cur)
+    return runs
+
+
+def _compactness(route: dict) -> float:
+    """4·pi·area / length² over the walk's convex hull. 1.0 is a circle.
+
+    A loop encloses ground; a thread encloses none. Measured on routes a
+    person judged good this lands at 0.36-0.57, and on ones they rejected at
+    0.22-0.30.
+    """
+    L = route["length_m"]
+    if L <= 0:
+        return 1.0
+    pts = list(route["geometry"].coords)
+    if len(pts) < 3:
+        return 0.0
+    lat0 = sum(p[1] for p in pts) / len(pts)
+    sx = _EARTH_M_PER_DEG * math.cos(math.radians(lat0))
+    flat = LineString([((x - pts[0][0]) * sx, (y - pts[0][1]) * _EARTH_M_PER_DEG)
+                       for x, y in pts])
+    return 4.0 * math.pi * flat.convex_hull.area / (L * L)
+
+
+def _shape_penalty(g: RouteGraph, route: dict) -> float:
+    """0 = a compact loop. Grows with threadiness, repetition and long runs."""
+    L = route["length_m"]
+    if L <= 0:
+        return 0.0
+    runs = _repeat_runs(g, route["seg_ids"])
+    run_excess = sum(max(0.0, r - _RUN_FREE_M) for r in runs)
+
+    counts: dict[int, int] = {}
+    for s in route["seg_ids"]:
+        counts[s] = counts.get(s, 0) + 1
+    wasted = sum(g.segments[s]["length_m"] * (n - 1)
+                 for s, n in counts.items() if s in g.segments)
+
+    return (
+        _W_RUN * (run_excess / L)
+        + _W_REPEAT * max(0.0, wasted / L - _REPEAT_FREE_FRAC)
+        + _W_COMPACT * max(0.0, _COMPACT_TARGET - _compactness(route)) / _COMPACT_TARGET
+    )
 
 
 # ---------------------------------------------------------------- contiguity --
@@ -871,7 +1160,21 @@ def route_stats(route: dict, network: Any, start_lonlat: Sequence[float] | None 
             forced += extra
         else:
             avoidable += extra
+    runs = _repeat_runs(g, route["seg_ids"])
+    serviced_isolated = sum(
+        g.segments[s]["length_m"] * (n - 1 if n > 1 else 0) + (
+            g.segments[s]["length_m"] if n > 1 else 0.0)
+        for s, n in counts.items()
+        if s in g.edge_of_seg and g.isolated[g.edge_of_seg[s]]
+    )
     return {
+        "compactness": round(_compactness(route), 3),
+        "shape_penalty": round(_shape_penalty(g, route), 3),
+        "max_repeat_run_m": round(max(runs), 1) if runs else 0.0,
+        "repeat_runs": len(runs),
+        # Rural-connector metres the walk paced up and back rather than passed
+        # through — the specific failure mode, isolated as a number.
+        "paced_connector_m": round(serviced_isolated, 1),
         "repeat_m": round(forced + avoidable, 2),
         "repeat_forced_m": round(forced, 2),     # dead ends: unavoidable
         "repeat_avoidable_m": round(avoidable, 2),
@@ -974,8 +1277,10 @@ def generate(start_lonlat, target_m, network, covered=None, *, seed=None) -> dic
     best_route = None
     best_key = None
 
-    def finish(sol: _Sol):
-        for _ in range(2):
+    def finish(sol: _Sol, rounds: int = 2):
+        # One round is enough after a small ruin; the full treatment is only
+        # worth it on a freshly constructed walk.
+        for _ in range(rounds):
             solver.improve(sol)
             solver.fill(sol, req)
             if time.monotonic() > deadline:
@@ -983,12 +1288,28 @@ def generate(start_lonlat, target_m, network, covered=None, *, seed=None) -> dic
         if sol.length < solver.lo:
             solver.pad(sol)
         route = solver.expand(sol)
-        return route, solver.score(route)
+        key = solver.score(route)
+        # If it doubles back a long way, see whether the deadhead can go round
+        # instead. Kept only if the walk that produces is genuinely better.
+        runs = _repeat_runs(g, route["seg_ids"])
+        if runs and max(runs) > _RUN_FREE_M and time.monotonic() < deadline:
+            alt = solver.expand(sol, go_around=True)
+            alt_key = solver.score(alt)
+            if alt_key < key:
+                route, key = alt, alt_key
+            else:
+                solver.expand(sol)     # restore the spans of the kept walk
+        return route, key
 
     for r in range(_RESTARTS):
         # Each restart is seeded on a different arc, so the restarts try
         # different neighbourhoods instead of re-deriving the same one.
-        first = req[(r * 3) % len(req)] if (r and req) else None
+        # Seeds spread across the whole candidate list, which is sorted by
+        # distance from the start. Seeding only on the nearest arcs anchors
+        # every restart to the same few streets; if the good neighbourhood is
+        # 500 m away, no amount of local search will find it from there.
+        seeds = [e for e in req if not g.isolated[e]] or req
+        first = seeds[(r * len(seeds)) // _RESTARTS] if (r and seeds) else None
         sol = solver.construct(req, randomised=(r > 0), first=first)
         route, key = finish(sol)
         if best_key is None or key < best_key:
@@ -998,15 +1319,15 @@ def generate(start_lonlat, target_m, network, covered=None, *, seed=None) -> dic
         # and let the insertion heuristic rebuild it. This is what gets a route
         # out of the local minimum where it walks a street twice because the
         # arcs happened to be inserted in an awkward order.
-        cur_key = key
+        cur_key, cur_route = key, route
         for _ in range(_RUIN_ITERS):
             if time.monotonic() > deadline:
                 break
             cand = sol.copy()
-            solver.ruin(cand)
-            c_route, c_key = finish(cand)
+            solver.ruin(cand, cur_route)
+            c_route, c_key = finish(cand, rounds=1)
             if c_key < cur_key:
-                sol, cur_key = cand, c_key
+                sol, cur_key, cur_route = cand, c_key, c_route
                 if c_key < best_key:
                     best_key, best_route = c_key, c_route
         if time.monotonic() > deadline:

@@ -143,7 +143,7 @@ def coverage() -> dict[str, Any]:
 
 @app.post("/api/route")
 def route(body: RouteRequest) -> dict[str, Any]:
-    target_m = body.minutes * METRES_PER_MINUTE
+    target_m = engines.metres_for_minutes(body.minutes, METRES_PER_MINUTE)
     try:
         r = engines.generate(
             (body.lon, body.lat),
@@ -168,7 +168,7 @@ def route(body: RouteRequest) -> dict[str, Any]:
     return {
         "seg_ids": seg_ids,
         "new_seg_ids": new_ids,
-        "geometry": r.get("geometry"),
+        "geometry": engines.to_geojson(r.get("geometry")),
         "length_m": float(r.get("length_m", 0.0)),
         "new_m": float(r.get("new_m", 0.0)),
         "target_m": target_m,

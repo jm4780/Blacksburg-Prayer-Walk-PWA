@@ -146,12 +146,21 @@ def parallel_pairs(segs):
     return pairs
 
 
-def grow(segs, adjacency, from_node, used, budget):
+def ends(s):
+    return {s["node_a"], s["node_b"]}
+
+
+def grow(segs, adjacency, prev_sid, from_node, used, budget):
     """Walk outward from a junction, taking the longest street available."""
     path, cur, total = [], from_node, 0.0
     while total < budget:
         opts = [x for x in adjacency.get(cur, ())
-                if x not in used and walkable(segs[x])]
+                if x not in used and walkable(segs[x])
+                # A street sharing *both* junctions with the one we are on is a
+                # two-cycle, not a continuation. The network has a few (e.g.
+                # Winston St / Campus Edge Ct), and they cannot be oriented
+                # into a single walked polyline.
+                and ends(segs[x]) != ends(segs[prev_sid])]
         if not opts:
             break
         nxt = max(opts, key=lambda x: (segs[x]["line"].length, -x))
@@ -160,39 +169,43 @@ def grow(segs, adjacency, from_node, used, budget):
         total += segs[nxt]["line"].length
         n = segs[nxt]
         cur = n["node_b"] if n["node_a"] == cur else n["node_a"]
+        prev_sid = nxt
     return path
 
 
 def path_through(segs, adjacency, sid, target_m, avoid=()):
-    """A node-continuous walk that passes along `sid`, roughly `target_m` long."""
+    """A node-continuous walk along `sid`, roughly `target_m` long, or None."""
     used = {sid} | set(avoid)
     s = segs[sid]
     half = max(0.0, (target_m - s["line"].length) / 2.0)
-    forward = grow(segs, adjacency, s["node_b"], used, half)
-    backward = grow(segs, adjacency, s["node_a"], used, half)
+    forward = grow(segs, adjacency, sid, s["node_b"], used, half)
+    backward = grow(segs, adjacency, sid, s["node_a"], used, half)
     path = list(reversed(backward)) + [sid] + forward
-    while len(path) > 2:
+    while len(path) >= 3:
         try:
             path_polyline(segs, path)
             return path
         except AssertionError:
-            path = path[1:] if len(path) > 3 else path[:-1]
-    raise AssertionError(f"could not grow a walkable path through {sid}")
+            path = path[1:] if path[0] != sid else path[:-1]
+    return None
 
 
 @pytest.fixture(scope="session")
 def parallel_case(segs, adjacency, parallel_pairs):
     """The tightest real parallel-street trap, plus a walk down one of them.
 
-    On the shipped network this comes out as W Roanoke St against Wall St,
-    about 50 m apart and 2 degrees off parallel, in the middle of downtown --
-    exactly the "~60 m apart" situation contracts.md rule 1 describes.
+    Which pair this is depends on the build -- the test prints it -- but it is
+    always the closest sustained pair of long, near-parallel, non-adjacent
+    streets in the shipped geometry, which is exactly the "~60 m apart"
+    situation contracts.md rule 1 describes. Pairs under 20 m apart are skipped:
+    those are one physical street the network happens to carry twice, not two
+    streets, and no GPS can separate them (the engine says so, in `reason`).
     """
     for sep, a, b in parallel_pairs:
         if sep < 20.0:
             continue                   # duplicate geometry, not two streets
         path = path_through(segs, adjacency, a, 450.0, avoid=[b])
-        if len(path) >= 3 and sum(segs[x]["line"].length for x in path) > 300.0:
+        if path and len(path) >= 3 and sum(segs[x]["line"].length for x in path) > 300.0:
             return {"path": path, "under_test": a, "traps": [b], "sep": sep}
     raise AssertionError("no usable parallel-street case in the network")
 
@@ -204,7 +217,7 @@ def clean_case(segs, adjacency, parallel_pairs, parallel_case):
         if sep < 20.0 or a in parallel_case["path"] or b in parallel_case["path"]:
             continue
         path = path_through(segs, adjacency, a, 550.0, avoid=[b])
-        if len(path) >= 3 and sum(segs[x]["line"].length for x in path) > 400.0:
+        if path and len(path) >= 3 and sum(segs[x]["line"].length for x in path) > 400.0:
             return {"path": path, "under_test": a, "traps": [b], "sep": sep}
     raise AssertionError("no second parallel-street case in the network")
 
@@ -214,7 +227,7 @@ def long_case(segs, adjacency, clean_case):
     """A ~1 km walk, long enough to hide a three-minute hole inside it."""
     path = path_through(segs, adjacency, clean_case["under_test"], 1100.0,
                         avoid=clean_case["traps"])
-    assert sum(segs[x]["line"].length for x in path) > 800.0
+    assert path and sum(segs[x]["line"].length for x in path) > 800.0
     return path
 
 
@@ -354,7 +367,8 @@ def random_walks(segs, count, *, target_m=600.0, seed=7):
         cur, total = segs[start]["node_b"], segs[start]["line"].length
         while total < target_m:
             opts = [x for x in adjacency.get(cur, ())
-                    if x not in used and walkable(segs[x])]
+                    if x not in used and walkable(segs[x])
+                    and ends(segs[x]) != ends(segs[path[-1]])]
             if not opts:
                 break
             nxt = rng.choice(opts)

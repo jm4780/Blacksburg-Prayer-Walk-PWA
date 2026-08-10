@@ -74,9 +74,20 @@ review *queue*, not the full decision set.
 
 | | miles |
 |---|---|
-| this provisional network | **156.54** |
+| drawn by this provisional network | 156.54 |
+| **countable, each carriageway once** | **149.20** |
 | previous authoritative build, required street + campus | **136.21** |
-| difference | **+20.33 (+14.9%)** |
+| difference | **+12.99 (+9.5%)** |
+
+The gap between drawn and countable is divided roads. A dual carriageway is two
+parallel lines in the source, and 109 of them are paired here, 7.34 mi of
+duplicate. Counting both sides would mean the town could never reach 100%, since
+nobody can walk the far side of a median separately. Both lines stay in the
+graph for routing; coverage and the denominator count the pair once. See
+contracts.md §7.
+
+Found by the coverage engine, which kept matching a walk to two rows of the same
+pavement and refused to tick either.
 
 The excess is apartment and private drives that carry ordinary-looking street
 names and that no reachable data distinguishes from public streets.

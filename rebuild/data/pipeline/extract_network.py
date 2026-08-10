@@ -43,7 +43,7 @@ import mapbox_vector_tile as mvt
 import pyproj
 from pmtiles.reader import MmapSource, Reader
 from shapely.geometry import LineString, Polygon, shape
-from shapely.ops import transform
+from shapely.ops import transform, unary_union
 
 Z = 13
 EXTENT = 4096
@@ -319,6 +319,81 @@ def build_segments(edges: dict, limits: Polygon):
     return kept
 
 
+def group_carriageways(segments: list[dict]) -> None:
+    """Give both sides of a divided road one shared coverage identity.
+
+    A dual carriageway is drawn as two parallel lines. Left alone, that breaks
+    the app's central promise twice over: the denominator counts the road twice,
+    so the town can never reach 100%, and a walker who walks Prices Fork Rd
+    covers one line while the other stays unprayed for ever, because nobody can
+    walk the far side of a median separately.
+
+    Both lines stay in the graph, because routing needs the real topology. They
+    simply share a `carriageway_id`, and coverage is counted per carriageway
+    rather than per segment. Walk either side, the road is prayed for.
+
+    Pairing is deliberately strict: same street name, at least 60% of the
+    shorter line lying within 20 m of the longer, and both over 40 m. Two
+    segments running end to end along one carriageway barely overlap laterally,
+    so they never pair, which is what keeps this from chaining down a whole road.
+    """
+    from shapely.strtree import STRtree
+
+    geoms = [s["geometry"] for s in segments]
+    tree = STRtree(geoms)
+    tol = 20.0 / 111_320.0
+
+    # Score every candidate counterpart, then keep only MUTUAL BEST pairs.
+    #
+    # Transitive grouping is wrong here and the data proves it: along Prices Fork
+    # Rd, the north line of one block also lies within tolerance of the south
+    # line of the next, so a union-find walks the length of the road and ends up
+    # claiming two miles are prayed for because somebody walked one block.
+    # Requiring each side to be the other's single best match makes a group of
+    # two the only thing that can form, which is exactly what a divided road is.
+    best_for: dict[int, tuple[float, int]] = {}
+    for i, g in enumerate(geoms):
+        name_i = segments[i]["name"]
+        buf = g.buffer(tol)
+        for j in tree.query(buf):
+            if j == i or segments[j]["name"] != name_i:
+                continue
+            li, lj = segments[i]["length_m"], segments[j]["length_m"]
+            if min(li, lj) <= 40:
+                continue
+            overlap = buf.intersection(geoms[j])
+            if overlap.is_empty:
+                continue
+            score = GEOD.geometry_length(overlap) / min(li, lj)
+            if score <= 0.6:
+                continue
+            if score > best_for.get(i, (0.0, -1))[0]:
+                best_for[i] = (score, j)
+
+    merged_m = 0.0
+    groups = 0
+    for s in segments:
+        s["carriageway"] = None
+    for i, (score, j) in best_for.items():
+        if best_for.get(j, (0.0, -1))[1] != i:
+            continue  # not mutual: one of them has a better counterpart
+        if segments[i]["carriageway"] is not None:
+            continue
+        # Store the REPRESENTATIVE'S seg_id, which is its list index + 1, not the
+        # index itself. Downstream this is compared as
+        # coalesce(carriageway, seg_id), so a raw 0-based index would collide
+        # with an unrelated segment's 1-based seg_id and drag it into the group.
+        cw = min(i, j) + 1
+        segments[i]["carriageway"] = cw
+        segments[j]["carriageway"] = cw
+        groups += 1
+        merged_m += min(segments[i]["length_m"], segments[j]["length_m"])
+
+    print(f"\ncarriageway candidates  : {len(best_for)}")
+    print(f"divided roads paired    : {groups}")
+    print(f"double-counted mileage  : {merged_m / 1609.34:.2f} mi removed from the denominator")
+
+
 def main():
     limits = Polygon(json.load(open(LIMITS))["coordinates"][0])
     edges, features = read_edges(limits)
@@ -342,14 +417,30 @@ def main():
     for reason, metres in sorted(by_reason.items(), key=lambda kv: -kv[1]):
         print(f"  {reason:34s} {metres / 1609.34:8.2f} mi")
 
+    group_carriageways(segments)
+
+    # The denominator counts each carriageway once: the longest line in a group
+    # stands for the road, the other side rides along with it.
+    best: dict[int, float] = {}
+    solo = 0.0
+    for s in segments:
+        cw = s.get("carriageway")
+        if cw is None:
+            solo += s["length_m"]
+        else:
+            best[cw] = max(best.get(cw, 0.0), s["length_m"])
+    effective = (solo + sum(best.values())) / 1609.34
+
     total = sum(s["length_m"] for s in segments) / 1609.34
     names = {s["name"] for s in segments}
     print(f"\ncoverable segments : {len(segments)}")
-    print(f"coverable miles    : {total:.2f}")
+    print(f"drawn miles        : {total:.2f}")
+    print(f"countable miles    : {effective:.2f}   (each carriageway once)")
     print(f"distinct streets   : {len(names)}")
     truth = TRUTH_REQUIRED_STREET_MI + TRUTH_CAMPUS_MI
     print(f"previous build     : {truth:.2f} mi required street + campus")
-    print(f"delta              : {total - truth:+.2f} mi ({100 * (total - truth) / truth:+.1f}%)")
+    print(f"delta              : {effective - truth:+.2f} mi "
+          f"({100 * (effective - truth) / truth:+.1f}%)")
 
     os.makedirs(OUT, exist_ok=True)
     fc = {
@@ -367,6 +458,9 @@ def main():
                     "length_m": round(s["length_m"], 2),
                     "node_a": f"{s['nodes'][0][0]}_{s['nodes'][0][1]}",
                     "node_b": f"{s['nodes'][1][0]}_{s['nodes'][1][1]}",
+                    # Both sides of a divided road share this. Null means the
+                    # segment stands alone, which is the ordinary case.
+                    "carriageway": s.get("carriageway"),
                 },
                 "geometry": json.loads(json.dumps(s["geometry"].__geo_interface__)),
             }

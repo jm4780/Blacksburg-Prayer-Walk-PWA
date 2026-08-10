@@ -33,11 +33,23 @@ length_m  float     metres, clipped to the town limit
 node_a    text      junction id, "gx_gy" on the z13/4096 grid
 node_b    text      junction id
 homes     int|null  ALWAYS NULL in this build. See §6.
+carriageway int|null both sides of a divided road carry the same value, which
+                    is the seg_id of the pair's representative. Null (the
+                    ordinary case) means the segment stands alone. See §7.
 geom      LineString, EPSG:4326
 ```
 
 Two segments are topologically adjacent iff they share a node id. That is the
 only adjacency rule; do not infer adjacency from proximity.
+
+Counts, in the two sizes that matter:
+
+| | |
+|---|---|
+| segments | 1,598 — routing and matching work in these |
+| countable units | 1,489 — coverage and percentages work in these |
+| drawn length | 156.54 mi |
+| countable length | 149.20 mi |
 
 ---
 
@@ -168,3 +180,29 @@ zero. A zero is a claim that no one lives on that street. The API returns
 `homes_covered: null`, and the interface renders no home line. When a real
 address source is wired in, populating `segment.homes` lights the counter with
 no other change anywhere.
+
+---
+
+## 7. Divided roads
+
+A dual carriageway is drawn as two parallel lines. Prices Fork Rd, US 460 Bus
+and Alumni Mall are the big ones here: 109 pairs, 7.34 mi of duplicate.
+
+Left alone that breaks the central promise twice. The denominator counts the
+road twice, so the town can never reach 100%. And a walker who walks Prices Fork
+Rd covers one line while the other stays unprayed for ever, because there is no
+way to walk the far side of a median and no reason to ask anyone to.
+
+So both lines stay in the graph, since routing needs the real topology, and they
+share a `carriageway`. Two rules follow, and every component must obey them:
+
+- **Coverage is per carriageway.** `commit_walk` marks every segment sharing a
+  carriageway with anything walked. Walk one side, the road is prayed for.
+- **The denominator is per carriageway.** The `street_unit` view takes the
+  longer of the two lines, never their sum.
+
+Pairing is mutual-best and therefore always exactly two segments. Transitive
+grouping was tried and is wrong: along Prices Fork Rd the north line of one
+block lies within tolerance of the south line of the next, so a union-find walks
+the length of the road and ends up claiming two miles are prayed for because
+somebody walked one block.

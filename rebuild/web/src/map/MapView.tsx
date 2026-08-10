@@ -177,12 +177,18 @@ export function MapView(props: MapViewProps) {
   }, [props.walker])
 
   // ---- follow the walker -------------------------------------------------
+  // Centring on the walker put the walker in the middle of the viewport, and
+  // the bottom half of the viewport is the sheet. During a walk you could not
+  // see yourself. Offset by half the sheet so the dot sits in the open map.
   useEffect(() => {
     const m = map.current
     if (!m || !props.follow || !props.walker) return
+    const sheet = document.querySelector('.sheet') as HTMLElement | null
+    const hidden = sheet ? sheet.getBoundingClientRect().height : 0
     m.easeTo({
       center: [props.walker.lon, props.walker.lat],
       zoom: Math.max(m.getZoom(), 16),
+      offset: [0, -Math.round(hidden / 2)],
       duration: 700,
     })
   }, [props.follow, props.walker])

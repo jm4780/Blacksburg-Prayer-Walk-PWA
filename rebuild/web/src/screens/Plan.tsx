@@ -71,7 +71,7 @@ export function Plan({
             {matches.map(([name, metres]) => (
               <li key={name}>
                 <button
-                  className="street"
+                  className="street street-add"
                   onClick={() => {
                     onAddByName(name)
                     setQuery('')

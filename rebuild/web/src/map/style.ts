@@ -53,6 +53,20 @@ export function buildStyle(): StyleSpecification {
         'source-layer': 'water',
         paint: { 'fill-color': color.water },
       },
+      // A near-black ground leaves almost no room to go darker, so water on its
+      // own sits 1.03:1 below it and cannot be seen. The shoreline is what makes
+      // the hole read. Still value, still no hue.
+      {
+        id: 'water-edge',
+        type: 'line',
+        source: 'base',
+        'source-layer': 'water',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': color.waterEdge,
+          'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.6, 13, 1.0, 17, 1.6],
+        },
+      },
       {
         id: 'waterway',
         type: 'line',
@@ -99,9 +113,12 @@ export function buildStyle(): StyleSpecification {
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
           'line-color': color.boundary,
-          'line-opacity': 0.34,
-          'line-dasharray': [4, 5],
-          'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.8, 12, 1.1, 16, 1.5],
+          // 0.34 on a 1px dash was a boundary nobody could find. The town edge
+          // is the one piece of civic geometry on this map and it should be
+          // quietly legible: a dashed hairline you can follow if you look for it.
+          'line-opacity': 0.85,
+          'line-dasharray': [3, 4],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1.0, 12, 1.4, 16, 1.8],
         },
       },
 
@@ -181,9 +198,12 @@ export function buildStyle(): StyleSpecification {
         source: 'network',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
-          'line-color': '#FFFFFF',
+          // Was a raw #FFFFFF, the one hard-coded colour left on the map and a
+          // second white competing with the walker. A street you claimed is
+          // still a prayed street: it belongs to the amber, only brighter.
+          'line-color': color.prayedLift,
           'line-width': mapWidth.segmentCore as never,
-          'line-opacity': ['case', ['boolean', ['feature-state', 'claimed'], false], 0.5, 0],
+          'line-opacity': ['case', ['boolean', ['feature-state', 'claimed'], false], 0.85, 0],
         },
       },
 
@@ -228,8 +248,8 @@ export function buildStyle(): StyleSpecification {
           'text-size': ['interpolate', ['linear'], ['zoom'], 11, 9, 15, 11.5],
           'text-letter-spacing': 0.05,
           'text-max-angle': 30,
-          'text-padding': 6,
-          'symbol-spacing': 340,
+          'text-padding': 16,
+          'symbol-spacing': 700,
         },
         paint: {
           'text-color': color.labelQuiet,
@@ -295,25 +315,29 @@ export function buildStyle(): StyleSpecification {
         id: 'label-street',
         type: 'symbol',
         source: 'network',
-        minzoom: 15,
+        // Was 15 with 260px spacing, which put ten or more names on one phone
+        // screen and repeated half of them. A street name is a thing you look
+        // for, not a thing you read; one instance per street per screen is the
+        // whole job.
+        minzoom: 15.5,
         layout: {
           'symbol-placement': 'line',
           'text-field': ['get', 'name'],
           'text-font': FONT,
-          'text-size': ['interpolate', ['linear'], ['zoom'], 15, 9.5, 18, 11.5],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 15.5, 9.5, 18, 11],
           'text-letter-spacing': 0.06,
-          'text-max-angle': 32,
-          'symbol-spacing': 260,
-          'text-padding': 4,
+          'text-max-angle': 30,
+          'symbol-spacing': 620,
+          'text-padding': 14,
         },
         paint: {
-          'text-color': [
-            'case',
-            ['boolean', ['feature-state', 'prayed'], false], color.prayedDim,
-            color.labelQuiet,
-          ],
+          // One colour, whatever the prayer state. The line underneath already
+          // says prayed or not; tinting the name as well drew dark brown text
+          // on top of a bright amber line, which was the least readable thing
+          // on the map, and spent the prayed colour twice for one meaning.
+          'text-color': color.labelQuiet,
           'text-halo-color': color.ground,
-          'text-halo-width': 1.5,
+          'text-halo-width': 1.6,
         },
       },
 
@@ -324,13 +348,13 @@ export function buildStyle(): StyleSpecification {
         source: 'walker',
         paint: {
           'circle-color': color.walker,
-          'circle-opacity': 0.08,
+          'circle-opacity': 0.07,
           'circle-radius': [
             'interpolate', ['linear'], ['zoom'],
             13, 6, 16, ['max', 10, ['/', ['get', 'accuracy_m'], 3]], 19, ['max', 18, ['get', 'accuracy_m']],
           ],
           'circle-stroke-color': color.walker,
-          'circle-stroke-opacity': 0.18,
+          'circle-stroke-opacity': 0.22,
           'circle-stroke-width': 1,
         },
       },
@@ -340,9 +364,9 @@ export function buildStyle(): StyleSpecification {
         source: 'walker',
         paint: {
           'circle-color': color.walker,
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 4.5, 16, 7, 19, 9],
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 5, 16, 7.5, 19, 9.5],
           'circle-stroke-color': color.groundSunk,
-          'circle-stroke-width': 2.5,
+          'circle-stroke-width': 3,
         },
       },
     ] as never,

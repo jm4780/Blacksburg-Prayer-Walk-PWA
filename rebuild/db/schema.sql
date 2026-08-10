@@ -27,6 +27,10 @@ create table if not exists segment (
     -- counter is built and plumbed; it simply has nothing truthful to show yet,
     -- so it shows nothing. A number we cannot stand behind is worse than a gap.
     homes       integer,
+    -- Both lines of a divided road carry the same value here. Null means the
+    -- segment stands alone, which is the ordinary case. Nobody can walk the far
+    -- side of a median separately, so the two sides are one thing to pray for.
+    carriageway integer,
     geom        geometry(LineString, 4326) not null
 );
 
@@ -115,8 +119,16 @@ begin
     where exists (select 1 from segment where segment.seg_id = s.seg_id)
     on conflict do nothing;
 
+    -- Cover every segment sharing a carriageway with something walked. Walk one
+    -- side of Prices Fork Rd and the road is prayed for, because there is no way
+    -- to walk the other side of a median and no reason to ask anyone to.
     insert into coverage (seg_id, first_walk_id)
-    select seg_id, v_walk_id from walk_segment where walk_id = v_walk_id
+    select s2.seg_id, v_walk_id
+    from walk_segment ws
+    join segment s1 on s1.seg_id = ws.seg_id
+    join segment s2
+      on coalesce(s2.carriageway, s2.seg_id) = coalesce(s1.carriageway, s1.seg_id)
+    where ws.walk_id = v_walk_id
     on conflict (seg_id) do nothing;
 
     return v_walk_id;
@@ -128,13 +140,29 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Percent complete is weighted by street length, not by segment count, so a
 -- long road counts for more than a cul-de-sac.
+-- One row per countable stretch of street. A divided road is ONE unit: its
+-- length is the longer of the two lines, not their sum, so the denominator
+-- reflects the town rather than the drawing.
+create or replace view street_unit as
+select
+    coalesce(carriageway, seg_id) as unit_id,
+    max(length_m)                 as length_m,
+    sum(homes)                    as homes
+from segment
+group by coalesce(carriageway, seg_id);
+
+create or replace view covered_unit as
+select distinct coalesce(s.carriageway, s.seg_id) as unit_id
+from coverage c
+join segment s using (seg_id);
+
 create or replace view progress as
 select
-    (select count(*) from coverage)                                    as segments_covered,
-    (select count(*) from segment)                                     as segments_total,
-    (select coalesce(sum(s.length_m), 0)
-       from coverage c join segment s using (seg_id))                  as covered_m,
-    (select sum(length_m) from segment)                                as total_m,
-    (select coalesce(sum(s.homes), 0)
-       from coverage c join segment s using (seg_id))                  as homes_covered,
-    (select sum(homes) from segment)                                   as homes_total;
+    (select count(*) from covered_unit)          as segments_covered,
+    (select count(*) from street_unit)           as segments_total,
+    (select coalesce(sum(u.length_m), 0) from street_unit u
+        join covered_unit cu on cu.unit_id = u.unit_id)  as covered_m,
+    (select sum(length_m) from street_unit)      as total_m,
+    (select sum(u.homes) from street_unit u
+        join covered_unit cu on cu.unit_id = u.unit_id)  as homes_covered,
+    (select sum(homes) from street_unit)         as homes_total;

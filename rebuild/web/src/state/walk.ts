@@ -32,6 +32,7 @@ export function emptyWalk(): WalkState {
     start: null,
     route: null,
     claimed: [],
+    suggested: [],
     manual: false,
     trace: [],
   }

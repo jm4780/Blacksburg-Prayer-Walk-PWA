@@ -10,6 +10,7 @@ export function Confirm({
   name,
   onName,
   claimedSegments,
+  suggestedSegments,
   covered,
   onToggle,
   onMatch,
@@ -22,6 +23,7 @@ export function Confirm({
   name: string
   onName: (v: string) => void
   claimedSegments: Segment[]
+  suggestedSegments: Segment[]
   covered: Set<number>
   onToggle: (seg_id: number) => void
   onMatch: () => void
@@ -41,6 +43,19 @@ export function Confirm({
       </p>
 
       <StreetList segments={claimedSegments} checked={claimed} covered={covered} onToggle={onToggle} />
+
+      {suggestedSegments.length > 0 && (
+        <>
+          <p className="label">Close to your track, not certain</p>
+          <p>Tick any of these you actually walked. Left alone, they count for nothing.</p>
+          <StreetList
+            segments={suggestedSegments}
+            checked={claimed}
+            covered={covered}
+            onToggle={onToggle}
+          />
+        </>
+      )}
 
       {notice && <p className="notice notice-warn">{notice}</p>}
 

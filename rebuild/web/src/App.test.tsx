@@ -166,6 +166,64 @@ describe('a walk', () => {
     expect(posted.find((p) => p.url === '/api/walk')!.body.seg_ids).toEqual([1])
   })
 
+  it('ticks streets off by itself, and leaves an unsure match unticked', async () => {
+    // A phone sitting on Progress St.
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      onLine: true,
+      geolocation: {
+        watchPosition: (ok: PositionCallback) => {
+          ok({
+            coords: { latitude: 37.232, longitude: -80.42, accuracy: 10 },
+            timestamp: 1_700_000_000_000,
+          } as GeolocationPosition)
+          return 1
+        },
+        clearWatch: () => {},
+      },
+    })
+    const realFetch = globalThis.fetch
+    vi.stubGlobal('fetch', async (url: string, init?: RequestInit) => {
+      if (String(url) === '/api/match') {
+        posted.push({ url: '/api/match', body: JSON.parse(String(init!.body)) })
+        // Exactly what the coverage engine does with a short, ambiguous track:
+        // offers it below 0.5 rather than deciding for the walker.
+        return json({
+          proposals: [
+            { seg_id: 3, name: 'Clay St', confidence: 0.4, matched_m: 73, reason: 'posterior 0.75' },
+          ],
+        })
+      }
+      return realFetch(url as never, init)
+    })
+
+    render(<App />)
+    const start = await screen.findByRole('button', { name: 'Start a walk' })
+    await waitFor(() => expect((start as HTMLButtonElement).disabled).toBe(false))
+    fireEvent.click(start)
+    fireEvent.click(await screen.findByRole('button', { name: /30/ }))
+    const go = await screen.findByRole('button', { name: 'Start walking' })
+    await waitFor(() => expect((go as HTMLButtonElement).disabled).toBe(false))
+    fireEvent.click(go)
+
+    // Progress St ticked itself off, with no tap and no coordinate leaving.
+    const walked = await screen.findByRole('checkbox', { name: /Progress St/ })
+    await waitFor(() => expect(walked.getAttribute('aria-checked')).toBe('true'))
+    expect(posted.filter((p) => p.url === '/api/match')).toHaveLength(0)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Finish walk' }))
+    fireEvent.click(await screen.findByRole('button', { name: /Check my track/ }))
+
+    // The unsure one is shown, and shown unticked.
+    const clay = await screen.findByRole('checkbox', { name: /Clay St/ })
+    expect(clay.getAttribute('aria-checked')).toBe('false')
+
+    // Left alone, it commits nothing.
+    fireEvent.click(screen.getByRole('button', { name: 'Add these streets to the map' }))
+    await waitFor(() => expect(posted.filter((p) => p.url === '/api/walk')).toHaveLength(1))
+    expect(posted.find((p) => p.url === '/api/walk')!.body.seg_ids).toEqual([1])
+  })
+
   it('shows no home count while homes are unknown', async () => {
     render(<App />)
     await screen.findByText(/of Blacksburg's streets prayed for/)

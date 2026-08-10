@@ -36,10 +36,24 @@ class EngineUnavailable(Exception):
         super().__init__(f"{engine}: {detail}")
 
 
+_loaded: dict[tuple[str, str], Callable[..., Any]] = {}
+
+
 def _load(module_name: str, attr: str) -> Callable[..., Any]:
+    """Import once and keep it.
+
+    A successful load is cached, because these engines hold expensive state
+    between calls (the route engine caches the graph it builds from the
+    network, which takes about a second). A failed load is not cached, so an
+    engine that lands while the server is running is picked up on the next
+    request rather than needing a restart.
+    """
+    key = (module_name, attr)
+    hit = _loaded.get(key)
+    if hit is not None:
+        return hit
     try:
         mod = importlib.import_module(module_name)
-        importlib.reload(mod)
     except Exception:
         raise EngineUnavailable(
             module_name,
@@ -48,6 +62,7 @@ def _load(module_name: str, attr: str) -> Callable[..., Any]:
     fn = getattr(mod, attr, None)
     if not callable(fn):
         raise EngineUnavailable(module_name, f"no callable {attr}()")
+    _loaded[key] = fn
     return fn
 
 
@@ -73,6 +88,53 @@ def generate(
     except TypeError as exc:
         raise EngineUnavailable("engine.route", f"signature mismatch: {exc}")
     return _as_dict(out)
+
+
+def to_geojson(geom: Any) -> dict[str, Any] | None:
+    """Whatever the engine hands back, the client gets GeoJSON.
+
+    The route engine returns a shapely LineString, which is a perfectly good
+    thing for an engine to return and not something the browser can read. Any
+    object with __geo_interface__ works, as does plain GeoJSON, as does a bare
+    list of coordinates.
+    """
+    if geom is None:
+        return None
+    if isinstance(geom, dict):
+        return geom
+    gi = getattr(geom, "__geo_interface__", None)
+    if gi is not None:
+        return {
+            "type": gi["type"],
+            "coordinates": _plain(gi["coordinates"]),
+        }
+    coords = getattr(geom, "coords", None)
+    if coords is not None:
+        return {"type": "LineString", "coordinates": [[float(x), float(y)] for x, y in coords]}
+    if isinstance(geom, (list, tuple)):
+        return {"type": "LineString", "coordinates": _plain(geom)}
+    raise EngineUnavailable("engine.route", f"cannot read geometry of type {type(geom).__name__}")
+
+
+def _plain(value: Any) -> Any:
+    """Tuples and numpy scalars into lists and floats, all the way down."""
+    if isinstance(value, (list, tuple)):
+        return [_plain(v) for v in value]
+    return float(value)
+
+
+def metres_for_minutes(minutes: float, fallback_pace: float) -> float:
+    """Minutes to metres, using the route engine's own pace when it has one.
+
+    The engine plans against a target in metres and judges itself on a +/-15%
+    band around it. If the API converted at a different pace than the engine
+    plans at, every route would sit at the edge of that band for no reason.
+    """
+    try:
+        fn = _load("engine.route", "meters_for_minutes")
+        return float(fn(minutes))
+    except Exception:
+        return minutes * fallback_pace
 
 
 def _as_dict(obj: Any) -> dict[str, Any]:

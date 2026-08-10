@@ -29,18 +29,14 @@ export function Walking({
   return (
     <div className="sheet">
       <div className="walking-figures">
-        <div>
-          <p className="counter-small">
-            {claimedSegments.length}
-            <span className="unit">of {target} streets</span>
-          </p>
-        </div>
-        <div>
-          <p className="counter-small">
-            {formatMiles(metres)}
-            <span className="unit">miles</span>
-          </p>
-        </div>
+        <p className="counter-small">
+          {claimedSegments.length}
+          <span className="unit">of {target} streets</span>
+        </p>
+        <p className="counter-small">
+          {formatMiles(metres)}
+          <span className="unit">miles</span>
+        </p>
       </div>
 
       <p>

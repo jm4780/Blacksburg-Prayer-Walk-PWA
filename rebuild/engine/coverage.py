@@ -98,10 +98,17 @@ AMBIGUOUS_MARGIN = 0.5       # ... nor is it, if the typical fix sat this close 
                              #     a rival segment, relative to its own accuracy ...
 JUNCTION_CLEAR_M = 35.0      # ... where "rival" ignores a segment sharing a junction
                              #     only while we are still within this of that
-                             #     junction, since streets meet at corners
-MARGIN_PERCENTILE = 0.25    # ... judged at the low quartile, not the median, so a
-                             #     rival hugging half the segment still counts
-MARGIN_FLOOR_M = 15.0        # ... never below this, whatever the fixes claim
+                             #     junction, since streets meet at corners ...
+JUNCTION_CLEAR_FRAC = 0.35   # ... capped at this fraction of a short segment, or the
+                             #     clearance would swallow the whole thing ...
+MARGIN_PERCENTILE = 0.25     # ... judged at the low quartile, not the median, so a
+                             #     rival hugging half the segment still counts ...
+MARGIN_FLOOR_M = 25.0        # ... and never below this. The contract asks us to
+                             #     resolve a ~60 m street grid; anything running
+                             #     closer than 25 m is a service road, a divided
+                             #     carriageway, or one street the network happens to
+                             #     carry twice, and picking between the two copies is
+                             #     a coin flip whatever the fixes say.
 AMBIGUOUS_CAP = 0.45         # ... and any of those means it can never tick (rule 1)
 INFERRED_CAP = 0.40          # traversed by the best path but never directly seen
 NOISE_FLOOR_CAP = 0.30
@@ -146,10 +153,13 @@ class Segment:
         self.node_b = node_b
         self.line = line
         self.geom_len = line.length
-        # length_m is clipped to the town limit and so may be shorter than the
-        # geometry we can actually observe. Coverage *fractions* are measured
-        # against the geometry (what a walker can be seen on); reported
-        # matched_m is capped at length_m (what actually counts toward the town).
+        # length_m is the town-clipped length. In the current build it equals
+        # the drawn geometry for all 1,598 rows, but the two are kept distinct
+        # on purpose: coverage *fractions* are measured against the geometry
+        # (what a walker can actually be observed on) while reported matched_m
+        # is capped at length_m (what counts toward the town total). If a future
+        # build ever reintroduces the mismatch, this degrades to under-claiming
+        # rather than to claiming street outside the town limit.
         self.length_m = float(length_m) if length_m else self.geom_len
 
         cum = [0.0]
@@ -890,8 +900,10 @@ def propose(trace, network, *, now=None) -> list[dict]:
                     # near the corner. Further along it counts like any other
                     # rival, which is what catches a duplicated street that
                     # happens to share an endpoint with the one it duplicates.
+                    clear = min(JUNCTION_CLEAR_M,
+                                JUNCTION_CLEAR_FRAC * c.seg.geom_len)
                     at_corner = any(
-                        to_end.get(nd, math.inf) < JUNCTION_CLEAR_M
+                        to_end.get(nd, math.inf) < clear
                         for nd in (other.seg.node_a, other.seg.node_b))
                     if not at_corner:
                         # Measured from the matched point on the segment, not
@@ -930,7 +942,10 @@ def propose(trace, network, *, now=None) -> list[dict]:
         if a.observed and len(a.accs) < 2:
             continue          # one fix is a coincidence, not a walk down a street
         cov_frac = min(1.0, covered / a.seg.cover_len)
-        matched_m = min(covered, a.seg.length_m)
+        # Rounded first, then clamped: rounding a value already at the cap can
+        # nudge it above, and "claims more metres than the street has" is a
+        # claim the confirm screen should never be able to make.
+        matched_m = min(round(covered, 1), a.seg.length_m)
 
         f_cov = _logistic((cov_frac - COV_MID) / COV_WIDTH)
         if a.w > 0.0:
@@ -990,7 +1005,7 @@ def propose(trace, network, *, now=None) -> list[dict]:
             "seg_id": a.seg.seg_id,
             "name": a.seg.name,
             "confidence": round(max(0.0, min(1.0, conf)), 3),
-            "matched_m": round(matched_m, 1),
+            "matched_m": matched_m,
             "reason": reason,
         })
 
