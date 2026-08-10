@@ -116,6 +116,7 @@ CLOSE_M = 100.0                       # contract §3.1
 SAFE_MOTORWAY_REF = "US 460 Bus"      # Main St downtown; walkable
 
 _UNCOVERED_DISCOUNT = 0.85   # deadhead prefers streets we still need
+_BALL = 0.5                  # candidate radius, as a share of the walk budget
 _MAX_CANDIDATES = 110        # required arcs considered per route
 _NEAR_TOUR = 60              # arcs evaluated per insertion (nearest to tour)
 _RESTARTS = 12
@@ -591,7 +592,7 @@ class _Solver:
             du = real.get(g.e_u[ei], _INF)
             dv = real.get(g.e_v[ei], _INF)
             dmin = min(du, dv)
-            if dmin > self.hi * 0.5:
+            if dmin > self.hi * _BALL:
                 continue
             reach.append((dmin, ei))
         reach.sort(key=lambda t: (t[0], g.e_seg[t[1]]))
