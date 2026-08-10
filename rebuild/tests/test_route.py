@@ -4,9 +4,14 @@ These run against the real Blacksburg street network, not a fixture. A
 route engine that passes on a toy grid and strands someone on Prices Fork Rd
 has not passed anything.
 
-Run with `-s` to see the measured numbers (contiguity, timing, coverage lift):
+Run with `-s` to see the measured numbers (shape, contiguity, timing, coverage
+lift, saturation):
 
     python3 -m pytest rebuild/tests/test_route.py -s
+
+The pictures are the other half of this. `five_routes.py` renders five walks
+from five different street fabrics for a person to judge; the shape tests here
+exist to keep what that judgement found from regressing silently.
 """
 from __future__ import annotations
 

@@ -105,6 +105,7 @@ __all__ = [
     "minutes_for_meters",
     "route_stats",
     "PACE_M_PER_MIN",
+    "SATURATED_RATIO",
 ]
 
 # ---------------------------------------------------------------- constants --
@@ -152,8 +153,8 @@ SATURATED_RATIO = 0.15       # below this share of new street, the walk is
                              # reported saturated
 _SUGGEST_RADIUS_M = 3000.0   # how far to look for somewhere better (~35 min
                              # walk away); capped so this never gets expensive
-_SUGGEST_MIN_FRAC = 1.0      # an alternative is only worth naming if it holds
-                             # uncovered street worth half the walk
+_SUGGEST_MIN_FRAC = 1.0      # only name somewhere else if it holds a whole
+                             # walk's worth of uncovered street within reach
 
 _EARTH_M_PER_DEG = 111_320.0
 
@@ -1244,9 +1245,10 @@ def _nearest_new_ground(g: RouteGraph, anchor: int, covered: set[int],
 
     Clusters the uncovered street into connected blocks (union-find over
     shared node ids, the only adjacency rule there is), then names the closest
-    block big enough to be worth the trip — half the walk's length in
-    uncovered street. Distance is walking distance through the network, not a
-    straight line, because that is the number the walker has to spend.
+    block holding a whole walk's worth of uncovered street, and confirms by
+    Dijkstra that the street is really within reach *of that spot* rather than
+    merely somewhere in that direction. Distance is walking distance through
+    the network, not a straight line, because that is what the walker spends.
 
     One Dijkstra out to `_SUGGEST_RADIUS_M` plus a pass over the edges, and
     only on saturated routes, so an ordinary route pays nothing for it.
@@ -1448,6 +1450,13 @@ def generate(start_lonlat, target_m, network, covered=None, *, seed=None) -> dic
         # no amount of local search will find it from there.
         seeds = [e for e in req if not g.isolated[e]] or req
         first = seeds[(r * len(seeds)) // _RESTARTS] if (r and seeds) else None
+        # Every fourth restart plans a deliberately short walk. That leaves
+        # budget for the go-around repair to spend on looping instead of
+        # doubling back — a loop that costs 200 m more than retracing cannot
+        # be bought out of a walk that has already spent everything.
+        loopy = (r % 4 == 3)
+        solver.aim = target_m * (0.80 if loopy else 0.96)
+        solver.cap = target_m * (0.92 if loopy else 1.10)
         sol = solver.construct(req, randomised=(r > 0), first=first)
         route, key = finish(sol)
         if best_key is None or key < best_key:

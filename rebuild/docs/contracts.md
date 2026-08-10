@@ -109,8 +109,19 @@ Route = {
     geometry: LineString,     # for drawing
     length_m: float,
     new_m: float,
+    new_ratio: float,         # new_m / length_m
+    saturated: bool,          # new_ratio < 0.15 (SATURATED_RATIO)
+    suggested_start: {lon, lat, distance_m, uncovered_m} | None,
 }
 ```
+
+**Saturation must never be silent.** When every street near the walker is
+already prayed for, a technically valid route is still a failed walk: someone
+walks a mile and a half believing they covered new ground. So the engine says
+so, and `suggested_start` names the nearest place a walk of that length would
+find real street. `distance_m` is walking distance through the network, not a
+straight line. Null means nowhere qualifies, which is the honest answer when the
+town is finished, rather than an invented destination.
 
 This is a rural postman problem on the uncovered subgraph. Solve it as one.
 
