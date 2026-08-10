@@ -2,6 +2,11 @@ export type Segment = {
   seg_id: number
   name: string
   length_m: number
+  /** Junction ids from the network build. Absent on a street file cached
+   *  before the server began sending them; streets.ts falls back to
+   *  reconstructing them from the endpoints. */
+  node_a?: string
+  node_b?: string
   geometry: { type: 'LineString'; coordinates: [number, number][] }
 }
 

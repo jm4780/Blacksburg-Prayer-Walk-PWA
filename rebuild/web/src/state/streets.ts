@@ -24,7 +24,15 @@ const Z = 13
 const EXTENT = 4096
 const WORLD = 2 ** Z * EXTENT
 
-/** A segment endpoint as the junction id the network build gave it. */
+/**
+ * A segment endpoint as the junction id the network build gave it.
+ *
+ * Only a fallback now. The server sends node_a/node_b, and those are used when
+ * present. This reconstruction stays for a phone still holding a street file
+ * cached before the server began sending them, and it is the reason the grid
+ * constants above have to match the pipeline: if a future build changes zoom or
+ * extent, this silently produces junction ids that do not exist.
+ */
 export function nodeIdOf(lon: number, lat: number): string {
   const x = ((lon + 180) / 360) * WORLD
   const s = Math.sin((lat * Math.PI) / 180)
@@ -47,8 +55,11 @@ export function buildStreetIndex(segments: Segment[]): StreetIndex {
   for (const s of segments) {
     const c = s.geometry.coordinates
     if (c.length < 2) continue
-    const a = nodeIdOf(c[0][0], c[0][1])
-    const b = nodeIdOf(c[c.length - 1][0], c[c.length - 1][1])
+    // Prefer the ids the network build actually assigned. Recomputing them
+    // from coordinates only works while the client's grid constants match the
+    // pipeline's, and nothing would announce it if they stopped matching.
+    const a = s.node_a ?? nodeIdOf(c[0][0], c[0][1])
+    const b = s.node_b ?? nodeIdOf(c[c.length - 1][0], c[c.length - 1][1])
     byId.set(s.seg_id, s)
     ends.set(s.seg_id, [a, b])
     for (const nd of a === b ? [a] : [a, b]) {

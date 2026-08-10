@@ -146,7 +146,8 @@ FastAPI on `:8000`. JSON everywhere. No auth; a device id is a claim, not a
 credential, and nothing in the schema can be damaged by a forged one.
 
 ```
-GET  /api/network              -> {segments: [{seg_id,name,length_m,geometry}]}
+GET  /api/network              -> {segments: [{seg_id, name, length_m,
+                                                node_a, node_b, geometry}]}
 GET  /api/progress             -> {segments_covered, segments_total,
                                    covered_m, total_m, percent,
                                    homes_covered|null, homes_total|null}
@@ -158,6 +159,13 @@ POST /api/walk                 -> body {device_id, client_walk_id,
                                   -> {walk_id, newly_covered: [int]}
 POST /api/match                -> body {trace: [Fix]} -> {proposals: [Proposal]}
 ```
+
+`node_a` / `node_b` are served, not implied. The phone needs adjacency to offer
+a street as the stretches people actually walk, and without them it has to
+rebuild the junction ids from endpoint coordinates using the pipeline's grid
+arithmetic transcribed into TypeScript. That holds only while both copies agree,
+and nothing would announce it if they stopped. The client still falls back to
+reconstruction for a street file cached before these were sent.
 
 `POST /api/walk` is **idempotent on `(device_id, client_walk_id)`**. The client
 mints `client_walk_id` before the walk starts and reuses it on every retry

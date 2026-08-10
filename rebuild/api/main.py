@@ -122,6 +122,14 @@ def network(request: Request) -> Response:
                 "seg_id": s["seg_id"],
                 "name": s["name"],
                 "length_m": s["length_m"],
+                # Junction ids, served rather than recomputed. The phone needs
+                # adjacency to offer a street as the stretches people walk, and
+                # it was rebuilding these from the endpoint coordinates using
+                # the pipeline's grid arithmetic copied into TypeScript. That
+                # works until the build changes zoom or extent, at which point
+                # adjacency goes silently wrong. The database already knows.
+                "node_a": s["node_a"],
+                "node_b": s["node_b"],
                 "geometry": s["geometry"],
             }
             for s in segments_now
