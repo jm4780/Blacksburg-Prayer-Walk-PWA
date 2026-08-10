@@ -4,14 +4,14 @@ import { BLACKSBURG } from './map/style'
 import { api, ApiError } from './data/api'
 import { loadCoverage, loadProgress, loadSegments, refreshSegments } from './data/network'
 import { bboxOf, claimedByProximity, metresBetween } from './state/geo'
-import { clearWalk, deviceId, displayName, emptyWalk, loadWalk, newId, saveWalk, setDisplayName } from './state/walk'
+import { buildStreetIndex } from './state/streets'
+import { clearWalk, deviceId, displayName, emptyWalk, loadWalk, newId, saveWalk } from './state/walk'
 import { enqueue, flushOnce, startFlushLoop, subscribe } from './state/outbox'
 import { useLocation } from './hooks/useLocation'
 import { useWakeLock } from './hooks/useWakeLock'
 import type { OutboxItem, Progress, Segment, WalkState } from './types'
 import { TownCounters } from './components/TownCounters'
 import { QueueBar } from './components/QueueBar'
-import { Home } from './screens/Home'
 import { Plan } from './screens/Plan'
 import { Walking } from './screens/Walking'
 import { Confirm } from './screens/Confirm'
@@ -82,6 +82,9 @@ export function App() {
 
   const segById = useMemo(() => new Map(segments.map((s) => [s.seg_id, s])), [segments])
 
+  // Junctions, worked out on the phone from the street file it already holds.
+  const streetIndex = useMemo(() => buildStreetIndex(segments), [segments])
+
 
   const update = useCallback((patch: Partial<WalkState>) => {
     setWalk((prev) => {
@@ -108,7 +111,8 @@ export function App() {
   }, [sentCount, refreshTown])
 
   // ---- location and screen -----------------------------------------------
-  const watching = (walk?.phase === 'walking' && !walk.manual) || wantLocation
+  const watching =
+    walk?.phase === 'planning' || (walk?.phase === 'walking' && !walk.manual) || wantLocation
   const { status: locStatus, fix } = useLocation(watching)
   useWakeLock(walk?.phase === 'walking')
 
@@ -155,6 +159,17 @@ export function App() {
     })
   }, [update])
 
+  /**
+   * Opening the app is the walker saying they want to walk. There was a screen
+   * before this one whose only button led here, and a loop nobody had asked for
+   * yet, so the app sat waiting to be told twice. It plans the ordinary walk
+   * straight away instead: the length already has a default, and the walker
+   * standing in a car park should find a loop drawn and one button on it.
+   */
+  useEffect(() => {
+    if (walk?.phase === 'idle' && segments.length > 0) startPlanning()
+  }, [walk?.phase, segments.length, startPlanning])
+
   const chooseMinutes = useCallback(
     async (minutes: number) => {
       if (!walk) return
@@ -179,10 +194,36 @@ export function App() {
     [walk, fix, update],
   )
 
+  /**
+   * The default length, planned as soon as the app knows where it is standing.
+   *
+   * It waits for location to come back one way or the other. Routing from the
+   * middle of town and then quietly re-routing under the walker would be worse
+   * than the short wait, and a denied answer is an answer: the loop starts in
+   * the middle of town and the screen says so.
+   */
+  const plannedFor = useRef<string | null>(null)
+  useEffect(() => {
+    if (!walk || walk.phase !== 'planning' || walk.manual || walk.route) return
+    if (!segments.length || busy === 'route') return
+    if (!fix && !locationDenied) return
+    if (plannedFor.current === walk.client_walk_id) return
+    plannedFor.current = walk.client_walk_id
+    void chooseMinutes(walk.minutes)
+  }, [walk, segments.length, busy, fix, locationDenied, chooseMinutes])
+
   const goManual = useCallback(() => {
     setNotice(null)
     update({ manual: true, route: null })
   }, [update])
+
+  /** Back out of picking by hand to the loop the app would have given you. */
+  const useLoop = useCallback(() => {
+    if (!walk) return
+    setNotice(null)
+    plannedFor.current = null
+    update({ manual: false, claimed: [] })
+  }, [walk, update])
 
   const tapSegment = useCallback(
     (seg: { seg_id: number; name: string }) => {
@@ -217,14 +258,18 @@ export function App() {
     [walk, update],
   )
 
-  /** Add every stretch of a named street. The list below can trim it back. */
-  const addByName = useCallback(
-    (name: string) => {
-      const ids = segments.filter((s) => s.name === name).map((s) => s.seg_id)
-      if (ids.length) setClaimed(ids, true)
-    },
-    [segments, setClaimed],
-  )
+  /**
+   * Add one stretch of street: the run between two corners the walker just
+   * picked out by name, and nothing else.
+   *
+   * This used to add every segment in town carrying that name. Tapping
+   * "US 460 Bus" claimed eighty-one segments and ten miles, 6.4% of Blacksburg,
+   * from a walker who meant two blocks. Coverage is permanent and a phone
+   * screen cannot show ten miles of list, so the confirm step could not catch
+   * it. Now a tap can only ever claim what the walker was shown, corner to
+   * corner.
+   */
+  const addBlock = useCallback((ids: number[]) => setClaimed(ids, true), [setClaimed])
 
   const startWalking = useCallback(() => {
     if (!walk) return
@@ -268,7 +313,10 @@ export function App() {
     if (!walk || walk.claimed.length === 0) return
     setBusy('confirm')
     const id = await deviceId()
-    await setDisplayName(name)
+    // A name box sat above this button asking for something nothing in the app
+    // ever shows back. It put a keyboard between a walker in a car park and the
+    // one tap that matters. A name already saved on the phone still rides
+    // along, so nobody who set one loses it.
     await enqueue({
       device_id: id,
       client_walk_id: walk.client_walk_id,
@@ -348,20 +396,14 @@ export function App() {
         <QueueBar online={online} queue={queue} />
       )}
 
-      <div
-        className={
-          walk?.phase === 'walking' || walk?.phase === 'confirming' ? 'top top-compact' : 'top'
-        }
-      >
-        <TownCounters progress={progress} stale={progressStale || coverageStale} />
-      </div>
-
-      {walk?.phase === 'idle' && (
-        <Home
-          onStart={startPlanning}
-          segmentsReady={segments.length > 0}
-          notice={notice}
-        />
+      {/* The town's figure is the point of the whole thing, and it is the wrong
+          thing to read while walking: it is not the next move, and at that size
+          it takes the top of the map away from the route. It comes back the
+          moment the walk is over, with the walk counted in it. */}
+      {walk?.phase !== 'walking' && (
+        <div className={walk?.phase === 'confirming' ? 'top top-compact' : 'top'}>
+          <TownCounters progress={progress} stale={progressStale || coverageStale} />
+        </div>
       )}
 
       {walk?.phase === 'planning' && (
@@ -375,13 +417,14 @@ export function App() {
           routeSegments={routeSegments}
           allSegments={segments}
           covered={covered}
+          streetIndex={streetIndex}
           onChooseMinutes={chooseMinutes}
           onManual={goManual}
+          onUseLoop={useLoop}
           onStartWalking={startWalking}
           onToggle={(id) => tapSegment({ seg_id: id, name: '' })}
           onToggleMany={setClaimed}
-          onAddByName={addByName}
-          onCancel={discard}
+          onAddBlock={addBlock}
         />
       )}
 
@@ -404,8 +447,6 @@ export function App() {
           walk={walk}
           busy={busy}
           notice={notice}
-          name={name}
-          onName={setName}
           claimedSegments={claimedSegments}
           suggestedSegments={suggestedSegments}
           covered={covered}
