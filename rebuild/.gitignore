@@ -5,3 +5,4 @@ __pycache__/
 node_modules/
 web/dist/
 data/out/routes/
+data/out/shots/
