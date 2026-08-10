@@ -553,3 +553,66 @@ button {
   color: var(--c-ink-faint);
   font-size: var(--t-small);
 }
+
+/* ------------------------------------------------- the walk, and the map */
+
+/* The map is the instrument while walking. Everything here exists to keep the
+   sheet off it: the sheet takes the bottom third, the correction list gets a
+   short window inside that, and the route stays on screen where the walker can
+   follow it. */
+.sheet-walking {
+  max-height: 38%;
+}
+
+.sheet-walking .streets {
+  max-height: 20vh;
+}
+
+/* The loop's headline figure on the planning screen. The unit sat inline
+   against the number with no space, reading "1.6miles". */
+.route-figure {
+  font-size: var(--t-counter-small);
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+  color: var(--c-ink);
+}
+
+.route-figure .unit {
+  display: block;
+  font-size: var(--t-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+  margin: var(--s-xs) 0 0;
+  font-weight: 400;
+}
+
+/* A stretch of street offered for picking: what it runs between, under the
+   street's name. Never a whole street in one row. */
+.street-add .between,
+.street-add .carries-on {
+  display: block;
+  font-size: var(--t-micro);
+  color: var(--c-ink-faint);
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+.street-add .carries-on {
+  color: var(--c-route);
+}
+
+/* Throwing the walk away is a real thing to want and a terrible thing to hit by
+   accident. It reads as the exit it is, not as a second way forward. */
+.btn-danger {
+  color: var(--c-danger);
+}
+
+/* "prayed" was set in prayedDim at 3.1:1, under AA at the 12px it is used at.
+   It is a footnote, so it stays quiet, but it has to be readable in sunlight. */
+.street .already {
+  color: var(--c-prayed-note);
+}

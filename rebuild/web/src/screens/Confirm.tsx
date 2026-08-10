@@ -7,8 +7,6 @@ export function Confirm({
   walk,
   busy,
   notice,
-  name,
-  onName,
   claimedSegments,
   suggestedSegments,
   covered,
@@ -21,8 +19,6 @@ export function Confirm({
   walk: WalkState
   busy: string | null
   notice: string | null
-  name: string
-  onName: (v: string) => void
   claimedSegments: Segment[]
   suggestedSegments: Segment[]
   covered: Set<number>
@@ -42,8 +38,12 @@ export function Confirm({
     <div className="sheet">
       <h1>Did you walk these?</h1>
       <p>
-        {countStreets(claimedSegments)} streets · {formatMiles(metres)} miles · {formatMiles(freshMetres)} miles of it
-        new to the town map. Take off anything you did not walk.
+        {countStreets(claimedSegments)} {countStreets(claimedSegments) === 1 ? 'street' : 'streets'} ·{' '}
+        {formatMiles(metres)} miles
+        {/* Nothing new is not a nought to print at someone. Their walk still
+            counted; the town map simply already had it. */}
+        {freshMetres > 0 && ` · ${formatMiles(freshMetres)} miles nobody had prayed for`}. Take off
+        anything you did not walk.
       </p>
 
       <StreetList
@@ -70,36 +70,31 @@ export function Confirm({
 
       {notice && <p className="notice notice-warn">{notice}</p>}
 
+      {/* Still an explicit tap, and still the only one that sends a coordinate
+          anywhere. Doing it automatically would have been one less thing on the
+          screen and would have broken the promise the sentence under it makes. */}
       {walk.trace.length > 0 && (
         <>
-          <button className="btn" onClick={onMatch} disabled={busy === 'match'}>
+          <button className="btn btn-quiet" onClick={onMatch} disabled={busy === 'match'}>
             {busy === 'match' ? 'Checking…' : 'Check my track for streets I missed'}
           </button>
           <p className="privacy">
-            That button is the one and only time your location leaves this phone. It is sent to be matched
-            against the street map, and the server keeps none of it. Skip it and tick the streets yourself if
-            you would rather.
+            That is the one time your location leaves this phone, and the server keeps none of it.
           </p>
         </>
       )}
 
-      <input
-        className="name-input"
-        value={name}
-        onChange={(e) => onName(e.target.value)}
-        placeholder="Your name, if you want to leave one"
-        autoComplete="name"
-      />
-
+      {/* Throwing the walk away used to sit last, on the easiest inch of the
+          screen to hit one-handed. It goes above the button that matters. */}
+      <button className="btn btn-quiet btn-danger" onClick={onDiscard}>
+        Throw this walk away
+      </button>
       <button
         className="btn btn-primary"
         onClick={onConfirm}
         disabled={claimedSegments.length === 0 || busy === 'confirm'}
       >
         Add these streets to the map
-      </button>
-      <button className="btn btn-quiet" onClick={onDiscard}>
-        Throw this walk away
       </button>
     </div>
   )

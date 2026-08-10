@@ -4,7 +4,13 @@
  * The walk, from cold open to the map, with the map itself stubbed out.
  *
  * What this is really guarding: nothing reaches POST /api/walk until the walker
- * taps confirm, and the tap count from a cold open to walking stays at three.
+ * taps confirm, and the tap count from a cold open to walking stays at one.
+ *
+ * It used to be three, and this file asserted three. Opening the app is the
+ * walker saying they want to walk, and the length already had a default, so the
+ * screen that only led here and the tap that only accepted the default are both
+ * gone. The count is a promise to someone standing in a car park, so it is
+ * counted here rather than described.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -34,6 +40,14 @@ const SEGMENTS = [
     name: 'Clay St',
     length_m: 250,
     geometry: { type: 'LineString', coordinates: [[-80.415, 37.234], [-80.415, 37.23]] },
+  },
+  // A second, quite separate stretch of Progress St, a mile off. Searching for
+  // "Progress St" used to claim this one too, sight unseen.
+  {
+    seg_id: 4,
+    name: 'Progress St',
+    length_m: 900,
+    geometry: { type: 'LineString', coordinates: [[-80.44, 37.25], [-80.44, 37.259]] },
   },
 ]
 
@@ -98,19 +112,15 @@ afterEach(() => {
 })
 
 describe('a walk', () => {
-  it('takes three taps to get walking, and commits only on the confirm tap', async () => {
+  it('takes one tap to get walking, and commits only on the confirm tap', async () => {
     render(<App />)
 
-    // Tap 1
-    const start = await screen.findByRole('button', { name: 'Start a walk' })
-    await waitFor(() => expect((start as HTMLButtonElement).disabled).toBe(false))
-    fireEvent.click(start)
-
-    // Tap 2: how long you have. The route is fetched on that same tap.
-    fireEvent.click(await screen.findByRole('button', { name: /30/ }))
+    // No tap at all. There is no screen before this one, and the length was
+    // already a default, so the app plans the ordinary walk on its own.
     await waitFor(() => expect(posted.some((p) => p.url === '/api/route')).toBe(true))
+    expect(posted.find((p) => p.url === '/api/route')!.body.minutes).toBe(30)
 
-    // Tap 3: go.
+    // The one tap between opening the app and walking.
     const go = await screen.findByRole('button', { name: 'Start walking' })
     await waitFor(() => expect((go as HTMLButtonElement).disabled).toBe(false))
     fireEvent.click(go)
@@ -150,15 +160,17 @@ describe('a walk', () => {
     })
 
     render(<App />)
-    const start = await screen.findByRole('button', { name: 'Start a walk' })
-    await waitFor(() => expect((start as HTMLButtonElement).disabled).toBe(false))
-    fireEvent.click(start)
-    fireEvent.click(await screen.findByRole('button', { name: /30/ }))
 
     // It says so plainly and hands over to picking streets by name.
-    await screen.findByText("Pick the streets you'll walk.")
+    await screen.findByText('Which streets are you walking?')
     fireEvent.change(screen.getByLabelText('Find a street by name'), { target: { value: 'progress' } })
     fireEvent.click(await screen.findByRole('button', { name: /Progress St/ }))
+
+    // A street name is not a thing anyone walked. Progress St is two stretches
+    // a mile apart, so it opens into them and the walker says which.
+    const stretches = document.querySelectorAll('.street-add')
+    expect(stretches.length).toBe(2)
+    fireEvent.click(stretches[0])
 
     const go = await screen.findByRole('button', { name: 'Start walking' })
     await waitFor(() => expect((go as HTMLButtonElement).disabled).toBe(false))
@@ -167,7 +179,13 @@ describe('a walk', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Add these streets to the map' }))
 
     await waitFor(() => expect(posted.filter((p) => p.url === '/api/walk')).toHaveLength(1))
-    expect(posted.find((p) => p.url === '/api/walk')!.body.seg_ids).toEqual([1])
+    // The one stretch tapped, and not the other one carrying the same name.
+    // Claiming every stretch of a name is what put ten miles of US 460 Bus on
+    // the town map from a walker who meant two blocks, and coverage is
+    // permanent.
+    const sent = posted.find((p) => p.url === '/api/walk')!.body.seg_ids as number[]
+    expect(sent).toHaveLength(1)
+    expect([1, 4]).toContain(sent[0])
   })
 
   it('ticks streets off by itself, and leaves an unsure match unticked', async () => {
@@ -202,10 +220,6 @@ describe('a walk', () => {
     })
 
     render(<App />)
-    const start = await screen.findByRole('button', { name: 'Start a walk' })
-    await waitFor(() => expect((start as HTMLButtonElement).disabled).toBe(false))
-    fireEvent.click(start)
-    fireEvent.click(await screen.findByRole('button', { name: /30/ }))
     const go = await screen.findByRole('button', { name: 'Start walking' })
     await waitFor(() => expect((go as HTMLButtonElement).disabled).toBe(false))
     fireEvent.click(go)
@@ -237,10 +251,6 @@ describe('a walk', () => {
 
   it('picks up a walk that was in progress when the app was killed', async () => {
     const { unmount } = render(<App />)
-    const start = await screen.findByRole('button', { name: 'Start a walk' })
-    await waitFor(() => expect((start as HTMLButtonElement).disabled).toBe(false))
-    fireEvent.click(start)
-    fireEvent.click(await screen.findByRole('button', { name: /30/ }))
     const go = await screen.findByRole('button', { name: 'Start walking' })
     await waitFor(() => expect((go as HTMLButtonElement).disabled).toBe(false))
     fireEvent.click(go)

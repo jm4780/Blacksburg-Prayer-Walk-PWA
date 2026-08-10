@@ -29,10 +29,15 @@ export function Walking({
   const target = countStreets(routeSegments.length ? routeSegments : claimedSegments)
 
   return (
-    <div className="sheet">
+    /* Walking is the one screen with somewhere to look other than itself. The
+       sheet used to stand 78% tall over a followed map, so the route ran off
+       behind it and the walker was handed a checklist instead of the way to go.
+       It keeps to the bottom third: figures, the one button, and the list of
+       streets under it for putting right what the phone got wrong. */
+    <div className="sheet sheet-walking">
       <div className="walking-figures">
         <p className="counter-small">
-          {claimedSegments.length}
+          {countStreets(claimedSegments)}
           <span className="unit">of {target} streets</span>
         </p>
         <p className="counter-small">
@@ -43,12 +48,19 @@ export function Walking({
 
       <p>
         {locationOn
-          ? 'Streets tick themselves off as you pass them. Tap any street to change it.'
+          ? 'Follow the blue line. Streets tick off as you pass them.'
           : locationDenied
-            ? 'Tap each street as you finish it. Nothing here needs your location.'
+            ? 'Follow the blue line. Tap each street as you finish it.'
             : 'Tap each street as you finish it.'}
       </p>
 
+      <button className="btn btn-primary" onClick={onFinish}>
+        Finish walk
+      </button>
+      <p className="privacy">Your location stays on this phone. Nothing is sent while you walk.</p>
+
+      {/* Below the button on purpose. Mid-walk this is for correcting the odd
+          street, not for reading, and it used to push the map off the screen. */}
       <StreetList
         segments={list}
         checked={claimed}
@@ -56,13 +68,6 @@ export function Walking({
         onToggle={onToggle}
         onToggleMany={onToggleMany}
       />
-
-      <button className="btn btn-primary" onClick={onFinish}>
-        Finish walk
-      </button>
-      <p className="privacy">
-        Nothing has gone to the map yet. You'll see everything you walked before anything is sent.
-      </p>
     </div>
   )
 }

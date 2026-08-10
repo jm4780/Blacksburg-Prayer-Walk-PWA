@@ -412,7 +412,6 @@ export function App() {
           busy={busy}
           notice={notice}
           locationDenied={locationDenied}
-          locationOn={locStatus === 'on'}
           claimedSegments={claimedSegments}
           routeSegments={routeSegments}
           allSegments={segments}

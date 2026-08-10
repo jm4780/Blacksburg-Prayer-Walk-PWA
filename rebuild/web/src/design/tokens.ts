@@ -57,6 +57,11 @@ export const color = {
   /** A street the town has prayed over. Warm, cumulative, the point of it all. */
   prayed: '#E0A03A',
   prayedDim: '#7A5A25',
+  /** The "prayed" footnote in a street list. prayedDim carries the same meaning
+   *  on the map, where it is a line two pixels thick and contrast is not what
+   *  makes it legible, but as 12px text it came to 3.1:1 and disappeared in
+   *  sunlight. Same amber, lifted to 5.7:1. */
+  prayedNote: '#AD8339',
   prayedLift: '#F3C77E', // the core of a street claimed on this walk
   /** A street nobody has covered yet. Grey on purpose: absence has no colour.
    *  It sits inside the road ramp, between primary and trunk, so that it reads

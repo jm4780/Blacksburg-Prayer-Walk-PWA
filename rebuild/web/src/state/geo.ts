@@ -104,5 +104,9 @@ export function metresToMiles(m: number): number {
 
 export function formatMiles(m: number): string {
   const mi = metresToMiles(m)
+  // A stretch of street shorter than a tenth of a mile rounded to "0.0 mi",
+  // which reads as nothing at all next to a street the walker is about to
+  // claim. Say it is short instead of saying it is nothing.
+  if (mi > 0 && mi < 0.05) return '<0.1'
   return mi < 10 ? mi.toFixed(1) : Math.round(mi).toString()
 }
