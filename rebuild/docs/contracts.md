@@ -5,7 +5,8 @@ component's private business; anything written here may not change without
 changing this file first.
 
 Everything below is already true and running: Postgres 16 + PostGIS 3.4 on
-`localhost:5432`, database `bbg`, 1,553 segments / 156.54 mi loaded.
+`localhost:5432`, database `bbg`, 1,598 segments / 1,489 countable units,
+156.54 mi drawn / 149.20 mi countable.
 
 ---
 
