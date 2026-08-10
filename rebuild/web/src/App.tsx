@@ -333,7 +333,10 @@ export function App() {
         segments={segments}
         covered={covered}
         claimed={walk?.claimed ?? []}
-        route={walk?.route?.geometry ?? null}
+        /* Once the walk is sent, the route is no longer the way you are being
+           sent — it is nothing. Leaving it drawn spends the one colour that
+           means "go this way" on a screen where there is nowhere to go. */
+        route={walk && walk.phase !== 'sent' ? (walk.route?.geometry ?? null) : null}
         walker={watching ? fix : null}
         follow={walk?.phase === 'walking'}
         tappable={walk?.phase === 'planning' || walk?.phase === 'walking' || walk?.phase === 'confirming'}

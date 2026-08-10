@@ -116,7 +116,9 @@ CLOSE_M = 100.0                       # contract §3.1
 SAFE_MOTORWAY_REF = "US 460 Bus"      # Main St downtown; walkable
 
 _UNCOVERED_DISCOUNT = 0.85   # deadhead prefers streets we still need
-_BALL = 0.5                  # candidate radius, as a share of the walk budget
+_BALL = 0.5                  # candidate radius as a share of the budget: an arc
+                             # further out than half the walk cannot be reached
+                             # and returned from
 _MAX_CANDIDATES = 110        # required arcs considered per route
 _NEAR_TOUR = 60              # arcs evaluated per insertion (nearest to tour)
 _RESTARTS = 12
@@ -141,6 +143,17 @@ _W_REPEAT = 1.0
 _W_COMPACT = 1.0
 _SHAPE_BUCKET = 0.05         # quantised, so shape only outranks new_m when the
                              # difference is real
+
+# -- saturation ---------------------------------------------------------------
+# When a neighbourhood has already been prayed for, the engine still returns a
+# perfectly good loop — it just has nothing new in it. Saying so is the whole
+# point: a walker who taps "start" deserves to know before they walk it.
+SATURATED_RATIO = 0.15       # below this share of new street, the walk is
+                             # reported saturated
+_SUGGEST_RADIUS_M = 3000.0   # how far to look for somewhere better (~35 min
+                             # walk away); capped so this never gets expensive
+_SUGGEST_MIN_FRAC = 1.0      # an alternative is only worth naming if it holds
+                             # uncovered street worth half the walk
 
 _EARTH_M_PER_DEG = 111_320.0
 
@@ -1006,6 +1019,9 @@ class _Solver:
             "geometry": LineString(coords),
             "length_m": round(length_m, 2),
             "new_m": round(new_m, 2),
+            "new_ratio": round(new_m / length_m, 4) if length_m > 0 else 0.0,
+            "saturated": False,
+            "suggested_start": None,
         }
 
     # -- objective (contract §3, lexicographic)
@@ -1222,6 +1238,89 @@ def route_stats(route: dict, network: Any, start_lonlat: Sequence[float] | None 
     }
 
 
+def _nearest_new_ground(g: RouteGraph, anchor: int, covered: set[int],
+                        target_m: float) -> dict | None:
+    """Nearest place worth walking instead, when here is all prayed for.
+
+    Clusters the uncovered street into connected blocks (union-find over
+    shared node ids, the only adjacency rule there is), then names the closest
+    block big enough to be worth the trip — half the walk's length in
+    uncovered street. Distance is walking distance through the network, not a
+    straight line, because that is the number the walker has to spend.
+
+    One Dijkstra out to `_SUGGEST_RADIUS_M` plus a pass over the edges, and
+    only on saturated routes, so an ordinary route pays nothing for it.
+    """
+    _, real, _, _ = g.dijkstra(anchor, g.e_len, _SUGGEST_RADIUS_M)
+    want = max(target_m * _SUGGEST_MIN_FRAC, 300.0)
+
+    parent: dict[int, int] = {}
+
+    def find(x: int) -> int:
+        parent.setdefault(x, x)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    near: list[int] = []
+    for ei in range(len(g.e_seg)):
+        if g.e_seg[ei] in covered:
+            continue
+        du = real.get(g.e_u[ei], _INF)
+        dv = real.get(g.e_v[ei], _INF)
+        if min(du, dv) > _SUGGEST_RADIUS_M:
+            continue
+        a, b = find(g.e_u[ei]), find(g.e_v[ei])
+        if a != b:
+            parent[a] = b
+        near.append(ei)
+
+    mass: dict[int, float] = {}
+    closest: dict[int, tuple[float, int]] = {}
+    for ei in near:
+        root = find(g.e_u[ei])
+        if not g.isolated[ei]:
+            mass[root] = mass.get(root, 0.0) + g.e_len[ei]
+        du = real.get(g.e_u[ei], _INF)
+        dv = real.get(g.e_v[ei], _INF)
+        node, d = (g.e_u[ei], du) if du <= dv else (g.e_v[ei], dv)
+        best = closest.get(root)
+        if best is None or d < best[0]:
+            closest[root] = (d, node)
+
+    options = [(closest[r][0], g.node_name[closest[r][1]], r)
+               for r in mass if mass[r] >= want and r in closest]
+    if not options:
+        return None
+    options.sort()
+
+    # A big block of uncovered street somewhere in that direction is not the
+    # same as a walk's worth of it *within reach of that spot*. Check the few
+    # nearest candidates properly rather than sending someone off on a promise
+    # the geography does not keep.
+    reach = target_m * (1.0 + BAND) * _BALL
+    for dist, _, root in options[:4]:
+        node = closest[root][1]
+        _, out, _, _ = g.dijkstra(node, g.e_len, reach)
+        nearby = 0.0
+        for ei in range(len(g.e_seg)):
+            if g.e_seg[ei] in covered or g.isolated[ei]:
+                continue
+            if min(out.get(g.e_u[ei], _INF), out.get(g.e_v[ei], _INF)) <= reach:
+                nearby += g.e_len[ei]
+        if nearby < want:
+            continue
+        lon, lat = g.node_lonlat[node]
+        return {
+            "lon": round(lon, 6),
+            "lat": round(lat, 6),
+            "distance_m": round(dist, 1),      # walking distance, not a straight line
+            "uncovered_m": round(nearby, 1),   # new street within reach of there
+        }
+    return None
+
+
 def _span(g: RouteGraph, seg_ids: Sequence[int]) -> float:
     """Widest straight-line gap between any two claimed segments, in metres.
 
@@ -1269,6 +1368,20 @@ def _blocks(g: RouteGraph, seg_ids: Sequence[int]) -> int:
 # ------------------------------------------------------------------- public --
 
 
+def _empty_route(lon: float, lat: float) -> dict:
+    """Nothing walkable from here. Say so in the same shape as any other route."""
+    return {
+        "seg_ids": [],
+        "new_seg_ids": [],
+        "geometry": LineString([(lon, lat), (lon, lat)]),
+        "length_m": 0.0,
+        "new_m": 0.0,
+        "new_ratio": 0.0,
+        "saturated": True,
+        "suggested_start": None,
+    }
+
+
 def generate(start_lonlat, target_m, network, covered=None, *, seed=None) -> dict:
     """Generate a closed prayer walk. See module docstring for the formulation.
 
@@ -1286,16 +1399,14 @@ def generate(start_lonlat, target_m, network, covered=None, *, seed=None) -> dic
     lon, lat = float(start_lonlat[0]), float(start_lonlat[1])
 
     if not g.e_seg:
-        return {"seg_ids": [], "new_seg_ids": [], "length_m": 0.0, "new_m": 0.0,
-                "geometry": LineString([(lon, lat), (lon, lat)])}
+        return _empty_route(lon, lat)
 
     anchor = g.nearest_node(lon, lat)
     rng = random.Random(0 if seed is None else seed)
 
     if target_m <= 0:
         alon, alat = g.node_lonlat[anchor]
-        return {"seg_ids": [], "new_seg_ids": [], "length_m": 0.0, "new_m": 0.0,
-                "geometry": LineString([(alon, alat), (alon, alat)])}
+        return _empty_route(alon, alat)
 
     solver = _Solver(g, anchor, target_m, covered, rng, deadline)
     req = solver.candidates()
@@ -1330,12 +1441,11 @@ def generate(start_lonlat, target_m, network, covered=None, *, seed=None) -> dic
         return route, key
 
     for r in range(_RESTARTS):
-        # Each restart is seeded on a different arc, so the restarts try
-        # different neighbourhoods instead of re-deriving the same one.
         # Seeds spread across the whole candidate list, which is sorted by
-        # distance from the start. Seeding only on the nearest arcs anchors
-        # every restart to the same few streets; if the good neighbourhood is
-        # 500 m away, no amount of local search will find it from there.
+        # distance from the start, so each restart tries a different
+        # neighbourhood. Seeding only on the nearest arcs anchors every restart
+        # to the same few streets, and if the good neighbourhood is 500 m away
+        # no amount of local search will find it from there.
         seeds = [e for e in req if not g.isolated[e]] or req
         first = seeds[(r * len(seeds)) // _RESTARTS] if (r and seeds) else None
         sol = solver.construct(req, randomised=(r > 0), first=first)
@@ -1361,4 +1471,12 @@ def generate(start_lonlat, target_m, network, covered=None, *, seed=None) -> dic
         if time.monotonic() > deadline:
             break
 
+    # Honesty about what the walk is actually worth. A loop through streets
+    # that have all been prayed for already is a fine loop and a poor walk,
+    # and the walker should hear that before they set off rather than after.
+    best_route["saturated"] = best_route["new_ratio"] < SATURATED_RATIO
+    if best_route["saturated"]:
+        best_route["suggested_start"] = _nearest_new_ground(
+            g, anchor, covered, target_m
+        )
     return best_route

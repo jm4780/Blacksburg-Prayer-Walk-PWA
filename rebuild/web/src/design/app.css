@@ -63,10 +63,10 @@ button {
   background: linear-gradient(
     to bottom,
     rgb(var(--c-ground-sunk-rgb) / 1) 0%,
-    rgb(var(--c-ground-sunk-rgb) / 1) 52%,
-    rgb(var(--c-ground-sunk-rgb) / 0.94) 64%,
-    rgb(var(--c-ground-sunk-rgb) / 0.72) 76%,
-    rgb(var(--c-ground-sunk-rgb) / 0.38) 88%,
+    rgb(var(--c-ground-sunk-rgb) / 1) 74%,
+    rgb(var(--c-ground-sunk-rgb) / 0.9) 82%,
+    rgb(var(--c-ground-sunk-rgb) / 0.6) 90%,
+    rgb(var(--c-ground-sunk-rgb) / 0.26) 96%,
     rgb(var(--c-ground-sunk-rgb) / 0) 100%
   );
 }
@@ -315,16 +315,6 @@ button {
 /* The "find a street by name" results are the same row without a tick and with
    a longer figure, so they get their own two-column track rather than being
    forced through the checklist's. */
-.street-add {
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-.street-add .name {
-  grid-column: 1;
-}
-.street-add .dist {
-  grid-column: 2;
-}
-
 .street .name {
   grid-column: 2;
   font-size: var(--t-body);
@@ -342,6 +332,22 @@ button {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
   white-space: nowrap;
+}
+
+/* The "find a street by name" results are the same row without a tick and with
+   a longer figure, so they get their own two-column track rather than being
+   forced through the checklist's four. This has to sit after the .name and
+   .dist rules above: same specificity, so source order is what decides, and
+   placed before them the name fell into the checklist's second column and the
+   row came out right-aligned. */
+.street-add {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.street-add .name {
+  grid-column: 1;
+}
+.street-add .dist {
+  grid-column: 2;
 }
 
 .tick {

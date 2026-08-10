@@ -28,6 +28,7 @@ from engine.route import (  # noqa: E402
     BAND,
     CLOSE_M,
     SAFE_MOTORWAY_REF,
+    SATURATED_RATIO,
     build_graph,
     contiguity,
     generate,
@@ -123,17 +124,22 @@ def routes(network, starts):
 def test_route_matches_contract_shape(routes):
     for case in routes:
         r = case["route"]
-        assert set(r) == {"seg_ids", "new_seg_ids", "geometry", "length_m", "new_m"}, (
-            "Route keys are fixed by contracts §3"
-        )
+        assert set(r) == {
+            "seg_ids", "new_seg_ids", "geometry", "length_m", "new_m",
+            "new_ratio", "saturated", "suggested_start",
+        }, "Route keys are fixed by contracts §3"
         assert all(isinstance(s, int) for s in r["seg_ids"])
         assert all(isinstance(s, int) for s in r["new_seg_ids"])
         assert isinstance(r["length_m"], float) and isinstance(r["new_m"], float)
+        assert isinstance(r["new_ratio"], float) and isinstance(r["saturated"], bool)
+        assert r["suggested_start"] is None or isinstance(r["suggested_start"], dict)
         assert r["geometry"].geom_type == "LineString"
         # new_seg_ids must be a subset of what is actually walked, without repeats
         assert set(r["new_seg_ids"]) <= set(r["seg_ids"])
         assert len(set(r["new_seg_ids"])) == len(r["new_seg_ids"])
         assert r["new_m"] <= r["length_m"] + 1e-6
+        assert abs(r["new_ratio"] - r["new_m"] / r["length_m"]) < 1e-3
+        assert r["saturated"] == (r["new_ratio"] < SATURATED_RATIO)
 
 
 def test_seg_ids_are_a_connected_walk(routes, graph):
@@ -512,6 +518,234 @@ def test_new_metres_are_worth_the_walk(routes):
           f"(min {min(rates):.3f})")
     assert statistics.mean(rates) >= 0.70
     assert min(rates) >= 0.45
+
+
+# ------------------------------------------------ 4b. shape: compact, not thin --
+
+
+def _walk_nodes(graph, seg_ids):
+    """The node the walk stands on before each segment, and after it."""
+    out, at = [], None
+    for i, s in enumerate(seg_ids):
+        seg = graph.segments[s]
+        u, v = graph.node_id[seg["node_a"]], graph.node_id[seg["node_b"]]
+        if at is None:
+            if len(seg_ids) > 1:
+                nxt = graph.segments[seg_ids[1]]
+                touching = {graph.node_id[nxt["node_a"]], graph.node_id[nxt["node_b"]]}
+                at = u if v in touching else v
+            else:
+                at = u
+        to = v if at == u else u
+        out.append((at, to))
+        at = to
+    return out
+
+
+def _long_doubled_runs(graph, seg_ids, min_m):
+    """Contiguous stretches the walk covers twice, with the ends to check."""
+    counts = {}
+    for s in seg_ids:
+        counts[s] = counts.get(s, 0) + 1
+    nodes = _walk_nodes(graph, seg_ids)
+    groups, cur = [], []
+    for i, s in enumerate(seg_ids):
+        if counts[s] > 1:
+            cur.append(i)
+        elif cur:
+            groups.append(cur)
+            cur = []
+    if cur:
+        groups.append(cur)
+
+    out = []
+    for idxs in groups:
+        total = sum(graph.segments[seg_ids[i]]["length_m"] for i in idxs)
+        if total < min_m:
+            continue
+        # For an out-and-back the ends coincide, so the question is whether the
+        # far turning point could have been reached another way.
+        far_m, far = 0.0, nodes[idxs[0]][0]
+        run = 0.0
+        for i in idxs:
+            run += graph.segments[seg_ids[i]]["length_m"]
+            if run > far_m:
+                far_m, far = run, nodes[i][1]
+        entry, leave = nodes[idxs[0]][0], nodes[idxs[-1]][1]
+        a, b, span = (entry, far, far_m) if entry == leave else (entry, leave, total)
+        out.append((total, a, b, span,
+                    {graph.edge_of_seg[seg_ids[i]] for i in idxs}))
+    return out
+
+
+def _way_around(graph, a, b, banned, limit):
+    """Shortest route from a to b that avoids ``banned`` edges, or infinity."""
+    import heapq
+    dist = {a: 0.0}
+    heap = [(0.0, a)]
+    seen = set()
+    while heap:
+        d, u = heapq.heappop(heap)
+        if u in seen:
+            continue
+        seen.add(u)
+        if u == b:
+            return d
+        if d > limit:
+            break
+        for v, ei in graph.adj[u]:
+            if ei in banned:
+                continue
+            nd = d + graph.e_len[ei]
+            if nd < dist.get(v, float("inf")):
+                dist[v] = nd
+                heapq.heappush(heap, (nd, v))
+    return float("inf")
+
+
+def test_long_doubled_back_stretches_have_no_way_around(routes, graph):
+    """The failure this engine was rebuilt for: a mile out and a mile back.
+
+    Short doubling is fine and often unavoidable — Blacksburg is full of
+    cul-de-sacs. What must not happen is a *long* stretch walked twice when
+    the town offered a loop instead. For every doubled run over 500 m this
+    checks the graph directly, with the run's own segments removed, for a way
+    round within 2.5x its length.
+    """
+    forced = avoidable = undecidable = 0
+    for case in routes:
+        for total, a, b, span, edges in _long_doubled_runs(
+            graph, case["route"]["seg_ids"], 500.0
+        ):
+            if a == b:
+                undecidable += 1          # repeats scattered, not one excursion
+                continue
+            alt = _way_around(graph, a, b, edges, span * 2.5)
+            if alt > span * 2.5:
+                forced += 1
+            else:
+                avoidable += 1
+                print(f"  avoidable {total:.0f} m doubled run, way round is {alt:.0f} m")
+    print(f"[shape]   doubled runs over 500 m: {forced} forced by the town, "
+          f"{avoidable} avoidable, {undecidable} not decidable")
+    assert avoidable == 0, "a long out-and-back was taken where a loop existed"
+
+
+def test_walks_are_compact_not_threads(routes, network):
+    """Contiguity says connected; compactness says it is a walk, not a thread."""
+    vals, shapes = [], []
+    for case in routes:
+        st = route_stats(case["route"], network)
+        vals.append(st["compactness"])
+        shapes.append(st["shape_penalty"])
+    print(f"[shape]   compactness mean {statistics.mean(vals):.3f} "
+          f"(min {min(vals):.3f}), shape penalty mean {statistics.mean(shapes):.2f} "
+          f"(worst {max(shapes):.2f})")
+    assert statistics.mean(vals) >= 0.30
+    assert min(vals) >= 0.15
+    assert statistics.mean(shapes) <= 0.65
+
+
+def test_rural_connectors_are_links_not_destinations(routes, graph, network):
+    """§3.5. A walk may pass along a rural road; it may not pace up and down it.
+
+    Any rural connector walked more than once has to be a *link* — the graph
+    must offer no way round it within 2.5x its length. Walking one twice
+    because it was the only road to the neighbourhood is correct; walking one
+    twice when a loop existed is the failure this rule exists to stop.
+    """
+    routes_with, links = 0, 0
+    for case in routes:
+        counts = {}
+        for s in case["route"]["seg_ids"]:
+            counts[s] = counts.get(s, 0) + 1
+        paced = [s for s, n in counts.items()
+                 if n > 1 and graph.isolated[graph.edge_of_seg[s]]]
+        if paced:
+            routes_with += 1
+        for sid in paced:
+            ei = graph.edge_of_seg[sid]
+            seg = graph.segments[sid]
+            around = _way_around(graph, graph.e_u[ei], graph.e_v[ei], {ei},
+                                 seg["length_m"] * 2.5)
+            links += 1
+            assert around > seg["length_m"] * 2.5, (
+                f"paced {seg['length_m']:.0f} m of rural connector "
+                f"{seg['name']!r} with a {around:.0f} m way round it"
+            )
+    print(f"[shape]   {routes_with}/{len(routes)} routes double back on a rural "
+          f"connector; all {links} were the only road in, none had a loop going spare")
+
+
+# ------------------------------------------------------- saturation reporting --
+
+
+def test_virgin_town_is_not_saturated(routes):
+    for case in routes:
+        r = case["route"]
+        assert r["saturated"] is False
+        assert r["suggested_start"] is None
+        assert r["new_ratio"] > SATURATED_RATIO
+
+
+def test_saturated_neighbourhood_is_reported_with_somewhere_better(network, graph):
+    """The live failure: a valid loop through streets already all prayed for.
+
+    The engine may not invent new street. It must say so, and point somewhere
+    the walker would actually find some.
+    """
+    start = (-80.4139, 37.2296)                     # downtown
+    target = meters_for_minutes(30)
+    anchor = graph.nearest_node(*start)
+    _, real, _, _ = graph.dijkstra(anchor, graph.e_len, 1200.0)
+    covered = {
+        graph.e_seg[ei] for ei in range(len(graph.e_seg))
+        if min(real.get(graph.e_u[ei], float("inf")),
+               real.get(graph.e_v[ei], float("inf"))) <= 1200.0
+    }
+    assert len(covered) > 200, "expected downtown to be saturated by this"
+
+    t0 = time.perf_counter()
+    r = generate(start, target, network, covered, seed=7)
+    dt = time.perf_counter() - t0
+
+    assert r["saturated"] is True
+    assert r["new_ratio"] < SATURATED_RATIO
+    assert r["length_m"] > 0, "a saturated area still gets a walk, just an honest one"
+    sug = r["suggested_start"]
+    assert sug is not None, "there is uncovered street in this town; say where"
+    assert set(sug) == {"lon", "lat", "distance_m", "uncovered_m"}
+    assert 0 < sug["distance_m"] <= 3000.0
+
+    # The promise has to hold: a walk of this length from there is not saturated.
+    there = generate((sug["lon"], sug["lat"]), target, network, covered, seed=7)
+    print(f"[sat]     ratio {r['new_ratio']:.3f} here -> suggested {sug['distance_m']:.0f} m "
+          f"away ({sug['uncovered_m']:.0f} m of new street in reach) -> ratio "
+          f"{there['new_ratio']:.3f} there, found in {dt:.2f} s")
+    assert there["saturated"] is False
+    assert there["new_ratio"] > r["new_ratio"]
+    assert dt < 3.0
+
+
+def test_fully_covered_town_reports_saturated_with_no_suggestion(network, graph, starts):
+    """Nowhere left to send anyone. Say null rather than invent a destination."""
+    covered = set(graph.segments)
+    start, minutes = starts[2]
+    r = generate(start, meters_for_minutes(minutes), network, covered, seed=2)
+    assert r["saturated"] is True
+    assert r["new_ratio"] == 0.0
+    assert r["suggested_start"] is None
+
+
+def test_saturation_costs_nothing_when_there_is_new_street(network, starts):
+    """The extra search only runs on saturated routes."""
+    start, minutes = starts[0]
+    target = meters_for_minutes(minutes)
+    t0 = time.perf_counter()
+    r = generate(start, target, network, set(), seed=1)
+    dt = time.perf_counter() - t0
+    assert r["saturated"] is False and r["suggested_start"] is None
+    assert dt < 3.0
 
 
 def test_performance_under_three_seconds(routes):

@@ -43,9 +43,14 @@ export const color = {
   labelPlace: '#9AA5A8',
 
   // --- interface text ----------------------------------------------------
-  ink: '#E8EDEE',
-  inkQuiet: '#96A0A3',
-  inkFaint: '#5F696C',
+  ink: '#E8EDEE', // 16.1:1 on the ground
+  inkQuiet: '#96A0A3', // 7.1:1
+  /** The quietest text the interface is allowed to use: distances, units, the
+   *  privacy note, the stat line under the counter. It was #5F696C, which is
+   *  3.4:1 — under AA for the 12-13px sizes it is actually used at, and the one
+   *  place where a little map showing through the tail of the header scrim was
+   *  enough to matter. 5.1:1 is quiet without being a guess. */
+  inkFaint: '#7C868A',
   hairline: '#222A2D',
 
   // --- the three colours -------------------------------------------------
