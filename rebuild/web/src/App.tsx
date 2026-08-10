@@ -171,14 +171,24 @@ export function App() {
   }, [walk?.phase, segments.length, startPlanning])
 
   const chooseMinutes = useCallback(
-    async (minutes: number) => {
+    /**
+     * `startOverride` is the start the walker just chose, this instant. Reading
+     * it back off `walk` instead would read the value from the render this
+     * callback was built in, so tapping a street to start there quietly routed
+     * from somewhere else.
+     */
+    async (minutes: number, startOverride?: { lon: number; lat: number }) => {
       if (!walk) return
-      const start = walk.start ?? (fix ? { lon: fix.lon, lat: fix.lat } : BLACKSBURG)
+      const chosen = startOverride ?? walk.start
+      const here = fix ? { lon: fix.lon, lat: fix.lat } : null
+      const start = chosen ?? here ?? BLACKSBURG
       setBusy('route')
       setNotice(null)
       try {
         const route = await api.route(start.lon, start.lat, minutes)
-        update({ minutes, start, route, manual: false })
+        // The middle of town is a stand-in, not a decision. Leaving it unsaved
+        // means the next plan uses a real position the moment there is one.
+        update({ minutes, start: chosen ?? here, route, manual: false })
         if (route.geometry) setFitTo(bboxOf(route.geometry.coordinates))
       } catch (e) {
         const msg =
@@ -195,22 +205,48 @@ export function App() {
   )
 
   /**
-   * The default length, planned as soon as the app knows where it is standing.
-   *
-   * It waits for location to come back one way or the other. Routing from the
-   * middle of town and then quietly re-routing under the walker would be worse
-   * than the short wait, and a denied answer is an answer: the loop starts in
-   * the middle of town and the screen says so.
+   * A phone does not always answer. Permission dialogs get left sitting, and
+   * location services can be off without the browser ever calling it a denial,
+   * so waiting for a yes or a no is waiting forever, on a disabled button. Give
+   * it a few seconds, then plan from the middle of town and say so.
    */
+  const [locationSlow, setLocationSlow] = useState(false)
+  useEffect(() => {
+    if (fix || locationDenied) {
+      setLocationSlow(false)
+      return
+    }
+    if (walk?.phase !== 'planning') return
+    const t = setTimeout(() => setLocationSlow(true), 4000)
+    return () => clearTimeout(t)
+  }, [fix, locationDenied, walk?.phase])
+
+  /** The default length, planned as soon as the app knows where it is standing. */
   const plannedFor = useRef<string | null>(null)
+  const routeFromTownCentre = useRef(false)
   useEffect(() => {
     if (!walk || walk.phase !== 'planning' || walk.manual || walk.route) return
     if (!segments.length || busy === 'route') return
-    if (!fix && !locationDenied) return
+    if (!fix && !locationDenied && !locationSlow) return
     if (plannedFor.current === walk.client_walk_id) return
     plannedFor.current = walk.client_walk_id
+    routeFromTownCentre.current = !fix && !walk.start
     void chooseMinutes(walk.minutes)
-  }, [walk, segments.length, busy, fix, locationDenied, chooseMinutes])
+  }, [walk, segments.length, busy, fix, locationDenied, locationSlow, chooseMinutes])
+
+  /**
+   * Location turning up late. The loop was drawn from the middle of town
+   * because nothing better was known; now something better is known, so it is
+   * drawn again from where the walker actually stands. Once only, and never
+   * once they have set off.
+   */
+  useEffect(() => {
+    if (!fix || !routeFromTownCentre.current) return
+    if (!walk || walk.phase !== 'planning' || walk.manual || !walk.route) return
+    if (busy === 'route') return
+    routeFromTownCentre.current = false
+    void chooseMinutes(walk.minutes, { lon: fix.lon, lat: fix.lat })
+  }, [fix, walk, busy, chooseMinutes])
 
   const goManual = useCallback(() => {
     setNotice(null)
@@ -225,6 +261,20 @@ export function App() {
     update({ manual: false, claimed: [] })
   }, [walk, update])
 
+  // The route engine tells us when a neighbourhood is finished and where the
+  // nearest unprayed street is. Moving the start is the whole point of being
+  // told, so it is one tap.
+  const startElsewhere = useCallback(
+    (lon: number, lat: number) => {
+      if (!walk) return
+      update({ start: { lon, lat } })
+      plannedFor.current = walk.client_walk_id
+      routeFromTownCentre.current = false
+      void chooseMinutes(walk.minutes, { lon, lat })
+    },
+    [walk, update, chooseMinutes],
+  )
+
   const tapSegment = useCallback(
     (seg: { seg_id: number; name: string }) => {
       if (!walk) return
@@ -233,7 +283,9 @@ export function App() {
         if (!s) return
         const [lon, lat] = s.geometry.coordinates[0]
         update({ start: { lon, lat } })
-        void chooseMinutes(walk.minutes)
+        plannedFor.current = walk.client_walk_id
+        routeFromTownCentre.current = false
+        void chooseMinutes(walk.minutes, { lon, lat })
         return
       }
       const has = walk.claimed.includes(seg.seg_id)
@@ -411,7 +463,7 @@ export function App() {
           walk={walk}
           busy={busy}
           notice={notice}
-          locationDenied={locationDenied}
+          fromTownCentre={!walk.start && Boolean(walk.route)}
           claimedSegments={claimedSegments}
           routeSegments={routeSegments}
           allSegments={segments}
@@ -424,6 +476,7 @@ export function App() {
           onToggle={(id) => tapSegment({ seg_id: id, name: '' })}
           onToggleMany={setClaimed}
           onAddBlock={addBlock}
+          onStartElsewhere={startElsewhere}
         />
       )}
 

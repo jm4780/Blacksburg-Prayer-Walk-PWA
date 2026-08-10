@@ -616,3 +616,33 @@ button {
 .street .already {
   color: var(--c-prayed-note);
 }
+
+/* The one action on a screen may not scroll off it.
+   The picking screen can carry three lists at once: the stretches of a street,
+   where the walk can carry on to, and the streets already picked. With a long
+   street open, "Start walking" sat 950px down a 844px screen, so the walker's
+   next move was somewhere below the fold with no sign it was there. The sheet
+   is the scroll container, so the button rides its bottom edge and the lists
+   scroll behind it. */
+.sheet > .btn-primary {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  /* Nothing may show through the one action. The ring paints the sheet's own
+     ground into the flex gap around the button, so rows scroll behind it
+     instead of through it. */
+  box-shadow: 0 0 0 var(--s-md) var(--c-ground-sunk);
+}
+
+/* A disabled primary is deliberately transparent, which is right in a column
+   and wrong stuck over a scrolling list: street names read straight through the
+   word "Start walking". It stays inert, and it stays opaque. */
+.sheet > .btn-primary[disabled] {
+  background: var(--c-ground-sunk);
+}
+
+/* Two lists stacked in one sheet cannot each take half the screen. */
+.sheet .streets + .streets,
+.street-add ~ .streets {
+  max-height: 30vh;
+}

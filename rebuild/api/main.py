@@ -183,6 +183,25 @@ def route(body: RouteRequest) -> dict[str, Any]:
         "new_m": float(r.get("new_m", 0.0)),
         "target_m": target_m,
         "minutes": body.minutes,
+        # Saturation must reach the walker. A route through a neighbourhood
+        # that is already prayed for is a valid route and a wasted walk, and
+        # staying quiet about it means somebody walks a mile and a half
+        # believing they covered new ground. suggested_start names the nearest
+        # place a walk this length would find real street.
+        "new_ratio": float(r.get("new_ratio", 0.0)),
+        "saturated": bool(r.get("saturated", False)),
+        "suggested_start": _suggested_start(r.get("suggested_start")),
+    }
+
+
+def _suggested_start(s: Any) -> dict[str, float] | None:
+    if not s:
+        return None
+    return {
+        "lon": float(s["lon"]),
+        "lat": float(s["lat"]),
+        "distance_m": float(s.get("distance_m", 0.0)),
+        "uncovered_m": float(s.get("uncovered_m", 0.0)),
     }
 
 

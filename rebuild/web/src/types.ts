@@ -23,6 +23,16 @@ export type RouteResult = {
   length_m: number
   new_m: number
   minutes: number
+  /** new_m / length_m. */
+  new_ratio?: number
+  /** True when nearly every street within reach is already prayed for. */
+  saturated?: boolean
+  /**
+   * The nearest place a walk this long would find street nobody has covered.
+   * Null when there is nowhere left, which is the honest answer once the town
+   * is finished. distance_m is walking distance, not a straight line.
+   */
+  suggested_start?: { lon: number; lat: number; distance_m: number; uncovered_m: number } | null
 }
 
 export type Fix = { lat: number; lon: number; accuracy_m: number; t: number }

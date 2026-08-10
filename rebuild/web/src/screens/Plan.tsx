@@ -10,13 +10,14 @@ export function Plan({
   walk,
   busy,
   notice,
-  locationDenied,
+  fromTownCentre,
   claimedSegments,
   routeSegments,
   allSegments,
   covered,
   streetIndex,
   onChooseMinutes,
+  onStartElsewhere,
   onManual,
   onUseLoop,
   onStartWalking,
@@ -27,13 +28,14 @@ export function Plan({
   walk: WalkState
   busy: string | null
   notice: string | null
-  locationDenied: boolean
+  fromTownCentre: boolean
   claimedSegments: Segment[]
   routeSegments: Segment[]
   allSegments: Segment[]
   covered: Set<number>
   streetIndex: StreetIndex
   onChooseMinutes: (m: number) => void
+  onStartElsewhere: (lon: number, lat: number) => void
   onManual: () => void
   onUseLoop: () => void
   onStartWalking: () => void
@@ -196,6 +198,31 @@ export function Plan({
             {countStreets(routeSegments)} streets
             {walk.route.new_m > 0 && ` · ${formatMiles(walk.route.new_m)} miles nobody has prayed for yet`}
           </p>
+          {/* A loop through a neighbourhood that is already prayed for is a
+              real walk and a wasted one. Saying so without offering the way
+              out would just be bad news. */}
+          {walk.route.saturated && walk.route.suggested_start && (
+            <div className="notice">
+              <p>
+                The streets around here have all been prayed for. The nearest ones that have not are
+                about {formatMiles(walk.route.suggested_start.distance_m)} miles away.
+              </p>
+              <button
+                className="btn btn-quiet"
+                onClick={() =>
+                  onStartElsewhere(walk.route!.suggested_start!.lon, walk.route!.suggested_start!.lat)
+                }
+              >
+                Start there instead
+              </button>
+            </div>
+          )}
+          {walk.route.saturated && !walk.route.suggested_start && (
+            <p className="notice">
+              Every street this walk can reach has been prayed for already. That is the whole town
+              near you, finished.
+            </p>
+          )}
         </>
       ) : (
         <>
@@ -206,10 +233,13 @@ export function Plan({
 
       {notice && <p className="notice notice-warn">{notice}</p>}
 
-      {locationDenied && !notice && (
+      {/* Covers a refusal and a phone that simply never answered. Either way
+          the walker needs to know the loop is not from where they stand, and
+          what to do about it. */}
+      {fromTownCentre && !notice && (
         <p className="notice">
-          Location is off, so the loop starts in the middle of town. Tap any street on the map to
-          start somewhere else.
+          This phone has not said where you are, so the loop starts in the middle of town. Tap any
+          street on the map to start somewhere else.
         </p>
       )}
 
