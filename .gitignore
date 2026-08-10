@@ -69,3 +69,6 @@ web/dev-dist/
 
 # Codespace-generated secrets. Created by .devcontainer/setup.sh, never committed.
 .codespace-env
+
+# rebuild/ app shell
+rebuild/web/dist/
