@@ -30,14 +30,30 @@ insertion, then local search** — using the standard RPP → TSP transformation
      inserting required arcs (in either orientation) until the budget is met.
   4. Improve with **2-opt** (sequence reversal, orientations flipped) and
      **or-opt** (relocate one arc), then re-fill the freed budget. Iterate.
-  5. Repeat with a few seeded randomised restarts and keep the best solution
-     under the contract's lexicographic objective.
+  5. Perturb with **ruin and recreate** — tear a short run of serviced arcs
+     out and let insertion rebuild it — which is what escapes the local
+     minimum where a street gets walked twice for no reason.
+  6. Repeat from several seeded restarts, each seeded on a *different* arc so
+     the restarts try different neighbourhoods, and keep the best solution
+     under the contract's lexicographic objective:
+     (in the length band, then max new_m, then max contiguity, then shorter).
 
 Every step preserves closure — the walk starts and ends at the depot node by
 construction, so priority 1 is structural rather than something we hope for.
 
 Unsafe segments (class='motorway' with ref != 'US 460 Bus') are removed from
 the graph entirely, so they cannot appear even as deadhead.
+
+The start point snaps to the nearest junction, and the walk never leaves that
+junction's connected component: 95% of the town's street length is in one
+component, and padding a route by teleporting across town would be a lie. A
+start in one of the 19 tiny components gets the best short loop that component
+allows, or an honest empty route if it allows none.
+
+Repeated street is not automatically waste. 608 of the 1,553 segments are
+bridges — cul-de-sac stems, the one road into a subdivision — and the only way
+back over a bridge is back over it. `route_stats()` reports forced and
+avoidable repeat mileage separately for exactly this reason.
 
 Pace: 3.0 mph = 80.47 m/min. A prayer walk is a strolling pace with stops, not
 a fitness walk; 3.0 mph is the standard casual figure and errs slightly fast,
@@ -414,6 +430,7 @@ class _Solver:
         self.is_new = [sid not in covered for sid in g.e_seg]
         self._sp: dict[int, tuple[dict, dict, dict, dict]] = {}
         self.cut = max(self.hi, 400.0)
+        self.filler: list[int] = []   # any walkable arc in reach, for padding
 
     # -- shortest paths
 
@@ -482,7 +499,11 @@ class _Solver:
         return starts, ends
 
     def best_insertion(self, sol: _Sol, ei: int, cap: float):
-        """Cheapest position/orientation for arc ``ei``. -> (delta, pos, u, v)."""
+        """Cheapest position and orientation for arc ``ei``.
+
+        Returns (delta_metres, position, from_node, to_node, new_metres the
+        connectors would pick up on the way), or None if it does not fit.
+        """
         g = self.g
         u0, v0 = g.e_u[ei], g.e_v[ei]
         L = g.e_len[ei]
@@ -688,7 +709,6 @@ class _Solver:
         capped so a tiny component returns a short honest loop instead of
         pacing the same street twenty times.
         """
-        g = self.g
         guard = 0
         while sol.length < self.lo and guard < 240:
             guard += 1
@@ -725,9 +745,7 @@ class _Solver:
             nonlocal at
             seg = g.segments[g.e_seg[ei]]
             c = seg["coords"]
-            if g.node_id[seg["node_a"]] != frm and g.e_u[ei] != g.e_v[ei]:
-                c = c[::-1]
-            elif g.node_id[seg["node_a"]] != frm:
+            if g.e_u[ei] != frm:                  # walking it from node_b to node_a
                 c = c[::-1]
             if not coords:
                 coords.extend(c)
@@ -864,12 +882,36 @@ def route_stats(route: dict, network: Any, start_lonlat: Sequence[float] | None 
         "new_fraction": (route["new_m"] / route["length_m"]) if route["length_m"] else 0.0,
         "contiguity": round(_contiguity_ids(g, route["new_seg_ids"]), 4),
         "new_blocks": _blocks(g, route["new_seg_ids"]),
+        "span_m": round(_span(g, route["new_seg_ids"]), 1),
         "n_segments": len(route["seg_ids"]),
         "n_new": len(route["new_seg_ids"]),
         "deadhead_m": round(route["length_m"] - route["new_m"], 2),
         "streets": sorted({s["name"] for s in segs if s["name"]}),
         "minutes": round(minutes_for_meters(route["length_m"]), 1),
     }
+
+
+def _span(g: RouteGraph, seg_ids: Sequence[int]) -> float:
+    """Widest straight-line gap between any two claimed segments, in metres.
+
+    The other half of contiguity: a small span means the walk filled in one
+    part of town. A single closed walk cannot spread further than about half
+    its own length, which is why scattered spurs are structurally impossible
+    here rather than merely discouraged.
+    """
+    mids = []
+    for s in seg_ids:
+        seg = g.segments.get(s)
+        if seg:
+            c = seg["coords"][len(seg["coords"]) // 2]
+            mids.append(c)
+    worst = 0.0
+    for i, a in enumerate(mids):
+        for b in mids[i + 1:]:
+            d = _flat_m(a[0], a[1], b[0], b[1])
+            if d > worst:
+                worst = d
+    return worst
 
 
 def _blocks(g: RouteGraph, seg_ids: Sequence[int]) -> int:

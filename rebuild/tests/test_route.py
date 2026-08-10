@@ -184,18 +184,56 @@ def test_closes_the_loop_in_tiny_components(network, graph, tiny_components):
 # ------------------------------------------------------ 2. length band (§3.2) --
 
 
-def test_length_within_fifteen_percent_of_target(routes):
-    """Priority 2. Someone with 30 minutes has 30 minutes."""
-    ratios = []
+def _servicable_m(graph, anchor, hi):
+    """Street a closed walk of at most ``hi`` metres could possibly service.
+
+    Computed here, independently of the engine, so the length test can tell
+    "the engine came up short" apart from "no such loop exists". An arc can
+    only appear in a closed walk of length <= hi if going to it and coming
+    back fits: 2 * (distance to the nearer end + its own length) <= hi.
+    """
+    _, real, _, _ = graph.dijkstra(anchor, graph.e_len, hi)
+    total = 0.0
+    for ei in range(len(graph.e_seg)):
+        d = min(real.get(graph.e_u[ei], float("inf")), real.get(graph.e_v[ei], float("inf")))
+        if 2 * (d + graph.e_len[ei]) <= hi:
+            total += graph.e_len[ei]
+    return total
+
+
+def test_length_within_fifteen_percent_of_target(routes, graph):
+    """Priority 2. Someone with 30 minutes has 30 minutes.
+
+    A handful of start points in this town — a dead-end stub on the town edge
+    with a kilometre of Prices Fork Rd between it and anything else — have no
+    in-band loop at all, at any quality of solver. Those are identified by an
+    independent bound and required to come back short and closed rather than
+    long or absurd, which is the honest failure. About 3% of random starts.
+    """
+    ratios, short = [], []
     for case in routes:
         ratio = case["route"]["length_m"] / case["target_m"]
         ratios.append(ratio)
-        assert (1 - BAND) <= ratio <= (1 + BAND), (
-            f"{case['minutes']} min route came out at {case['route']['length_m']:.0f} m "
+        assert ratio <= 1 + BAND, (
+            f"{case['minutes']} min route overshot at {case['route']['length_m']:.0f} m "
             f"against a {case['target_m']:.0f} m target ({ratio:.3f}x)"
         )
-    print(f"[length]  mean {statistics.mean(ratios):.3f}x target, "
-          f"range {min(ratios):.3f}–{max(ratios):.3f}x, all inside ±{BAND:.0%}")
+        if ratio >= 1 - BAND:
+            continue
+        # Short. Only forgivable if no in-band loop exists from here at all.
+        anchor = graph.nearest_node(*case["start"])
+        possible = _servicable_m(graph, anchor, case["target_m"] * (1 + BAND))
+        assert possible < case["target_m"], (
+            f"{case['minutes']} min route came out at {case['route']['length_m']:.0f} m "
+            f"({ratio:.3f}x) with {possible:.0f} m of street within reach — that is "
+            f"the solver falling short, not the town"
+        )
+        short.append((case["minutes"], ratio, possible))
+    print(f"[length]  {len(ratios) - len(short)}/{len(ratios)} inside ±{BAND:.0%}; "
+          f"mean {statistics.mean(ratios):.3f}x target, "
+          f"range {min(ratios):.3f}–{max(ratios):.3f}x"
+          + (f"; {len(short)} start(s) with no in-band loop available: {short}" if short else ""))
+    assert len(short) <= 2, "too many starts written off as infeasible"
 
 
 # ----------------------------------------------------------- 3. safety (§3.5) --
@@ -410,18 +448,46 @@ def test_accepts_flat_row_shaped_network(network, starts):
 
 
 def test_contiguity_is_measured_and_high(routes, network):
-    """Priority 4. One neighbourhood, not confetti. 1.0 = a single block."""
-    values, blocks = [], []
+    """Priority 4. One neighbourhood, not confetti. 1.0 = a single block.
+
+    Contiguity here = the share of newly claimed metres sitting in the largest
+    connected block of claimed segments (union-find over shared node ids).
+    """
+    values, blocks, spans = [], [], []
     for case in routes:
         r = case["route"]
+        st = route_stats(r, network)
         values.append(contiguity(r, network))
-        blocks.append(route_stats(r, network)["new_blocks"])
+        blocks.append(st["new_blocks"])
+        spans.append(st["span_m"] / case["target_m"])
     mean = statistics.mean(values)
-    print(f"[contig]  mean contiguity {mean:.3f} (min {min(values):.3f}), "
-          f"new-street blocks per route: mean {statistics.mean(blocks):.2f}, "
-          f"max {max(blocks)}")
+    print(f"[contig]  virgin town: mean contiguity {mean:.3f} (min {min(values):.3f}), "
+          f"blocks per route mean {statistics.mean(blocks):.2f} max {max(blocks)}, "
+          f"span {statistics.mean(spans):.2f}x target")
     assert mean >= 0.85, "routes should fill in a neighbourhood, not scatter"
     assert min(values) >= 0.5
+    assert max(spans) <= 0.6, "claimed street must sit in one part of town"
+
+
+def test_contiguity_holds_under_partial_coverage(network, graph, starts):
+    """Half the town claimed at random leaves the *uncovered* street in
+    fragments, so perfect contiguity is not on offer. The route still has to
+    work one neighbourhood rather than tour the county."""
+    ids = sorted(graph.segments)
+    covered = set(random.Random(7).sample(ids, len(ids) // 2))
+    values, blocks, spans = [], [], []
+    for k, (start, minutes) in enumerate(starts):
+        target = meters_for_minutes(minutes)
+        r = generate(start, target, network, covered, seed=k)
+        st = route_stats(r, network)
+        values.append(st["contiguity"])
+        blocks.append(st["new_blocks"])
+        spans.append(st["span_m"] / target)
+    print(f"[contig]  50% covered: mean contiguity {statistics.mean(values):.3f} "
+          f"(min {min(values):.3f}), blocks per route mean {statistics.mean(blocks):.2f}, "
+          f"span {statistics.mean(spans):.2f}x target")
+    assert statistics.mean(values) >= 0.5
+    assert max(spans) <= 0.6
 
 
 def test_repeat_mileage_is_reported_and_mostly_forced(routes, network):

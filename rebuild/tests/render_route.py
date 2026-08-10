@@ -54,6 +54,38 @@ def _aspect(lat: float) -> float:
     return 1.0 / math.cos(math.radians(lat))
 
 
+def orient(route: list[dict]) -> list[list]:
+    """Return each segment's coordinates in WALKING order.
+
+    A segment's stored coordinate order is arbitrary: it is whichever way the
+    line happened to be digitised. Walking order is what the route means. Taking
+    the first stored coordinate as "the start" makes a properly closed loop look
+    like it ends a block from where it began, which would send a reviewer
+    hunting for a bug that is not there.
+    """
+    out: list[list] = []
+    prev_end = None
+    for i, f in enumerate(route):
+        c = list(f["geometry"]["coordinates"])
+        if prev_end is not None:
+            # Flip if the far end is the one that meets where we currently are.
+            d_head = (c[0][0] - prev_end[0]) ** 2 + (c[0][1] - prev_end[1]) ** 2
+            d_tail = (c[-1][0] - prev_end[0]) ** 2 + (c[-1][1] - prev_end[1]) ** 2
+            if d_tail < d_head:
+                c.reverse()
+        elif len(route) > 1:
+            # Orient the first segment so it points at the second.
+            nxt = route[1]["geometry"]["coordinates"]
+            ends = [nxt[0], nxt[-1]]
+            d_head = min((c[0][0] - e[0]) ** 2 + (c[0][1] - e[1]) ** 2 for e in ends)
+            d_tail = min((c[-1][0] - e[0]) ** 2 + (c[-1][1] - e[1]) ** 2 for e in ends)
+            if d_head < d_tail:
+                c.reverse()
+        out.append(c)
+        prev_end = c[-1]
+    return out
+
+
 def render(
     seg_ids: list[int],
     title: str,
@@ -67,6 +99,7 @@ def render(
     route = [network[s] for s in seg_ids if s in network]
     if not route:
         raise ValueError("no known segments in route")
+    walked = orient(route)
 
     xs, ys = [], []
     for f in route:
@@ -129,8 +162,8 @@ def render(
             bbox=dict(boxstyle="round,pad=0.18", fc=INK, ec="none", alpha=0.82),
         )
 
-    sx, sy = route[0]["geometry"]["coordinates"][0]
-    ex, ey = route[-1]["geometry"]["coordinates"][-1]
+    sx, sy = walked[0][0]
+    ex, ey = walked[-1][-1]
     ax.plot([sx], [sy], "o", ms=13, mfc=START, mec=INK, mew=2.0, zorder=8)
     ax.plot([ex], [ey], "o", ms=8, mfc="none", mec=START, mew=1.8, zorder=8)
 

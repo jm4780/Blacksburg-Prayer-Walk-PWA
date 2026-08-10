@@ -96,6 +96,12 @@ AMBIGUOUS_RIVAL = 0.30       # ... nor is it, if one rival holds this share of t
                              #     can separate those, and this is what catches them.)
 AMBIGUOUS_MARGIN = 0.5       # ... nor is it, if the typical fix sat this close to
                              #     a rival segment, relative to its own accuracy ...
+JUNCTION_CLEAR_M = 35.0      # ... where "rival" ignores a segment sharing a junction
+                             #     only while we are still within this of that
+                             #     junction, since streets meet at corners
+MARGIN_PERCENTILE = 0.25    # ... judged at the low quartile, not the median, so a
+                             #     rival hugging half the segment still counts
+MARGIN_FLOOR_M = 15.0        # ... never below this, whatever the fixes claim
 AMBIGUOUS_CAP = 0.45         # ... and any of those means it can never tick (rule 1)
 INFERRED_CAP = 0.40          # traversed by the best path but never directly seen
 NOISE_FLOOR_CAP = 0.30
@@ -494,10 +500,18 @@ def _ang180(a: float, b: float) -> float:
 
 
 class _Cand:
-    __slots__ = ("seg", "dist", "along", "lp_emit")
+    __slots__ = ("seg", "dist", "along", "lp_emit", "_pt")
 
     def __init__(self, seg, dist, along, lp_emit):
         self.seg, self.dist, self.along, self.lp_emit = seg, dist, along, lp_emit
+        self._pt = None
+
+    @property
+    def pt(self) -> Point:
+        """Where on the segment this fix was matched (noise already removed)."""
+        if self._pt is None:
+            self._pt = self.seg.line.interpolate(self.along)
+        return self._pt
 
 
 def _candidates(net: Network, chain: list[_Fix]) -> list[list[_Cand]]:
@@ -864,20 +878,34 @@ def propose(trace, network, *, now=None) -> list[dict]:
                 a.post_w += f.w * post[k][path[k]]
                 a.accs.append(f.acc)
                 nearest_rival = math.inf
-                touching = {c.seg.node_a, c.seg.node_b}
+                # Distance from this fix to each end of the segment it matched.
+                to_end = {c.seg.node_a: c.along,
+                          c.seg.node_b: c.seg.geom_len - c.along}
                 for j, other in enumerate(cands[i]):
                     if j == path[k]:
                         continue
-                    # Segments that share a junction with this one sit at zero
-                    # distance *at that junction* by construction. That is a
-                    # corner, not an ambiguity, so they do not count against the
-                    # margin -- topology, heading and the posterior handle them.
-                    if not touching & {other.seg.node_a, other.seg.node_b}:
-                        nearest_rival = min(nearest_rival, other.dist)
+                    # A segment sharing a junction with this one sits at zero
+                    # distance *at that junction* by construction -- a corner,
+                    # not an ambiguity -- so it is ignored while we are still
+                    # near the corner. Further along it counts like any other
+                    # rival, which is what catches a duplicated street that
+                    # happens to share an endpoint with the one it duplicates.
+                    at_corner = any(
+                        to_end.get(nd, math.inf) < JUNCTION_CLEAR_M
+                        for nd in (other.seg.node_a, other.seg.node_b))
+                    if not at_corner:
+                        # Measured from the matched point on the segment, not
+                        # from the fix: this asks a question about the town's
+                        # geometry ("does another street run alongside here?"),
+                        # which is stable, rather than about one noisy fix,
+                        # which under 25 m error would look ambiguous
+                        # everywhere.
+                        nearest_rival = min(nearest_rival,
+                                            other.seg.line.distance(c.pt))
                     if post[k][j] > 0.0:
                         a.rival[other.seg.seg_id] = (
                             a.rival.get(other.seg.seg_id, 0.0) + f.w * post[k][j])
-                a.margins.append(nearest_rival - c.dist)
+                a.margins.append(nearest_rival)
 
             # Crossing a junction between two accepted runs means the walker
             # really reached that junction, so the metres between their last
@@ -923,15 +951,26 @@ def propose(trace, network, *, now=None) -> list[dict]:
             if f_sep < 0.9:
                 reason += (f"; accuracy too coarse to separate a ~60 m street "
                            f"spacing (separability {f_sep:.2f})")
-            margin = sorted(a.margins)[len(a.margins) // 2] if a.margins else math.inf
+            if a.margins:
+                ms = sorted(a.margins)
+                margin = ms[min(len(ms) - 1, int(MARGIN_PERCENTILE * len(ms)))]
+            else:
+                margin = math.inf
             if mean_post < AMBIGUOUS_POSTERIOR or rival_share > AMBIGUOUS_RIVAL:
                 conf = min(conf, AMBIGUOUS_CAP)
                 reason += (f"; ambiguous against segment {rival_id} "
                            f"({rival_share * 100:.0f}% of the posterior mass)")
-            if margin < AMBIGUOUS_MARGIN * med_acc:
+            # The floor matters as much as the accuracy term: we never claim
+            # to localise better than MIN_SIGMA_M, so two lines running closer
+            # together than MARGIN_FLOOR_M are unresolvable however good the
+            # fixes say they are. (The shipped network has such a pair --
+            # Honeysuckle Dr is carried twice, 11 m apart, for 330 m.)
+            need_margin = max(MARGIN_FLOOR_M, AMBIGUOUS_MARGIN * med_acc)
+            if margin < need_margin:
                 conf = min(conf, AMBIGUOUS_CAP)
-                reason += (f"; another segment ran within {margin:.0f} m of this "
-                           f"one throughout, which {med_acc:.0f} m fixes cannot resolve")
+                reason += (f"; another segment runs {margin:.0f} m away along "
+                           f"this one, under the {need_margin:.0f} m needed to "
+                           f"tell them apart")
             # Covered metres inside the GPS noise floor are not evidence of a walk.
             if matched_m < max(25.0, 1.5 * med_acc):
                 conf = min(conf, NOISE_FLOOR_CAP)

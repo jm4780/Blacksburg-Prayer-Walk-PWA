@@ -285,17 +285,37 @@ def build_segments(edges: dict, limits: Polygon):
                     "nodes": (pts[0], pts[-1]),
                 }
             )
-    # Keep only what is inside the town limit, and record how much of each
-    # segment actually falls inside so length is never over-counted.
+    # Clip to the town limit. The GEOMETRY is clipped too, not just the length:
+    # storing a full-length line beside an inside-only length draws street the
+    # town does not claim and prices a walk at less than it costs. A segment
+    # crossing the boundary can also come back as several disjoint pieces, and
+    # each piece is its own segment because you cannot walk between them without
+    # leaving town.
     kept = []
     for seg in segments:
         inside = seg["geometry"].intersection(limits)
         if inside.is_empty:
             continue
-        seg["length_m"] = GEOD.geometry_length(inside)
-        if seg["length_m"] < 1.0:
-            continue
-        kept.append(seg)
+        parts = inside.geoms if hasattr(inside, "geoms") else [inside]
+        for part in parts:
+            if part.geom_type != "LineString" or len(part.coords) < 2:
+                continue
+            length = GEOD.geometry_length(part)
+            if length < 1.0:
+                continue
+            # Node ids come from the clipped endpoints. An endpoint that moved
+            # because of the boundary becomes a dead end, which is the truth:
+            # the road continues, but not anywhere this app asks anyone to walk.
+            a = to_grid(*part.coords[0])
+            b = to_grid(*part.coords[-1])
+            kept.append(
+                {
+                    **seg,
+                    "geometry": part,
+                    "length_m": length,
+                    "nodes": (a, b),
+                }
+            )
     return kept
 
 
