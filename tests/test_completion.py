@@ -48,16 +48,106 @@ def test_walk_lifecycle(client, h):
     assert client.get(f"/api/walks/{w['id']}", headers=h).json()["status"] == "COMPLETED"
 
 
-def test_completion_is_idempotent(client, h):
+def test_a_walk_that_is_already_recorded_cannot_be_submitted_again(client, h):
+    """§15: submitting the same walk twice must not move any number.
+
+    The way that promise is kept is by refusing the second submission rather than
+    absorbing it, so the walker is told their walk is already counted instead of
+    being shown a confirmation that quietly did nothing.
+    """
     w = plan(client, h)
     client.post(f"/api/walks/{w['id']}/start", headers=h)
     first = client.post(f"/api/walks/{w['id']}/complete",
-                        json=dict(outcome="AS_PLANNED"), headers=h).json()
-    second = client.post(f"/api/walks/{w['id']}/complete",
-                         json=dict(outcome="AS_PLANNED"), headers=h).json()
-    assert first["segments_newly_recorded"] > 0
-    assert second["segments_newly_recorded"] == 0
-    assert second["idempotent"] is True
+                        json=dict(outcome="AS_PLANNED"), headers=h)
+    assert first.status_code == 200
+    assert first.json()["segments_newly_recorded"] > 0
+
+    again = client.post(f"/api/walks/{w['id']}/complete",
+                        json=dict(outcome="AS_PLANNED"), headers=h)
+    assert again.status_code == 409
+    assert "already recorded" in again.json()["detail"]
+
+
+def test_a_recorded_walk_cannot_be_taken_back_as_not_completed(client, h):
+    """A finished walk must not be un-finishable.
+
+    Reloading the confirmation screen offered the three-way question a second time,
+    and answering "I didn't complete it" zeroed the walk's distance while leaving the
+    street completions it had already earned in place. The town's two numbers then
+    disagreed about one walk: the streets counted, the miles did not, and a duplicate
+    set of REMOVED rows went into the audit trail.
+    """
+    from sqlalchemy import select
+
+    from api.app.db import SessionLocal
+    from api.app.models import Walk, WalkEdit
+
+    w = plan(client, h)
+    client.post(f"/api/walks/{w['id']}/start", headers=h)
+    client.post(f"/api/walks/{w['id']}/complete", json=dict(outcome="AS_PLANNED"),
+                headers=h)
+    before = client.get("/api/progress/metrics").json()
+
+    r = client.post(f"/api/walks/{w['id']}/complete",
+                    json=dict(outcome="DID_NOT_COMPLETE"), headers=h)
+    assert r.status_code == 409
+
+    after = client.get("/api/progress/metrics").json()
+    assert after["total_miles_walked"] == before["total_miles_walked"]
+    assert after["required_segments_complete"] == before["required_segments_complete"]
+    assert after["percent_prayed_for"] == before["percent_prayed_for"]
+
+    with SessionLocal() as db:
+        walk = db.get(Walk, w["id"])
+        assert walk.outcome == "AS_PLANNED"
+        assert walk.final_distance_miles == w["distance_miles"]
+        assert walk.manual_removals == []
+        assert not db.execute(select(WalkEdit)
+                              .where(WalkEdit.walk_id == w["id"])).scalars().all()
+
+
+def test_a_walk_that_was_never_started_cannot_be_recorded(client, h):
+    """§14 confirms a walk that happened; a PREVIEW is a route being looked at.
+
+    Opening the confirmation screen for an accepted-but-unstarted walk recorded its
+    whole mileage as prayed for without anybody leaving the house.
+    """
+    from sqlalchemy import select
+
+    from api.app.db import SessionLocal
+    from api.app.models import Completion
+
+    w = plan(client, h)
+    assert w["status"] == "PREVIEW"
+    r = client.post(f"/api/walks/{w['id']}/complete",
+                    json=dict(outcome="AS_PLANNED"), headers=h)
+    assert r.status_code == 409
+    assert "never started" in r.json()["detail"]
+
+    with SessionLocal() as db:
+        assert not db.execute(select(Completion)
+                              .where(Completion.walk_id == w["id"])).scalars().all()
+    # Refused, not resolved: the walk is still there to be started.
+    assert client.get(f"/api/walks/{w['id']}", headers=h).json()["status"] == "PREVIEW"
+
+
+def test_an_active_walk_still_completes_normally(client, h):
+    """The refusals above must not have narrowed the ordinary path."""
+    w = plan(client, h)
+    assert client.post(f"/api/walks/{w['id']}/start",
+                       headers=h).json()["status"] == "ACTIVE"
+    r = client.post(f"/api/walks/{w['id']}/complete",
+                    json=dict(outcome="AS_PLANNED"), headers=h)
+    assert r.status_code == 200, r.text
+    assert r.json()["segments_recorded"] > 0
+
+
+def test_a_walk_that_was_never_started_can_still_be_discarded(client, h):
+    """Putting a preview down is unchanged: discard is how you do it."""
+    w = plan(client, h)
+    r = client.post(f"/api/walks/{w['id']}/discard", headers=h)
+    assert r.status_code == 200, r.text
+    assert r.json()["status"] == "DISCARDED"
 
 
 def test_metrics_do_not_move_on_a_repeat_submission(client, h):

@@ -65,13 +65,21 @@ def extend(db: Session, walk: Walk) -> None:
     db.commit()
 
 
-def release(db: Session, walk: Walk) -> int:
+def release(db: Session, walk: Walk, commit: bool = True) -> int:
+    """Let the walk's holds go.
+
+    `commit=False` leaves the release inside the caller's open transaction. That is
+    for the one case where releasing a walk's holds and creating the walk that
+    replaces it have to land together or not at all: committing in the middle would
+    drop the row lock the caller is holding and reopen the race it is closing.
+    """
     now = _now()
     res = db.execute(update(Reservation)
                      .where(Reservation.walk_id == walk.id,
                             Reservation.released_at.is_(None))
                      .values(released_at=now))
-    db.commit()
+    if commit:
+        db.commit()
     return res.rowcount or 0
 
 

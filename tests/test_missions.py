@@ -235,6 +235,84 @@ def test_a_second_walk_is_refused_while_one_is_active(client):
     assert "in progress" in r.json()["detail"]
 
 
+def test_accepting_a_second_mission_leaves_exactly_one_open_walk(client):
+    """One open walk per participant, where open means PREVIEW or ACTIVE.
+
+    Accepting is how you take a closer look at a mission, so a second accept replaces
+    a walk that was only ever previewed. What must not survive is two open walks: the
+    abandoned one's streets would stay held against everybody else until the hold
+    lapsed, and two devices would each believe they had a live walk.
+    """
+    from sqlalchemy import select
+
+    from api.app.db import SessionLocal
+    from api.app.models import Reservation, Walk
+
+    p = register(client, "twopreviews@example.com", "Two", "Previews")
+    h = auth(p["token"])
+    m1 = client.get("/api/missions/recommend?minutes=30", headers=h).json()["mission"]
+    first = client.post(f"/api/missions/{m1['id']}/accept?minutes=30", headers=h).json()
+
+    m2 = client.get("/api/missions/recommend?minutes=60", headers=h).json()["mission"]
+    second = client.post(f"/api/missions/{m2['id']}/accept?minutes=60", headers=h)
+    assert second.status_code == 200, second.text
+    second_id = second.json()["walk_id"]
+    assert second_id != first["walk_id"]
+
+    with SessionLocal() as db:
+        open_ids = [w.id for w in db.execute(
+            select(Walk).where(Walk.participant_id == p["id"],
+                               Walk.status.in_(("PREVIEW", "ACTIVE")))).scalars()]
+        assert open_ids == [second_id]
+
+        replaced = db.get(Walk, first["walk_id"])
+        assert replaced.status == "DISCARDED"
+        assert replaced.resolved_at is not None
+        # Replacing a walk has to hand its streets back, or they stay held by nobody.
+        assert not db.execute(
+            select(Reservation).where(Reservation.walk_id == first["walk_id"],
+                                      Reservation.released_at.is_(None))).scalars().all()
+
+    # Put the surviving walk down, so the streets this test held are not still held
+    # when the next one asks for a recommendation.
+    client.post(f"/api/walks/{second_id}/discard", headers=h)
+
+
+def test_an_accept_that_is_refused_writes_nothing(client):
+    """The refusal comes before any row, so a blocked accept leaves no debris.
+
+    The walk and the route request that reproduces it are one transaction now. A
+    participant tapping accept repeatedly while a walk is in progress must not
+    accumulate a route request per tap.
+    """
+    from sqlalchemy import func, select
+
+    from api.app.db import SessionLocal
+    from api.app.models import RouteRequest, Walk
+
+    p = register(client, "refused@example.com", "Ref", "Used")
+    h = auth(p["token"])
+
+    def rows():
+        with SessionLocal() as db:
+            return (db.execute(select(func.count(Walk.id))
+                               .where(Walk.participant_id == p["id"])).scalar(),
+                    db.execute(select(func.count(RouteRequest.id))
+                               .where(RouteRequest.participant_id == p["id"])).scalar())
+
+    m = client.get("/api/missions/recommend?minutes=30", headers=h).json()["mission"]
+    first = client.post(f"/api/missions/{m['id']}/accept?minutes=30", headers=h).json()
+    client.post(f"/api/walks/{first['walk_id']}/start", headers=h)
+    before = rows()
+
+    again = client.get("/api/missions/recommend?minutes=30", headers=h).json()["mission"]
+    r = client.post(f"/api/missions/{again['id']}/accept?minutes=30", headers=h)
+    assert r.status_code == 409
+    assert rows() == before
+
+    client.post(f"/api/walks/{first['walk_id']}/discard", headers=h)
+
+
 def test_a_stale_mission_id_is_refused_with_an_explanation(client):
     p = register(client, "stale@example.com", "Stale", "Mission")
     h = auth(p["token"])

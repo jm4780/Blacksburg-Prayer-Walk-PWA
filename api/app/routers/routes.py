@@ -107,6 +107,58 @@ def generate(body: RouteRequestIn, p: Participant = Depends(current_participant)
         variants=result["variants"])
 
 
+def claim_walk_slot(db: Session, participant_id: str) -> None:
+    """Take the participant's one open-walk slot, ready for a new walk to be inserted.
+
+    "Open" means PREVIEW **or** ACTIVE: both states hold segments against everybody
+    else, and a participant may be in exactly one of them at a time. The two are not
+    treated the same way, because they mean different things.
+
+      ACTIVE   a commitment. Never replaced silently — the caller has to finish or
+               cancel it, so this refuses and nothing is written. Without it, a
+               participant could leave an ACTIVE walk behind on any error path and
+               then start another, holding both sets of segments for the full
+               active-reservation window. Found by test ordering in
+               tests/test_completion.py, not by design.
+      PREVIEW  browsing. Replaced, with its holds released, so trying five sizes or
+               three missions does not hold three routes.
+
+    Deliberately **not committed here**. The row lock taken on the participant is what
+    makes the claim atomic, and a lock lasts only as long as the transaction: the
+    caller inserts its new walk and commits once, so two devices accepting at the same
+    moment queue up behind each other instead of both finding an empty slot and both
+    ending up with a live walk. Before this, the guard was a plain read followed by an
+    unrelated write, and two simultaneous accepts could both pass it.
+
+    PostgreSQL, which the pilot runs, makes `FOR UPDATE` a real per-participant mutex.
+    SQLite's dialect drops the clause, and its single writer serialises the same work
+    at the cost of the loser seeing a busy database rather than a clean 409.
+
+    Lives here rather than in a service because a refusal is an HTTP answer, and the
+    services layer deliberately knows nothing about HTTP. Shared with
+    `routers/missions.py` so the two ways of starting a walk cannot drift apart again.
+    """
+    db.execute(select(Participant.id)
+               .where(Participant.id == participant_id).with_for_update())
+
+    open_walks = db.execute(
+        select(Walk).where(Walk.participant_id == participant_id,
+                           Walk.status.in_(("PREVIEW", "ACTIVE")))).scalars().all()
+
+    active = next((w for w in open_walks if w.status == "ACTIVE"), None)
+    if active is not None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"You already have a walk in progress ({active.band}, "
+            f"{active.distance_miles} mi). Finish or cancel it before starting another.")
+
+    now = datetime.now(timezone.utc)
+    for old in open_walks:
+        res_svc.release(db, old, commit=False)
+        old.status = "DISCARDED"
+        old.resolved_at = now
+
+
 @router.post("/walks/select", response_model=WalkOut)
 def select_walk(body: SelectWalkIn, p: Participant = Depends(current_participant),
                 db: Session = Depends(get_db)):
@@ -120,29 +172,10 @@ def select_walk(body: SelectWalkIn, p: Participant = Depends(current_participant
         raise HTTPException(status.HTTP_409_CONFLICT,
                             f"the {body.band} size is not available for this request")
 
-    # One walk at a time per participant, and previewing is treated differently from
-    # starting. Browsing sizes replaces the previous PREVIEW and releases its holds, so
-    # trying five sizes does not hold five routes. An ACTIVE walk is a commitment and
-    # is never discarded silently — the caller has to finish or cancel it.
-    #
-    # Without this, a participant could leave an ACTIVE walk behind on any error path
-    # and then start another, holding both sets of segments against everyone else for
-    # the full active-reservation window. Found by test ordering in
-    # tests/test_completion.py, not by design.
-    active = db.execute(select(Walk).where(Walk.participant_id == p.id,
-                                           Walk.status == "ACTIVE")).scalars().first()
-    if active is not None:
-        raise HTTPException(
-            status.HTTP_409_CONFLICT,
-            f"You already have a walk in progress ({active.band}, "
-            f"{active.distance_miles} mi). Finish or cancel it before starting another.")
-
-    for old in db.execute(select(Walk).where(Walk.participant_id == p.id,
-                                             Walk.status == "PREVIEW")).scalars():
-        res_svc.release(db, old)
-        old.status = "DISCARDED"
-        old.resolved_at = datetime.now(timezone.utc)
-    db.commit()
+    # One walk at a time per participant. The claim stays open until the commit below,
+    # so the walk that replaces the previous preview lands in the same transaction that
+    # let the previous one go.
+    claim_walk_slot(db, p.id)
 
     walk = Walk(participant_id=p.id, request_id=req.id, network_id=req.network_id,
                 engine_version=req.engine_version, status="PREVIEW", band=v["band"],
@@ -190,11 +223,38 @@ def discard_walk(walk_id: str, p: Participant = Depends(current_participant),
 def complete_walk(walk_id: str, body: CompleteWalkIn,
                   p: Participant = Depends(current_participant),
                   db: Session = Depends(get_db)):
-    """Post-walk confirmation (§14). Idempotent (§15)."""
+    """Post-walk confirmation (§14).
+
+    §15 asks that submitting the same walk twice moves no number. The way that promise
+    is kept is by refusing the second submission outright, before anything is written.
+    Letting a COMPLETED walk be recorded again meant a walker who reloaded the
+    confirmation screen was offered the three-way question a second time, and
+    answering "I didn't complete it" zeroed the walk's distance while leaving the
+    street completions it had already earned standing. The town's own numbers then
+    disagreed about a single walk: the streets counted as prayed for, the miles did
+    not, and a second set of REMOVED rows was written into the audit trail.
+
+    Correcting a submitted walk is an administrator's job
+    (`POST /api/admin/completions/reverse`), where it is audited before it is applied.
+    It is not something the confirmation screen can do by being visited twice.
+    """
     ns = network_service()
     walk = _own_walk(db, walk_id, p)
+    if walk.status == "COMPLETED":
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "This walk is already recorded, so there is nothing left to submit. If "
+            "what we recorded is wrong, tell us and we will correct it.")
     if walk.status == "DISCARDED":
         raise HTTPException(status.HTTP_409_CONFLICT, "walk was discarded")
+    if walk.status == "PREVIEW":
+        # §14 confirms a walk that happened. A PREVIEW is a route being looked at:
+        # nobody has set off, so there is nothing to confirm and no mileage to credit.
+        # Discarding a preview is still the ordinary way to put one down.
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "This walk was never started, so there is nothing to record. Tap Start "
+            "when you set off, and confirm it when you are back.")
     if body.outcome == "EDITED" and not body.segment_ids:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,

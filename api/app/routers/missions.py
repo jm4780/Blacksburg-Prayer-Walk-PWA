@@ -12,7 +12,6 @@ held against everybody else.
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
@@ -22,6 +21,9 @@ from ..services import mission_service as svc
 from ..services import reservations as res_svc
 from ..services import routing_service as routing
 from ..services.network_state import network_service
+# The one-open-walk guard is shared with /api/walks/select rather than written twice:
+# two copies of "how many walks may a participant have" is how they came to disagree.
+from .routes import claim_walk_slot
 
 router = APIRouter(prefix="/api/missions", tags=["missions"])
 
@@ -117,19 +119,14 @@ def accept(mission_id: str, minutes: int = Query(45, ge=5, le=240),
                             "That walk is no longer available. Ask for a new "
                             "recommendation and we'll find you another.")
 
-    active = db.execute(select(Walk).where(Walk.participant_id == p.id,
-                                           Walk.status == "ACTIVE")).scalars().first()
-    if active is not None:
-        raise HTTPException(
-            status.HTTP_409_CONFLICT,
-            f"You already have a walk in progress ({active.distance_miles} mi). "
-            f"Finish or cancel it before starting another.")
-
-    for old in db.execute(select(Walk).where(Walk.participant_id == p.id,
-                                             Walk.status == "PREVIEW")).scalars():
-        res_svc.release(db, old)
-        old.status = "DISCARDED"
-    db.commit()
+    # One open walk per participant, PREVIEW or ACTIVE, claimed under a row lock and
+    # held until the single commit below. Accepting a second mission replaces a walk
+    # that was only ever previewed — accepting is how you look at a mission, and a
+    # walker who backs out of one and takes another has not committed to two. What the
+    # claim adds is that two devices accepting at the same moment can no longer both
+    # come away with a live walk: one of them waits, then sees the other's walk and is
+    # told about it instead of quietly discarding it.
+    claim_walk_slot(db, p.id)
 
     # A route request row keeps the mission reproducible on the same terms as any
     # other route: seed, network, engine, completion state.
@@ -145,7 +142,9 @@ def accept(mission_id: str, minutes: int = Query(45, ge=5, le=240),
         active_reservation_count=len(held),
         variants=[], failure_reason=None)
     db.add(req)
-    db.commit()
+    # Flush rather than commit: `req.id` is generated at INSERT and the walk below
+    # needs it, but committing here would end the transaction and drop the claim.
+    db.flush()
 
     connectors = sorted({sid for sid in chosen.segment_ids
                          if sid not in set(chosen.required_segment_ids)})
