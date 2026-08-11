@@ -112,7 +112,27 @@ export default function Confirm({ nav, walkId, onDone }: {
   const [done, setDone] = useState<any | null>(null)
 
   useEffect(() => {
+    /*
+     * EVERYTHING RESETS WHEN THE WALK ID CHANGES, AND NOTHING LATE MAY WRITE.
+     *
+     * Without this the screen kept the previous walk's answer, its ticked streets and
+     * its note while the new walk loaded — and the draft effect below then wrote walk
+     * A's selection into storage under walk B's key. A reviewer opened
+     * `#/confirm/<B>` and found "Review and edit" already on, 34 streets ticked, 31 of
+     * them belonging to walk A, and a live Submit under them. The server takes the
+     * segment ids it is given, so pressing it would have recorded streets from a walk
+     * that was not this one.
+     *
+     * The same shape of bug was fixed on the walk screen and this screen did not get
+     * it. `live` closes the other half: a response for the walk we have navigated away
+     * from must not land on top of the one we navigated to.
+     */
+    let live = true
+    setWalk(null); setError(null); setDone(null)
+    setOutcome('AS_PLANNED'); setPicked(new Set()); setNote('')
+
     api.walk(walkId).then((w) => {
+      if (!live) return
       setWalk(w)
       if (RESOLVED.includes(w.status)) {
         // Already recorded, or cancelled. There is no answer to keep, and any draft
@@ -126,14 +146,19 @@ export default function Confirm({ nav, walkId, onDone }: {
       // there is one, is where the walker had already got to.
       setPicked(new Set(draft?.picked ?? w.planned_required_ids ?? []))
       if (draft) { setOutcome(draft.outcome); setNote(draft.note) }
-    }).catch((e) => setError(e.message))
-    api.progressMap().then(setBase).catch(() => setBase(null))
+    }).catch((e) => { if (live) setError(e.message) })
+    api.progressMap().then((m) => { if (live) setBase(m) }).catch(() => { if (live) setBase(null) })
+    return () => { live = false }
   }, [walkId])
 
   // Written on every change rather than on unload: a tab that is killed outright, or a
   // phone that goes to sleep and never comes back, never gets an unload event.
   useEffect(() => {
     if (!walk || RESOLVED.includes(walk.status) || done) return
+    // The loaded walk must BE the walk in the URL. This is the guard that stops one
+    // walk's selection being saved under another walk's key; the reset above stops it
+    // being shown, and this stops it being written.
+    if (walk.id !== walkId) return
     writeDraft(walkId, { outcome, picked: [...picked], note })
   }, [walkId, walk, done, outcome, picked, note])
 
@@ -189,7 +214,11 @@ export default function Confirm({ nav, walkId, onDone }: {
       // same walk twice. Nothing of ours was written, so the honest thing is to go and
       // find out what the walk actually says and show that instead of the question.
       if (e instanceof ApiError && e.status === 409) {
-        setError('This walk has already been recorded. Nothing was sent again.')
+        // The server writes these sentences for walkers and there is more than one of
+        // them — "already recorded" and "never started" are different facts. Flattening
+        // every 409 into the first told somebody who had not started their walk that it
+        // was already recorded, which is not true and not actionable.
+        setError(e.message)
         api.walk(walkId).then((w) => {
           setWalk(w)
           // Only once the walk itself confirms it is finished with — a draft is the
@@ -206,7 +235,12 @@ export default function Confirm({ nav, walkId, onDone }: {
   }
 
   if (error && !walk) return <div className="screen"><p className="error">{error}</p></div>
-  if (!walk) return <div className="screen"><p className="muted">Loading…</p></div>
+  // `walk.id !== walkId` is the frame between a hash change and the fetch landing. It
+  // is up to fifteen seconds wide on a bad link, and it used to render the previous
+  // walk in full, with a live Submit.
+  if (!walk || walk.id !== walkId) {
+    return <div className="screen"><p className="muted">Loading…</p></div>
+  }
 
   if (done) {
     // What the server recorded, in the server's own numbers.

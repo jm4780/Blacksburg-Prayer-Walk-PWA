@@ -27,7 +27,7 @@
  * direction is dark throughout and the other screens follow later.
  */
 import { useEffect, useMemo, useState } from 'react'
-import { api, ApiError } from '../api'
+import { api, ApiError, isOffline } from '../api'
 import MapView, { type SegmentFeature } from '../components/MapView'
 import { boundsOf, frameAsRing, progressFrame } from './progressFrame'
 import type { Metrics, ParticipantOut, ProgressMap, Walk } from '../types'
@@ -39,12 +39,20 @@ export default function Dashboard({ nav, me, walk }: {
   const [m, setM] = useState<Metrics | null>(null)
   const [map, setMap] = useState<ProgressMap | null>(null)
   const [mapBlocked, setMapBlocked] = useState<string | null>(null)
+  const [mapFailed, setMapFailed] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [defs, setDefs] = useState(false)
 
   useEffect(() => {
-    api.metrics().then(setM).catch((e) => setError(e.message))
+    // Whatever the server says about itself stays on the server. A 500 detail here was
+    // rendered verbatim on the landing screen — a reviewer saw "server exploded" above
+    // the town's own numbers — and a stack-trace fragment on the first screen of a
+    // church app is not a message, it is an apology nobody can act on. The client's own
+    // offline sentences are already addressed to walkers, so those pass through.
+    api.metrics().then(setM).catch((e) => setError(
+      isOffline(e) ? e.message
+        : 'We could not load the town’s progress just now. This is not something you did.'))
   }, [walk?.id])
 
   useEffect(() => {
@@ -53,7 +61,11 @@ export default function Dashboard({ nav, me, walk }: {
       // BPW_ACCESS_MODE=authenticated an anonymous visitor gets a 403 here — on the
       // landing screen, where the map is the centrepiece. Say so rather than
       // showing an empty panel.
+      // 403 is the G1 licensing gate and its message is written for a reader. Anything
+      // else that stops the map is reported as itself rather than silently leaving an
+      // empty panel with a legend under it.
       if (e instanceof ApiError && e.status === 403) setMapBlocked(e.message)
+      else setMapFailed(true)
     })
   }, [walk?.id])
 
@@ -176,6 +188,13 @@ export default function Dashboard({ nav, me, walk }: {
           <div className="dash-map-blocked" role="status">
             <strong>The town map is not public yet</strong>
             <p>{mapBlocked}</p>
+          </div>
+        ) : mapFailed ? (
+          /* Reported, not left blank. An empty panel with "Covered / Still to walk"
+             underneath it says the town has been walked nowhere. */
+          <div className="dash-map-blocked" role="status">
+            <strong>The map did not load</strong>
+            <p>Everything else on this screen is still right. Pull down to try again.</p>
           </div>
         ) : (
           <MapView segments={segments} context="town" height="100%"
