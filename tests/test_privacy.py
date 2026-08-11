@@ -76,8 +76,16 @@ def responses(client, h, admin_h):
 # (docs/20 §4). Both describe a public road's classification — Arterial, Local, Trail,
 # Sidewalk. Neither is residential, neither identifies anybody, and neither is derived
 # from the address data.
+#
+# `neighborhood` was admitted for the map's label tier (docs/20 §6). It is the name of
+# the part of town a public street sits in — TOM'S CREEK, HETHWOOD / PRICES FORK — and
+# it passes the same three tests: it is not residential, it identifies nobody, and it
+# is not derived from the address data. It is on the street, not on anyone who lives
+# there. It is here because the map has no other way to place those labels: there is no
+# neighbourhood boundary anywhere in this product, so the client derives one anchor per
+# name from the segments carrying it.
 MAP_FEATURE_PROPERTIES = {"id", "name", "kind", "done", "held",
-                          "road_class", "path_type"}
+                          "road_class", "path_type", "neighborhood"}
 
 
 def test_map_features_carry_only_permitted_properties(client, h):
