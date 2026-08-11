@@ -26,27 +26,62 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [reporting, setReporting] = useState(false)
+  // Cancelling a walk in progress releases every street held for this walker, and
+  // there is no undo — so it is asked for twice, and answered once it is done.
+  const [confirming, setConfirming] = useState(false)
+  const [released, setReleased] = useState(false)
 
   useEffect(() => {
     api.walk(walkId).then(setWalk).catch((e) => setError(e.message))
   }, [walkId])
 
   async function begin() {
-    setBusy(true)
+    setBusy(true); setError(null)
     try { const w = await api.start(walkId); setWalk(w); onWalk(w) }
     catch (e: any) { setError(e.message) }
     finally { setBusy(false) }
   }
 
   async function discard() {
-    setBusy(true)
-    try { await api.discard(walkId); onWalk(null); nav('/') }
+    setBusy(true); setError(null)
+    try {
+      await api.discard(walkId)
+      onWalk(null)
+      // A preview was never under way: "not this one" needs no receipt, so it goes
+      // straight back. Ending a walk that had started does — the walker gave streets
+      // up, and landing silently on the dashboard reads exactly like a tap that did
+      // nothing. They go home from the acknowledgement, deliberately.
+      if (walk?.status === 'ACTIVE') setReleased(true)
+      else nav('/')
+    }
+    // The confirmation stays open on failure: the message appears directly above it,
+    // and the walker who meant to cancel can try again without asking for it twice.
     catch (e: any) { setError(e.message) }
     finally { setBusy(false) }
   }
 
-  if (error) return <div className="screen"><p className="error" role="alert">{error}</p></div>
+  // Only fatal while there is nothing to show. Once the walk has loaded, a failed
+  // start or a failed cancel belongs beside the button that failed — see below.
+  if (error && !walk) {
+    return <div className="screen"><p className="error" role="alert">{error}</p></div>
+  }
   if (!walk) return <div className="screen"><p className="muted">Loading…</p></div>
+
+  if (released) {
+    return (
+      <div className="screen narrow">
+        <h1>Walk cancelled</h1>
+        <div className="note ok">
+          <strong>Your streets are released</strong>
+          <p>
+            Nothing was recorded, and the streets held for you are free straight away
+            so someone else can walk them.
+          </p>
+        </div>
+        <button className="primary big" onClick={() => nav('/')}>Back to home</button>
+      </div>
+    )
+  }
 
   const started = walk.status === 'ACTIVE'
 
@@ -57,7 +92,10 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
       <div className="card">
         {/* The marker is the walk's fixed start and end point, computed once when
             the route was generated. It is not the walker — it never moves. */}
-        <MapView route={walk.geometry} height={360}
+        {/* `walking` is the map system's outdoors setting: heaviest weights, highest
+            contrast, street names on, and nothing on the map that is not the route or
+            the way to it — see src/map/style.ts. */}
+        <MapView route={walk.geometry} height={360} context="walking"
                  start={walk.start_point
                    ? { lon: walk.start_point[0], lat: walk.start_point[1] } : null}
                  ariaLabel={`Planned route, ${walk.distance_miles} miles`} />
@@ -103,8 +141,40 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
         </button>
       )}
       {started && reporting && (
-        <FeedbackForm walkId={walk.id} from="ACTIVE_WALK"
-                      onDone={() => setReporting(false)} />
+        /* No `onDone`. It closed the form the instant the report was sent, which threw
+           away the form's own "Thank you — that helps" before anybody could read it:
+           reporting a problem looked like it had done nothing at all. The form keeps
+           its acknowledgement on screen instead, exactly as it does on the
+           confirmation screen. */
+        <FeedbackForm walkId={walk.id} from="ACTIVE_WALK" />
+      )}
+
+      {/* A failed start or a failed cancel used to be invisible here: `error` was only
+          rendered in the branch that returns before the walk has loaded, so the button
+          simply re-enabled itself and said nothing. */}
+      {error && <p className="error" role="alert">{error}</p>}
+
+      {/* Cancelling asks first. Everything held for this walker is released the moment
+          it is confirmed, and no part of that is recoverable, so the walker gets to
+          read what it costs and where it leaves them before it happens. */}
+      {started && confirming && (
+        <div className="note warn">
+          <strong>Cancel this walk?</strong>
+          <p>
+            No streets are marked as prayed for, and the ones held for you are released
+            straight away so someone else can walk them. You cannot pick this walk back
+            up afterwards.
+          </p>
+          <div className="actions">
+            <button className="primary" disabled={busy} onClick={discard}>
+              {busy ? 'Releasing…' : 'Yes, cancel and release my streets'}
+            </button>
+            <button className="secondary" disabled={busy}
+                    onClick={() => setConfirming(false)}>
+              No, keep walking
+            </button>
+          </div>
+        </div>
       )}
 
       <div className="actions">
@@ -118,7 +188,10 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
             Finish Walk
           </button>
         )}
-        <button className="secondary" disabled={busy} onClick={discard}>
+        {/* A preview holds streets too, but nothing has been started, so going back to
+            choose again is not a decision worth interrupting. */}
+        <button className="secondary" disabled={busy || (started && confirming)}
+                onClick={() => (started ? setConfirming(true) : discard())}>
           {started ? 'Cancel this walk' : 'Choose a different walk'}
         </button>
       </div>

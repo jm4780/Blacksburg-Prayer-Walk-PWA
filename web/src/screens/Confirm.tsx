@@ -163,7 +163,10 @@ export default function Confirm({ nav, walkId, onDone }: {
 
       {outcome === 'AS_PLANNED' && walk.geometry && (
         <div className="card">
-          <MapView route={walk.geometry} height={300}
+          {/* `recording` is the map system's setting for a walk being confirmed:
+              assigned and covered ground shown together, so the difference between the
+              plan and the record is visible — see src/map/style.ts. */}
+          <MapView route={walk.geometry} height={300} context="recording"
                    ariaLabel="The route you planned" />
         </div>
       )}
@@ -174,10 +177,16 @@ export default function Confirm({ nav, walkId, onDone }: {
             Tap a street to add or remove it. Your planned route is selected to start
             with. Pinch to zoom out if you walked somewhere further off.
           </p>
-          {/* `editing` opens closer and widens the tap target, and `fitTo` frames the
-              walk rather than the whole town — the streets the walker might have
-              swapped in are the ones next to where they were. */}
-          <MapView segments={selectable} height={420} editing
+          {/* `editing` is the map system's setting for picking streets by thumb: it
+              opens at the same close zoom the old `editing` flag asked for, lifts the
+              surrounding context so a street you can't see can't be chosen, and carries
+              the widest tap target in the system (26px, against the 24px the flag got).
+              The flag is gone rather than kept alongside it — a context overrides it
+              outright in MapView, so leaving it would only read as if it still did
+              something. `fitTo` still frames the walk rather than the whole town: the
+              streets the walker might have swapped in are the ones next to where they
+              were. */}
+          <MapView segments={selectable} height={420} context="editing"
                    fitTo={walk.geometry}
                    onSegmentTap={toggle}
                    ariaLabel="Select the streets you covered" />

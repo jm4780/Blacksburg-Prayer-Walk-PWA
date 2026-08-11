@@ -64,9 +64,15 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
       .catch(() => { /* the fallback bounds are the same ones the server ships */ })
   }, [])
 
-  const load = useCallback(async (mins: number, missionId?: string) => {
+  /**
+   * `keepError` is for the one caller that reloads *because* something went wrong: the
+   * 409 on accept. Clearing the message on the way in wiped the only explanation the
+   * walker had, and a different walk then appeared unannounced.
+   */
+  const load = useCallback(async (mins: number, missionId?: string, keepError = false) => {
     const mine = ++seq.current
-    setLoading(true); setError(null)
+    setLoading(true)
+    if (!keepError) setError(null)
     try {
       const r = missionId ? await api.mission(missionId, mins) : await api.recommend(mins)
       if (seq.current === mine) setData(r)
@@ -103,8 +109,10 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
     } catch (e: any) {
       setError(e.message)
       // 409 means the world moved: somebody took these streets, or this walker
-      // already has a walk open. Either way the current card is stale.
-      if (e instanceof ApiError && e.status === 409) load(minutes)
+      // already has a walk open. Either way the current card is stale — so it is
+      // replaced, with the message kept, because the swapped-in walk is the answer to
+      // a question the walker never asked and needs the sentence that explains it.
+      if (e instanceof ApiError && e.status === 409) load(minutes, undefined, true)
     } finally { setAccepting(false) }
   }
 
@@ -140,6 +148,23 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
         <div className="note stop">
           <strong>Nothing left to assign</strong>
           <p>{data.reason}</p>
+          {/* A dead end with no way out of it. The answer is rarely permanent — a
+              different length asks a different question of the network, and streets
+              held by other walkers come back when those walks end — so the screen
+              says what to try instead of stopping. */}
+          <p className="fine">
+            Try a different length with the slider above, or look again in a moment.
+          </p>
+          <div className="actions">
+            {/* No busy label: this whole block is behind `!loading`, so the moment it
+                is tapped the screen is back on "Finding you a walk…". */}
+            <button className="primary" onClick={() => load(minutes)}>
+              Look again
+            </button>
+            <button className="secondary" onClick={() => nav('/')}>
+              Back to home
+            </button>
+          </div>
         </div>
       )}
 
@@ -152,7 +177,10 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
             About {m.estimated_minutes} minutes · {m.distance_miles} miles
           </p>
 
-          <MapView route={m.geometry}
+          {/* `briefing` is the map system's setting for a walk being considered: the
+              route is the only saturated thing on screen and its streets are named,
+              because the walker is about to commit to them — see src/map/style.ts. */}
+          <MapView route={m.geometry} context="briefing"
                    start={{ lat: m.start.lat, lon: m.start.lon }}
                    height={320}
                    ariaLabel={`Recommended walk: ${m.title}, ${m.distance_miles} miles`} />
