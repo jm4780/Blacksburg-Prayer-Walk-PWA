@@ -83,6 +83,17 @@ main { flex: 1; background: var(--d-bg); }
 
 .fine.centered { text-align: center; margin-top: 8px; }
 
+/* A bare `<a>` and a bare `<ul>` inside a screen were left to the browser, which on a
+   dark page means a violet nobody chose (#9E9EFF) and a 40px disc-bulleted list on
+   15px margins. Both only survive on Admin, which is exactly why they survived — but
+   the bar says every screen, and these are two rules. `:where()` so any class on the
+   element still wins. */
+:where(.screen, .card, .note) a { color: var(--d-orange); text-decoration: underline;
+  text-underline-offset: 2px; }
+:where(.screen, .card, .note) ul { margin: 0 0 12px; padding-left: 18px; }
+:where(.screen, .card, .note) li { margin: 0 0 6px; }
+:where(.screen, .card, .note) li::marker { color: var(--d-faint); }
+
 .screen {
   padding: 20px 24px 26px;
   padding-bottom: calc(26px + env(safe-area-inset-bottom));
@@ -521,7 +532,10 @@ p button.link { display: inline; min-height: 0; }
   background: rgba(20, 23, 26, .55); color: var(--d-dim);
   border: 1px solid var(--d-rule); border-radius: 999px;
 }
-.tabs button.on { background: var(--d-orange); color: var(--d-paper);
+/* The tint, not a solid fill: `.choice.on`, `.tick.on` and `.dash-resume` all say
+   "this one is selected" with rgba(228,113,44,.14) on the accent, and a solid orange
+   tab said it in a way nothing else in the product does. */
+.tabs button.on { background: rgba(228, 113, 44, .14); color: var(--d-orange);
                   border-color: var(--d-orange); }
 
 .grid { width: 100%; border-collapse: collapse; font-size: 12px; color: var(--d-ink);
@@ -647,11 +661,16 @@ p button.link { display: inline; min-height: 0; }
 .dash-legend span { display: flex; align-items: center; gap: 10px;
                     font: 500 11px/1 Archivo, sans-serif; color: var(--d-dim); }
 .dash-legend i { width: 26px; flex: none; }
-/* The swatches are the map's own weights, at the map's own colours. Covered is
-   heavier and warm white; still-to-walk is a thin solid grey, not a dash — see
-   TEXTURE in src/map/tokens.ts for why the dashes went. */
-.dash-legend .lg-done { height: 4px; border-radius: 2px; background: #F2EFE9; }
-.dash-legend .lg-todo { height: 2px; border-radius: 1px; background: #4A5457; }
+/* The swatches are the map's own weights, at the map's own colours — and until now
+   they were neither. They read #F2EFE9 and #4A5457, which are close enough to the
+   real values to look right and wrong enough to be wrong: the `town` context sets
+   `subject: 'covered'` (src/map/style.ts), so covered is painted INK.subject #FFFFFF
+   and everything left is INK.remaining #4F5458. A legend two shades off the map it
+   sits on is the same defect as a legend naming the wrong colour entirely, just
+   harder to catch. Covered is heavier and pure white; still-to-walk is a thin solid
+   grey, not a dash — see TEXTURE in src/map/tokens.ts for why the dashes went. */
+.dash-legend .lg-done { height: 4px; border-radius: 2px; background: #FFFFFF; }
+.dash-legend .lg-todo { height: 2px; border-radius: 1px; background: #4F5458; }
 
 .dash-explore, .dash-collapse {
   position: absolute; right: 14px; bottom: 32px; z-index: 3;
