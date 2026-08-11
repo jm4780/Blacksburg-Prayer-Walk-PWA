@@ -9,6 +9,10 @@
  *                            contribution update as you go
  *   I didn't complete it     nothing is recorded, the holds are released
  *
+ * The three answers are a selection, not three submits. Choosing one decides which
+ * panel opens beneath; nothing is recorded until the one button that says Submit is
+ * pressed, and that button is the only thing on the screen dressed as a decision.
+ *
  * Editing is segment selection, never freehand drawing. A drawn line would have to be
  * map-matched back onto the network, and every match would be a silent guess about
  * what somebody actually prayed for.
@@ -143,31 +147,69 @@ export default function Confirm({ nav, walkId, onDone }: {
     <div className="screen">
       <h1>Did you complete the route as shown?</h1>
 
-      <div className="choices">
-        <button className={outcome === 'AS_PLANNED' ? 'choice on' : 'choice'}
+      {/* These three are one answer to one question, not three things to do. They were
+          three identical bordered blocks that each read like a button you press to
+          finish, so the screen appeared to have four submits — and pressing one of
+          them, which only sets `outcome`, looked from outside like a submit that had
+          done nothing.
+
+          The same radiogroup treatment FeedbackForm gives its yes/no rows: a group
+          labelled by the question above, radios inside it, `aria-checked` carrying the
+          selection. Assistive tech now announces "1 of 3, not selected" instead of
+          three buttons, and the one thing that submits is the one button that says
+          Submit. `.choice.on` already marks the selection visually. */}
+      <div className="choices" role="radiogroup"
+           aria-label="Did you complete the route as shown?">
+        <button type="button" role="radio" aria-checked={outcome === 'AS_PLANNED'}
+                className={outcome === 'AS_PLANNED' ? 'choice on' : 'choice'}
                 onClick={() => setOutcome('AS_PLANNED')}>
           <strong>Yes, mark it complete</strong>
           <span>{walk.distance_miles} mi · {walk.required_segment_count} streets</span>
         </button>
-        <button className={outcome === 'EDITED' ? 'choice on' : 'choice'}
+        <button type="button" role="radio" aria-checked={outcome === 'EDITED'}
+                className={outcome === 'EDITED' ? 'choice on' : 'choice'}
                 onClick={() => setOutcome('EDITED')}>
           <strong>Review and edit</strong>
           <span>Skip streets you missed, add ones you walked instead</span>
         </button>
-        <button className={outcome === 'DID_NOT_COMPLETE' ? 'choice on' : 'choice'}
+        <button type="button" role="radio" aria-checked={outcome === 'DID_NOT_COMPLETE'}
+                className={outcome === 'DID_NOT_COMPLETE' ? 'choice on' : 'choice'}
                 onClick={() => setOutcome('DID_NOT_COMPLETE')}>
           <strong>I didn’t complete it</strong>
           <span>Nothing is recorded and your streets are released</span>
         </button>
       </div>
 
-      {outcome === 'AS_PLANNED' && walk.geometry && (
+      {outcome === 'AS_PLANNED' && (
         <div className="card">
           {/* `recording` is the map system's setting for a walk being confirmed:
               assigned and covered ground shown together, so the difference between the
-              plan and the record is visible — see src/map/style.ts. */}
-          <MapView route={walk.geometry} height={300} context="recording"
-                   ariaLabel="The route you planned" />
+              plan and the record is visible — see src/map/style.ts.
+
+              Guarded here rather than around the whole panel: a walk with no stored
+              geometry used to select this option and produce nothing at all on screen,
+              so the numbers below vanished along with the map. The numbers are the
+              part that matters — they are what is being signed for. */}
+          {walk.geometry && (
+            <MapView route={walk.geometry} height={300} context="recording"
+                     ariaLabel="The route you planned" />
+          )}
+          {/* "Yes, mark it complete" was asking the walker to affirm a distance and a
+              household count they had last seen on the previous screen. Nobody confirms
+              a number from memory; they just press the button. So the walk restates
+              itself here, in the same words the active-walk screen used, and the
+              sentence under it says plainly what pressing Submit will record. Straight
+              off the `walk` already loaded — nothing new is fetched to say it. */}
+          <p className="mission-line">
+            About {walk.estimated_minutes} minutes · {walk.distance_miles} miles
+            {walk.households
+              ? ` · approximately ${walk.households.toLocaleString()} households`
+              : ''}
+          </p>
+          <p className="fine">
+            Submitting records all {walk.required_segment_count} streets of this route —
+            {' '}{walk.distance_miles} miles — as prayed for, exactly as planned.
+          </p>
         </div>
       )}
 

@@ -77,7 +77,30 @@ export default function App() {
     setToken(null); setMe(null); setWalk(null); nav('/')
   }
 
-  if (loading) return <div className="screen"><p className="muted">Loading…</p></div>
+  /*
+   * The first paint of the whole app, and for a returning walker it is two network
+   * round trips long — /me and then /walks/current. It was a `.screen`, which is the
+   * inner-page shell: a different ground from the dashboard that lands immediately
+   * after it, so opening the app from the home screen flashed one colour and then
+   * repainted in another. An install that changes colour on launch reads as broken
+   * before anybody has done anything.
+   *
+   * `.dash` is the dashboard's own root — fixed to the viewport, dark ground, safe
+   * areas — so the first frame is already the frame the dashboard arrives in and only
+   * the content fills in. `.dash-mission` carries the page gutter and `.dash-label`
+   * the system-label treatment, both borrowed rather than rebuilt.
+   */
+  if (loading) {
+    return (
+      <div className="dash">
+        <section className="dash-mission">
+          {/* A div, exactly as Dashboard writes its own label — `.dash-mission p` is
+              the mission-statement paragraph and this is not that. */}
+          <div className="dash-label" role="status">Loading…</div>
+        </section>
+      </div>
+    )
+  }
 
   /** Screens that record something against a person. Reached without one, they ask. */
   const gate = (reason: string) => (

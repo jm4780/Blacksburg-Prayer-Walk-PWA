@@ -6,12 +6,20 @@
  * question — how long do you have? — and answers with a specific walk it recommends,
  * described in terms of where it goes and who lives there.
  *
- * Four things are deliberate:
+ * Five things are deliberate:
  *
- *   NO LOCATION NEEDED.  The default recommendation is town-wide (Priority 5). The
- *                        app opens, you move the slider, you get a real walk. Sharing
- *                        a location is one *optional* way to bias the answer, offered
- *                        below as "Find a walk near me" (Priority 7), not a toll gate.
+ *   NO LOCATION NEEDED.  The recommendation is town-wide (Priority 5). The app opens,
+ *                        you move the slider, you get a real walk. No location, no
+ *                        account, nothing asked for until the walker accepts — and,
+ *                        since the "Find a walk near me instead" entry point came out,
+ *                        nothing on this screen that quietly leads to one either. See
+ *                        the note where that button used to be.
+ *
+ *   ONE WAY FORWARD.     "Walk this" is the only thing on this screen styled as a
+ *                        decision. Swapping the recommendation, browsing the other
+ *                        walks, and getting directions to the start are all real and
+ *                        all kept — as links and a disclosure, because a walker
+ *                        standing outside should have to read one button, not five.
  *
  *   TIME, NOT SIZE.      A continuous slider from 20 to 90 minutes in 5-minute steps
  *                        (Priority 4). "Quick / Medium / Long" were engine bands
@@ -140,7 +148,11 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
         </div>
       </div>
 
-      {error && <p className="error" role="alert">{error}</p>}
+      {/* Only the errors that have no walk to sit beside are reported up here. A
+          failed accept belongs against the button that failed — it is at the bottom of
+          a card with a 320px map in it, and a message at the top of the screen is
+          simply off-screen from where the walker just tapped. See the mission card. */}
+      {error && !m && <p className="error" role="alert">{error}</p>}
 
       {loading && !m && <p className="muted">Finding you a walk…</p>}
 
@@ -193,10 +205,15 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
             {m.directions && (
               <div className="dirlinks">
                 {/* Directions to the START only. The app stays the source of truth for
-                    the route itself — no claim is made that a mapping app preserves it. */}
-                <a className="secondary" href={m.directions.apple}
+                    the route itself — no claim is made that a mapping app preserves it.
+
+                    No `secondary` class on these: `button.secondary` never matched an
+                    anchor, so it styled nothing and only made the markup read as two
+                    more buttons on a screen that already had too many. `.dirlinks a`
+                    is what actually dresses them, and it dresses them as links. */}
+                <a href={m.directions.apple}
                    target="_blank" rel="noreferrer">Apple Maps</a>
-                <a className="secondary" href={m.directions.google}
+                <a href={m.directions.google}
                    target="_blank" rel="noreferrer">Google Maps</a>
               </div>
             )}
@@ -206,18 +223,29 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
             The walk ends where it starts.
           </p>
 
+          {/* The accept can fail — 409 when somebody else took these streets, or a
+              network error — and until this was here it failed silently as far as the
+              walker could see: the button re-enabled itself and the explanation was a
+              full map's height above. */}
+          {error && <p className="error" role="alert">{error}</p>}
+
           <button className="primary big" disabled={accepting || loading}
                   onClick={accept}>
             {accepting ? 'Holding these streets…' : 'Walk this'}
           </button>
 
+          {/* A link, not a button. This is the same offer the "Other walks" disclosure
+              below makes — one tap instead of a list — and when it was a full-width
+              outlined button under the orange one, the screen asked the walker to
+              choose between accepting a walk and rejecting it, in matching furniture.
+              Only "Walk this" is a decision here. */}
           {data!.alternatives.length > 0 && (
-            <button className="secondary" disabled={swapping || loading}
+            <button className="link" disabled={swapping || loading}
                     onClick={() => {
                       setSwapping(true)
                       load(minutes, data!.alternatives[0].id)
                     }}>
-              Show me a different walk
+              {swapping ? 'Finding another…' : 'Show me a different walk'}
             </button>
           )}
         </div>
@@ -242,14 +270,25 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
         </details>
       )}
 
-      {/* Priority 7: preserved, demoted. Starting from where you are standing is a
-          real thing people want; it is just not the only way to be given a walk. */}
+      {/* Priority 7: preserved, demoted twice over.
+
+          A link, not a button. This screen has one decision on it and "Walk this" is
+          it; starting from where you are standing is a different way in, not a rival
+          answer to the same question, and as a second full-width control it read as
+          one.
+
+          And it says what it costs. /generate is identity-gated — App.tsx puts an
+          IdentityGate in front of it for anyone without a token, because generating
+          from a device location records a route request against a person. This screen
+          promises no location and no account, so the one route off it that asks for
+          both has to say so before it is tapped, not after. */}
       <div className="secondary-entry">
-        <button className="secondary big" onClick={() => nav('/generate')}>
+        <button className="link" onClick={() => nav('/generate')}>
           Find a walk near me instead
         </button>
         <p className="fine">
-          Uses your location once, when you ask, to start the walk from where you are.
+          Uses your location once, when you ask, to start the walk from where you are,
+          and asks who you are first.
         </p>
       </div>
 

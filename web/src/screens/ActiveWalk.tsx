@@ -134,9 +134,14 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
       )}
 
       {/* §5: reportable from the active screen, so "this crossing doesn't exist" can
-          be said standing at the crossing rather than remembered afterwards. */}
+          be said standing at the crossing rather than remembered afterwards.
+
+          A link rather than an outlined button. It is not a way to finish the walk and
+          it is not a way to abandon it — it is a side channel back to us — but as a
+          bordered button in the same shape as "Cancel this walk" it sat in the row of
+          exits and made a three-way decision out of a one-way one. */}
       {started && !reporting && (
-        <button className="secondary" onClick={() => setReporting(true)}>
+        <button className="link" onClick={() => setReporting(true)}>
           Report a problem with this route
         </button>
       )}
@@ -177,6 +182,9 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
         </div>
       )}
 
+      {/* One primary, in both states. "Start this walk" before, "Finish Walk" after,
+          and never both — the other exit is an outlined button underneath it, which is
+          the only pairing on this screen that is meant to read as a pair. */}
       <div className="actions">
         {!started && (
           <button className="primary big" disabled={busy} onClick={begin}>
@@ -189,7 +197,11 @@ export default function ActiveWalk({ nav, walkId, onWalk }: {
           </button>
         )}
         {/* A preview holds streets too, but nothing has been started, so going back to
-            choose again is not a decision worth interrupting. */}
+            choose again is not a decision worth interrupting.
+
+            Deliberately not `big`: full width and 18px would put it shoulder to
+            shoulder with the orange button above and let a walker who meant to finish
+            release everything they walked instead. */}
         <button className="secondary" disabled={busy || (started && confirming)}
                 onClick={() => (started ? setConfirming(true) : discard())}>
           {started ? 'Cancel this walk' : 'Choose a different walk'}

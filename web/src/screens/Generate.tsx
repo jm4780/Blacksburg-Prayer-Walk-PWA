@@ -131,18 +131,7 @@ export default function Generate({ nav, onWalk }: {
 
       {phase === 'RESULT' && result && (
         <>
-          {error && (
-            <div className="note warn" role="alert">
-              <strong>{error}</strong>
-              {/* The common case is a walk left in progress: /api/walks/select
-                  refuses to start a second one. Point at the way out. */}
-              <button className="secondary" onClick={() => nav('/')}>
-                Go to your walk in progress
-              </button>
-            </div>
-          )}
-
-          <Opportunity result={result} onRestart={() => setPhase('PICKING')} />
+          <Opportunity result={result} />
 
           {result.available_bands.length > 0 && (
             <>
@@ -181,6 +170,22 @@ export default function Generate({ nav, onWalk }: {
                       you cover by walking the parallel walkway — walking one side counts.
                     </p>
                   ) : null}
+                  {/* Moved down here from the top of the RESULT block. In this phase
+                      the only thing that can fail is this button — `run` sends its own
+                      failures back to PICKING — and the message was rendering above a
+                      340px map, off the top of the screen from where the walker had
+                      just tapped. A hold that did not happen has to say so where the
+                      thumb already is. */}
+                  {error && (
+                    <div className="note warn" role="alert">
+                      <strong>{error}</strong>
+                      {/* The common case is a walk left in progress: /api/walks/select
+                          refuses to start a second one. Point at the way out. */}
+                      <button className="secondary" onClick={() => nav('/')}>
+                        Go to your walk in progress
+                      </button>
+                    </div>
+                  )}
                   <button className="primary big" disabled={busy} onClick={preview}>
                     {busy ? 'Holding your route…'
                       : isSmallArea ? 'Complete this area' : 'Preview this walk'}
@@ -190,7 +195,18 @@ export default function Generate({ nav, onWalk }: {
             </>
           )}
 
-          <button className="secondary" onClick={() => setPhase('PICKING')}>
+          {/* The one way back out of a result, and the only one — Opportunity used to
+              render its own "Choose a different starting point" in two of its four
+              states, which meant those states showed two buttons doing the identical
+              thing while the other two states relied on this one alone. This is the
+              button that is always here, so this is the button that stayed.
+
+              It is primary when there is no walk to preview. A start point with
+              nothing worth walking from it is still a dead end if the only live
+              control on the screen is drawn as an afterthought; when there *is* a
+              route, previewing it is the decision and this drops back to secondary. */}
+          <button className={selected?.available ? 'secondary' : 'primary big'}
+                  onClick={() => setPhase('PICKING')}>
             Start somewhere else
           </button>
         </>
@@ -207,10 +223,14 @@ export default function Generate({ nav, onWalk }: {
  * longer size reaches work. None of it is derived from a town-wide completion
  * percentage: a town at 40% can have a finished neighbourhood, and a town at 95% can
  * have good walking left one street over.
+ *
+ * These are statements, not exits. Two of them used to carry their own "Choose a
+ * different starting point" button, duplicating the "Start somewhere else" the RESULT
+ * phase already renders underneath in every state — the same action, twice, in two
+ * wordings. The button belongs to the screen, so it stays with the screen and this
+ * says only what the server found.
  */
-function Opportunity({ result, onRestart }: {
-  result: RouteResponse; onRestart: () => void
-}) {
+function Opportunity({ result }: { result: RouteResponse }) {
   const worst = result.variants.find((v) => !v.available) ?? null
   const nearest = worst?.nearest_incomplete_miles
     ?? result.variants.find((v) => v.nearest_incomplete_miles != null)?.nearest_incomplete_miles
@@ -258,9 +278,6 @@ function Opportunity({ result, onRestart }: {
             Choose a different starting point or start closer to the nearest
             unfinished area.
           </p>
-          <button className="secondary" onClick={onRestart}>
-            Choose a different starting point
-          </button>
         </div>
       )
 
@@ -269,9 +286,6 @@ function Opportunity({ result, onRestart }: {
         <div className="note stop">
           <strong>No useful route from this point</strong>
           <p>{result.variants[0]?.reason || 'Nothing reachable from here needs prayer right now.'}</p>
-          <button className="secondary" onClick={onRestart}>
-            Choose a different starting point
-          </button>
         </div>
       )
   }
