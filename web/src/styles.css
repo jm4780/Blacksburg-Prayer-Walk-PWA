@@ -51,102 +51,114 @@
 
 body {
   margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--d-bg);
+  color: var(--d-ink);
+  font: 400 15px/1.5 Archivo, system-ui, -apple-system, sans-serif;
   -webkit-text-size-adjust: 100%;
 }
 
-.app { min-height: 100dvh; display: flex; flex-direction: column; }
+.app { min-height: 100dvh; display: flex; flex-direction: column;
+       background: var(--d-bg); color: var(--d-ink); }
 
 .topbar {
   position: sticky; top: 0; z-index: 10;
-  display: flex; align-items: center; justify-content: space-between; gap: .5rem;
-  padding: .6rem .9rem;
-  padding-top: max(.6rem, env(safe-area-inset-top));
-  background: var(--green); color: #fff;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 10px 24px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  background: var(--d-bg); color: var(--d-ink);
+  border-bottom: 1px solid var(--d-rule);
 }
-.topbar .brand { font-weight: 650; font-size: .95rem; }
+.topbar .brand { font: 800 17px/1 Archivo, sans-serif; color: var(--d-paper); }
 .topbar button {
   background: none; border: 0; color: inherit; font: inherit;
-  padding: .35rem .5rem; border-radius: 6px; cursor: pointer;
+  padding: 6px 8px; border-radius: 8px; cursor: pointer;
 }
-.topbar nav { display: flex; gap: .15rem; }
-.topbar nav button { font-size: .85rem; opacity: .9; }
-.topbar button:active { background: rgba(255,255,255,.15); }
+.topbar nav { display: flex; gap: 4px; }
+.topbar nav button { font: 500 13px/1 Archivo, sans-serif; color: var(--d-dim); }
+.topbar button:active { background: var(--d-rule); color: var(--d-paper); }
 
-main { flex: 1; }
+main { flex: 1; background: var(--d-bg); }
 
 .whoami {
-  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
-  padding: .45rem .9rem; font-size: .82rem;
-  background: #f1efe8; border-bottom: 1px solid var(--line); color: var(--muted);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 7px 24px; font-size: 12px;
+  background: var(--d-panel); border-bottom: 1px solid var(--d-rule);
+  color: var(--d-muted);
 }
-.whoami strong { color: var(--ink); }
+.whoami strong { color: var(--d-ink); }
 .whoami .link { white-space: nowrap; }
 
-.fine.centered { text-align: center; margin-top: .5rem; }
+.fine.centered { text-align: center; margin-top: 8px; }
 
 .screen {
-  padding: 1rem .9rem 3rem;
-  padding-bottom: max(3rem, env(safe-area-inset-bottom));
+  padding: 20px 24px 26px;
+  padding-bottom: calc(26px + env(safe-area-inset-bottom));
   max-width: 720px; margin: 0 auto;
 }
 .screen.narrow { max-width: 460px; }
 
-h1 { font-size: 1.4rem; margin: .3rem 0 .8rem; }
-h2 { font-size: 1.05rem; margin: 1.4rem 0 .5rem; }
-h3 { font-size: .95rem; margin: 1rem 0 .35rem; }
+h1 { font: 700 24px/1.2 Archivo, sans-serif; color: var(--d-paper); margin: 4px 0 12px; }
+h2 { font: 600 18px/1.3 Archivo, sans-serif; color: var(--d-paper); margin: 26px 0 8px; }
+h3 { font: 600 15px/1.35 Archivo, sans-serif; color: var(--d-paper); margin: 18px 0 6px; }
 
-.lede { color: var(--muted); margin: 0 0 1rem; }
-.muted { color: var(--muted); }
-.fine { font-size: .82rem; color: var(--muted); margin-top: 1rem; }
-.error { color: var(--red); font-weight: 500; }
+.lede { color: var(--d-dim); margin: 0 0 18px; }
+.muted { color: var(--d-dim); }
+.fine { font-size: 12px; color: var(--d-muted); margin-top: 18px; }
+.error { color: var(--d-orange); font-weight: 500; }
 
 /* --- forms ------------------------------------------------------------- */
-label { display: block; margin: 0 0 .9rem; font-size: .88rem; color: var(--muted); }
+label { display: block; margin: 0 0 14px; font-size: 13px; color: var(--d-muted); }
 input, textarea {
-  display: block; width: 100%; margin-top: .3rem;
-  padding: .7rem .6rem; font: inherit; color: var(--ink);
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  display: block; width: 100%; margin-top: 6px;
+  padding: 12px; font: inherit; color: var(--d-paper);
+  background: var(--d-panel); border: 1px solid var(--d-rule); border-radius: 10px;
 }
-input:focus, textarea:focus { outline: 2px solid var(--green); outline-offset: 1px; }
+input::placeholder, textarea::placeholder { color: var(--d-muted); }
+input:focus, textarea:focus { outline: 2px solid var(--d-orange); outline-offset: 1px; }
 
+/* Inline by default. `.big` is the full-width variant — the dashboard's CTA shape. */
 button.primary, button.secondary {
-  display: block; width: 100%; padding: .8rem 1rem; margin: .5rem 0 0;
-  font: inherit; font-weight: 600; border-radius: var(--radius); cursor: pointer;
-  border: 1px solid transparent;
+  display: inline-block; padding: 12px 20px; margin: 8px 0 0;
+  font: 600 15px/1.2 Archivo, system-ui, sans-serif; border-radius: 10px;
+  cursor: pointer; border: 1px solid transparent;
 }
-button.primary { background: var(--green); color: #fff; }
-button.secondary { background: var(--card); color: var(--green); border-color: var(--line); }
-button.big { padding: .95rem 1rem; font-size: 1.02rem; }
+button.primary { background: var(--d-orange); color: var(--d-paper); }
+button.primary:active { filter: brightness(.92); }
+button.secondary { background: none; color: var(--d-paper); border-color: var(--d-rule-2); }
+button.secondary:active { background: var(--d-rule); }
+button.big { display: block; width: 100%; padding: 20px; font-size: 18px; }
 button:disabled { opacity: .45; cursor: not-allowed; }
 button.link {
-  background: none; border: 0; padding: .2rem 0; color: var(--green);
-  font: inherit; font-size: .82rem; text-decoration: underline; cursor: pointer;
+  background: none; border: 0; padding: 4px 0; color: var(--d-dim);
+  font: 500 13px/1.4 Archivo, sans-serif; text-decoration: underline; cursor: pointer;
 }
 
-.actions { margin-top: 1.2rem; }
+.actions { margin-top: 20px; display: flex; flex-direction: column; align-items: flex-start; }
 
 /* --- cards, notes ------------------------------------------------------ */
 .card {
-  background: var(--card); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: .9rem; margin: 0 0 1rem;
+  background: var(--d-panel); border: 1px solid var(--d-rule);
+  border-radius: 10px; padding: 14px; margin: 0 0 18px;
 }
-.banner {
-  display: flex; align-items: center; justify-content: space-between; gap: .8rem;
-  background: #fff8e6; border: 1px solid #e8d9a8;
-  border-radius: var(--radius); padding: .8rem; margin-bottom: 1rem;
-}
-.banner button { width: auto; margin: 0; padding: .55rem .9rem; }
 
-.note { border-radius: var(--radius); padding: .8rem; margin: 0 0 1rem; font-size: .92rem; }
-.note strong { display: block; margin-bottom: .25rem; }
+/*
+ * Three states, one palette. Orange is the only saturated colour in the system, so
+ * the states escalate by how loud the left rule is rather than by hue: a hairline for
+ * "fine", a legible grey for "look at this", the accent (plus its tint) for "stop".
+ * A green "ok" would be a second accent, and there isn't one.
+ */
+.note {
+  border-radius: 10px; padding: 14px; margin: 0 0 18px; font-size: 13px;
+  background: var(--d-panel); border: 1px solid var(--d-rule);
+  border-left: 3px solid var(--d-rule-2); color: var(--d-ink);
+}
+.note strong { display: block; margin-bottom: 4px; color: var(--d-paper); }
 .note p { margin: 0; }
-.note.ok   { background: #eef7f0; border: 1px solid #bcd9c6; }
-.note.warn { background: #fff6e8; border: 1px solid #e8d2a6; }
-.note.stop { background: #fdeeee; border: 1px solid #e7bcbc; }
-.note button { width: auto; margin-top: .6rem; padding: .5rem .8rem; }
+.note.ok   { border-left-color: var(--d-rule-2); }
+.note.warn { border-left-color: var(--d-muted); }
+.note.stop { background: rgba(228, 113, 44, .14); border-color: rgba(228, 113, 44, .5);
+             border-left-color: var(--d-orange); }
+.note button { width: auto; margin-top: 10px; padding: 10px 14px; }
 
 /* --- metrics ----------------------------------------------------------- */
 .metrics { display: grid; gap: .7rem; margin-bottom: 1.4rem; }
@@ -156,7 +168,6 @@ button.link {
   border-radius: var(--radius); padding: .9rem;
 }
 .metric-value { font-size: 1.9rem; font-weight: 700; line-height: 1.1; color: var(--green); }
-.metric-value .unit { font-size: 1.1rem; margin-left: .1rem; }
 .metric-label { font-size: .86rem; margin-top: .15rem; }
 .metric-extra { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
 .definition { font-size: .8rem; color: var(--muted); margin: .5rem 0 0; }
@@ -181,41 +192,23 @@ button.link {
 .tick.on { border-color: var(--green); background: #eef4f0; }
 .tick.off { opacity: .4; cursor: not-allowed; }
 
-/* --- map --------------------------------------------------------------- */
-.map {
-  display: block; width: 100%; background: #f2f1ec;
-  border: 1px solid var(--line); border-radius: var(--radius);
-  touch-action: manipulation;
-}
-.map path { fill: none; stroke-linecap: round; stroke-linejoin: round;
-            pointer-events: none; }
-.ln-todo   { stroke: var(--todo);  stroke-width: 1.4px; }
-.ln-done   { stroke: var(--done);  stroke-width: 1.6px; }
-.ln-held   { stroke: var(--held);  stroke-width: 1.8px; }
-.ln-picked { stroke: var(--gold);  stroke-width: 3.4px; }
-.ln-dropped { stroke: var(--todo); stroke-width: 2.6px; stroke-dasharray: 4 4; }
-.ln-boundary { stroke: #b9b5a8; stroke-width: 1.6px; stroke-dasharray: 6 5; }
-.ln-route  { stroke: var(--green); stroke-width: 3.6px; }
-.marker circle { fill: var(--gold); stroke: #fff; stroke-width: 3px; }
-.map[data-pickable="true"] { cursor: crosshair; }
-
-/* Invisible tap targets. 14px is the smallest stroke that reliably beats a
-   fingertip's landing error on a 1.4px street line. */
-.map path.hit {
-  stroke: transparent; stroke-width: 14px; pointer-events: stroke; cursor: pointer;
-}
-
-.legend { display: flex; flex-wrap: wrap; gap: .9rem; margin: .6rem 0; font-size: .8rem; }
-.legend i { display: inline-block; width: 18px; height: 3px; margin-right: .35rem; vertical-align: middle; }
-/* These mirror DARK_COLORS in MapView. The pre-system screens draw on the regional
-   basemap now, which is near-black, so the map switched to the dark palette and the
-   legend has to follow it — a legend that does not match the map is worse than none. */
+/* --- legend ------------------------------------------------------------ */
+/* The hand-rolled SVG renderer that used to live here (.map, .ln-*, .marker) went
+   with the move to MapView; nothing renders those classes any more. */
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0; font-size: 12px;
+          color: var(--d-dim); }
+.legend i { display: inline-block; width: 18px; height: 3px; margin-right: 6px;
+            border-radius: 2px; vertical-align: middle; }
+/* These are DARK_COLORS in src/components/MapView.tsx, verbatim — plus GROUND.boundary
+   from src/map/tokens.ts. Every screen left on this stylesheet draws on the regional
+   basemap, which is near-black, so the map is on the dark palette and the legend has
+   to be the same values. A legend that does not match the map is worse than none. */
 .legend .done { background: #5E9B7E; }
 .legend .todo { background: #6E7676; }
 .legend .held { background: #E4712C; }
-.legend .picked { background: var(--gold); }
-.legend .dropped { background: var(--todo); }
-.legend .boundary { background: #b9b5a8; }
+.legend .picked { background: #b5801f; }
+.legend .dropped { background: #c8c5bc; }
+.legend .boundary { background: #242B2D; }
 
 /* --- slippy map (MapView) ---------------------------------------------- */
 .mapwrap {
@@ -253,16 +246,18 @@ button.link {
   opacity: .14;
 }
 .map-recenter {
-  position: absolute; left: .6rem; bottom: .6rem; z-index: 2;
-  padding: .5rem .8rem; font: inherit; font-size: .82rem; font-weight: 600;
-  background: rgba(255,255,255,.94); color: var(--green);
-  border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  position: absolute; left: 14px; bottom: 14px; z-index: 2;
+  padding: 8px 14px; font: 600 12px/1 Archivo, sans-serif;
+  background: rgba(20, 23, 26, .86); color: var(--d-dim);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 1px solid var(--d-rule); border-radius: 999px; cursor: pointer;
 }
 .map-degraded {
-  position: absolute; top: .6rem; left: .6rem; right: 3.4rem; z-index: 2;
-  padding: .4rem .6rem; font-size: .76rem;
-  background: rgba(255,248,230,.95); border: 1px solid #e8d9a8; border-radius: 6px;
+  position: absolute; top: 14px; left: 14px; right: 3.4rem; z-index: 2;
+  padding: 6px 10px; font-size: 12px;
+  background: rgba(20, 23, 26, .86); color: var(--d-dim);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 1px solid var(--d-rule); border-radius: 8px;
 }
 /* MapLibre's own controls, sized for a thumb rather than a mouse. */
 .maplibregl-ctrl-group button { width: 38px; height: 38px; }
@@ -326,11 +321,13 @@ button.link {
 }
 .buildbadge > button, .bb-detail { pointer-events: auto; }
 .buildbadge > button {
-  background: rgba(31,61,43,.92); color: #fff; border: 0;
-  padding: .3rem .55rem; border-radius: 999px; font: inherit; cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  background: rgba(20, 23, 26, .86); color: var(--d-dim);
+  border: 1px solid var(--d-rule);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  padding: 4px 8px; border-radius: 999px; cursor: pointer;
+  font: 500 10px/1.4 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: .06em;
 }
-.buildbadge.warn > button { background: var(--red); }
+.buildbadge.warn > button { color: var(--d-orange); border-color: rgba(228, 113, 44, .5); }
 .bb-flag { font-weight: 700; }
 .bb-detail {
   margin-top: .35rem; padding: .6rem;
@@ -397,10 +394,6 @@ button.link {
   background: var(--card); border: 1px solid var(--line); border-radius: 999px;
 }
 .tabs button.on { background: var(--green); color: #fff; border-color: var(--green); }
-.json {
-  background: #f4f3ee; border: 1px solid var(--line); border-radius: 8px;
-  padding: .7rem; font-size: .76rem; overflow-x: auto; max-height: 60vh;
-}
 .grid { width: 100%; border-collapse: collapse; font-size: .8rem; display: block; overflow-x: auto; }
 .grid th, .grid td { text-align: left; padding: .4rem .5rem; border-bottom: 1px solid var(--line); }
 .grid tr.flagged { background: #fdeeee; }
@@ -597,14 +590,6 @@ button.link {
 .dash-expand .mapwrap { border: 0; border-radius: 0; height: 100% !important; }
 .dash-legend.expanded { bottom: calc(58px + env(safe-area-inset-bottom)); }
 .dash-collapse { bottom: calc(14px + env(safe-area-inset-bottom)); }
-.dash-excludes {
-  position: absolute; left: 14px; bottom: calc(14px + env(safe-area-inset-bottom));
-  z-index: 3; max-width: 60%;
-  font: 400 11px/1.4 Archivo, sans-serif; color: var(--d-dim);
-  background: rgba(20, 23, 26, .86); border: 1px solid var(--d-rule);
-  border-radius: 8px; padding: .4rem .6rem;
-}
-.dash-excludes ul { margin: .4rem 0 0; padding-left: 1rem; }
 
 /* MapLibre's own chrome, restyled for the dark panel. */
 .mapwrap.dark { background: #1B1F22; }
@@ -672,7 +657,8 @@ button.link {
 .spec-swatches li { display: flex; align-items: center; gap: 12px;
                     font: 500 13px/1 Archivo, sans-serif; }
 .spec-swatches b { min-width: 88px; font-weight: 600; color: #F7F5F1; }
-.sw { width: 34px; height: 6px; border-radius: 3px; flex: none; }
+/* Scoped: unscoped, this leaked onto Confirm's legend and overrode `.legend i`. */
+.spec .sw { width: 34px; height: 6px; border-radius: 3px; flex: none; }
 .sw-covered  { background: #5E9B7E; }
 .sw-assigned { background: #E4712C; }
 .sw-held     { background: repeating-linear-gradient(90deg,#8A7A52 0 2px,transparent 2px 5px); }
