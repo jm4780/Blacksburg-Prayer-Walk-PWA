@@ -215,6 +215,13 @@ def progress_map(db: Session = Depends(get_db), _: bool = Depends(geometry_or_40
                 # filter read these. See docs/20 §4.
                 "road_class": s.road_class,
                 "path_type": s.path_type,
+                # The neighbourhood this street sits in, for the map's own labels —
+                # TOM'S CREEK, GRISSOM / HIGHLAND. It is a name, not a geometry: the
+                # map derives each label's anchor from the segments that carry it, so
+                # no neighbourhood boundary is ever sent. It rides this endpoint
+                # because this endpoint is already the G1 gate; a static file next to
+                # the basemap would publish Town-derived data (docs/05).
+                "neighborhood": s.neighborhood,
                 "done": s.id in done,
                 # "held" carries no identity — §12 forbids exposing who holds it.
                 "held": s.id in held and s.id not in done,

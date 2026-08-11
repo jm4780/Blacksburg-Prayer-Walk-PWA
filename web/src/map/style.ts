@@ -57,6 +57,12 @@ export interface ContextSpec {
   maxZoom: number
   /** How much unwalked context to let through. */
   remainingOpacity: number
+  /**
+   * Neighbourhood names and BLACKSBURG. On at town scale, where they are how somebody
+   * finds the part of town they live in; off on a walk, where the only name that
+   * matters is the street underfoot.
+   */
+  places: boolean
 }
 
 export const CONTEXTS: Record<MapContext, ContextSpec> = {
@@ -71,27 +77,27 @@ export const CONTEXTS: Record<MapContext, ContextSpec> = {
   // honestly, in the layer that is actually supposed to be saying it.
   town:      { context: true, subject: 'covered',
                labels: false, boundary: false, parks: true,  controls: false,
-               emphasis: 1.45, hit: 0, maxZoom: 15,   remainingOpacity: 0.75 },
+               emphasis: 1.45, hit: 0, maxZoom: 15,   remainingOpacity: 0.75 , places: true },
   // A decision. The route is the subject and its streets are named.
   briefing:  { context: true, subject: 'assigned',
                labels: true,  boundary: false, parks: true,  controls: false,
-               emphasis: 1.1, hit: 0,  maxZoom: 16,   remainingOpacity: 0.3 },
+               emphasis: 1.1, hit: 0,  maxZoom: 16,   remainingOpacity: 0.3 , places: false },
   // In use. Loudest weights, least context, most contrast.
   walking:   { context: true, subject: 'assigned',
                labels: true,  boundary: false, parks: false, controls: true,
-               emphasis: 1.35, hit: 0, maxZoom: 17,   remainingOpacity: 0.22 },
+               emphasis: 1.35, hit: 0, maxZoom: 17,   remainingOpacity: 0.22 , places: false },
   // Plan against record. Both states present at once, deliberately.
   recording: { context: true, subject: 'assigned',
                labels: true,  boundary: false, parks: false, controls: true,
-               emphasis: 1.2, hit: 0,  maxZoom: 17,   remainingOpacity: 0.3 },
+               emphasis: 1.2, hit: 0,  maxZoom: 17,   remainingOpacity: 0.3 , places: false },
   // Selection by thumb. Context lifted so nearby streets are findable.
   editing:   { context: true, subject: 'assigned',
                labels: true,  boundary: false, parks: false, controls: true,
-               emphasis: 1.15, hit: 26, maxZoom: 17.5, remainingOpacity: 0.55 },
+               emphasis: 1.15, hit: 26, maxZoom: 17.5, remainingOpacity: 0.55 , places: false },
   // The whole obligation.
   atlas:     { context: true, subject: 'covered',
                labels: false, boundary: true,  parks: true,  controls: true,
-               emphasis: 1.35, hit: 0, maxZoom: 15,   remainingOpacity: 0.7 },
+               emphasis: 1.35, hit: 0, maxZoom: 15,   remainingOpacity: 0.7 , places: true },
 }
 
 // ---------------------------------------------------------------- helpers
@@ -310,6 +316,63 @@ export function prayerLayers(ctx: MapContext, basemap = false): any[] {
         'line-color': INK.remaining,
         'line-width': widthFor('remaining', c.emphasis * 1.3),
         'line-opacity': 0.7, 'line-dasharray': [1.2, 1.6],
+      },
+    })
+  }
+
+  // --- the bright half of the label hierarchy --------------------------------------
+  //
+  // TWO TIERS, SPLIT BY THE MUNICIPAL LINE, and the gap between them is nine times.
+  // Measured off the reference: everything outside the town — CHRISTIANSBURG,
+  // MONTGOMERY COUNTY, BRUSH MOUNTAIN, CEDAR RUN — sits at #42474A..#4D5255, and every
+  // neighbourhood inside it sits at #D5D6DA..#EBEFEE, on identical typography. The
+  // outside tier is the basemap's own (blacksburg.json); this is the inside one.
+  //
+  // It is drawn here rather than in the style document because it is the app's data:
+  // the anchors are derived from the mission's own segments at load time, so no
+  // neighbourhood geometry exists to put in an archive. See MapView.
+  if (c.places) {
+    layers.push({
+      id: 'pw-neighbourhood', type: 'symbol', source: 'pw-places',
+      minzoom: LABELS.place.minZoom, maxzoom: LABELS.place.maxZoom,
+      filter: ['==', ['get', 'kind'], 'neighbourhood'],
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-font': LABELS.font,
+        'text-transform': 'uppercase',
+        'text-size': interpolate(LABELS.place.size as Array<[number, number]>),
+        'text-letter-spacing': LABELS.place.tracking,
+        // Two lines for the long ones — HETHWOOD / PRICES FORK — which is what the
+        // reference does and the only way they fit over their own streets.
+        'text-max-width': 8,
+        'text-line-height': 1.35,
+        'text-padding': 12,
+        'symbol-sort-key': ['-', 0, ['to-number', ['coalesce', ['get', 'weight'], 0]]],
+      },
+      paint: {
+        'text-color': LABELS.place.color,
+        // No heavy halo: the reference lets the ground show between the letters.
+        'text-halo-color': LABELS.haloColor,
+        'text-halo-width': 0.8,
+      },
+    })
+    layers.push({
+      id: 'pw-town-name', type: 'symbol', source: 'pw-places',
+      minzoom: LABELS.town.minZoom, maxzoom: LABELS.town.maxZoom,
+      filter: ['==', ['get', 'kind'], 'town'],
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-font': LABELS.font,
+        'text-transform': 'uppercase',
+        'text-size': interpolate(LABELS.town.size as Array<[number, number]>),
+        'text-letter-spacing': LABELS.town.tracking,
+        'text-padding': 14,
+        'symbol-sort-key': -1000,
+      },
+      paint: {
+        'text-color': LABELS.town.color,
+        'text-halo-color': LABELS.haloColor,
+        'text-halo-width': 1,
       },
     })
   }

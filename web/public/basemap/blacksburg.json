@@ -2,13 +2,14 @@
   "version": 8,
   "name": "Prayer Walk — Blacksburg regional basemap",
   "metadata": {
-    "bpw:note": "The ground the mission is drawn on. Every colour here is checked against src/map/tokens.ts by src/map/__tests__/basemap.test.ts — the brightest thing on this basemap must stay below the dimmest prayer state, or the map starts arguing with itself.",
+    "bpw:note": "The ground the mission is drawn on. Every colour here is checked against src/map/tokens.ts by src/map/__tests__/basemap.test.ts.",
     "bpw:source": "USGS The National Map (Transportation, Hydrography, Small-scale) and GNIS. Public domain — 17 U.S.C. 105. No OpenStreetMap geometry.",
     "bpw:extent": "-81.00,36.80 to -79.80,37.65 — roughly 50 km around Blacksburg.",
-    "bpw:emphasis": "There is none, and that is deliberate. No plate, no wash, no vignette — the region is one corpus drawn one way everywhere, and Blacksburg separates itself because the prayer overlay is drawn there and nowhere else. The only thing this basemap says about the town is bg-town-line: the municipal limits, drawn once, as a boundary. Geometry from pipeline/basemap/boundary.py."
+    "bpw:palette": "Sampled off the approved reference render rather than chosen: ground #0F1518, roads #34393C..#44494C, labels outside the town #42474A..#4D5255. See docs/20 §3.",
+    "bpw:labels": "TWO TIERS, SPLIT BY THE MUNICIPAL LINE. Everything in this document is the outside tier and is deliberately dim. The bright tier — the neighbourhood names and BLACKSBURG — is drawn by the app from its own data, above this whole document. See src/map/style.ts."
   },
   "glyphs": "/fonts/{fontstack}/{range}.pbf",
-  "sources": {
+    "sources": {
     "bpw-base": {
       "type": "vector",
       "url": "pmtiles:///basemap/blacksburg.pmtiles",
@@ -23,7 +24,7 @@
     {
       "id": "bg-land",
       "type": "background",
-      "paint": { "background-color": "#0D1113" }
+      "paint": { "background-color": "#0F1518" }
     },
 
     {
@@ -31,7 +32,7 @@
       "type": "fill",
       "source": "bpw-base",
       "source-layer": "land",
-      "paint": { "fill-color": "#131A15", "fill-opacity": 1 }
+      "paint": { "fill-color": "#141A18", "fill-opacity": 1 }
     },
 
     {
@@ -39,7 +40,7 @@
       "type": "fill",
       "source": "bpw-base",
       "source-layer": "water",
-      "paint": { "fill-color": "#0E161B", "fill-opacity": 1 }
+      "paint": { "fill-color": "#141821", "fill-opacity": 1 }
     },
     {
       "id": "bg-waterway",
@@ -48,7 +49,7 @@
       "source-layer": "waterway",
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#17222A",
+        "line-color": "#1C242D",
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
           8, ["case", ["to-boolean", ["get", "major"]], 0.8, 0.3],
@@ -66,7 +67,7 @@
       "source-layer": "rail",
       "minzoom": 11,
       "paint": {
-        "line-color": "#1A1F22",
+        "line-color": "#262B2E",
         "line-width": ["interpolate", ["linear"], ["zoom"], 11, 0.5, 14, 0.8, 17, 1.3],
         "line-dasharray": [2.5, 3]
       }
@@ -77,15 +78,15 @@
       "type": "line",
       "source": "bpw-base",
       "source-layer": "roads",
-      "minzoom": 12,
+      "minzoom": 10,
       "filter": ["in", ["get", "class"], ["literal", ["minor", "link", "tertiary"]]],
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#20262A",
-        "line-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.45, 13.5, 1],
+        "line-color": "#34393C",
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 10, 0.7, 12.5, 1],
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
-          12, 0.6, 14, 1.1, 16, 2.0, 18, 3.4
+          10, 0.5, 14, 1.1, 16, 2.0, 18, 3.4
         ]
       }
     },
@@ -98,11 +99,11 @@
       "filter": ["==", ["get", "class"], "secondary"],
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#252C2F",
-        "line-opacity": ["interpolate", ["linear"], ["zoom"], 10, 0.4, 12, 1],
+        "line-color": "#383D40",
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 10, 0.6, 12, 1],
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
-          10, 0.5, 12, 0.8, 14, 1.5, 16, 2.8, 18, 4.6
+          10, 0.55, 12, 0.8, 14, 1.5, 16, 2.8, 18, 4.6
         ]
       }
     },
@@ -115,10 +116,10 @@
       "filter": ["==", ["get", "class"], "primary"],
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#2A3134",
+        "line-color": "#3C4144",
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
-          9, 0.5, 12, 0.95, 14, 1.75, 16, 3.2, 18, 5.4
+          9, 0.55, 12, 0.95, 14, 1.75, 16, 3.2, 18, 5.4
         ]
       }
     },
@@ -131,10 +132,10 @@
       "filter": ["==", ["get", "class"], "trunk"],
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#2E3639",
+        "line-color": "#404548",
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
-          7, 0.5, 10, 0.9, 12, 1.15, 14, 2.1, 16, 3.9, 18, 6.5
+          7, 0.5, 10, 0.9, 12, 1.2, 14, 2.1, 16, 3.9, 18, 6.5
         ]
       }
     },
@@ -147,25 +148,24 @@
       "filter": ["==", ["get", "class"], "motorway"],
       "layout": { "line-cap": "round", "line-join": "round" },
       "paint": {
-        "line-color": "#333C40",
+        "line-color": "#44494C",
         "line-width": [
           "interpolate", ["linear"], ["zoom"],
-          7, 0.7, 10, 1.1, 12, 1.35, 14, 2.5, 16, 4.6, 18, 7.6
+          7, 0.7, 10, 1.1, 12, 1.45, 14, 2.5, 16, 4.6, 18, 7.6
         ]
       }
     },
-
 
     {
       "id": "bg-town-line",
       "type": "line",
       "source": "bpw-boundary",
-      "layout": { "line-cap": "round", "line-join": "round" },
+      "layout": { "line-cap": "butt", "line-join": "round" },
       "paint": {
-        "line-color": "#3D4A50",
-        "line-opacity": 0.34,
-        "line-dasharray": [4, 5],
-        "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.8, 12, 1.1, 16, 1.5]
+        "line-color": "#FFFFFF",
+        "line-opacity": 0.55,
+        "line-dasharray": [1.6, 2.4],
+        "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.9, 12, 1.1, 16, 1.5]
       }
     },
 
@@ -180,60 +180,78 @@
         "symbol-placement": "line",
         "text-field": ["get", "name"],
         "text-font": ["Prayer Walk Regular"],
-        "text-size": ["interpolate", ["linear"], ["zoom"], 11, 9, 15, 11],
+        "text-size": ["interpolate", ["linear"], ["zoom"], 11, 5.5, 15, 6.5],
         "text-letter-spacing": 0.12,
         "text-max-angle": 32,
         "symbol-spacing": 420
       },
       "paint": {
-        "text-color": "#414E52",
-        "text-halo-color": "#0D1113",
+        "text-color": "#3A4145",
+        "text-halo-color": "#0F1518",
         "text-halo-width": 1.1
       }
     },
+
     {
-      "id": "bg-road-shield",
+      "id": "bg-shield",
       "type": "symbol",
       "source": "bpw-base",
       "source-layer": "roads",
-      "minzoom": 11,
+      "minzoom": 10,
       "filter": ["all", ["has", "ref"], ["in", ["get", "class"], ["literal", ["motorway", "trunk", "primary"]]]],
       "layout": {
         "symbol-placement": "line",
-        "text-field": ["get", "ref"],
+        "symbol-spacing": 330,
+        "text-field": ["case",
+          ["==", ["slice", ["get", "ref"], 0, 2], "I-"], ["slice", ["get", "ref"], 2],
+          ["==", ["slice", ["get", "ref"], 0, 3], "US "], ["slice", ["get", "ref"], 3],
+          ["==", ["slice", ["get", "ref"], 0, 3], "VA "], ["slice", ["get", "ref"], 3],
+          ["get", "ref"]],
         "text-font": ["Prayer Walk Regular"],
-        "text-size": ["interpolate", ["linear"], ["zoom"], 11, 9, 15, 11.5],
-        "text-letter-spacing": 0.05,
-        "text-max-angle": 30,
-        "text-padding": 6,
-        "symbol-spacing": 340
+        "text-size": ["interpolate", ["linear"], ["zoom"], 10, 5.2, 15, 6.4],
+        "text-letter-spacing": 0.02,
+        "text-rotation-alignment": "viewport",
+        "text-pitch-alignment": "viewport",
+        "text-padding": 4,
+        "icon-image": ["case",
+          ["==", ["slice", ["get", "ref"], 0, 2], "I-"], "shield-i",
+          ["==", ["slice", ["get", "ref"], 0, 3], "US "], "shield-us",
+          "shield-state"],
+        "icon-text-fit": "both",
+        "icon-text-fit-padding": [1, 2, 1, 2],
+        "icon-rotation-alignment": "viewport",
+        "icon-allow-overlap": false,
+        "text-allow-overlap": false
       },
       "paint": {
-        "text-color": "#5A6265",
-        "text-halo-color": "#0D1113",
-        "text-halo-width": 1.4
+        "text-color": "#6A6F72",
+        "icon-opacity": 0.9,
+        "text-opacity": 0.95
       }
     },
+
     {
       "id": "bg-place-terrain",
       "type": "symbol",
       "source": "bpw-base",
       "source-layer": "place",
-      "minzoom": 11.5,
+      "minzoom": 10,
       "maxzoom": 14,
       "filter": ["==", ["get", "kind"], "terrain"],
       "layout": {
         "text-field": ["get", "name"],
         "text-font": ["Prayer Walk Regular"],
-        "text-size": 9.5,
-        "text-letter-spacing": 0.16,
-        "text-max-width": 8,
-        "text-padding": 8
+        "text-transform": "uppercase",
+        "text-size": ["interpolate", ["linear"], ["zoom"], 10, 5.2, 13, 6.2],
+        "text-letter-spacing": 0.2,
+        "text-max-width": 7,
+        "text-line-height": 1.35,
+        "text-padding": 10
       },
       "paint": {
-        "text-color": "#4E5654",
-        "text-halo-color": "#0D1113",
-        "text-halo-width": 1.1
+        "text-color": "#42474A",
+        "text-halo-color": "#0F1518",
+        "text-halo-width": 0.8
       }
     },
     {
@@ -243,27 +261,31 @@
       "source-layer": "place",
       "minzoom": 8,
       "maxzoom": 14,
-      "filter": ["==", ["get", "kind"], "town"],
+      "filter": ["all",
+        ["==", ["get", "kind"], "town"],
+        ["!=", ["get", "name"], "Blacksburg"]
+      ],
       "layout": {
         "text-field": ["get", "name"],
         "text-font": ["Prayer Walk Regular"],
-        "text-transform": ["step", ["get", "rank"], "uppercase", 3, "none"],
+        "text-transform": "uppercase",
         "text-size": [
           "interpolate", ["linear"], ["zoom"],
-          8, ["step", ["get", "rank"], 10, 2, 9, 3, 8],
-          13, ["step", ["get", "rank"], 13, 2, 11.5, 3, 10]
+          8, ["step", ["to-number", ["coalesce", ["get", "rank"], 4]], 5.6, 3, 5.1],
+          13, ["step", ["to-number", ["coalesce", ["get", "rank"], 4]], 6.8, 3, 6.2]
         ],
-        "text-letter-spacing": ["step", ["get", "rank"], 0.2, 3, 0.08],
-        "text-max-width": 7,
+        "text-letter-spacing": 0.2,
+        "text-max-width": 8,
+        "text-line-height": 1.35,
         "text-padding": 10
       },
       "paint": {
         "text-color": [
-          "case", ["==", ["get", "name"], "Blacksburg"], "#7F8583",
-          ["step", ["get", "rank"], "#6F7674", 3, "#5C6362"]
+          "step", ["to-number", ["coalesce", ["get", "rank"], 4]],
+          "#4D5255", 3, "#484D50"
         ],
-        "text-halo-color": "#0D1113",
-        "text-halo-width": 1.3
+        "text-halo-color": "#0F1518",
+        "text-halo-width": 0.8
       }
     }
   ]

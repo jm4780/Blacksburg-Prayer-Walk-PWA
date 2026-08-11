@@ -43,6 +43,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { DEFAULT_STYLE_URL, registerBasemapProtocol } from '../map/basemap'
 import { CONTEXTS, type MapContext, baseStyle, prayerLayers } from '../map/style'
+import { addShields } from '../map/shields'
 import { MOTION } from '../map/tokens'
 import type { LineString } from '../types'
 
@@ -68,6 +69,68 @@ export interface SegmentFeature {
   pathType?: string | null
   /** Drives labels, which appear only for mission and covered streets. */
   name?: string | null
+  /**
+   * The Town neighbourhood this street sits in. Presentation only — the map derives
+   * one label anchor per neighbourhood from the segments that carry the name, which
+   * is why no neighbourhood geometry is ever fetched. See `neighbourhoodLabels`.
+   */
+  neighbourhood?: string | null
+}
+
+/**
+ * One label anchor per neighbourhood, from the streets that belong to it.
+ *
+ * The reference puts TOM'S CREEK and GRISSOM / HIGHLAND over their own streets, and
+ * there is no neighbourhood polygon anywhere in this product to place them from — the
+ * name lives on each segment and nowhere else. So the anchor is computed: take every
+ * vertex of every segment carrying the name, weight it by the length of the piece it
+ * sits on, and use the centroid. Length-weighting matters because a neighbourhood's
+ * segments are not evenly sampled — a long arterial contributes one vertex per bend
+ * and a dense cul-de-sac grid contributes hundreds, so an unweighted mean is dragged
+ * into whichever corner has the most junctions.
+ *
+ * Neighbourhoods with only a handful of streets are dropped: a label is a claim that
+ * an area exists, and three segments is not an area.
+ */
+export function neighbourhoodLabels(segments: SegmentFeature[]) {
+  const acc = new Map<string, { x: number; y: number; w: number; n: number }>()
+  for (const s of segments) {
+    const name = s.neighbourhood
+    if (!name) continue
+    const a = acc.get(name) ?? { x: 0, y: 0, w: 0, n: 0 }
+    for (let i = 1; i < s.coordinates.length; i++) {
+      const [x0, y0] = s.coordinates[i - 1]
+      const [x1, y1] = s.coordinates[i]
+      // Degrees are fine as a weight here: every segment is inside one town, so the
+      // longitude scale is effectively constant across the whole set.
+      const w = Math.hypot(x1 - x0, y1 - y0)
+      a.x += ((x0 + x1) / 2) * w
+      a.y += ((y0 + y1) / 2) * w
+      a.w += w
+    }
+    a.n += 1
+    acc.set(name, a)
+  }
+  const features = [...acc.entries()]
+    .filter(([, a]) => a.w > 0 && a.n >= 4)
+    .map(([name, a]) => ({
+      type: 'Feature' as const,
+      properties: { name, kind: 'neighbourhood', weight: a.n },
+      geometry: { type: 'Point' as const, coordinates: [a.x / a.w, a.y / a.w] },
+    }))
+  // And the town itself, at the centre of everything the mission covers. It is the
+  // one label on this map that is pure white, so it is placed first and never
+  // displaced — a neighbourhood name losing a collision to BLACKSBURG is correct.
+  let x = 0, y = 0, w = 0
+  for (const a of acc.values()) { x += a.x; y += a.y; w += a.w }
+  if (w > 0) {
+    features.unshift({
+      type: 'Feature' as const,
+      properties: { name: 'Blacksburg', kind: 'town', weight: 1e6 },
+      geometry: { type: 'Point' as const, coordinates: [x / w, y / w] },
+    })
+  }
+  return { type: 'FeatureCollection' as const, features }
 }
 
 interface Props {
@@ -243,6 +306,8 @@ export default function MapView({
     m.on('load', () => { window.clearTimeout(failTimer); setReady(true) })
     m.on('styledata', () => {
       if (!m.isStyleLoaded()) return
+      // Route markers are drawn rather than fetched, and a style reload drops them.
+      try { addShields(m as any) } catch { /* no canvas, no shields */ }
       setReady(true)
       setStyleEpoch((n) => n + 1)
     })
@@ -267,7 +332,10 @@ export default function MapView({
 
   // ------------------------------------------------------------------ sources
   const routeKey = route ? `${route.coordinates.length}:${route.coordinates[0]?.join()}` : ''
-  const segKey = segments ? `${segments.length}:${segments.filter(s => s.state === 'selected').length}` : ''
+  const segKey = segments
+    ? `${segments.length}:${segments.filter(s => s.state === 'selected').length}`
+      + `:${new Set(segments.map(s => s.neighbourhood)).size}`
+    : ''
   const fitKey = fitTo ? `fit:${fitTo.coordinates.length}:${fitTo.coordinates[0]?.join()}` : ''
 
   useEffect(() => {
@@ -306,6 +374,9 @@ export default function MapView({
       upsertSource(m, 'pw-boundary', boundary
         ? { type: 'Feature', properties: {}, geometry: boundary }
         : { type: 'FeatureCollection', features: [] })
+      // The bright half of the label hierarchy. Derived, never fetched — see
+      // `neighbourhoodLabels`.
+      upsertSource(m, 'pw-places', neighbourhoodLabels(segments ?? []))
       upsertSource(m, 'startpt', {
         type: 'FeatureCollection',
         features: start

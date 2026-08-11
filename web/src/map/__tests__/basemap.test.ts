@@ -68,8 +68,14 @@ describe('regional basemap style', () => {
       ...Object.values(BASEMAP.road),
     ]
     for (const hex of ground) expect(luminance(hex)).toBeLessThan(floor)
-    // And with real headroom, not by a rounding error.
-    expect(floor / luminance(BASEMAP.road.motorway)).toBeGreaterThan(1.5)
+    // The margin used to be 1.5 and the approved reference does not allow it.
+    // Measured off that image: the brightest road in frame (US 460, #44494C) sits at
+    // 0.77 of the still-to-walk grey, not 0.5. The reference runs the two close on
+    // purpose and gets its separation somewhere else — covered ground is pure white,
+    // and the mission is drawn inside the town while the roads are everywhere. This
+    // bound is now the reference's own ratio with a little room, not a design
+    // preference. Nothing may pass the floor; it just may come nearer to it.
+    expect(floor / luminance(BASEMAP.road.motorway)).toBeGreaterThan(1.15)
   })
 
   it('keeps basemap labels below the mission, and above nothing else', () => {
@@ -164,12 +170,18 @@ describe('regional basemap style', () => {
       expect(line().paint['line-dasharray'].length).toBe(2)
     })
 
-    it('stays under the mission it encloses', () => {
-      // Effective luminance over land, which is what the eye actually gets. A frame
-      // that outranks the dimmest prayer state is a frame drawing attention to itself.
+    it('is a white dash, and still yields to the mission', () => {
+      // The reference draws this line in WHITE, which the previous rule forbade — it
+      // required the boundary to sit under the dimmest prayer state, and a white dash
+      // is far above it. That rule was written when the boundary was the edge of an
+      // emphasis effect and had to disappear. It is a real jurisdictional line now and
+      // the reference wants it seen, so the constraint moves: it must stay under the
+      // SUBJECT — covered ground — and it must never be solid.
+      expect(BASEMAP.line).toBe('#FFFFFF')
+      expect(BASEMAP.lineOpacity).toBeLessThan(0.7)
       const land = luminance(GROUND.land)
       const seen = land + (luminance(BASEMAP.line) - land) * BASEMAP.lineOpacity
-      expect(seen).toBeLessThan(luminance(INK.remaining) * 0.6)
+      expect(seen).toBeLessThan(luminance(INK.subject))
     })
 
     it('is the only thing the basemap says about the town', () => {
@@ -244,7 +256,13 @@ describe('regional basemap style', () => {
       // to win, at the dashboard's opacity, against the loudest road in the archive.
       const land = luminance(GROUND.land)
       const seen = land + (luminance(INK.remaining) - land) * CONTEXTS.town.remainingOpacity
-      expect(seen / luminance(BASEMAP.road.motorway)).toBeGreaterThan(1.4)
+      // Barely, and that is the reference's own arrangement — see the road ramp note
+      // above. What actually separates the town from the county here is that the
+      // mission is only drawn on the town, and that covered ground is pure white.
+      expect(seen / luminance(BASEMAP.road.motorway)).toBeGreaterThan(1.02)
+      // The state that carries the message has real headroom, and that is the one
+      // that has to.
+      expect(luminance(INK.subject) / luminance(BASEMAP.road.motorway)).toBeGreaterThan(10)
     })
   })
 })

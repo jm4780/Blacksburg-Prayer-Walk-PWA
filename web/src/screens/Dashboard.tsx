@@ -65,6 +65,7 @@ export default function Dashboard({ nav, me, walk }: {
       roadClass: (f.properties as any).road_class ?? null,
       pathType: (f.properties as any).path_type ?? null,
       name: f.properties.name ?? null,
+      neighbourhood: (f.properties as any).neighborhood ?? null,
     } as SegmentFeature)), [map])
 
   // Point the map at the progress, pulled back until it is clearly a minority of the

@@ -49,7 +49,7 @@
  * about 4% — enough to separate, not enough to notice.
  */
 export const GROUND = {
-  land: '#0D1113',
+  land: '#0F1518',
   /**
    * Public open space. Presence, not decoration: a park should be felt, not read.
    *
@@ -60,7 +60,7 @@ export const GROUND = {
    * a park can go back to being a park. Relative luminance 0.017, still five times
    * under the dimmest prayer state.
    */
-  park: '#1A261F',
+  park: '#2B3533',
   /** The edge of the obligation. Not a border — a limit on what we claim. */
   boundary: '#242B2D',
   /**
@@ -105,18 +105,18 @@ export const GROUND = {
  */
 export const BASEMAP = {
   /** National forest. Felt as a mass on the horizon, never read as a shape. */
-  forest: '#131A15',
+  forest: '#141A18',
   /** The New River and its lakes. Cooler than land, barely lighter. */
-  water: '#0E161B',
-  waterway: '#17222A',
+  water: '#141821',
+  waterway: '#1C242D',
   /** Norfolk Southern through Christiansburg. Dashed, and almost gone. */
-  rail: '#1A1F22',
+  rail: '#262B2E',
   road: {
-    minor: '#20262A',
-    secondary: '#252C2F',   // = GROUND.context
-    primary: '#2A3134',
-    trunk: '#2E3639',
-    motorway: '#333C40',    // = GROUND.contextMajor
+    minor: '#34393C',
+    secondary: '#383D40',
+    primary: '#3C4144',
+    trunk: '#404548',
+    motorway: '#44494C',
   },
   /**
    * THE MUNICIPAL LIMITS, AND NOTHING ELSE.
@@ -150,21 +150,23 @@ export const BASEMAP = {
    * Geometry: public/basemap/boundary.json, from pipeline/basemap/boundary.py — USGS
    * GovtUnit, Census-sourced, public domain, so it clears release gate G1 (docs/05).
    */
-  line: '#3D4A50',
-  lineOpacity: 0.34,
+  line: '#FFFFFF',
+  lineOpacity: 0.55,
   /**
    * Basemap labels are not the design system's labels. A street name on today's walk
    * is `LABELS.color` (0.55) because the walker is about to act on it; CHRISTIANSBURG
    * is 0.18 because it is only there so the walker knows which way is south.
    */
   label: {
-    town: '#6F7674',
-    hamlet: '#5C6362',
-    terrain: '#4E5654',
-    shield: '#5A6265',
-    water: '#414E52',
-    halo: '#0D1113',
+    town: '#4D5255',
+    hamlet: '#484D50',
+    terrain: '#42474A',
+    shield: '#6A6F72',
+    water: '#3A4145',
+    halo: '#0F1518',
   },
+  /** The shield's own plate: darker than the ground it sits on, with a hairline. */
+  shieldFill: '#080D10',
 } as const
 
 // ------------------------------------------------------------- prayer ink
@@ -193,7 +195,7 @@ export const BASEMAP = {
  */
 export const INK = {
   /** The subject of this context, whatever it is. Warm white, and unmistakable. */
-  subject: '#F2EFE9',
+  subject: '#FFFFFF',
   /**
    * Prayed for, when it is not the subject — on a walk, ground covered last month is
    * context. Desaturated toward green so it stays distinguishable from the merely
@@ -203,7 +205,7 @@ export const INK = {
   /** Today's assignment, when it is not the subject. */
   assigned: '#9A8A76',
   /** Still to walk. Present, legible, and deliberately receding. */
-  remaining: '#4A5457',
+  remaining: '#4F5458',
   /** Held by another walker right now. Visible so it is not offered twice. */
   held: '#6E6455',
   /** The one saturated mark on the map. Points only, never lines. */
@@ -359,8 +361,37 @@ export const LABELS = {
     [17, 13],
   ] as Array<[number, number]>,
   color: '#C6C3BC',
-  haloColor: '#0D1113',
+  haloColor: '#0F1518',
   haloWidth: 1.4,
+
+  /**
+   * THE BRIGHT TIER, and the reason there is a tier at all.
+   *
+   * Measured off the approved reference, every label outside the municipal line sits
+   * between #42474A and #4D5255, and every neighbourhood inside it sits between
+   * #D5D6DA and #EBEFEE. Same face, same caps, same tracking; nine times the
+   * luminance. Nothing about the type is doing the work — the split is entirely
+   * positional, and it says the same thing the rest of this map says: what is inside
+   * the town is the mission, and what is outside it is where the mission is not.
+   *
+   * The outside tier lives in public/basemap/blacksburg.json with the rest of the
+   * basemap. This is the inside one, drawn from the app's own segments.
+   */
+  place: {
+    minZoom: 10.2,
+    maxZoom: 14.5,
+    size: [[10.2, 5.4], [13, 6.6]] as Array<[number, number]>,
+    tracking: 0.2,
+    color: '#DDE1E2',
+  },
+  /** BLACKSBURG. The only pure white type on the map, and the largest. */
+  town: {
+    minZoom: 9.5,
+    maxZoom: 14.5,
+    size: [[9.5, 6.6], [13, 8.2]] as Array<[number, number]>,
+    tracking: 0.28,
+    color: '#FFFFFF',
+  },
 } as const
 
 // ------------------------------------------------------------------ motion

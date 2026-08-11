@@ -197,6 +197,32 @@ button.link {
 .maplibre { position: absolute; inset: 0; }
 /* One-finger pan must reach the map, not scroll the page under it. */
 .maplibre canvas { outline: none; }
+
+/*
+ * THE VIGNETTE.
+ *
+ * It lives here rather than in the style document because MapLibre has no primitive
+ * for it — there is no layer type that darkens toward the frame, and faking one with
+ * a geometry would put a fixed shape on a map that pans underneath it. It is a
+ * property of the viewport, so it belongs to the element.
+ *
+ * Measured off the approved reference: the extreme corner is about 11% down on the
+ * centre — ground 16,21,24 in the middle against 14,19,22 in the corners. That is
+ * almost nothing, and it is meant to be; the job is to stop the frame's edge from
+ * being the brightest thing in peripheral vision, not to draw a ring.
+ *
+ * `mask-image` rather than an opacity ramp so the darkening is pure alpha and cannot
+ * tint the ground it sits on, and `pointer-events: none` so it never eats a drag.
+ */
+.mapwrap.dark::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: #000;
+  -webkit-mask-image: radial-gradient(120% 100% at 50% 50%,
+    transparent 42%, rgba(0, 0, 0, .45) 78%, #000 100%);
+  mask-image: radial-gradient(120% 100% at 50% 50%,
+    transparent 42%, rgba(0, 0, 0, .45) 78%, #000 100%);
+  opacity: .14;
+}
 .map-recenter {
   position: absolute; left: .6rem; bottom: .6rem; z-index: 2;
   padding: .5rem .8rem; font: inherit; font-size: .82rem; font-weight: 600;
