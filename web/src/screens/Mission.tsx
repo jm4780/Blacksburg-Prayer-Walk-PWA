@@ -322,6 +322,37 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
                    height={220}
                    ariaLabel={`Recommended walk: ${m.title}, ${m.distance_miles} miles`} />
 
+          {/* The accept can fail — 409 when the walk is gone or this walker already
+              has one open, or a network error — and until this was here it failed
+              silently as far as the walker could see: the button re-enabled itself
+              and the explanation was a full map's height above. */}
+          {error && (
+            <div className="note warn" role="alert">
+              <strong>{error.message}</strong>
+              {resume}
+            </div>
+          )}
+
+          <button className="primary big" disabled={accepting || loading}
+                  onClick={accept}>
+            {accepting ? 'Starting your walk…' : 'Walk this'}
+          </button>
+
+          {/* MOVED BELOW THE DECISION, and this is the edit that finally got the
+              decision on screen.
+
+              Cutting words and shrinking the map recovered 149px and still left the
+              button's top edge at exactly 746px in a 746px viewport — level with the
+              fold, none of it visible. What remained above it was not padding to
+              shave; it was the slider, the title, the map and this box, and the only
+              honest 87px in that stack is this one.
+
+              It belongs here anyway. What the walker decides from is what the walk is
+              — where it goes, who lives there, how long it takes, and the loop drawn
+              on the map. Where to park a car and which app to open are what you need
+              once you have decided to go, and nobody reads them first. Same reasoning
+              as the walk screen's turn-by-turn list, which moved below its button for
+              the same reason: the decision comes first, the wayfinding follows it. */}
           <div className="startbox">
             <div>
               <span className="startlabel">Starts at</span>
@@ -343,27 +374,6 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
               </div>
             )}
           </div>
-          {/* The paragraph that used to sit here — that the links go to the start,
-              that the route stays in the app, that the walk ends where it began —
-              came out. It was twenty words of reassurance directly above the only
-              decision on the screen, and it was part of why that decision started
-              below the fold. The two links say where they go; the map shows a loop. */}
-
-          {/* The accept can fail — 409 when the walk is gone or this walker already
-              has one open, or a network error — and until this was here it failed
-              silently as far as the walker could see: the button re-enabled itself
-              and the explanation was a full map's height above. */}
-          {error && (
-            <div className="note warn" role="alert">
-              <strong>{error.message}</strong>
-              {resume}
-            </div>
-          )}
-
-          <button className="primary big" disabled={accepting || loading}
-                  onClick={accept}>
-            {accepting ? 'Starting your walk…' : 'Walk this'}
-          </button>
 
           {/* A link, not a button. This is the same offer the "Other walks" disclosure
               below makes — one tap instead of a list — and when it was a full-width
