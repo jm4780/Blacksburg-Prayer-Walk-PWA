@@ -32,8 +32,17 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def reserve(db: Session, walk: Walk, segment_ids, minutes: int | None = None) -> int:
-    """Hold the walk's required segments. Idempotent per (walk, segment)."""
+def reserve(db: Session, walk: Walk, segment_ids, minutes: int | None = None,
+            commit: bool = True) -> int:
+    """Hold the walk's required segments. Idempotent per (walk, segment).
+
+    `commit=False` leaves the holds inside the caller's open transaction, for the case
+    where a walk and the streets it holds have to land together. They used to be two
+    transactions, and the gap between them was a way to leak reservations: a walk could
+    be created, lose its slot to a simultaneous request that released the holds it had
+    not written yet, and then write them anyway — leaving streets held against the whole
+    town by a walk that had already been discarded.
+    """
     mins = minutes if minutes is not None else settings().reservation_preview_minutes
     expires = _now() + timedelta(minutes=mins)
     existing = set(db.execute(
@@ -51,7 +60,8 @@ def reserve(db: Session, walk: Walk, segment_ids, minutes: int | None = None) ->
                .where(Reservation.walk_id == walk.id,
                       Reservation.released_at.is_(None))
                .values(expires_at=expires))
-    db.commit()
+    if commit:
+        db.commit()
     return added
 
 

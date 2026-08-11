@@ -14,6 +14,7 @@ coverage claim can see both what was offered and what was reported.
 """
 from __future__ import annotations
 
+import math
 from datetime import datetime, timezone
 
 from sqlalchemy import func, select
@@ -40,6 +41,117 @@ OUTCOMES = {
 ADMIN_OUTCOMES = {
     "DIFFERENT_ROUTE": "Recorded by an administrator for a walk taken without the app.",
 }
+
+# How far off the planned route an edited submission may reach: a quarter of a mile.
+#
+# An EDITED submission used to be unbounded. It was filtered to segment ids that exist
+# and are REQUIRED, and nothing checked that they had anything to do with the walk — a
+# reviewer credited three streets on the far side of Blacksburg against a downtown walk
+# by naming them in the request. The screen only ever offers streets on and around the
+# route, so this is not something a walker does by accident; what it means is that the
+# town's coverage record could be moved by a request that no walk supports.
+#
+# A quarter mile is chosen to be generous to the walk that actually happened. Skipping
+# the planned block and walking the next street over, cutting through to the parallel
+# road, finishing along the far side of the park: all of those are a hundred metres or
+# two from the route and all of them stay allowed. Nothing three streets away is
+# refused. What is refused is a claim about somewhere the walker demonstrably was not.
+EDIT_RADIUS_M = 402.0
+
+# Anchors are taken every 200 m along the planned route, so a long straight segment with
+# only two vertices is measured from along its length rather than from its ends.
+_ANCHOR_STEP_M = 200.0
+
+_M_PER_DEG_LAT = 111_320.0
+
+
+def _lon_scale(lat: float) -> float:
+    return _M_PER_DEG_LAT * math.cos(math.radians(lat))
+
+
+def _route_anchors(ns: NetworkService, walk: Walk) -> tuple[dict, float, float]:
+    """Points along the planned route, bucketed into quarter-mile cells.
+
+    Returns the buckets, the metres-per-degree-of-longitude used to build them, and the
+    cell size, so a candidate can be tested against the nine cells around it rather than
+    against every point on the route.
+    """
+    pts: list[tuple[float, float]] = []
+    for sid in walk.planned_segment_ids:
+        i = ns.idx_of_id.get(sid)
+        if i is None:
+            continue
+        coords = ns.net.segments[i].coords
+        for a, b in zip(coords, coords[1:]):
+            pts.append((a[0], a[1]))
+            # Densify: a two-vertex segment half a mile long would otherwise only be
+            # measured from its endpoints.
+            scale = _lon_scale(a[1])
+            dx = (b[0] - a[0]) * scale
+            dy = (b[1] - a[1]) * _M_PER_DEG_LAT
+            span = math.hypot(dx, dy)
+            for k in range(1, int(span // _ANCHOR_STEP_M) + 1):
+                t = k * _ANCHOR_STEP_M / span
+                pts.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
+        if coords:
+            pts.append((coords[-1][0], coords[-1][1]))
+
+    if not pts:
+        return {}, _lon_scale(37.23), EDIT_RADIUS_M
+    scale = _lon_scale(sum(p[1] for p in pts) / len(pts))
+    cell = EDIT_RADIUS_M
+    buckets: dict[tuple[int, int], list[tuple[float, float]]] = {}
+    for lon, lat in pts:
+        x, y = lon * scale, lat * _M_PER_DEG_LAT
+        buckets.setdefault((int(x // cell), int(y // cell)), []).append((x, y))
+    return buckets, scale, cell
+
+
+def unsupported_edits(ns: NetworkService, walk: Walk,
+                      segment_ids: list[str] | None) -> list[str]:
+    """Which of these segment ids this walk cannot support (§14).
+
+    In bounds: anything the walk planned — required obligations and the connectors it
+    was routed along — plus anything whose own geometry comes within `EDIT_RADIUS_M` of
+    that route. Out of bounds: everything else, returned in the order it was submitted.
+
+    Ids the network does not know are not reported here. They earn nothing either way —
+    `record` drops them — and a walker cannot act on "this id does not exist".
+
+    A pure function of the frozen network and the stored plan, so the rule can be
+    checked before anything is written and asserted directly in a test.
+    """
+    ids = [s for s in (segment_ids or []) if s in ns.idx_of_id]
+    planned = set(walk.planned_segment_ids) | set(walk.planned_required_ids)
+    candidates = [s for s in ids if s not in planned]
+    if not candidates:
+        return []
+
+    buckets, scale, cell = _route_anchors(ns, walk)
+    if not buckets:
+        return candidates
+
+    return [sid for sid in candidates
+            if not _near_route(ns.net.segments[ns.idx_of_id[sid]].coords,
+                               buckets, scale, cell)]
+
+
+def _near_route(coords, buckets: dict, scale: float, cell: float) -> bool:
+    """Does any point of this street come within the radius of the route?
+
+    Only the nine cells around each point are examined, so a street on the far side of
+    town costs nine dictionary misses rather than a scan of the whole route.
+    """
+    r2 = EDIT_RADIUS_M ** 2
+    for lon, lat in coords:
+        x, y = lon * scale, lat * _M_PER_DEG_LAT
+        cx, cy = int(x // cell), int(y // cell)
+        for gx in (cx - 1, cx, cx + 1):
+            for gy in (cy - 1, cy, cy + 1):
+                for ax, ay in buckets.get((gx, gy), ()):
+                    if (ax - x) ** 2 + (ay - y) ** 2 <= r2:
+                        return True
+    return False
 
 
 def record(db: Session, ns: NetworkService, walk: Walk, outcome: str,
@@ -92,6 +204,15 @@ def record(db: Session, ns: NetworkService, walk: Walk, outcome: str,
         chosen = planned
     else:
         chosen = [s for s in (segment_ids or []) if s in ns.idx_of_id]
+        if outcome == "EDITED":
+            # The router refuses an out-of-bounds submission outright, so the walker
+            # hears about it rather than having part of their answer quietly dropped.
+            # This is the backstop: no path through this module may credit a street the
+            # walk cannot support, whoever calls it and whatever they were told.
+            # DIFFERENT_ROUTE is exempt — an administrator recording a walk taken
+            # without the app has no route to be near.
+            unsupported = set(unsupported_edits(ns, walk, chosen))
+            chosen = [s for s in chosen if s not in unsupported]
 
     # Only REQUIRED segments earn coverage. A walker can legitimately report walking a
     # connector; it just does not move the town-wide number, because connectors are

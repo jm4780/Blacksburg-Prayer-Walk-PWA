@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from .conftest import DOWNTOWN, auth, network_version, register
+from .conftest import (DOWNTOWN, auth, metres_between, network_version, register,
+                       streets_beside_the_route)
 from .test_privacy import MAP_FEATURE_PROPERTIES
 
 
@@ -183,8 +184,7 @@ def test_adding_nearby_segments(client, h, ns):
     w = plan(client, h)
     client.post(f"/api/walks/{w['id']}/start", headers=h)
     planned = _planned_required(client, w["id"], h)
-    extra = [s.id for s in ns.net.segments
-             if s.required and s.id not in set(planned)][:2]
+    extra = streets_beside_the_route(ns, w, 2)
     r = client.post(f"/api/walks/{w['id']}/complete",
                     json=dict(outcome="EDITED", segment_ids=planned[:2] + extra),
                     headers=h).json()
@@ -197,8 +197,7 @@ def test_edits_are_recorded_as_a_diff(client, h, ns):
     w = plan(client, h)
     client.post(f"/api/walks/{w['id']}/start", headers=h)
     planned = _planned_required(client, w["id"], h)
-    extra = [s.id for s in ns.net.segments
-             if s.required and s.id not in set(planned)][:1]
+    extra = streets_beside_the_route(ns, w, 1)
     client.post(f"/api/walks/{w['id']}/complete",
                 json=dict(outcome="EDITED", segment_ids=planned[:1] + extra), headers=h)
     from sqlalchemy import select
@@ -242,8 +241,9 @@ def test_different_route_leaves_the_plan_intact(client, h, ns):
     client.post(f"/api/walks/{w['id']}/start", headers=h)
     planned_before = _planned_all(client, w["id"])
 
-    elsewhere = [s.id for s in ns.net.segments
-                 if s.required and s.id not in planned_before][:4]
+    # "I went up the next street instead." Streets beside the route, none of them on
+    # it: what a walker who changed their mind at the first corner actually reports.
+    elsewhere = streets_beside_the_route(ns, w, 4)
     client.post(f"/api/walks/{w['id']}/complete",
                 json=dict(outcome="EDITED", segment_ids=elsewhere,
                           note="went up Draper instead"), headers=h)
@@ -260,9 +260,15 @@ def test_different_route_leaves_the_plan_intact(client, h, ns):
 
 
 def test_connectors_do_not_earn_coverage(client, h, ns):
+    """A connector the walker could actually have walked: reported honestly, earns
+    nothing. Taken from this walk's own route where it has one, and from the corner it
+    starts on where it does not — a connector across town is now refused outright, for
+    the same reason any other street across town is."""
     w = plan(client, h)
     client.post(f"/api/walks/{w['id']}/start", headers=h)
-    connector = next(s.id for s in ns.net.segments if not s.required)
+    connector = next((s for s in _planned_all(client, w["id"])
+                      if not ns.net.segments[ns.idx_of_id[s]].required),
+                     None) or streets_beside_the_route(ns, w, 1, required=False)[0]
     r = client.post(f"/api/walks/{w['id']}/complete",
                     json=dict(outcome="EDITED", segment_ids=[connector]),
                     headers=h).json()
@@ -454,24 +460,33 @@ def test_duplicate_completion_by_two_users_counts_once(client, ns):
     client.post(f"/api/walks/{wa['id']}/complete", json=dict(outcome="AS_PLANNED"),
                 headers=a)
 
-    shared = _planned_required(client, wa["id"], a)
+    walked_by_a = set(_planned_required(client, wa["id"], a))
     mid = client.get("/api/progress/metrics").json()
 
     wb = plan(client, b, band="Short")
     client.post(f"/api/walks/{wb['id']}/start", headers=b)
+    # B walks the streets A has already covered around the corner they both start on.
+    # Not A's whole route: an edited submission is now bounded to the walk's own route
+    # and a quarter mile around it, and B was never over where A finished.
+    shared = [s for s in walked_by_a
+              if min(metres_between(c, wb["start_point"])
+                     for c in ns.net.segments[ns.idx_of_id[s]].coords) < 400]
+    assert len(shared) >= 2, "the two walkers' starts should share some of A's streets"
     rb = client.post(f"/api/walks/{wb['id']}/complete",
-                     json=dict(outcome="EDITED", segment_ids=shared),
-                     headers=b).json()
+                     json=dict(outcome="EDITED", segment_ids=shared), headers=b)
+    assert rb.status_code == 200, rb.text
+    rb = rb.json()
     after = client.get("/api/progress/metrics").json()
 
     # Coverage does not move — the same obligations were already complete.
     assert after["percent_prayed_for"]["value"] == mid["percent_prayed_for"]["value"]
     assert after["estimated_households_prayed_for"]["value"] == \
         mid["estimated_households_prayed_for"]["value"]
-    # But both walks count toward miles walked, and B keeps its own contribution.
-    assert after["total_miles_walked"]["value"] > mid["total_miles_walked"]["value"]
+    # But both walks count, and B keeps its own contribution to the miles.
     assert after["completed_walks"] == mid["completed_walks"] + 1
+    assert after["total_miles_walked"]["value"] >= mid["total_miles_walked"]["value"]
     assert rb["segments_recorded"] == len(shared)
+    assert rb["final_distance_miles"] > 0
 
 
 def test_households_deduplicate_across_walks(client, h, ns):

@@ -91,6 +91,52 @@ def auth(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
 
+def planned_segment_ids(walk_id: str) -> list[str]:
+    """Everything the walk was routed along, obligations and connectors alike."""
+    from api.app.db import SessionLocal
+    from api.app.models import Walk
+    with SessionLocal() as db:
+        return list(db.get(Walk, walk_id).planned_segment_ids)
+
+
+def metres_between(a, b, lat: float = 37.23) -> float:
+    """Flat-earth distance between two [lon, lat] points, good enough across one town."""
+    import math
+    dx = (a[0] - b[0]) * 111_320.0 * math.cos(math.radians(lat))
+    dy = (a[1] - b[1]) * 111_320.0
+    return math.hypot(dx, dy)
+
+
+def _by_distance(ns, point, keep):
+    return sorted(((min(metres_between(c, point) for c in s.coords), s.id)
+                   for s in ns.net.segments if s.coords and keep(s)),
+                  key=lambda t: t[0])
+
+
+def streets_beside_the_route(ns, walk, n, required=True, limit_m=250.0) -> list[str]:
+    """The `n` streets nearest the walk's start that the walk did not plan.
+
+    What "add the streets you actually walked" means: the next road over, the block you
+    cut through, the far side of the square. Chosen by measuring from the start point
+    rather than by asking the server what it would accept, so a test using these judges
+    the rule instead of agreeing with it.
+    """
+    planned = set(planned_segment_ids(walk["id"]))
+    near = [(d, s) for d, s in
+            _by_distance(ns, walk["start_point"],
+                         lambda s: s.required == required and s.id not in planned)][:n]
+    assert len(near) == n and near[-1][0] < limit_m, \
+        f"expected {n} unplanned streets within {limit_m} m of the start: {near}"
+    return [sid for _d, sid in near]
+
+
+def streets_across_town(ns, walk, n=3, at_least_m=2000.0) -> list[str]:
+    """Required streets as far from this walk's start as the network goes."""
+    far = _by_distance(ns, walk["start_point"], lambda s: s.required)[-n:]
+    assert far[0][0] > at_least_m, far
+    return [sid for _d, sid in far]
+
+
 def make_admin(client, participant_id: str):
     """Promote a participant directly in the database.
 

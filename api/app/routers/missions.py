@@ -23,7 +23,7 @@ from ..services import routing_service as routing
 from ..services.network_state import network_service
 # The one-open-walk guard is shared with /api/walks/select rather than written twice:
 # two copies of "how many walks may a participant have" is how they came to disagree.
-from .routes import claim_walk_slot
+from .routes import claim_walk_slot, commit_claimed_walk
 
 router = APIRouter(prefix="/api/missions", tags=["missions"])
 
@@ -161,8 +161,7 @@ def accept(mission_id: str, minutes: int = Query(45, ge=5, le=240),
         seed=req.seed,
         score_components=(chosen.route.score.components if chosen.route.score else {}))
     db.add(walk)
-    db.commit()
-    res_svc.reserve(db, walk, chosen.required_segment_ids)
+    commit_claimed_walk(db, walk, chosen.required_segment_ids)
 
     return dict(walk_id=walk.id, mission_id=chosen.id,
                 distance_miles=walk.distance_miles,

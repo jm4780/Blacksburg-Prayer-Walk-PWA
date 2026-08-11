@@ -38,15 +38,18 @@ The documented contract for POST /api/routes/generate:
 """
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..deps import current_participant
-from ..models import Participant, RouteFeedback, RouteRequest, Walk
+from ..models import (OPEN_WALK_STATUSES, Participant, RouteFeedback, RouteRequest,
+                      Walk)
 from ..schemas import (CompleteWalkIn, FeedbackIn, FeedbackOut, RouteRequestIn,
                        RouteResponseOut, SelectWalkIn, WalkOut)
 from ..services import completion as completion_svc
@@ -54,6 +57,7 @@ from ..services import reservations as res_svc
 from ..services import routing_service as routing
 from ..services.network_state import network_service
 
+log = logging.getLogger("bpw")
 router = APIRouter(prefix="/api", tags=["routes"])
 
 BLACKSBURG_BBOX = (-80.55, 37.15, -80.33, 37.30)   # lon_min, lat_min, lon_max, lat_max
@@ -123,27 +127,59 @@ def claim_walk_slot(db: Session, participant_id: str) -> None:
       PREVIEW  browsing. Replaced, with its holds released, so trying five sizes or
                three missions does not hold three routes.
 
-    Deliberately **not committed here**. The row lock taken on the participant is what
-    makes the claim atomic, and a lock lasts only as long as the transaction: the
-    caller inserts its new walk and commits once, so two devices accepting at the same
-    moment queue up behind each other instead of both finding an empty slot and both
-    ending up with a live walk. Before this, the guard was a plain read followed by an
-    unrelated write, and two simultaneous accepts could both pass it.
+    Deliberately **not committed here**: the caller inserts its new walk and commits
+    once, through `commit_claimed_walk`, so letting the old walk go and taking the slot
+    land together or not at all.
 
-    PostgreSQL, which the pilot runs, makes `FOR UPDATE` a real per-participant mutex.
-    SQLite's dialect drops the clause, and its single writer serialises the same work
-    at the cost of the loser seeing a busy database rather than a clean 409.
+    HOW THE CLAIM IS MADE ATOMIC, AND WHY IT IS NOT `SELECT … FOR UPDATE`
+    --------------------------------------------------------------------
+    It used to be. `FOR UPDATE` is real on PostgreSQL, but SQLite's dialect drops the
+    clause silently, and the previous note here — that SQLite's single writer serialises
+    the same work anyway — was wrong. SQLite serialises *writes*; this claim is a read
+    followed by a write, and in WAL mode any number of transactions can take the read
+    before the first of them takes the write. A reviewer measured it against the running
+    dev database: three simultaneous accepts left two open walks, eight left three, and
+    one participant ended up holding three walks and seventy-one live street
+    reservations — streets held against every other walker in town by walks the app
+    would never show anybody.
+
+    Two changes, because either alone would leave a way through:
+
+      1. The claim opens by **writing** the participant row rather than reading it under
+         a lock hint. An UPDATE takes a row-level exclusive lock on PostgreSQL, exactly
+         as `FOR UPDATE` did, and on SQLite it takes the database write lock at the
+         *start* of the transaction rather than at the first write near the end. Either
+         way the second caller waits here, and when it proceeds it reads a snapshot that
+         already contains the first caller's walk — so it replaces that walk properly
+         instead of adding a second one beside it. The preceding commit matters: it ends
+         any read snapshot this session already has open, so the write lock is the
+         transaction's first act and SQLite has nothing stale to reconcile.
+
+      2. A partial unique index on `walks(participant_id) WHERE status IN
+         ('PREVIEW','ACTIVE')` — see models.Walk — refuses a second open walk at the
+         database, on both backends, whatever the locking did. `commit_claimed_walk`
+         turns that refusal into a 409 rather than a 500, and writes the walk's street
+         holds inside the same transaction, so the loser leaves nothing behind at all —
+         no walk, no route request, no reservations.
+
+    The cost to a walker on their own is one UPDATE of a row we were about to touch
+    anyway — `current_participant` already stamps `last_seen_at` on every request.
+
+    Callers must have nothing uncommitted in the session when they call this.
 
     Lives here rather than in a service because a refusal is an HTTP answer, and the
     services layer deliberately knows nothing about HTTP. Shared with
     `routers/missions.py` so the two ways of starting a walk cannot drift apart again.
     """
-    db.execute(select(Participant.id)
-               .where(Participant.id == participant_id).with_for_update())
+    now = datetime.now(timezone.utc)
+
+    db.commit()
+    db.execute(update(Participant).where(Participant.id == participant_id)
+               .values(last_seen_at=now))
 
     open_walks = db.execute(
         select(Walk).where(Walk.participant_id == participant_id,
-                           Walk.status.in_(("PREVIEW", "ACTIVE")))).scalars().all()
+                           Walk.status.in_(OPEN_WALK_STATUSES))).scalars().all()
 
     active = next((w for w in open_walks if w.status == "ACTIVE"), None)
     if active is not None:
@@ -152,11 +188,55 @@ def claim_walk_slot(db: Session, participant_id: str) -> None:
             f"You already have a walk in progress ({active.band}, "
             f"{active.distance_miles} mi). Finish or cancel it before starting another.")
 
-    now = datetime.now(timezone.utc)
     for old in open_walks:
         res_svc.release(db, old, commit=False)
         old.status = "DISCARDED"
         old.resolved_at = now
+    # Flush the releases now, so the UPDATEs that empty the slot reach the database
+    # before the INSERT that fills it. SQLAlchemy's unit of work emits inserts before
+    # updates for a given table, which would otherwise trip the partial unique index on
+    # the ordinary "replace my preview" path.
+    db.flush()
+
+
+def commit_claimed_walk(db: Session, walk: Walk, reserve_ids: list[str]) -> None:
+    """Land a walk claimed by `claim_walk_slot`: the walk, its holds, and nothing else.
+
+    The holds go in **inside this transaction**, not after it. They used to be written
+    in a second transaction once the walk was safely committed, and the gap between the
+    two was its own way to leak reservations: a walk could be created, lose its slot to
+    a simultaneous request that dutifully released the holds it had not written yet, and
+    then write them — leaving a discarded walk holding streets against the whole town.
+    A concurrency test caught exactly that, after the walk race itself was closed.
+
+    So the loser of a race commits nothing at all: no walk, no route request, no holds.
+    What is left is to say so in words a walker can act on, rather than letting a
+    database error become a 500.
+    """
+    try:
+        db.flush()          # the walk takes the slot here, or the index refuses it
+        res_svc.reserve(db, walk, reserve_ids, commit=False)
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        log.info("one-open-walk index refused a second walk for %s: %s",
+                 walk.participant_id, exc.orig)
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Another device set a walk up for you a moment ago, so this one was not "
+            "started. Open the walk you already have, or cancel it and choose again."
+        ) from None
+    except OperationalError as exc:
+        # SQLite under contention: the write lock did not come free in time. Nothing was
+        # written; asking again is the whole remedy. Logged rather than swallowed —
+        # a walker seeing this often is a database working harder than it should.
+        db.rollback()
+        log.warning("could not land a claimed walk for %s: %s",
+                    walk.participant_id, exc.orig)
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "We could not set that walk up just then — two requests arrived at the "
+            "same moment. Try again.") from None
 
 
 @router.post("/walks/select", response_model=WalkOut)
@@ -187,8 +267,7 @@ def select_walk(body: SelectWalkIn, p: Participant = Depends(current_participant
                 seed=req.seed,
                 score_components=v["score_components"] or {})
     db.add(walk)
-    db.commit()
-    res_svc.reserve(db, walk, v["required_segment_ids"])
+    commit_claimed_walk(db, walk, v["required_segment_ids"])
     return _walk_out(ns, walk, v)
 
 
@@ -260,6 +339,22 @@ def complete_walk(walk_id: str, body: CompleteWalkIn,
             status.HTTP_422_UNPROCESSABLE_ENTITY,
             "select the streets you covered, or report that you did not complete "
             "the walk")
+    if body.outcome == "EDITED":
+        # §14 lets a walker drop planned streets and add ones they walked instead. It
+        # does not let a submission reach across town: what a walk may claim is bounded
+        # by the route it was given plus a quarter mile around it. Refused here rather
+        # than filtered silently, so a walker is told which streets we would not record
+        # and can correct the answer instead of signing their name to a number that
+        # quietly lost three streets.
+        stray = completion_svc.unsupported_edits(ns, walk, body.segment_ids)
+        if stray:
+            names = _street_names(ns, stray)
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                f"{'One street is' if len(stray) == 1 else f'{len(stray)} streets are'} "
+                f"too far from this walk's route to record against it "
+                f"({names}). Pick streets on the route or near it, or tell us you did "
+                f"not complete the walk.")
 
     result = completion_svc.record(db, ns, walk, body.outcome, body.segment_ids,
                                    body.note)
@@ -344,6 +439,23 @@ def current_walk(p: Participant = Depends(current_participant),
 def get_walk(walk_id: str, p: Participant = Depends(current_participant),
              db: Session = Depends(get_db)):
     return _walk_out(network_service(), _own_walk(db, walk_id, p))
+
+
+def _street_names(ns, segment_ids: list[str], limit: int = 3) -> str:
+    """Name a few refused streets, so the message is about a place and not an id.
+
+    Street names, never addresses: the same public names the turn list already prints.
+    """
+    names: list[str] = []
+    for sid in segment_ids:
+        i = ns.idx_of_id.get(sid)
+        nm = (ns.net.segments[i].display_name if i is not None else None) or "an unnamed path"
+        if nm not in names:
+            names.append(nm)
+        if len(names) == limit:
+            break
+    rest = len(segment_ids) - limit
+    return ", ".join(names) + (f" and {rest} more" if rest > 0 else "")
 
 
 def _own_walk(db: Session, walk_id: str, p: Participant) -> Walk:

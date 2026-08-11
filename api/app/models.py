@@ -22,7 +22,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import (JSON, Boolean, DateTime, Float, ForeignKey, Index, Integer,
-                        String, Text, UniqueConstraint)
+                        String, Text, UniqueConstraint, text)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -92,9 +92,34 @@ class RouteRequest(Base):
                                                 default=utcnow, index=True)
 
 
+OPEN_WALK_STATUSES = ("PREVIEW", "ACTIVE")
+
+# The one-open-walk rule, written where it cannot be argued with.
+#
+# "Open" means PREVIEW or ACTIVE: both hold segments against every other walker, so a
+# participant may be in exactly one of them. The application enforces this too (see
+# routers/routes.claim_walk_slot), but application-level enforcement is a read followed
+# by a write, and two requests can interleave between the two. A reviewer measured
+# exactly that: three simultaneous accepts left two open walks, eight left three, and
+# one participant held three walks and seventy-one live street reservations at once —
+# streets held against the whole town by walks nobody could see or finish.
+#
+# A partial unique index is the only version of this rule that does not depend on lock
+# semantics being what we assumed. PostgreSQL and SQLite both support it, so the
+# invariant is identical on the pilot's database and on the one the dev environment
+# runs, and the loser of a race gets its whole transaction rejected — no walk, and no
+# reservations, which now land in that same transaction.
+_ONE_OPEN_WALK = "status IN ('PREVIEW', 'ACTIVE')"
+
+
 class Walk(Base):
     """A route a participant selected. PREVIEW -> ACTIVE -> COMPLETED | DISCARDED."""
     __tablename__ = "walks"
+    __table_args__ = (
+        Index("uq_walk_one_open_per_participant", "participant_id", unique=True,
+              sqlite_where=text(_ONE_OPEN_WALK),
+              postgresql_where=text(_ONE_OPEN_WALK)),
+    )
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
     participant_id: Mapped[str] = mapped_column(ForeignKey("participants.id"), index=True)
