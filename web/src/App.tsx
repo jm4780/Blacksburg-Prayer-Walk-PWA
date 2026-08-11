@@ -10,7 +10,7 @@
  * confirmation, admin — say so when they are reached; the ones that do not, don't ask.
  */
 import { useCallback, useEffect, useState } from 'react'
-import { api, getToken, setToken } from './api'
+import { api, getToken, isAuthFailure, isOffline, setToken } from './api'
 import type { ParticipantOut, Walk } from './types'
 import BuildBadge from './components/BuildBadge'
 import IdentityGate from './components/IdentityGate'
@@ -40,10 +40,15 @@ export default function App() {
   const [me, setMe] = useState<ParticipantOut | null>(null)
   const [walk, setWalk] = useState<Walk | null>(null)
   const [loading, setLoading] = useState(true)
+  // Set when the shell could not reach the server at boot and we kept the token
+  // anyway. It is the difference between "we do not know you" and "we could not ask".
+  const [offline, setOffline] = useState(false)
 
   const refreshWalk = useCallback(async () => {
     if (!getToken()) { setWalk(null); return }
-    try { setWalk(await api.current()) } catch { setWalk(null) }
+    // An unreachable server is not evidence that the walk ended. Leave whatever we
+    // already know on screen rather than replacing a real walk with nothing.
+    try { setWalk(await api.current()) } catch (e) { if (!isOffline(e)) setWalk(null) }
   }, [])
 
   useEffect(() => {
@@ -52,10 +57,24 @@ export default function App() {
       try {
         setMe(await api.me())
         await refreshWalk()
-      } catch {
-        // A token the server does not recognise is worse than no token: it produces
-        // 401s on every screen. Drop it and carry on anonymously.
-        setToken(null)
+      } catch (e) {
+        // ONLY the server saying "not you" drops the token. A token the server does
+        // not recognise is worse than no token — it produces 401s on every screen —
+        // but a request that never got an answer says nothing about the token at all.
+        //
+        // This used to be a bare `catch`, and the cost of that was specific and bad:
+        // a walker who lost signal for one page load, mid-walk, was signed out and
+        // shown "This walk belongs to somebody. Sign in to open it." They could not
+        // sign back in either, because registering is a network call. Standing
+        // outside, halfway through, is the exact circumstance this app exists for.
+        if (isAuthFailure(e)) {
+          setToken(null)
+        } else {
+          // Keep the token and say so. The screens fetch their own data and will
+          // report their own failures; what matters here is that we did not decide
+          // a person was a stranger because their phone had one bar.
+          setOffline(true)
+        }
       } finally { setLoading(false) }
     })()
   }, [refreshWalk])
@@ -102,12 +121,43 @@ export default function App() {
     )
   }
 
-  /** Screens that record something against a person. Reached without one, they ask. */
-  const gate = (reason: string) => (
-    <div className="screen">
-      <IdentityGate reason={reason} onDone={adopt} onCancel={() => nav('/')} />
-    </div>
-  )
+  /**
+   * Screens that record something against a person. Reached without one, they ask.
+   *
+   * Unless we are holding a token we simply could not check. Asking "who is walking?"
+   * of somebody who is already signed in, because their signal dropped, is the worst
+   * sentence this app can produce: it reads as "your walk is gone", it is false, and
+   * the sign-in they are being offered is itself a network call that will also fail.
+   * Say what is actually true and give them the one button that can help.
+   */
+  const gate = (reason: string) => {
+    if (offline && getToken()) {
+      return (
+        <div className="screen">
+          <h1>No signal</h1>
+          <p className="lede">
+            You are still signed in. We just could not reach the server to load this
+            screen.
+          </p>
+          <p className="muted">
+            Your walk and everything you have prayed for are on the server, not on this
+            phone. Nothing has been lost.
+          </p>
+          <div className="actions">
+            <button className="primary big" onClick={() => window.location.reload()}>
+              Try again
+            </button>
+            <button className="secondary" onClick={() => nav('/')}>Back to home</button>
+          </div>
+        </div>
+      )
+    }
+    return (
+      <div className="screen">
+        <IdentityGate reason={reason} onDone={adopt} onCancel={() => nav('/')} />
+      </div>
+    )
+  }
 
   const screen = (() => {
     // The map system's specimen sheet. Not in any navigation — a reference for
