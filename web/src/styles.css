@@ -51,13 +51,16 @@ body {
 .topbar {
   position: sticky; top: 0; z-index: 10;
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 10px 24px;
-  padding-top: max(10px, env(safe-area-inset-top));
+  padding: 4px 24px;
+  padding-top: max(4px, env(safe-area-inset-top));
   background: var(--d-bg); color: var(--d-ink);
   border-bottom: 1px solid var(--d-rule);
 }
 .topbar .brand { font: 800 17px/1 Archivo, sans-serif; color: var(--d-paper); }
+/* The bar's own padding came down as the buttons inside it went up to the 44px
+   minimum, so the shell grew by three pixels rather than fifteen. */
 .topbar button {
+  display: inline-flex; align-items: center; min-height: 44px;
   background: none; border: 0; color: inherit; font: inherit;
   padding: 6px 8px; border-radius: 8px; cursor: pointer;
 }
@@ -69,7 +72,9 @@ main { flex: 1; background: var(--d-bg); }
 
 .whoami {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 7px 24px; font-size: 12px;
+  /* No vertical padding: "Switch person" is a 44px target and it sets the height of
+     the row, rather than adding to it. */
+  min-height: 44px; padding: 0 24px; font-size: 12px;
   background: var(--d-panel); border-bottom: 1px solid var(--d-rule);
   color: var(--d-muted);
 }
@@ -94,6 +99,23 @@ h3 { font: 600 15px/1.35 Archivo, sans-serif; color: var(--d-paper); margin: 18p
 .fine { font-size: 12px; color: var(--d-muted); margin-top: 18px; }
 .error { color: var(--d-orange); font-weight: 500; }
 
+/*
+ * PARAGRAPH RHYTHM.
+ *
+ * The UA gives every <p> a 1em top and bottom margin. At the 15px body size that is
+ * 15px, and 15 is not a step in the rhythm (4 6 7 8 10 12 14 18 20 26) — so every
+ * paragraph that only ever got a colour (`.muted`, `.error`) or no class at all was
+ * quietly off it, on Admin, Generate and Confirm alike.
+ *
+ * Fixed here rather than screen by screen, because it is not a screen's problem. The
+ * bare-element half of the selector is wrapped in `:where()` so it carries the
+ * specificity of `p` and nothing more: every class that sets its own margin — `.lede`,
+ * `.note p`, `.dash-*` — still wins, and a screen that wants a different step just
+ * says so.
+ */
+p.muted, p.error,
+:where(.screen, .card, .spec) p { margin: 0 0 12px; }
+
 /* --- forms ------------------------------------------------------------- */
 label { display: block; margin: 0 0 14px; font-size: 13px; color: var(--d-muted); }
 input, textarea {
@@ -110,16 +132,30 @@ button.primary, button.secondary {
   font: 600 15px/1.2 Archivo, system-ui, sans-serif; border-radius: 10px;
   cursor: pointer; border: 1px solid transparent;
 }
-button.primary { background: var(--d-orange); color: var(--d-paper); }
+/* Bordered in its own fill rather than in `transparent`: the box is the same size
+   either way, but a transparent border is a colour on the screen that is in no
+   palette, and it showed up on every screen that has a primary. */
+button.primary { background: var(--d-orange); color: var(--d-paper);
+                 border-color: var(--d-orange); }
 button.primary:active { filter: brightness(.92); }
 button.secondary { background: none; color: var(--d-paper); border-color: var(--d-rule-2); }
 button.secondary:active { background: var(--d-rule); }
 button.big { display: block; width: 100%; padding: 20px; font-size: 18px; }
 button:disabled { opacity: .45; cursor: not-allowed; }
+/*
+ * A side channel, and still a thumb target: 44px of height without 44px of ink. The
+ * padding stays on the rhythm and `min-height` does the rest, so the underline sits
+ * where it always did and the row around it grows instead of the type.
+ *
+ * A link inside a sentence is text, not a control, and a 44px inline-flex box in the
+ * middle of a paragraph opens a hole in it — so `p button.link` opts back out.
+ */
 button.link {
+  display: inline-flex; align-items: center; min-height: 44px;
   background: none; border: 0; padding: 4px 0; color: var(--d-dim);
   font: 500 13px/1.4 Archivo, sans-serif; text-decoration: underline; cursor: pointer;
 }
+p button.link { display: inline; min-height: 0; }
 
 .actions { margin-top: 20px; display: flex; flex-direction: column; align-items: flex-start; }
 
@@ -146,7 +182,10 @@ button.link {
 .note.warn { border-left-color: var(--d-muted); }
 .note.stop { background: rgba(228, 113, 44, .14); border-color: rgba(228, 113, 44, .5);
              border-left-color: var(--d-orange); }
-.note button { width: auto; margin-top: 10px; padding: 10px 14px; }
+/* 12/14 rather than 10/14: at 10 the confirmation's two buttons — one of them the
+   destructive one — computed 40px tall, under the thumb minimum. 12 puts them at 44
+   and is a step in the rhythm. */
+.note button { width: auto; margin-top: 10px; padding: 12px 14px; }
 
 /* --- metrics ----------------------------------------------------------- */
 /* The dashboard's stat row, in card form: warm-white numeral at 24/700 with the
@@ -183,7 +222,8 @@ button.link {
 
 /* --- size slider ------------------------------------------------------- */
 .sizes { margin: 0 0 18px; }
-.sizes input[type="range"] { width: 100%; accent-color: var(--d-orange); }
+.sizes input[type="range"] { width: 100%; height: 44px; margin: 0;
+                             accent-color: var(--d-orange); }
 /* SizeSlider renders `.sizes.empty` when no size fits the time on the dial. It had
    markup and no rule, so the copy sat naked on the ground; it is a recessed card
    saying "nothing to choose", not a control. */
@@ -193,7 +233,8 @@ button.link {
 }
 .ticks { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
 .tick {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; min-height: 44px;
   padding: 8px 4px; font: inherit; cursor: pointer; color: var(--d-ink);
   background: var(--d-panel); border: 1px solid var(--d-rule); border-radius: 8px;
 }
@@ -218,20 +259,20 @@ button.link {
 /* A legend that does not match the map is worse than none, and this one had already
    drifted twice — so each swatch names where its value comes from.
 
-   `done`/`todo`/`held` are DARK_COLORS in src/components/MapView.tsx, which is what the
-   legacy (context-less) map path draws.
+   `picked`/`dropped` are the two swatches Confirm's editing legend renders. They were
+   #b5801f gold and #c8c5bc grey, matching MapView's `selected` and `removed`. They
+   were right until this pass: Confirm's picking map now runs on `context="editing"`,
+   so it is drawn by prayerLayers, and prayerLayers paints a selected street
+   INK.subject and a dropped one INK.remaining (src/map/style.ts). The legend was
+   describing the map it used to have. These are the tokens it has now.
 
-   `picked`/`dropped` were #b5801f gold and #c8c5bc grey, matching MapView's `selected`
-   and `removed`. They were right until this pass: Confirm's picking map now runs on
-   `context="editing"`, so it is drawn by prayerLayers, and prayerLayers paints a
-   selected street INK.subject and a dropped one INK.remaining (src/map/style.ts).
-   The legend was describing the map it used to have. These are the tokens it has now. */
-.legend .done { background: #5E9B7E; }
-.legend .todo { background: #6E7676; }
-.legend .held { background: #E4712C; }
+   `.done` #5E9B7E, `.held` #E4712C, `.boundary` #242B2D and `.todo` #6E7676 sat here
+   too, left over from the context-less map path and from the three-swatch version of
+   Confirm's legend. A repo-wide search finds no element wearing any of the four.
+   #5E9B7E in particular is the dead green, parked in a stylesheet one className away
+   from being on a screen. Deleted rather than kept "in case". */
 .legend .picked { background: #FFFFFF; }        /* INK.subject */
 .legend .dropped { background: #4F5458; }       /* INK.remaining */
-.legend .boundary { background: #242B2D; }      /* GROUND.boundary */
 
 /* --- slippy map (MapView) ---------------------------------------------- */
 /* The well the map sits in before a tile paints. It was cream, which meant every
@@ -274,6 +315,9 @@ button.link {
 }
 .map-recenter {
   position: absolute; left: 14px; bottom: 14px; z-index: 2;
+  /* A control on a map is used outdoors with a thumb. The overlay pills that only
+     open and close a panel stay at 32; anything that moves the map is 44. */
+  display: inline-flex; align-items: center; min-height: 44px;
   padding: 8px 14px; font: 600 12px/1 Archivo, sans-serif;
   background: rgba(20, 23, 26, .86); color: var(--d-dim);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
@@ -286,8 +330,9 @@ button.link {
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   border: 1px solid var(--d-rule); border-radius: 8px;
 }
-/* MapLibre's own controls, sized for a thumb rather than a mouse. */
-.maplibregl-ctrl-group button { width: 38px; height: 38px; }
+/* MapLibre's own controls, sized for a thumb rather than a mouse. 38 was still under
+   the 44px minimum every other control in the app is now held to. */
+.maplibregl-ctrl-group button { width: 44px; height: 44px; }
 
 /* --- time slider (Priority 4) ------------------------------------------ */
 .timebox { display: grid; gap: 6px; }
@@ -302,7 +347,9 @@ button.link {
 }
 /* 44px of vertical room and a large thumb: this is the control the whole screen
    turns on, and it is used outdoors, one-handed. */
-.timeslider { width: 100%; height: 44px; accent-color: var(--d-orange); }
+/* margin 0 because `input[type=range]` carries 2px of UA margin on all four sides,
+   and 2 is not a step in the rhythm. */
+.timeslider { width: 100%; height: 44px; margin: 0; accent-color: var(--d-orange); }
 .timeslider::-webkit-slider-thumb { width: 30px; height: 30px; }
 .timeslider::-moz-range-thumb { width: 30px; height: 30px; }
 .timeends {
@@ -333,13 +380,17 @@ button.link {
 /* Handing off to Apple or Google is a secondary action, so it takes the secondary
    shape the dashboard already defines: outline on --d-rule-2, no fill. */
 .dirlinks a {
-  display: inline-block; width: auto; margin: 0; padding: 8px 12px;
+  display: inline-flex; align-items: center; min-height: 44px;
+  width: auto; margin: 0; padding: 8px 12px;
   font: 500 12px/1 Archivo, sans-serif; text-decoration: none;
   background: none; color: var(--d-paper);
   border: 1px solid var(--d-rule-2); border-radius: 8px;
 }
 
 .alts { margin: 0 0 18px; font-size: 13px; }
+/* A disclosure row is a control. `padding` rather than a flex box so the marker
+   triangle survives — `display: flex` on a summary throws it away. */
+.screen details > summary { padding: 12px 0; cursor: pointer; }
 .alts ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
 .altrow {
   display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
@@ -434,13 +485,18 @@ button.link {
 /* An unfilled star is the hairline made visible — the same rgba the stronger rules
    are drawn in — so the row reads as five empty slots rather than five grey objects.
    Filled is the accent, which is the only colour a rating is allowed to be. */
+/* `font: inherit` first, then the size. A <button> inherits no font-family from its
+   parent, so setting only `font-size` here left the glyphs on the UA's Arial — a third
+   typeface, on every screen that shows this form. The same fix `.tick`, `.altrow` and
+   `.choice` already carry. 44px of thumb comes from the padding, not from the glyph. */
 .star {
-  background: none; border: 0; font-size: 24px; line-height: 1; cursor: pointer;
-  color: var(--d-rule-2); padding: 0 4px;
+  background: none; border: 0; font: inherit; font-size: 24px; line-height: 1;
+  cursor: pointer; color: var(--d-rule-2); padding: 10px 8px; min-width: 44px;
 }
 .star.on { color: var(--d-orange); }
 .yesno { display: flex; gap: 4px; }
 .yesno button {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
   padding: 8px 14px; font: 500 12px/1 Archivo, sans-serif; cursor: pointer;
   background: none; color: var(--d-paper);
   border: 1px solid var(--d-rule-2); border-radius: 999px;
@@ -451,12 +507,15 @@ button.link {
 .check input { width: auto; margin: 4px 0 0; accent-color: var(--d-orange); }
 
 /* --- admin ------------------------------------------------------------- */
-/* Tabs are the dashboard's Explore pill, repeated: 32px, 999, glass, mono control
-   label. The selected one is the accent, because selection is the one thing on this
-   screen worth a colour. */
+/* Tabs are the dashboard's Explore pill, repeated: 999, glass, mono control label.
+   The selected one is the accent, because selection is the one thing on this screen
+   worth a colour. Taller than the Explore pill's 32 on purpose — that one floats over
+   a map and only opens a panel; these are eleven adjacent targets in a wrapping row,
+   and they get the full 44. */
 .tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 18px; }
 .tabs button {
-  height: 32px; padding: 0 12px; cursor: pointer;
+  display: inline-flex; align-items: center;
+  height: 44px; padding: 0 12px; cursor: pointer;
   font: 500 10px/1 'IBM Plex Mono', ui-monospace, monospace;
   letter-spacing: .12em; text-transform: uppercase;
   background: rgba(20, 23, 26, .55); color: var(--d-dim);
@@ -722,44 +781,62 @@ button.link {
   .dash-shared { margin-top: 8px; font-size: 12px; }
 }
 
-/* --- map-system specimen sheet (#/map-system) --------------------------- */
+/* --- map-system specimen sheet (#/map-system) ---------------------------
+ *
+ * This page is the reference sheet for the cartography, which makes it the one page
+ * in the app that cannot be allowed to be wrong out loud — and it was, twice over.
+ *
+ * It had its own palette (#0E1113 ground, #C6C3BC body, #6E7676 values), its own type
+ * scale (a 26px h1 where every other h1 is 24), its own radius (3), its own tracking
+ * (.08em) and its own spacing (32, 34, 64). It is now written in the --d-* tokens on
+ * the contract's scales like everything else. Being a reference sheet is not an
+ * exemption from the system it references.
+ *
+ * And the six swatches were painted from hexes typed into this file, beside hexes
+ * printed from `src/map/tokens.ts` — so all six disagreed with their own caption, one
+ * of them in the dead green. The `.sw-*` colour rules are gone: MapSystem.tsx paints
+ * each swatch inline from the same token it prints, which is the only arrangement in
+ * which the two cannot drift apart. What is left here is geometry.
+ */
 .spec {
-  min-height: 100dvh; background: #0E1113; color: #E7E4DE;
-  font-family: Archivo, system-ui, sans-serif; padding: 24px 20px 64px;
+  min-height: 100dvh; background: var(--d-bg); color: var(--d-ink);
+  font-family: Archivo, system-ui, sans-serif;
+  padding: 20px 24px 26px;
+  padding-bottom: calc(26px + env(safe-area-inset-bottom));
 }
-.spec header h1 { font: 700 26px/1.1 Archivo, sans-serif; margin: 0 0 8px; color: #F7F5F1; }
-.spec header p, .spec-note { font: 400 13px/1.55 Archivo, sans-serif; color: #9AA0A0;
+/* No `h1` rule: the page takes the app's, which is 24/700 on --d-paper. */
+.spec header p, .spec-note { font: 400 13px/1.55 Archivo, sans-serif; color: var(--d-dim);
                              max-width: 62ch; margin: 0 0 8px; }
-.spec code { font: 500 11px/1 'IBM Plex Mono', ui-monospace, monospace; color: #8B9392; }
+.spec code { font: 500 11px/1 'IBM Plex Mono', ui-monospace, monospace;
+             color: var(--d-muted); }
 .spec h2 { font: 500 11px/1 'IBM Plex Mono', ui-monospace, monospace;
-           letter-spacing: .14em; text-transform: uppercase; color: #8B9392;
-           margin: 32px 0 8px; }
+           letter-spacing: .14em; text-transform: uppercase; color: var(--d-muted);
+           margin: 26px 0 8px; }
 .spec-swatches ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid;
                     gap: 8px; }
 .spec-swatches li { display: flex; align-items: center; gap: 12px;
                     font: 500 13px/1 Archivo, sans-serif; }
-.spec-swatches b { min-width: 88px; font-weight: 600; color: #F7F5F1; }
-/* Scoped: unscoped, this leaked onto Confirm's legend and overrode `.legend i`. */
-.spec .sw { width: 34px; height: 6px; border-radius: 3px; flex: none; }
-.sw-covered  { background: #5E9B7E; }
-.sw-assigned { background: #E4712C; }
-.sw-held     { background: repeating-linear-gradient(90deg,#8A7A52 0 2px,transparent 2px 5px); }
-.sw-remaining{ background: repeating-linear-gradient(90deg,#6E7676 0 5px,transparent 5px 10px); }
-.sw-park     { background: #151B1C; border: 1px solid #2A3133; }
-.sw-land     { background: #101416; border: 1px solid #2A3133; }
-.spec-ramp li i { display: block; width: 34px; background: #6E7676; border-radius: 2px; }
-.spec-ctx { margin-top: 34px; }
+.spec-swatches b { min-width: 88px; font-weight: 600; color: var(--d-paper); }
+/* Scoped: unscoped, this leaked onto Confirm's legend and overrode `.legend i`.
+   Geometry only — the colour arrives inline, from the token. Radius 2 is the bar
+   radius; 3 was not a radius this system has. */
+.spec .sw { width: 34px; height: 6px; border-radius: 2px; flex: none; }
+.sw-park, .sw-land { border: 1px solid var(--d-rule); }
+.spec-ramp li i { display: block; width: 34px; background: var(--d-faint);
+                  border-radius: 2px; }
+.spec-ctx { margin-top: 26px; }
 .spec-head { display: flex; align-items: baseline; gap: 12px; }
-.spec-head h2 { margin: 0; color: #F7F5F1; }
-.spec-screen { font: 400 12px/1 Archivo, sans-serif; color: #6E7676; }
-.spec-asks { font: 400 14px/1.4 Archivo, sans-serif; color: #C6C3BC; margin: 6px 0 10px; }
-.spec-map { border: 1px solid rgba(247,245,241,.10); border-radius: 10px;
-            overflow: hidden; }
+.spec-head h2 { margin: 0; color: var(--d-paper); }
+.spec-screen { font: 400 12px/1 Archivo, sans-serif; color: var(--d-muted); }
+.spec-asks { font: 400 14px/1.4 Archivo, sans-serif; color: var(--d-ink);
+             margin: 6px 0 10px; }
+.spec-map { border: 1px solid var(--d-rule); border-radius: 10px; overflow: hidden; }
 .spec-map .mapwrap { border: 0; border-radius: 0; }
 .spec-props { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 14px;
               margin: 10px 0 0; }
 .spec-props div { display: flex; justify-content: space-between; gap: 8px;
-                  border-bottom: 1px solid rgba(247,245,241,.08); padding-bottom: 4px; }
+                  border-bottom: 1px solid var(--d-rule); padding-bottom: 4px; }
 .spec-props dt { font: 500 10px/1.4 'IBM Plex Mono', ui-monospace, monospace;
-                 letter-spacing: .08em; text-transform: uppercase; color: #6E7676; }
-.spec-props dd { margin: 0; font: 600 12px/1.4 Archivo, sans-serif; color: #C6C3BC; }
+                 letter-spacing: .12em; text-transform: uppercase; color: var(--d-muted); }
+.spec-props dd { margin: 0; font: 600 12px/1.4 Archivo, sans-serif; color: var(--d-ink);
+                 font-variant-numeric: tabular-nums; }

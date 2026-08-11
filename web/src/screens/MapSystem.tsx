@@ -9,12 +9,35 @@
  * Reached at #/map-system. Deliberately not in any navigation — it is a reference for
  * whoever is working on the map, not a screen for walkers.
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { api } from '../api'
 import MapView, { type SegmentFeature } from '../components/MapView'
 import { CONTEXTS, type MapContext } from '../map/style'
-import { CLASS_WEIGHT, GROUND, INK, INK_OPACITY, STATE_WEIGHT } from '../map/tokens'
+import { CLASS_WEIGHT, GROUND, INK, INK_OPACITY, STATE_WEIGHT, TEXTURE } from '../map/tokens'
 import type { LineString, ProgressMap } from '../types'
+
+/**
+ * A swatch, painted from the token it is captioned with.
+ *
+ * It used to be painted from a hex typed into styles.css beside a hex printed from
+ * this module, and all six had drifted apart — the specimen sheet was showing orange
+ * for assigned (#9A8A76), the dead green for covered (#7E8C86), a dash for remaining
+ * where TEXTURE says solid, and so on. A reference that can disagree with what it
+ * references will, so it is no longer able to: one value reaches both the paint and
+ * the caption.
+ *
+ * `dash` is TEXTURE's, in line-widths, as MapLibre reads it; `PX` is what one
+ * line-width is worth at swatch scale.
+ */
+const PX = 3
+function swatch(colour: string, dash: number[] | null): CSSProperties {
+  if (!dash) return { background: colour }
+  const [on, gap] = dash
+  return {
+    background: `repeating-linear-gradient(90deg, ${colour} 0 ${on * PX}px,`
+      + ` transparent ${on * PX}px ${(on + gap) * PX}px)`,
+  }
+}
 
 const ORDER: Array<{ ctx: MapContext; screen: string; asks: string }> = [
   { ctx: 'town', screen: 'Dashboard',
@@ -79,15 +102,17 @@ export default function MapSystem() {
         <ul>
           {(['assigned', 'covered', 'held', 'remaining'] as const).map((k) => (
             <li key={k}>
-              <span className={`sw sw-${k}`} />
+              <span className={`sw sw-${k}`} style={swatch(INK[k], TEXTURE[k] ?? null)} />
               <b>{k}</b>
               <code>{INK[k]}</code>
               <code>α {INK_OPACITY[k]}</code>
               <code>×{STATE_WEIGHT[k]}</code>
             </li>
           ))}
-          <li><span className="sw sw-park" /><b>park</b><code>{GROUND.park}</code></li>
-          <li><span className="sw sw-land" /><b>land</b><code>{GROUND.land}</code></li>
+          <li><span className="sw sw-park" style={swatch(GROUND.park, null)} />
+            <b>park</b><code>{GROUND.park}</code></li>
+          <li><span className="sw sw-land" style={swatch(GROUND.land, null)} />
+            <b>land</b><code>{GROUND.land}</code></li>
         </ul>
       </section>
 

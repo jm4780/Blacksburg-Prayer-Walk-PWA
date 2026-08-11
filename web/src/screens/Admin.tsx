@@ -55,7 +55,30 @@ export default function Admin({ me }: { me: ParticipantOut }) {
     return () => { cancelled = true }
   }, [tab])
 
-  if (!me.is_admin) return <div className="screen"><p>Administrator access required.</p></div>
+  // A refusal is still a screen. This was one unstyled sentence on an empty page with
+  // no heading and no way off it — the only dead end in the app without both. It takes
+  // the shape every other dead end takes (ActiveWalk's cancelled walk): a heading, a
+  // note saying what happened in words, and one way out.
+  //
+  // The hash is written directly because App renders <Admin me={me} /> and does not
+  // hand this screen a `nav`; that assignment is exactly what App's own `nav` does.
+  if (!me.is_admin) {
+    return (
+      <div className="screen narrow">
+        <h1>Administration</h1>
+        <div className="note warn">
+          <strong>This part is not open to your account</strong>
+          <p>
+            It is where the people running the pilot check on routes, feedback and the
+            street network. If you need to be in here, ask whoever set up your account.
+          </p>
+        </div>
+        <button className="primary big" onClick={() => { window.location.hash = '/' }}>
+          Back to home
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="screen">

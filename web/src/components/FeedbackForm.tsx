@@ -107,7 +107,13 @@ export default function FeedbackForm({ walkId, from, onDone }: {
       </label>
 
       {error && <p className="error" role="alert">{error}</p>}
-      <button className="primary" disabled={busy || rating === 0} onClick={submit}>
+      {/* Secondary, not primary. This form is a side channel — it opens over the
+          active walk and again after the walk is recorded, and on both of those
+          screens the decision has already been made and already has an orange button
+          ("Finish Walk", "Back to home"). A second orange bar underneath it asks the
+          walker to choose between finishing and complaining, in matching furniture.
+          It takes the shape its own cancel siblings take. */}
+      <button className="secondary" disabled={busy || rating === 0} onClick={submit}>
         {busy ? 'Sending…' : 'Send feedback'}
       </button>
     </div>
