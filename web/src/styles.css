@@ -11,9 +11,12 @@
  * re-declaring the whole block. That is exactly how a product ends up with two of every
  * colour, so they are here now: one system, one place, inherited by everything.
  *
- * The light tokens under this are NOT deleted. Screens that still use them keep
- * working until they are migrated, and deleting them would be a rewrite rather than a
- * finish. They are legacy, and the migration is one screen at a time.
+ * The light tokens that used to sit under this are gone. They were kept while screens
+ * still referenced them; the last reference went with the screen-level retheme below,
+ * and a second palette that nothing reads is not a fallback, it is an invitation to
+ * start a third. `color-scheme: dark` went with them — it was still telling the browser
+ * to draw range tracks, checkboxes, scrollbars and autofill in light mode on top of all
+ * this, which is the one part of the light theme CSS could not paint over.
  */
 :root {
   --d-bg: #14171A;
@@ -29,22 +32,7 @@
   --d-orange: #E4712C;
   --d-rule: rgba(247, 245, 241, .12);
   --d-rule-2: rgba(247, 245, 241, .18);
-}
-
-:root {
-  --ink: #1a1a18;
-  --muted: #5f6260;
-  --paper: #faf9f6;
-  --card: #ffffff;
-  --line: #e2e0d9;
-  --green: #1f3d2b;
-  --gold: #b5801f;
-  --red: #9b2c2c;
-  --done: #2f7d4f;
-  --todo: #c8c5bc;
-  --held: #d99a2b;
-  --radius: 10px;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -161,35 +149,63 @@ button.link {
 .note button { width: auto; margin-top: 10px; padding: 10px 14px; }
 
 /* --- metrics ----------------------------------------------------------- */
-.metrics { display: grid; gap: .7rem; margin-bottom: 1.4rem; }
+/* The dashboard's stat row, in card form: warm-white numeral at 24/700 with the
+   negative tracking big Archivo numerals get, over the mono uppercase label. */
+.metrics { display: grid; gap: 8px; margin-bottom: 20px; }
 @media (min-width: 560px) { .metrics { grid-template-columns: repeat(3, 1fr); } }
 .metric {
-  background: var(--card); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: .9rem;
+  background: var(--d-panel); border: 1px solid var(--d-rule);
+  border-radius: 10px; padding: 14px;
 }
-.metric-value { font-size: 1.9rem; font-weight: 700; line-height: 1.1; color: var(--green); }
-.metric-label { font-size: .86rem; margin-top: .15rem; }
-.metric-extra { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
-.definition { font-size: .8rem; color: var(--muted); margin: .5rem 0 0; }
+.metric-value {
+  font: 700 24px/1.1 Archivo, sans-serif; letter-spacing: -.02em;
+  color: var(--d-paper); font-variant-numeric: tabular-nums;
+}
+.metric-label {
+  margin-top: 8px;
+  font: 500 10px/1.4 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--d-muted);
+}
+.metric-extra { font: 400 12px/1.45 Archivo, sans-serif; color: var(--d-dim); margin-top: 6px; }
+.definition { font: 400 12px/1.5 Archivo, sans-serif; color: var(--d-dim); margin: 8px 0 0; }
 
-.facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: .6rem; margin: .8rem 0 0; }
+.facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0 0; }
 @media (min-width: 480px) { .facts { grid-template-columns: repeat(4, 1fr); } }
 .facts div { min-width: 0; }
-.facts dt { font-size: .74rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
-.facts dd { margin: .1rem 0 0; font-weight: 650; }
+.facts dt {
+  font: 500 10px/1.4 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--d-muted);
+}
+.facts dd {
+  margin: 4px 0 0; font: 600 13px/1.3 Archivo, sans-serif;
+  color: var(--d-paper); font-variant-numeric: tabular-nums;
+}
 
 /* --- size slider ------------------------------------------------------- */
-.sizes { margin: 0 0 1rem; }
-.sizes input[type="range"] { width: 100%; accent-color: var(--green); }
-.ticks { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3rem; margin-top: .4rem; }
-.tick {
-  display: flex; flex-direction: column; align-items: center; gap: .1rem;
-  padding: .45rem .2rem; font: inherit; cursor: pointer;
-  background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+.sizes { margin: 0 0 18px; }
+.sizes input[type="range"] { width: 100%; accent-color: var(--d-orange); }
+/* SizeSlider renders `.sizes.empty` when no size fits the time on the dial. It had
+   markup and no rule, so the copy sat naked on the ground; it is a recessed card
+   saying "nothing to choose", not a control. */
+.sizes.empty {
+  padding: 14px; background: var(--d-panel); border: 1px solid var(--d-rule);
+  border-radius: 10px; font: 400 13px/1.5 Archivo, sans-serif; color: var(--d-dim);
 }
-.tick .band { font-size: .76rem; font-weight: 600; }
-.tick .mi { font-size: .7rem; color: var(--muted); }
-.tick.on { border-color: var(--green); background: #eef4f0; }
+.ticks { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+.tick {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 4px; font: inherit; cursor: pointer; color: var(--d-ink);
+  background: var(--d-panel); border: 1px solid var(--d-rule); border-radius: 8px;
+}
+.tick .band { font: 600 13px/1.3 Archivo, sans-serif; color: var(--d-paper); }
+.tick .mi {
+  font: 500 10px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--d-muted);
+  font-variant-numeric: tabular-nums;
+}
+/* Selected is the accent and its tint — the same pair the resume banner and the
+   stop note use. There is no second colour to reach for. */
+.tick.on { border-color: var(--d-orange); background: rgba(228, 113, 44, .14); }
 .tick.off { opacity: .4; cursor: not-allowed; }
 
 /* --- legend ------------------------------------------------------------ */
@@ -199,22 +215,33 @@ button.link {
           color: var(--d-dim); }
 .legend i { display: inline-block; width: 18px; height: 3px; margin-right: 6px;
             border-radius: 2px; vertical-align: middle; }
-/* These are DARK_COLORS in src/components/MapView.tsx, verbatim — plus GROUND.boundary
-   from src/map/tokens.ts. Every screen left on this stylesheet draws on the regional
-   basemap, which is near-black, so the map is on the dark palette and the legend has
-   to be the same values. A legend that does not match the map is worse than none. */
+/* A legend that does not match the map is worse than none, and this one had already
+   drifted twice — so each swatch names where its value comes from.
+
+   `done`/`todo`/`held` are DARK_COLORS in src/components/MapView.tsx, which is what the
+   legacy (context-less) map path draws.
+
+   `picked`/`dropped` were #b5801f gold and #c8c5bc grey, matching MapView's `selected`
+   and `removed`. They were right until this pass: Confirm's picking map now runs on
+   `context="editing"`, so it is drawn by prayerLayers, and prayerLayers paints a
+   selected street INK.subject and a dropped one INK.remaining (src/map/style.ts).
+   The legend was describing the map it used to have. These are the tokens it has now. */
 .legend .done { background: #5E9B7E; }
 .legend .todo { background: #6E7676; }
 .legend .held { background: #E4712C; }
-.legend .picked { background: #b5801f; }
-.legend .dropped { background: #c8c5bc; }
-.legend .boundary { background: #242B2D; }
+.legend .picked { background: #FFFFFF; }        /* INK.subject */
+.legend .dropped { background: #4F5458; }       /* INK.remaining */
+.legend .boundary { background: #242B2D; }      /* GROUND.boundary */
 
 /* --- slippy map (MapView) ---------------------------------------------- */
+/* The well the map sits in before a tile paints. It was cream, which meant every
+   screen flashed a light rectangle on load and framed the near-black basemap in a
+   colour the basemap does not contain. It is the panel, hairlined like every other
+   surface. */
 .mapwrap {
   position: relative; width: 100%;
-  border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
-  background: #f2f1ec;
+  border: 1px solid var(--d-rule); border-radius: 10px; overflow: hidden;
+  background: var(--d-panel);
 }
 .maplibre { position: absolute; inset: 0; }
 /* One-finger pan must reach the map, not scroll the page under it. */
@@ -263,57 +290,76 @@ button.link {
 .maplibregl-ctrl-group button { width: 38px; height: 38px; }
 
 /* --- time slider (Priority 4) ------------------------------------------ */
-.timebox { display: grid; gap: .35rem; }
-.timelabel { margin: 0; font-size: .95rem; color: var(--ink); font-weight: 600; }
+.timebox { display: grid; gap: 6px; }
+/* The question is a label, not a heading — the answer under it is the loud thing. */
+.timelabel {
+  margin: 0; font: 500 11px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--d-muted);
+}
 .timevalue {
-  font-size: 1.7rem; font-weight: 700; color: var(--green); line-height: 1.1;
+  font: 700 32px/1.1 Archivo, sans-serif; letter-spacing: -.02em;
+  color: var(--d-paper); font-variant-numeric: tabular-nums;
 }
 /* 44px of vertical room and a large thumb: this is the control the whole screen
    turns on, and it is used outdoors, one-handed. */
-.timeslider { width: 100%; height: 44px; accent-color: var(--green); }
+.timeslider { width: 100%; height: 44px; accent-color: var(--d-orange); }
 .timeslider::-webkit-slider-thumb { width: 30px; height: 30px; }
 .timeslider::-moz-range-thumb { width: 30px; height: 30px; }
-.timeends { display: flex; justify-content: space-between; font-size: .76rem; color: var(--muted); }
+.timeends {
+  display: flex; justify-content: space-between;
+  font: 500 10px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--d-muted);
+  font-variant-numeric: tabular-nums;
+}
 
 /* --- mission card ------------------------------------------------------ */
-.mission h2 { margin: 0 0 .3rem; font-size: 1.25rem; line-height: 1.25; color: var(--green); }
-.mission-line { margin: .2rem 0 .7rem; font-size: .95rem; }
+/* The dashboard's mission voice, one level down: 19/600 warm white for the claim,
+   dim body for the sentence that qualifies it. */
+.mission h2 { margin: 0 0 6px; font: 600 19px/1.35 Archivo, sans-serif; color: var(--d-paper); }
+.mission-line { margin: 6px 0 12px; font: 400 14px/1.4 Archivo, sans-serif; color: var(--d-dim); }
 /* Dimmed while a newer recommendation is loading, so the card never silently
    claims to be the answer to a question that has already changed. */
 .mission.stale { opacity: .55; transition: opacity .15s; }
 
 .startbox {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-  gap: .6rem; margin-top: .8rem;
+  gap: 10px; margin-top: 12px;
 }
-.startlabel { display: block; font-size: .74rem; color: var(--muted);
-              text-transform: uppercase; letter-spacing: .03em; }
-.dirlinks { display: flex; gap: .4rem; }
+.startlabel {
+  display: block; font: 500 10px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--d-muted);
+}
+.dirlinks { display: flex; gap: 6px; }
+/* Handing off to Apple or Google is a secondary action, so it takes the secondary
+   shape the dashboard already defines: outline on --d-rule-2, no fill. */
 .dirlinks a {
-  display: inline-block; width: auto; margin: 0; padding: .55rem .8rem;
-  font-size: .85rem; font-weight: 600; text-decoration: none;
-  background: var(--card); color: var(--green);
-  border: 1px solid var(--line); border-radius: var(--radius);
+  display: inline-block; width: auto; margin: 0; padding: 8px 12px;
+  font: 500 12px/1 Archivo, sans-serif; text-decoration: none;
+  background: none; color: var(--d-paper);
+  border: 1px solid var(--d-rule-2); border-radius: 8px;
 }
 
-.alts { margin: 0 0 1rem; font-size: .9rem; }
-.alts ul { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .4rem; }
+.alts { margin: 0 0 18px; font-size: 13px; }
+.alts ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
 .altrow {
-  display: flex; flex-direction: column; align-items: flex-start; gap: .15rem;
-  width: 100%; padding: .7rem; text-align: left; font: inherit; cursor: pointer;
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  width: 100%; padding: 12px; text-align: left; font: inherit; cursor: pointer;
+  color: var(--d-ink);
+  background: var(--d-panel); border: 1px solid var(--d-rule); border-radius: 10px;
 }
-.altrow .muted { font-size: .8rem; }
+.altrow .muted { font-size: 12px; }
 
-.secondary-entry { margin-top: 1.6rem; padding-top: 1rem; border-top: 1px solid var(--line); }
-.identity { margin-top: 1.2rem; border-color: var(--green); }
-.identity h2 { margin-top: 0; }
+.secondary-entry { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--d-rule); }
+/* A card that wants slightly more presence than the rest gets the stronger hairline.
+   It does not get a colour — a bordered-in-accent box would read as an error. */
+.identity { margin-top: 20px; border-color: var(--d-rule-2); }
+.identity h2 { margin-top: 0; color: var(--d-paper); }
 
 /* --- build badge (temporary, for verifying previews) -------------------- */
 .buildbadge {
-  position: fixed; right: .5rem; z-index: 40;
-  bottom: max(.5rem, env(safe-area-inset-bottom));
-  font-size: .72rem; max-width: min(20rem, calc(100vw - 1rem));
+  position: fixed; right: 8px; z-index: 40;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  font-size: 11px; max-width: min(320px, calc(100vw - 16px));
   /* The wrapper spans a corner of the screen but is not itself a target. Without
      this it swallows taps aimed at whatever button happens to sit underneath —
      a diagnostic that breaks the thing it is diagnosing. */
@@ -329,83 +375,119 @@ button.link {
 }
 .buildbadge.warn > button { color: var(--d-orange); border-color: rgba(228, 113, 44, .5); }
 .bb-flag { font-weight: 700; }
+/* The pill above it is already glass on the dark ground; the panel it opens was a
+   white card, which made the diagnostic the brightest object on any screen. */
 .bb-detail {
-  margin-top: .35rem; padding: .6rem;
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-  box-shadow: 0 2px 10px rgba(0,0,0,.14);
+  margin-top: 6px; padding: 10px; color: var(--d-ink);
+  background: var(--d-panel); border: 1px solid var(--d-rule); border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .14);
 }
-.bb-detail dl { margin: 0 0 .5rem; display: grid; gap: .15rem; }
-.bb-detail dl div { display: flex; justify-content: space-between; gap: .6rem; }
-.bb-detail dt { color: var(--muted); }
-.bb-detail dd { margin: 0; font-weight: 600; word-break: break-all; text-align: right; }
-.bb-msg { margin: 0 0 .5rem; color: var(--red); }
-.bb-detail button { margin: 0; padding: .5rem .6rem; font-size: .78rem; }
+.bb-detail dl { margin: 0 0 8px; display: grid; gap: 4px; }
+.bb-detail dl div { display: flex; justify-content: space-between; gap: 10px; }
+.bb-detail dt { color: var(--d-muted); }
+.bb-detail dd { margin: 0; font-weight: 600; word-break: break-all; text-align: right;
+                color: var(--d-paper); }
+.bb-msg { margin: 0 0 8px; color: var(--d-orange); }
+.bb-detail button { margin: 0; padding: 8px 10px; font-size: 12px; }
 
 /* --- directions -------------------------------------------------------- */
-.directions { list-style: none; margin: 1rem 0; padding: 0; }
+.directions { list-style: none; margin: 18px 0; padding: 0; }
 .directions li {
-  display: flex; align-items: baseline; gap: .6rem;
-  padding: .6rem .2rem; border-bottom: 1px solid var(--line);
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 10px 4px; border-bottom: 1px solid var(--d-rule);
 }
-.directions .d-name { flex: 1; }
-.directions .d-miles { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .88rem; }
+.directions .d-name { flex: 1; color: var(--d-ink); }
+.directions .d-miles { font: 400 13px/1.4 Archivo, sans-serif; color: var(--d-muted);
+                       font-variant-numeric: tabular-nums; }
+/* A tag is a label on a row, not a status: it takes the mono label treatment on the
+   hairline, so it reads as quiet metadata rather than competing with the street. */
 .directions .d-tag {
-  font-size: .7rem; background: #eef4f0; color: var(--green);
-  padding: .1rem .4rem; border-radius: 999px;
+  font: 500 10px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .12em; text-transform: uppercase;
+  background: var(--d-rule); color: var(--d-dim);
+  padding: 4px 8px; border-radius: 999px;
 }
-.directions li.crossing .d-name { color: var(--gold); font-style: italic; }
+/* "You have to cross here" is the one warning on this screen, and warnings are
+   orange. The gold it used to be was the system's second accent; there is one. */
+.directions li.crossing .d-name { color: var(--d-orange); font-weight: 500; }
 
 /* --- confirmation choices ---------------------------------------------- */
-.choices { display: grid; gap: .55rem; margin-bottom: 1.2rem; }
+.choices { display: grid; gap: 6px; margin-bottom: 20px; }
 .choice {
-  display: flex; flex-direction: column; align-items: flex-start; gap: .15rem;
-  width: 100%; padding: .85rem; text-align: left; font: inherit; cursor: pointer;
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
+  width: 100%; padding: 14px; text-align: left; font: inherit; cursor: pointer;
+  color: var(--d-ink);
+  background: var(--d-panel); border: 1px solid var(--d-rule); border-radius: 10px;
 }
-.choice span { font-size: .82rem; color: var(--muted); }
-.choice.on { border-color: var(--green); background: #eef4f0; }
+.choice span { font: 400 12px/1.45 Archivo, sans-serif; color: var(--d-dim); }
+.choice.on { border-color: var(--d-orange); background: rgba(228, 113, 44, .14);
+             color: var(--d-paper); }
 
 /* --- feedback ---------------------------------------------------------- */
 .feedback h2 { margin-top: 0; }
 .feedback .field {
-  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
-  padding: .5rem 0; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid var(--d-rule);
 }
-.feedback .q { font-size: .88rem; }
-.stars { display: flex; gap: .1rem; }
+.feedback .q { font: 400 13px/1.4 Archivo, sans-serif; color: var(--d-ink); }
+.stars { display: flex; gap: 4px; }
+/* An unfilled star is the hairline made visible — the same rgba the stronger rules
+   are drawn in — so the row reads as five empty slots rather than five grey objects.
+   Filled is the accent, which is the only colour a rating is allowed to be. */
 .star {
-  background: none; border: 0; font-size: 1.6rem; line-height: 1; cursor: pointer;
-  color: var(--todo); padding: 0 .1rem;
+  background: none; border: 0; font-size: 24px; line-height: 1; cursor: pointer;
+  color: var(--d-rule-2); padding: 0 4px;
 }
-.star.on { color: var(--gold); }
-.yesno { display: flex; gap: .3rem; }
+.star.on { color: var(--d-orange); }
+.yesno { display: flex; gap: 4px; }
 .yesno button {
-  padding: .35rem .8rem; font: inherit; font-size: .85rem; cursor: pointer;
-  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: 8px 14px; font: 500 12px/1 Archivo, sans-serif; cursor: pointer;
+  background: none; color: var(--d-paper);
+  border: 1px solid var(--d-rule-2); border-radius: 999px;
 }
-.yesno button.on { background: var(--green); color: #fff; border-color: var(--green); }
-.check { display: flex; align-items: flex-start; gap: .5rem; margin: 0; color: var(--ink); }
-.check input { width: auto; margin: .15rem 0 0; }
+.yesno button.on { background: var(--d-orange); color: var(--d-paper);
+                   border-color: var(--d-orange); }
+.check { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: var(--d-ink); }
+.check input { width: auto; margin: 4px 0 0; accent-color: var(--d-orange); }
 
 /* --- admin ------------------------------------------------------------- */
-.tabs { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: 1rem; }
+/* Tabs are the dashboard's Explore pill, repeated: 32px, 999, glass, mono control
+   label. The selected one is the accent, because selection is the one thing on this
+   screen worth a colour. */
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 18px; }
 .tabs button {
-  padding: .4rem .7rem; font: inherit; font-size: .82rem; cursor: pointer;
-  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  height: 32px; padding: 0 12px; cursor: pointer;
+  font: 500 10px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .12em; text-transform: uppercase;
+  background: rgba(20, 23, 26, .55); color: var(--d-dim);
+  border: 1px solid var(--d-rule); border-radius: 999px;
 }
-.tabs button.on { background: var(--green); color: #fff; border-color: var(--green); }
-.grid { width: 100%; border-collapse: collapse; font-size: .8rem; display: block; overflow-x: auto; }
-.grid th, .grid td { text-align: left; padding: .4rem .5rem; border-bottom: 1px solid var(--line); }
-.grid tr.flagged { background: #fdeeee; }
-.grid code { font-size: .74rem; color: var(--muted); }
+.tabs button.on { background: var(--d-orange); color: var(--d-paper);
+                  border-color: var(--d-orange); }
 
-.bars { display: grid; gap: .25rem; margin: .4rem 0 1rem; }
-.bar { display: grid; grid-template-columns: minmax(6rem, 12rem) 1fr 3rem; gap: .5rem;
-       align-items: center; font-size: .82rem; }
-.bar-k { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar-t { background: #eeece5; border-radius: 3px; height: 10px; }
-.bar-t i { display: block; height: 10px; background: var(--green); border-radius: 3px; }
-.bar-v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.grid { width: 100%; border-collapse: collapse; font-size: 12px; color: var(--d-ink);
+        display: block; overflow-x: auto; }
+.grid th, .grid td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--d-rule); }
+.grid th {
+  font: 500 10px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--d-muted);
+  white-space: nowrap;
+}
+.grid td { font-variant-numeric: tabular-nums; }
+/* A flagged row is the stop note as a table row: the accent tint, nothing louder. */
+.grid tr.flagged { background: rgba(228, 113, 44, .14); }
+.grid code { font: 500 10px/1.4 'IBM Plex Mono', ui-monospace, monospace;
+             color: var(--d-muted); }
+
+.bars { display: grid; gap: 6px; margin: 8px 0 18px; }
+.bar { display: grid; grid-template-columns: minmax(6rem, 12rem) 1fr 3rem; gap: 8px;
+       align-items: center; font-size: 12px; }
+.bar-k { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--d-ink); }
+/* The dashboard's progress bar, undashed and shorter: warm-white fill in an empty
+   channel cut from the hairline. Radius 2 is the bar radius. */
+.bar-t { background: var(--d-rule); border-radius: 2px; height: 10px; }
+.bar-t i { display: block; height: 10px; background: var(--d-paper); border-radius: 2px; }
+.bar-v { text-align: right; font-variant-numeric: tabular-nums; color: var(--d-muted); }
 
 /* ===========================================================================
    Mission control — design "01 — Mission control".
