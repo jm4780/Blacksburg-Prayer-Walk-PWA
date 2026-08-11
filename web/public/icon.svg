@@ -1,6 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#1f3d2b"/>
+  <!--
+    The mark is unchanged; only its palette is. It used to be cream-on-green from the
+    first cut of the product. The app is dark now, and the two colours it actually
+    means something by are the ones on the map: white is ground that has been prayed
+    for, and the single orange dot is where a walk starts. So the icon says what the
+    map says.
+  -->
+  <rect width="512" height="512" rx="96" fill="#0F1518"/>
   <path d="M120 372 C 176 300, 200 260, 232 196 C 258 144, 300 128, 340 148 C 384 170, 392 220, 366 258 C 340 296, 292 300, 268 276"
-        fill="none" stroke="#f4e9c8" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="120" cy="372" r="30" fill="#e2a03f"/>
+        fill="none" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="120" cy="372" r="30" fill="#E4712C"/>
 </svg>

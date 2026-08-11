@@ -2,6 +2,35 @@
    visual polish, and every rule here earns its place by making something readable
    one-handed, outdoors, at arm's length. */
 
+/*
+ * THE DARK SYSTEM, PROMOTED.
+ *
+ * These eleven values were declared on `.dash` and nowhere else, which meant the
+ * dashboard was the only screen that could see them — every other screen inherited the
+ * light `:root` theme below and there was no way to reach the dark one short of
+ * re-declaring the whole block. That is exactly how a product ends up with two of every
+ * colour, so they are here now: one system, one place, inherited by everything.
+ *
+ * The light tokens under this are NOT deleted. Screens that still use them keep
+ * working until they are migrated, and deleting them would be a rewrite rather than a
+ * finish. They are legacy, and the migration is one screen at a time.
+ */
+:root {
+  --d-bg: #14171A;
+  --d-panel: #1B1F22;
+  --d-paper: #F7F5F1;
+  --d-ink: #E7E4DE;
+  --d-muted: #8B9392;
+  --d-dim: #9AA0A0;
+  --d-faint: #7E8686;
+  /* Declared with the rest for completeness. It is the map's "covered" green and has
+     never been a UI colour — the accent is --d-orange. Do not reach for it. */
+  --d-green: #5E9B7E;
+  --d-orange: #E4712C;
+  --d-rule: rgba(247, 245, 241, .12);
+  --d-rule-2: rgba(247, 245, 241, .18);
+}
+
 :root {
   --ink: #1a1a18;
   --muted: #5f6260;
@@ -391,18 +420,6 @@ button.link {
    The approved direction is dark throughout; the other screens follow later.
    =========================================================================== */
 .dash {
-  --d-bg: #14171A;
-  --d-panel: #1B1F22;
-  --d-paper: #F7F5F1;
-  --d-ink: #E7E4DE;
-  --d-muted: #8B9392;
-  --d-dim: #9AA0A0;
-  --d-faint: #7E8686;
-  --d-green: #5E9B7E;
-  --d-orange: #E4712C;
-  --d-rule: rgba(247, 245, 241, .12);
-  --d-rule-2: rgba(247, 245, 241, .18);
-
   position: fixed; inset: 0;
   display: flex; flex-direction: column;
   background: var(--d-bg); color: var(--d-ink);

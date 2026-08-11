@@ -42,14 +42,19 @@ export default defineConfig({
         name: 'Blacksburg Prayer Walk',
         short_name: 'Prayer Walk',
         description: 'Pray for Blacksburg, one street at a time.',
-        theme_color: '#1f3d2b',
-        background_color: '#faf9f6',
+        // The splash screen. These were the first cut's cream and green, so a cold
+        // install opened on a cream screen and flashed to a near-black app.
+        theme_color: '#0F1518',
+        background_color: '#0F1518',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
         scope: '/',
         icons: [
-          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },
+          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
@@ -77,7 +82,7 @@ export default defineConfig({
         // full 200 response a precache returns to a range request — pmtiles' own
         // FetchSource throws on that, which would break the map offline and only
         // offline. See the comment there before changing either side.
-        globPatterns: ['**/*.{js,css,svg,pmtiles}', 'basemap/*.json'],
+        globPatterns: ['**/*.{js,css,svg,png,pmtiles}', 'basemap/*.json'],
         // Default is 2 MiB, which silently drops the archive from the manifest.
         maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
         cleanupOutdatedCaches: true,
