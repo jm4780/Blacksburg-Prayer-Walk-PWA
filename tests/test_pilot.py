@@ -266,3 +266,34 @@ def test_response_rate_can_never_exceed_one(client, h, admin_h):
     assert s["response_rate"] is None or 0.0 <= s["response_rate"] <= 1.0, s
     assert s["responses"] >= s["responses_on_submitted_walks"]
     assert s["responses_on_walks_still_in_progress"] >= 1
+
+
+def test_an_administrator_can_record_a_walk_taken_without_the_app(client, admin_h, ns):
+    """The paper sign-up sheet path — and it 500'd for its whole existence.
+
+    /api/admin/completions/record writes `outcome="DIFFERENT_ROUTE"` onto the synthetic
+    walk and then hands the same string to `completion_svc.record`, whose allow-list
+    contained only the three outcomes a *walker* can choose. Every call raised
+    ValueError. It has never had a test, which is how it stayed broken while the
+    endpoint above and below it were exercised.
+
+    It matters more since walks became un-resubmittable: the refusal a walker now sees
+    tells them to ask us to correct the record, and this is the endpoint that does it.
+    """
+    required = [s.id for s in ns.net.segments if s.required][:3]
+    r = client.post("/api/admin/completions/record",
+                    json=required, params=dict(reason="Sunday group walk, paper list"),
+                    headers=admin_h)
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["outcome"] == "DIFFERENT_ROUTE"
+    assert body["segments_newly_recorded"] == len(required)
+    assert body["miles_credited"] > 0
+
+
+def test_a_walker_cannot_send_an_administrator_only_outcome(client, h):
+    """DIFFERENT_ROUTE stays out of OUTCOMES so it cannot arrive in a request body."""
+    w, _ = a_walk(client, h)
+    r = client.post(f"/api/walks/{w['id']}/complete",
+                    json=dict(outcome="DIFFERENT_ROUTE"), headers=h)
+    assert r.status_code >= 400, r.text

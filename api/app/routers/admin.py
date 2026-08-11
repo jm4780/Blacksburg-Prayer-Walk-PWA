@@ -278,7 +278,17 @@ def record_offline(segment_ids: list[str], reason: str,
     if not valid:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
                             "no valid REQUIRED segment ids in the request")
-    walk = Walk(participant_id=actor.id, request_id="", network_id=ns.net.network_id,
+    # A synthetic request to hang the walk on. `Walk.request_id` is a foreign key into
+    # route_requests, and this endpoint passed the empty string — so every call failed
+    # on a FOREIGN KEY constraint even after getting past the outcome allow-list. There
+    # was no generation here, so the row records that honestly: engine ADMIN, no seed,
+    # no variants, and a start node of -1 that cannot collide with a real snapped node.
+    req = RouteRequest(participant_id=actor.id, network_id=ns.net.network_id,
+                       engine_version="ADMIN", start_node=-1, start_source="MAP",
+                       seed=0, variants={}, failure_reason=None)
+    db.add(req)
+    db.flush()
+    walk = Walk(participant_id=actor.id, request_id=req.id, network_id=ns.net.network_id,
                 engine_version="ADMIN", status="COMPLETED", band="OFFLINE",
                 target_miles=0.0,
                 distance_miles=round(sum(ns.net.segments[ns.idx_of_id[s]].miles

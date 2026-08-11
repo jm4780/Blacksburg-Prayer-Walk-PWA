@@ -30,6 +30,17 @@ OUTCOMES = {
     "DID_NOT_COMPLETE": "Did not complete the walk.",
 }
 
+# What an administrator may record that a walker may not. `DIFFERENT_ROUTE` is a walk
+# that happened without the app at all — somebody walked, told us afterwards, and an
+# administrator entered it. It is already written to `Walk.outcome` by
+# /api/admin/completions/record, so the vocabulary has always contained it; only this
+# allow-list did not, which meant that endpoint raised ValueError and returned a 500
+# every time it was called. It is kept out of OUTCOMES rather than added to it so the
+# walker-facing handler cannot accept it from a request body.
+ADMIN_OUTCOMES = {
+    "DIFFERENT_ROUTE": "Recorded by an administrator for a walk taken without the app.",
+}
+
 
 def record(db: Session, ns: NetworkService, walk: Walk, outcome: str,
            segment_ids: list[str] | None, note: str | None = None) -> dict:
@@ -50,7 +61,7 @@ def record(db: Session, ns: NetworkService, walk: Walk, outcome: str,
     line would have to be map-matched back onto the network, and every match would be
     a silent guess about what somebody prayed for.
     """
-    if outcome not in OUTCOMES:
+    if outcome not in OUTCOMES and outcome not in ADMIN_OUTCOMES:
         raise ValueError(f"unknown outcome {outcome!r}")
 
     planned = list(walk.planned_required_ids)
