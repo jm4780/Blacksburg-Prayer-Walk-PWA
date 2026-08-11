@@ -82,7 +82,17 @@ export default defineConfig({
         // full 200 response a precache returns to a range request — pmtiles' own
         // FetchSource throws on that, which would break the map offline and only
         // offline. See the comment there before changing either side.
-        globPatterns: ['**/*.{js,css,svg,png,pmtiles}', 'basemap/*.json'],
+        //
+        // The glyphs (`pbf`) and the web fonts (`woff`, `woff2`) are in here for the
+        // same reason as the archive: without them the offline map draws every street
+        // and names none of them — MapLibre cannot render a label without its glyph
+        // atlas — and the app itself falls back to the system UI face, which is a
+        // different product on screen. Together they are ~250 KB against a 6 MB
+        // archive, so the offline typography is close to free.
+        globPatterns: [
+          '**/*.{js,css,svg,png,pmtiles,woff,woff2,pbf}',
+          'basemap/*.json',
+        ],
         // Default is 2 MiB, which silently drops the archive from the manifest.
         maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
         cleanupOutdatedCaches: true,

@@ -118,7 +118,14 @@ export default function Generate({ nav, onWalk }: {
         <div className="card">
           {error && <p className="error" role="alert">{error}</p>}
           <p>Pan and zoom to where you would like to start, then tap.</p>
-          <MapView segments={lines} start={start} height={400}
+          {/* `editing` is the map system's setting for picking by thumb — the close
+              zoom, the lifted context and the 26px tap target. This picker takes taps
+              and wants exactly those, and it is the same setting Confirm's street
+              picker runs on, so the two pick surfaces in the product look alike.
+              Without a context MapView falls back to its pre-system rendering, which
+              is how this screen ended up drawing a different map from every other
+              screen — see src/map/style.ts. */}
+          <MapView segments={lines} start={start} height={400} context="editing"
                    ariaLabel="Blacksburg required streets. Tap to choose a start point."
                    onMapTap={(p) => { setStart(p); run(p.lat, p.lon, 'MAP') }} />
           <button className="secondary" onClick={useMyLocation}>
@@ -155,7 +162,11 @@ export default function Generate({ nav, onWalk }: {
 
               {selected?.available && (
                 <div className="card">
+                  {/* `briefing`, the same setting Mission uses: this is the identical
+                      moment — a route being considered, not yet accepted — so it is
+                      the identical map. */}
                   <MapView route={selected.geometry} start={start} height={340}
+                           context="briefing"
                            ariaLabel={`${selected.band} route, ${selected.distance_miles} miles`} />
                   {/* Priority 8: what the walk is, not how it scored. */}
                   <p className="mission-line">

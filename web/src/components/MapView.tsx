@@ -53,12 +53,39 @@ mlConfig.WORKER_URL = workerUrl
 registerBasemapProtocol()
 
 /**
- * Set once a basemap fetch has demonstrably failed. Later maps in the same session
- * skip the six-second discovery and start on the fallback immediately — otherwise
- * tapping "Explore" on a blocked network shows an empty panel for six seconds while
- * a second map independently rediscovers what the first one already knows.
+ * How long to wait for the basemap before drawing without it.
+ *
+ * This used to be three seconds, on the reasoning that the style and the archive are
+ * same-origin static files so a slow answer means no answer. That reasoning holds for
+ * a warm cache on a desk. It does not hold for the walker this product is actually
+ * for: a phone on a rural link, cold, fetching a 6 MB archive's header and directory
+ * through however much latency Montgomery County offers that afternoon. Three seconds
+ * of that is an ordinary first load, not a failure, and calling it a failure threw
+ * away the street background of a map that was about to arrive.
+ *
+ * Ten seconds is long enough that a genuinely slow link finishes inside it, and short
+ * enough that a genuinely absent basemap does not hold the screen hostage — the route
+ * still draws either way, so what is being spent here is context, not the screen.
  */
-let basemapKnownDead = false
+const BASEMAP_DEADLINE_MS = 10_000
+
+/**
+ * When a basemap fetch has demonstrably failed, the verdict stands until this time.
+ *
+ * The latch is worth keeping: without it, tapping through three screens on a blocked
+ * network means three separate full-length waits, each map independently rediscovering
+ * what the first one already knows.
+ *
+ * But it used to be a boolean that nothing ever cleared, and a verdict that never
+ * expires is worse than the wait it saves. One slow first load condemned the basemap
+ * for the whole session — every later map drew degraded on a completely healthy
+ * network, and only a full page reload fixed it. So the verdict is now a cooldown
+ * rather than a sentence. Maps created inside the window skip the wait; the first map
+ * created after it tries the network again; and any map whose real style actually
+ * loads clears the verdict outright for every map that follows it.
+ */
+let basemapDeadUntil = 0
+const BASEMAP_RETRY_MS = 30_000
 
 export interface SegmentFeature {
   id: string
@@ -257,7 +284,10 @@ export default function MapView({
   // ---------------------------------------------------------------- lifecycle
   useEffect(() => {
     if (!container.current || map.current) return
-    const bornDead = basemapKnownDead
+    const bornDead = Date.now() < basemapDeadUntil
+    // Whether this map is showing the real basemap, so only a map that actually
+    // reached it may clear the verdict for everybody else.
+    let live = !bornDead
     // The basemap is a static file on our own origin — one `.pmtiles` archive and one
     // style document, both precached by the service worker. So this fetch is local,
     // works offline, and no tile host can fail or restyle us. That is the point of
@@ -286,24 +316,28 @@ export default function MapView({
     // that never draws, because the layers are added on 'load'.
     if (bornDead) setBasemapFailed(true)
     const giveUp = () => {
-      basemapKnownDead = true
+      live = false
+      basemapDeadUntil = Date.now() + BASEMAP_RETRY_MS
       setBasemapFailed(true)
       try {
         m.setStyle(fallbackStyle(groundRef.current))
       } catch { /* already gone */ }
     }
-    // Shorter than the six seconds a remote tile host earned: the style and the
-    // archive are both same-origin static files, so if they have not arrived by now
-    // they are not coming.
     const failTimer = bornDead ? 0 : window.setTimeout(() => {
       if (!m.isStyleLoaded()) giveUp()
-    }, 3000)
+    }, BASEMAP_DEADLINE_MS)
 
     m.on('error', (e: any) => {
       // Tile 404s are noise; a failed *style* is not.
       if (e?.error?.status && e.error.status >= 400 && !m.isStyleLoaded()) giveUp()
     })
-    m.on('load', () => { window.clearTimeout(failTimer); setReady(true) })
+    m.on('load', () => {
+      window.clearTimeout(failTimer)
+      // The basemap answered. Whatever an earlier map concluded is out of date, and
+      // the next map should not start on the fallback because of it.
+      if (live) basemapDeadUntil = 0
+      setReady(true)
+    })
     m.on('styledata', () => {
       if (!m.isStyleLoaded()) return
       // Route markers are drawn rather than fetched, and a style reload drops them.
