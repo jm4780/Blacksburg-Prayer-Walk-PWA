@@ -373,7 +373,10 @@ p button.link { display: inline; min-height: 0; }
 /* --- mission card ------------------------------------------------------ */
 /* The dashboard's mission voice, one level down: 19/600 warm white for the claim,
    dim body for the sentence that qualifies it. */
-.mission h2 { margin: 0 0 6px; font: 600 19px/1.35 Archivo, sans-serif; color: var(--d-paper); }
+/* The walk's title is the page's h1 (see Mission.tsx). It keeps the type it always
+   had — the level changed, not the design — so this selector covers both. */
+.mission h1, .mission h2 { margin: 0 0 6px; font: 600 19px/1.35 Archivo, sans-serif;
+  color: var(--d-paper); }
 .mission-line { margin: 6px 0 12px; font: 400 14px/1.4 Archivo, sans-serif; color: var(--d-dim); }
 /* Dimmed while a newer recommendation is loading, so the card never silently
    claims to be the answer to a question that has already changed. */

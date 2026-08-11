@@ -59,11 +59,10 @@ export default function Dashboard({ nav, me, walk }: {
     api.progressMap().then(setMap).catch((e) => {
       // The map is gated behind the G1 licensing decision. Under
       // BPW_ACCESS_MODE=authenticated an anonymous visitor gets a 403 here — on the
-      // landing screen, where the map is the centrepiece. Say so rather than
-      // showing an empty panel.
-      // 403 is the G1 licensing gate and its message is written for a reader. Anything
-      // else that stops the map is reported as itself rather than silently leaving an
-      // empty panel with a legend under it.
+      // landing screen, where the map is the centrepiece — and that message is written
+      // for a reader, so it is shown as itself. Anything else that stops the map is
+      // now reported too, rather than leaving an empty panel with a legend under it
+      // quietly implying the town has been walked nowhere.
       if (e instanceof ApiError && e.status === 403) setMapBlocked(e.message)
       else setMapFailed(true)
     })

@@ -390,9 +390,15 @@ export default function Confirm({ nav, walkId, onDone }: {
               Guarded here rather than around the whole panel: a walk with no stored
               geometry used to select this option and produce nothing at all on screen,
               so the numbers below vanished along with the map. The numbers are the
-              part that matters — they are what is being signed for. */}
+              part that matters — they are what is being signed for.
+
+              180px, not 300. This is the screen somebody reaches having just walked
+              the route it is drawing — they do not need to study it, they need to
+              recognise it — and at 300px it pushed Submit some 400px below the fold on
+              a phone, so the way out of the screen was invisible on arrival. The
+              cartography is untouched; only the height. */}
           {walk.geometry && (
-            <MapView route={walk.geometry} height={300} context="recording"
+            <MapView route={walk.geometry} height={180} context="recording"
                      ariaLabel="The route you planned" />
           )}
           {/* "Yes, mark it complete" was asking the walker to affirm a distance and a

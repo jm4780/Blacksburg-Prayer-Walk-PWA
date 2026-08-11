@@ -224,7 +224,16 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
 
   return (
     <div className="screen">
-      <h1>Find my next walk</h1>
+      {/* No standalone heading. "Find my next walk" cost 45px on a screen whose whole
+          job is to ask one question and show one answer — and the slider below asks
+          the question ("How long have you got?") while the card names the answer. On a
+          390x746 phone that 45px was the difference between a signed-in walker seeing
+          the whole of "Walk this" and seeing 54px of it: the `whoami` bar is 45px, so
+          the person who comes back every week was the one getting the clipped button.
+
+          The walk's own title carries the h1 now (see the card below), which is both
+          truer — the heading of this page is the walk it is offering — and keeps the
+          document with exactly one top-level heading. */}
 
       {/* ---------------------------------------------------------- the slider */}
       <div className="card timebox">
@@ -303,7 +312,10 @@ export default function Mission({ nav, me, onIdentity, onWalk }: {
       {/* ------------------------------------------------------- the mission */}
       {m && (
         <div className={loading ? 'card mission stale' : 'card mission'}>
-          <h2>{m.title}</h2>
+          {/* The page's heading, not a sub-heading: this screen has one subject and
+              this is its name. Styled by `.mission h1` exactly as `.mission h2` was —
+              the type is unchanged, only the level. */}
+          <h1>{m.title}</h1>
           <p className="mission-line">{m.households_line}</p>
           <p className="mission-line">
             About {m.estimated_minutes} minutes · {m.distance_miles} miles
