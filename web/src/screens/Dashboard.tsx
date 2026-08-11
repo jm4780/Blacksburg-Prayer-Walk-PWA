@@ -57,6 +57,22 @@ export default function Dashboard({ nav, me, walk }: {
     })
   }, [walk?.id])
 
+  /*
+   * Escape closes the expanded map.
+   *
+   * The comment on the overlay below has promised this since it was written — "Escape
+   * or the close button and you are exactly where you were" — and nothing ever
+   * listened for the key. It is an `aria-modal` dialog, so a screen reader tells the
+   * person they are in a modal and that Escape is how modals close, and then Escape
+   * did nothing. Documenting a behaviour is not implementing it.
+   */
+  useEffect(() => {
+    if (!expanded) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setExpanded(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [expanded])
+
   const segments: SegmentFeature[] = useMemo(
     () => (map?.features ?? []).map((f) => ({
       id: f.properties.id,
@@ -88,6 +104,18 @@ export default function Dashboard({ nav, me, walk }: {
   const pct = m ? m.percent_prayed_for.value : null
   const done = m?.required_segments_complete ?? 0
   const total = m?.required_segments_total ?? 0
+  /*
+   * Unknown is not zero, and the difference matters here more than anywhere else in
+   * the app. When /api/progress/* failed or hung, this screen reported a town at
+   * "0 households, 0 streets, 0 miles" with the map drawn and the legend under it and
+   * no error anywhere — a confident, specific, wrong statement that nobody in
+   * Blacksburg has prayed for anything.
+   *
+   * The percentage above already had the right answer: an em dash. This is the same
+   * treatment applied to the three numbers beside it, so the whole panel either knows
+   * or says it does not. Not a new design — the design's own idiom, used consistently.
+   */
+  const stat = (v: number | undefined) => (m ? (v ?? 0).toLocaleString() : '—')
   // The percentage is measured in MILES. Showing a segment count beneath it invited
   // the reader to check the arithmetic against a different denominator and find it
   // wrong: 100 of 1,582 segments is 6.3%, while the same state of the town is 4.5%
@@ -131,7 +159,8 @@ export default function Dashboard({ nav, me, walk }: {
           <div className="dash-pct-side">
             <div className="dash-label">Prayed for</div>
             <div className="dash-pct-sub">
-              {milesDone.toLocaleString()} of {milesTotal.toLocaleString()} miles
+              {m ? `${milesDone.toLocaleString()} of ${milesTotal.toLocaleString()} miles`
+                 : 'miles prayed for'}
             </div>
           </div>
         </div>
@@ -169,19 +198,19 @@ export default function Dashboard({ nav, me, walk }: {
         <button className="dash-metric" onClick={() => setDefs(!defs)}
                 aria-expanded={defs}>
           <span className="dash-metric-v">
-            {(m?.estimated_households_prayed_for.value ?? 0).toLocaleString()}
+            {stat(m?.estimated_households_prayed_for.value)}
           </span>
           <span className="dash-label">Households</span>
         </button>
         <button className="dash-metric" onClick={() => setDefs(!defs)}
                 aria-expanded={defs}>
-          <span className="dash-metric-v">{done.toLocaleString()}</span>
+          <span className="dash-metric-v">{stat(m?.required_segments_complete)}</span>
           <span className="dash-label">Streets</span>
         </button>
         <button className="dash-metric" onClick={() => setDefs(!defs)}
                 aria-expanded={defs}>
           <span className="dash-metric-v">
-            {(m?.total_miles_walked.value ?? 0).toLocaleString()}
+            {stat(m?.total_miles_walked.value)}
           </span>
           <span className="dash-label">Miles</span>
         </button>

@@ -71,6 +71,23 @@ export default function BuildBadge() {
     window.location.replace(`${window.location.pathname}?fresh=${Date.now()}${window.location.hash}`)
   }
 
+  /*
+   * "Remove this once previewing is boring again" — the note at the top of this file.
+   *
+   * Not removed, because the thing it was built to catch is real and still happens: a
+   * phone holding an old service worker shows a build that looks current and is not.
+   * But it was drawn on every screen, always, and in a finished app that a 65-year-old
+   * installs from a home screen, a permanent orange sticker reading
+   * "build 409ec95+edits · stale" over the bottom of the page is not information —
+   * it is a fault indicator that never goes out. It also sat on top of the first row
+   * of the street list on the walk screen.
+   *
+   * So it now appears when it has something to say and is otherwise silent: a bundle
+   * that disagrees with the server, or a server reporting empty map data. In dev it
+   * always shows, because that is where somebody is actually asking the question.
+   */
+  if (!mismatch && !staleData && !import.meta.env.DEV) return null
+
   return (
     <div className={mismatch || staleData ? 'buildbadge warn' : 'buildbadge'}>
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open}>
