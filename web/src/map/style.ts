@@ -245,26 +245,32 @@ export function prayerLayers(ctx: MapContext, basemap = false): any[] {
   })
 
   // --- already prayed for -------------------------------------------------------
+  /*
+   * COLOUR CARRIES THIS, NOT MASS.
+   *
+   * Where covered ground is the subject — the town map and the atlas — it used to be
+   * drawn at the subject weight (0.95) with a blurred halo 2.6x wider beneath it,
+   * against remaining at 0.4. Two and a half times the line, plus a glow. On a town
+   * with real coverage that reads as a thick overlay laid on top of the map rather
+   * than as the same streets in a different state, and it thickens exactly as the
+   * mission succeeds: the further the church gets, the heavier the map.
+   *
+   * It is now the same line as everything still to walk, in white. The whole
+   * hierarchy of this map is luminance against a near-black ground, and white on
+   * #4F5458 is a wide enough gap to carry the difference on its own — which is the
+   * design's own rule ("hierarchy from luminance, not hue") applied to width as well.
+   * The halo goes with it; it existed to lift a heavy line off the ground, and a
+   * hairline does not need lifting.
+   */
   const coveredIsSubject = c.subject === 'covered'
-  if (coveredIsSubject) {
-    layers.push({
-      id: 'pw-covered-halo', type: 'line', source: 'pw-segments',
-      filter: isState('done'),
-      layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: {
-        'line-color': INK.subject,
-        'line-width': widthFor('subject', c.emphasis * HALO.widthFactor),
-        'line-opacity': HALO.opacity.subject, 'line-blur': 2,
-      },
-    })
-  }
   layers.push({
     id: 'pw-covered', type: 'line', source: 'pw-segments',
     filter: isState('done'),
     layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: {
       'line-color': coveredIsSubject ? INK.subject : INK.covered,
-      'line-width': widthFor(coveredIsSubject ? 'subject' : 'covered', c.emphasis),
+      // Subject or not, covered is drawn at the weight of the ground around it.
+      'line-width': widthFor(coveredIsSubject ? 'remaining' : 'covered', c.emphasis),
       'line-opacity': coveredIsSubject ? INK_OPACITY.subject : INK_OPACITY.covered,
     },
   })

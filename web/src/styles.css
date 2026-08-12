@@ -671,8 +671,13 @@ p button.link { display: inline; min-height: 0; }
    and everything left is INK.remaining #4F5458. A legend two shades off the map it
    sits on is the same defect as a legend naming the wrong colour entirely, just
    harder to catch. Covered is heavier and pure white; still-to-walk is a thin solid
-   grey, not a dash — see TEXTURE in src/map/tokens.ts for why the dashes went. */
-.dash-legend .lg-done { height: 4px; border-radius: 2px; background: #FFFFFF; }
+   grey, not a dash — see TEXTURE in src/map/tokens.ts for why the dashes went.
+
+   Both swatches are now the same weight, because the map's are: covered ground is
+   drawn at the same width as everything still to walk and separated from it by
+   luminance alone. A 4px swatch over a 2px one would be describing the map this
+   legend used to sit on. */
+.dash-legend .lg-done { height: 2px; border-radius: 1px; background: #FFFFFF; }
 .dash-legend .lg-todo { height: 2px; border-radius: 1px; background: #4F5458; }
 
 .dash-explore, .dash-collapse {
