@@ -1,0 +1,358 @@
+{
+  "name_fixes": [
+    {
+      "field": "name",
+      "from": "Deerfield",
+      "to": "deerfield trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Hethwood Trail Underpass",
+      "to": "hethwood trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Hethwood Trail Underpass",
+      "to": "hethwood trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Hethwood Trail Underpass",
+      "to": "hethwood trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Smithfield Road Trail Underpass",
+      "to": "smithfield road trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Bicenntennial Trail",
+      "to": "bicentennial trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Bicenntennial Trail",
+      "to": "bicentennial trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Bicenntennial Trail",
+      "to": "bicentennial trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Deerfield",
+      "to": "deerfield trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Hethwood Trail Underpass",
+      "to": "hethwood trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Hethwood Trail Underpass",
+      "to": "hethwood trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Hethwood Trail Underpass",
+      "to": "hethwood trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Hethwood Trail Underpass",
+      "to": "hethwood trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Hethwood Trail Underpass",
+      "to": "hethwood trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Hethwood Trail Underpass",
+      "to": "hethwood trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Hethwood Trail Underpass",
+      "to": "hethwood trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Smithfield Road Trail Underpass",
+      "to": "smithfield road trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Smithfield Road Trail Underpass",
+      "to": "smithfield road trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Smithfield Road Trail Underpass",
+      "to": "smithfield road trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Bicenntennial Trail",
+      "to": "bicentennial trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Bicenntennial Trail",
+      "to": "bicentennial trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Bicenntennial Trail",
+      "to": "bicentennial trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Bicenntennial Trail",
+      "to": "bicentennial trail",
+      "rule": "NAME_FIXES"
+    },
+    {
+      "field": "name",
+      "from": "Bicenntennial Trail",
+      "to": "bicentennial trail",
+      "rule": "NAME_FIXES"
+    }
+  ],
+  "value_fixes": [
+    {
+      "field": "Material",
+      "from": "Aspahlt",
+      "to": "Asphalt",
+      "source_id": 536,
+      "rule": "MATERIAL_FIXES"
+    },
+    {
+      "field": "Material",
+      "from": "Aspahlt",
+      "to": "Asphalt",
+      "source_id": 612,
+      "rule": "MATERIAL_FIXES"
+    }
+  ],
+  "anomalies": [
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Sharrow",
+      "road": "Roanoke Street",
+      "source_id": 24
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Contra Flow Lane",
+      "road": "Draper Road",
+      "source_id": 37
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Country Club Drive",
+      "source_id": 48
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Share the Road",
+      "road": "Turner Street",
+      "source_id": 64
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Sharrow",
+      "road": "Patrick Henry Drive",
+      "source_id": 178
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Patrick Henry Drive",
+      "source_id": 179
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Patrick Henry Drive",
+      "source_id": 180
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Progress Street",
+      "source_id": 217
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Progress Street",
+      "source_id": 218
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Clay Street",
+      "source_id": 342
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Share the Road",
+      "road": "Clay Street",
+      "source_id": 343
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Sharrow",
+      "road": "Progress Street",
+      "source_id": 364
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Sharrow",
+      "road": "Progress Street",
+      "source_id": 365
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "West Campus Drive",
+      "source_id": 589
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Stanger Street",
+      "source_id": 590
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Stanger Street",
+      "source_id": 591
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Kraft Drive",
+      "source_id": 623
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Kraft Drive",
+      "source_id": 624
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Sharrow",
+      "road": "Draper Road",
+      "source_id": 728
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Turner Street",
+      "source_id": 1277
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Church Street",
+      "source_id": 1318
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Country Club Drive",
+      "source_id": 1338
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Country Club Drive",
+      "source_id": 1399
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Country Club Dr",
+      "source_id": 1400
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Country Club Drive",
+      "source_id": 1424
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Progress Street",
+      "source_id": 1429
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Progress Street",
+      "source_id": 1430
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Progress Street",
+      "source_id": 1432
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Sharrow",
+      "road": "Progress Street",
+      "source_id": 1433
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Church Street",
+      "source_id": 1442
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": "Progress St",
+      "source_id": 1458
+    },
+    {
+      "kind": "onstreet_path_unmatched",
+      "type": "Bike Lane",
+      "road": null,
+      "source_id": 20074
+    }
+  ]
+}

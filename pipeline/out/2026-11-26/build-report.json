@@ -1,0 +1,1327 @@
+{
+  "snapshot_date": "2026-11-26",
+  "built_at": "2026-11-26T00:37:51.237495+00:00",
+  "sources": {
+    "roads": {
+      "dataset": "roads",
+      "title": "Town of Blacksburg \u2014 Roads",
+      "publisher": "Town of Blacksburg",
+      "role": "Primary street network",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Address_Road_Building/FeatureServer/1",
+      "retrieved_at": "2026-11-26T00:37:15.525058+00:00",
+      "source_updated_at": "2026-11-24T02:05:33.303000+00:00",
+      "source_schema_updated_at": "2026-09-10T20:24:34.997000+00:00",
+      "feature_count": 1550,
+      "server_reported_count": 1550,
+      "geometry_type": "esriGeometryPolyline",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284,
+        "vcsWkid": 105790,
+        "latestVcsWkid": 3855
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "PRE_TYPE",
+        "PREMOD",
+        "PREDIR",
+        "NAME",
+        "TYPE",
+        "SUFFIX",
+        "ESN_L",
+        "ESN_R",
+        "COMM_L",
+        "COMM_R",
+        "L_F_ADD",
+        "L_T_ADD",
+        "R_F_ADD",
+        "R_T_ADD",
+        "MSAG_L",
+        "MSAG_R",
+        "ROUTE",
+        "CHGDATE",
+        "ALTNAME",
+        "SOURCE",
+        "RD_MAINT",
+        "MILES",
+        "LABEL",
+        "BLOCK_RANG",
+        "STREETMAP_",
+        "ONE_WAY",
+        "ROAD_CLASS",
+        "SHAPE_LENG",
+        "GlobalID",
+        "postal_code_left",
+        "postal_code_right",
+        "Parity_L",
+        "Parity_R",
+        "State_L",
+        "State_R",
+        "County_L",
+        "County_R",
+        "NbrhdCom_L",
+        "NbrhdCom_R",
+        "SpeedLimit",
+        "Shape__Length"
+      ]
+    },
+    "paths": {
+      "dataset": "paths",
+      "title": "Town of Blacksburg \u2014 Paths to the Future (Existing)",
+      "publisher": "Town of Blacksburg",
+      "role": "Trails, sidewalks, bike infrastructure",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Paths_to_the_Future/FeatureServer/0",
+      "retrieved_at": "2026-11-26T00:37:32.620426+00:00",
+      "source_updated_at": "2026-09-16T20:00:35.975000+00:00",
+      "source_schema_updated_at": "2026-09-16T20:00:35.975000+00:00",
+      "feature_count": 1083,
+      "server_reported_count": 1083,
+      "geometry_type": "esriGeometryPolyline",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "Id",
+        "Road",
+        "From_",
+        "To_",
+        "Type",
+        "Route",
+        "F5ftReg",
+        "Status",
+        "Level_",
+        "Width",
+        "Material",
+        "Slope",
+        "Maintenanc",
+        "Alt_Type_1",
+        "Alt_Type_2",
+        "Priority",
+        "Owner",
+        "GlobalID",
+        "Subtype",
+        "Notes",
+        "Shape__Length"
+      ]
+    },
+    "boundary": {
+      "dataset": "boundary",
+      "title": "Town of Blacksburg \u2014 Town Corporate Limits",
+      "publisher": "Town of Blacksburg",
+      "role": "Coverage area boundary",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Administrative_Reference_Boundaries/FeatureServer/4",
+      "retrieved_at": "2026-11-26T00:37:30.959740+00:00",
+      "source_updated_at": "2026-01-31T12:04:17.422000+00:00",
+      "source_schema_updated_at": "2024-06-18T12:03:26.998000+00:00",
+      "feature_count": 1,
+      "server_reported_count": 1,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "GlobalID",
+        "Acres",
+        "Square_Miles",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    },
+    "zoning": {
+      "dataset": "zoning",
+      "title": "Town of Blacksburg \u2014 Town Zoning",
+      "publisher": "Town of Blacksburg",
+      "role": "UNIV polygon = campus core draft; district context",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Zoning_and_Landuse/FeatureServer/9",
+      "retrieved_at": "2026-11-26T00:37:38.719419+00:00",
+      "source_updated_at": "2023-01-09T18:58:24.857000+00:00",
+      "source_schema_updated_at": "2023-01-09T18:58:24.857000+00:00",
+      "feature_count": 112,
+      "server_reported_count": 112,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Extract,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "Zoning",
+        "Color",
+        "Labels",
+        "GlobalID",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    },
+    "address": {
+      "dataset": "address",
+      "title": "Town of Blacksburg \u2014 Address",
+      "publisher": "Town of Blacksburg",
+      "role": "Household base layer (unit-level)",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Address_Road_Building/FeatureServer/0",
+      "retrieved_at": "2026-11-26T00:37:22.603893+00:00",
+      "source_updated_at": "2026-11-21T00:04:57.267000+00:00",
+      "source_schema_updated_at": "2026-09-10T20:24:34.997000+00:00",
+      "feature_count": 20000,
+      "server_reported_count": 20000,
+      "geometry_type": "esriGeometryPoint",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284,
+        "vcsWkid": 105790,
+        "latestVcsWkid": 3855
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 8000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "STNUM",
+        "STREET_PRE_DIR",
+        "STREET_NAME",
+        "STREET_TYPE",
+        "STREET_POST_DIR",
+        "COMMUNITY",
+        "ESN",
+        "ADD_CHECK",
+        "LAT",
+        "LON",
+        "unit",
+        "unit_designator",
+        "postal_code",
+        "E",
+        "ADDR",
+        "GlobalID",
+        "Addtl_Loc",
+        "Floor",
+        "Placement",
+        "LandmkName",
+        "PlaceName",
+        "DateUpdate",
+        "LocalType",
+        "Elev",
+        "Nbrhd_Comm",
+        "Inc_Muni",
+        "County",
+        "State"
+      ]
+    },
+    "landuse": {
+      "dataset": "landuse",
+      "title": "Town of Blacksburg \u2014 Current Land Use",
+      "publisher": "Town of Blacksburg",
+      "role": "Residential filter (replaces county parcels)",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Comprehensive_Plan/FeatureServer/8",
+      "retrieved_at": "2026-11-26T00:37:37.535039+00:00",
+      "source_updated_at": "2026-09-10T20:00:58.010000+00:00",
+      "source_schema_updated_at": "2023-05-04T12:02:16.644000+00:00",
+      "feature_count": 11398,
+      "server_reported_count": 11398,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "ST_Level_1",
+        "ST_Level_2",
+        "ST_Level_3",
+        "Land_Use",
+        "GlobalID",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    },
+    "openspace": {
+      "dataset": "openspace",
+      "title": "Town of Blacksburg \u2014 Open Space",
+      "publisher": "Town of Blacksburg",
+      "role": "HOA / privately-owned polygons: private-drive corroboration",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Parks_and_Open_Space/FeatureServer/1",
+      "retrieved_at": "2026-11-26T00:37:39.970391+00:00",
+      "source_updated_at": "2026-03-14T12:03:48.632000+00:00",
+      "source_schema_updated_at": "2023-05-02T18:42:44.063000+00:00",
+      "feature_count": 375,
+      "server_reported_count": 375,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "Type",
+        "Color",
+        "GlobalID",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    },
+    "building": {
+      "dataset": "building",
+      "title": "Town of Blacksburg \u2014 Building",
+      "publisher": "Town of Blacksburg",
+      "role": "Household sanity check; complex footprints",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Address_Road_Building/FeatureServer/2",
+      "retrieved_at": "2026-11-26T00:37:29.243443+00:00",
+      "source_updated_at": "2026-11-21T00:04:57.267000+00:00",
+      "source_schema_updated_at": "2026-09-10T20:24:34.997000+00:00",
+      "feature_count": 10210,
+      "server_reported_count": 10210,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284,
+        "vcsWkid": 105790,
+        "latestVcsWkid": 3855
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "GlobalID",
+        "SourceType",
+        "STNUM",
+        "STREET_PRE",
+        "STREET_NAM",
+        "STREET_TYP",
+        "STREET_SUF",
+        "LOT_APT",
+        "COMMUNITY",
+        "COMMON_NAME",
+        "PlaceName",
+        "PlaceType",
+        "BLDG_NUM",
+        "DATE_UPDATED",
+        "DATA_SOURCE",
+        "CO_DATE",
+        "notes",
+        "baseElev",
+        "height_ft",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    },
+    "parks": {
+      "dataset": "parks",
+      "title": "Town of Blacksburg \u2014 Parks",
+      "publisher": "Town of Blacksburg",
+      "role": "Named park context for trail curation",
+      "source_url": "https://services1.arcgis.com/rAuQoDGA22NtJdmg/arcgis/rest/services/Parks_and_Open_Space/FeatureServer/0",
+      "retrieved_at": "2026-11-26T00:37:40.919202+00:00",
+      "source_updated_at": "2026-09-09T19:43:53.520000+00:00",
+      "source_schema_updated_at": "2023-05-02T18:42:44.063000+00:00",
+      "feature_count": 44,
+      "server_reported_count": 44,
+      "geometry_type": "esriGeometryPolygon",
+      "source_srs": {
+        "wkid": 102747,
+        "latestWkid": 2284
+      },
+      "snapshot_srs": "EPSG:4326",
+      "service_capabilities": "Query,Sync",
+      "max_record_count": 2000,
+      "license_text": "",
+      "license_status": "NONE_PUBLISHED",
+      "source_id_field": "OBJECTID",
+      "stable_id_field": "GlobalID",
+      "field_names": [
+        "OBJECTID",
+        "Name",
+        "Address",
+        "acreage",
+        "Status",
+        "GlobalID",
+        "Shape__Area",
+        "Shape__Length"
+      ]
+    }
+  },
+  "absorption": {
+    "bike_facility": 54,
+    "bike_facility_unmatched": 32,
+    "sidewalk": 414
+  },
+  "split": {
+    "inputs": 2565,
+    "split": 418,
+    "outputs": 3192,
+    "nodes": 2597,
+    "snaps_over_threshold": 50,
+    "duplicate_geometry_dropped": 173
+  },
+  "connect": {
+    "components_before": 269,
+    "connectors": 432,
+    "components_joined": 249,
+    "components_unreachable": 19,
+    "unreachable": [
+      {
+        "component": 50,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 51,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 52,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 53,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 54,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 55,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 56,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 57,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 58,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 59,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 61,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 62,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      },
+      {
+        "component": 63,
+        "nodes": 2,
+        "reason": "nothing within 25 m in a larger component"
+      }
+    ],
+    "components_after": 64,
+    "stopped_reason": "component count stopped falling; remaining components have nothing within 25 m in a larger component",
+    "passes": [
+      {
+        "pass": 1,
+        "components_before": 269,
+        "connectors": 249,
+        "unreachable": 19
+      },
+      {
+        "pass": 2,
+        "components_before": 91,
+        "connectors": 77,
+        "unreachable": 13
+      },
+      {
+        "pass": 3,
+        "components_before": 70,
+        "connectors": 56,
+        "unreachable": 13
+      },
+      {
+        "pass": 4,
+        "components_before": 64,
+        "connectors": 50,
+        "unreachable": 13
+      },
+      {
+        "pass": 5,
+        "components_before": 64,
+        "connectors": 50,
+        "unreachable": 13
+      }
+    ]
+  },
+  "curation_overrides": {
+    "applied": 6,
+    "miles": 1.041,
+    "segments": [
+      {
+        "segment_id": "SEG-000004",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.227
+      },
+      {
+        "segment_id": "SEG-000010",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.485
+      },
+      {
+        "segment_id": "SEG-000013",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.194
+      },
+      {
+        "segment_id": "SEG-000026",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.048
+      },
+      {
+        "segment_id": "SEG-000031",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.021
+      },
+      {
+        "segment_id": "SEG-000035",
+        "name": "Gordon C Willis Smart Rd",
+        "from_role": "REQUIRED",
+        "to_role": "EXCLUDED",
+        "miles": 0.066
+      }
+    ],
+    "rules": {
+      "gordon c willis smart rd": "The Virginia Smart Road is Virginia Tech Transportation Institute's controlled research facility, not a public street. It is gated, instrumented, and closed to the public except on organised tours; members of the public cannot lawfully walk it. It carries RD_MAINT=Blacksburg in the town's 911 file because emergency vehicles must be routed there, which is exactly the failure mode the Phase 1 audit warned about: presence in a 911 road layer is not evidence of public access. Reclassified REQUIRED -> EXCLUDED 2026-08-03 (Phase 2b.1 item 3)."
+    }
+  },
+  "connector_classes": {
+    "CROSSING_REVIEW_REQUIRED": {
+      "connectors": 30,
+      "miles": 0.137
+    },
+    "HIGH_CONFIDENCE": {
+      "connectors": 223,
+      "miles": 0.88
+    },
+    "LIKELY_FALSE": {
+      "connectors": 8,
+      "miles": 0.04
+    },
+    "UNRESOLVED": {
+      "connectors": 4,
+      "miles": 0.029
+    }
+  },
+  "connector_policy": "Only HIGH_CONFIDENCE connectors are routable by default. The rest stay in the network with routable_by_default=false and walkable=false so they are visible for review but cannot carry a route.",
+  "campus_normalization": {
+    "corridors": 14,
+    "campus_segments": 114,
+    "canonical_segments": 73,
+    "alternative_segments": 41,
+    "alternatives_with_credit": 41,
+    "canonical_segments_with_an_alternative": 35,
+    "alternatives_without_credit": 0,
+    "alternatives_without_credit_ids": [],
+    "satisfy_share": 0.6,
+    "satisfy_distance_m": 45.0,
+    "canonical_miles": 11.359,
+    "duplicate_miles": 2.044,
+    "named_canonical_miles": 5.331,
+    "named_duplicate_miles": 1.126,
+    "unnamed_distinct_miles": 6.028,
+    "unnamed_duplicate_miles": 0.918,
+    "total_campus_pedestrian_miles": 13.403
+  },
+  "campus_promotion": {
+    "applied": 73,
+    "miles": 11.36,
+    "status": "CONFIRMED",
+    "note": "D1b: campus pedestrian corridors carry the coverage obligation for campus, because the town Roads layer does not contain campus streets at all (see docs/02-technical-plan.md \u00a72.4a). One obligation per corridor: the canonical side is REQUIRED, parallel walkways are ALTERNATIVE and satisfy it. Promoted for network v1.2, 2026-08-03.",
+    "duplicate_obligation_miles_avoided": 2.044,
+    "segments": [
+      {
+        "segment_id": "SEG-000659",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.295
+      },
+      {
+        "segment_id": "SEG-000684",
+        "name": "Southgate Dr",
+        "corridor": "southgate dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.225
+      },
+      {
+        "segment_id": "SEG-000733",
+        "name": "Smithfield Road Trl",
+        "corridor": "smithfield rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.236
+      },
+      {
+        "segment_id": "SEG-000760",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.046
+      },
+      {
+        "segment_id": "SEG-000792",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.056
+      },
+      {
+        "segment_id": "SEG-000793",
+        "name": "Washington St",
+        "corridor": "washington st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.129
+      },
+      {
+        "segment_id": "SEG-000794",
+        "name": "Beamer Way",
+        "corridor": "beamer way",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.357
+      },
+      {
+        "segment_id": "SEG-000835",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.124
+      },
+      {
+        "segment_id": "SEG-000837",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.055
+      },
+      {
+        "segment_id": "SEG-000843",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.009
+      },
+      {
+        "segment_id": "SEG-000858",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.292
+      },
+      {
+        "segment_id": "SEG-000864",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.397
+      },
+      {
+        "segment_id": "SEG-000874",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.229
+      },
+      {
+        "segment_id": "SEG-000875",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.26
+      },
+      {
+        "segment_id": "SEG-000887",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.076
+      },
+      {
+        "segment_id": "SEG-000919",
+        "name": "Duck Pond Drive Trl",
+        "corridor": "duck pond dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.301
+      },
+      {
+        "segment_id": "SEG-000944",
+        "name": "Life Science Cir",
+        "corridor": "life science cir",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.153
+      },
+      {
+        "segment_id": "SEG-000956",
+        "name": "Smithfield Road Trl",
+        "corridor": "smithfield rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.146
+      },
+      {
+        "segment_id": "SEG-000963",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.358
+      },
+      {
+        "segment_id": "SEG-000974",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.258
+      },
+      {
+        "segment_id": "SEG-000978",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.058
+      },
+      {
+        "segment_id": "SEG-001032",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.297
+      },
+      {
+        "segment_id": "SEG-001037",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.103
+      },
+      {
+        "segment_id": "SEG-001041",
+        "name": "Duck Pond Drive Trl",
+        "corridor": "duck pond dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.07
+      },
+      {
+        "segment_id": "SEG-001044",
+        "name": "Smithfield Road Trl",
+        "corridor": "smithfield rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.004
+      },
+      {
+        "segment_id": "SEG-001071",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.043
+      },
+      {
+        "segment_id": "SEG-001073",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.147
+      },
+      {
+        "segment_id": "SEG-001102",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.052
+      },
+      {
+        "segment_id": "SEG-001109",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.395
+      },
+      {
+        "segment_id": "SEG-001144",
+        "name": "Oak Lane Trl",
+        "corridor": "oak ln",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.77
+      },
+      {
+        "segment_id": "SEG-001153",
+        "name": "Duck Pond Trl",
+        "corridor": "duck pond",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.27
+      },
+      {
+        "segment_id": "SEG-001163",
+        "name": "Duck Pond Trl",
+        "corridor": "duck pond",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.123
+      },
+      {
+        "segment_id": "SEG-001189",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.232
+      },
+      {
+        "segment_id": "SEG-001216",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.282
+      },
+      {
+        "segment_id": "SEG-001219",
+        "name": "Drillfield Dr",
+        "corridor": "drillfield dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.193
+      },
+      {
+        "segment_id": "SEG-001239",
+        "name": "Drillfield Dr",
+        "corridor": "drillfield dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.083
+      },
+      {
+        "segment_id": "SEG-001273",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.126
+      },
+      {
+        "segment_id": "SEG-001301",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.032
+      },
+      {
+        "segment_id": "SEG-001306",
+        "name": "Prices Fork Road Trl",
+        "corridor": "prices fork rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.056
+      },
+      {
+        "segment_id": "SEG-001308",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.072
+      },
+      {
+        "segment_id": "SEG-001311",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.136
+      },
+      {
+        "segment_id": "SEG-001319",
+        "name": "Drillfield Dr",
+        "corridor": "drillfield dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.065
+      },
+      {
+        "segment_id": "SEG-001331",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.053
+      },
+      {
+        "segment_id": "SEG-001346",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.127
+      },
+      {
+        "segment_id": "SEG-001362",
+        "name": "W Campus Dr",
+        "corridor": "campus dr w",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.233
+      },
+      {
+        "segment_id": "SEG-001388",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.077
+      },
+      {
+        "segment_id": "SEG-001396",
+        "name": "Drillfield Dr",
+        "corridor": "drillfield dr",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.235
+      },
+      {
+        "segment_id": "SEG-001412",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.089
+      },
+      {
+        "segment_id": "SEG-001435",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.096
+      },
+      {
+        "segment_id": "SEG-001439",
+        "name": "Prices Fork Road Trl",
+        "corridor": "prices fork rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.214
+      },
+      {
+        "segment_id": "SEG-001441",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.287
+      },
+      {
+        "segment_id": "SEG-001501",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.084
+      },
+      {
+        "segment_id": "SEG-001526",
+        "name": "Perry St",
+        "corridor": "perry st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.106
+      },
+      {
+        "segment_id": "SEG-001536",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.19
+      },
+      {
+        "segment_id": "SEG-001544",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.061
+      },
+      {
+        "segment_id": "SEG-001546",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.11
+      },
+      {
+        "segment_id": "SEG-001559",
+        "name": "Stanger St",
+        "corridor": "stanger st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.134
+      },
+      {
+        "segment_id": "SEG-001591",
+        "name": "W Campus Dr",
+        "corridor": "campus dr w",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.108
+      },
+      {
+        "segment_id": "SEG-001600",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.04
+      },
+      {
+        "segment_id": "SEG-001605",
+        "name": "Prices Fork Road Trl",
+        "corridor": "prices fork rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.2
+      },
+      {
+        "segment_id": "SEG-001608",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.035
+      },
+      {
+        "segment_id": "SEG-001616",
+        "name": "W Campus Drive Trl",
+        "corridor": "campus dr w",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.033
+      },
+      {
+        "segment_id": "SEG-001622",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.128
+      },
+      {
+        "segment_id": "SEG-001627",
+        "name": "Perry St",
+        "corridor": "perry st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.2
+      },
+      {
+        "segment_id": "SEG-001637",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.033
+      },
+      {
+        "segment_id": "SEG-001640",
+        "name": "Prices Fork Road Trl",
+        "corridor": "prices fork rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.182
+      },
+      {
+        "segment_id": "SEG-001662",
+        "name": "Prices Fork Road Trl",
+        "corridor": "prices fork rd",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.018
+      },
+      {
+        "segment_id": "SEG-001681",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.125
+      },
+      {
+        "segment_id": "SEG-001683",
+        "name": "Stanger St",
+        "corridor": "stanger st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.117
+      },
+      {
+        "segment_id": "SEG-001718",
+        "name": "Turner St",
+        "corridor": "turner st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.281
+      },
+      {
+        "segment_id": "SEG-001728",
+        "name": "Stanger St",
+        "corridor": "stanger st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.045
+      },
+      {
+        "segment_id": "SEG-001737",
+        "name": null,
+        "corridor": null,
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.066
+      },
+      {
+        "segment_id": "SEG-001756",
+        "name": "Stanger St",
+        "corridor": "stanger st",
+        "from_role": "OPTIONAL_CONNECTOR",
+        "miles": 0.042
+      }
+    ]
+  },
+  "totals": {
+    "OPTIONAL_CONNECTOR": {
+      "segments": 962,
+      "miles": 59.398
+    },
+    "OPTIONAL_CONNECTOR::OUT_OF_AREA_CONNECTOR": {
+      "segments": 4,
+      "miles": 4.215
+    },
+    "REQUIRED": {
+      "segments": 1585,
+      "miles": 145.216
+    },
+    "REQUIRED::STREET": {
+      "segments": 1452,
+      "miles": 123.434
+    },
+    "EXCLUDED": {
+      "segments": 472,
+      "miles": 49.807
+    },
+    "EXCLUDED::STREET": {
+      "segments": 424,
+      "miles": 45.842
+    },
+    "OPTIONAL_CONNECTOR::TRAIL": {
+      "segments": 350,
+      "miles": 30.543
+    },
+    "OPTIONAL_CONNECTOR::PEDESTRIAN_CONNECTOR": {
+      "segments": 608,
+      "miles": 24.639
+    },
+    "REQUIRED::TRAIL": {
+      "segments": 87,
+      "miles": 14.894
+    },
+    "EXCLUDED::TRAIL": {
+      "segments": 48,
+      "miles": 3.965
+    },
+    "REQUIRED::PEDESTRIAN_CONNECTOR": {
+      "segments": 46,
+      "miles": 6.887
+    },
+    "ALL": {
+      "segments": 3019,
+      "miles": 254.42
+    },
+    "ELIGIBLE_MILEAGE": 145.216
+  },
+  "households": {
+    "residential_address_points": 18225,
+    "estimated_housing_units": 18168,
+    "units_associated_to_required_coverage": 11227,
+    "units_associated_to_connector_only": 656,
+    "units_held_for_review": 6285,
+    "public_label": "Estimated households prayed for",
+    "public_label_maps_to": "units_associated_to_required_coverage",
+    "public_value": 11227,
+    "method": "RESIDENTIAL_UNITS_ON_REQUIRED_COVERAGE",
+    "occupancy_model_applied": false,
+    "occupancy_model_note": "Deliberately none. A residential dwelling unit associated with a REQUIRED segment is the unit of account. Applying an unsourced occupancy rate would make the number less auditable, not more accurate.",
+    "translation": "residential address points (LocalType=Residential) -> drop non-dwellings: vacant / demolished / under construction -> drop duplicate normalized address keys = estimated housing units -> associate each unit one-to-one with the nearest REQUIRED segment within 75 m (name-match tie-break; REQUIRED outranks connectors), holding units in complexes a walker cannot pass = units associated to REQUIRED coverage = the public number"
+  },
+  "household_stats": {
+    "address_points_total": 20000,
+    "non_residential": 1775,
+    "residential_address_points": 18225,
+    "excluded_not_a_dwelling": 57,
+    "estimated_housing_units": 18168,
+    "unit_level_points": 10060,
+    "building_level_points": 8108,
+    "distinct_buildings": 9010
+  },
+  "association_stats": {
+    "confidence_low": 1925,
+    "role_required": 11227,
+    "beyond_cap": 679,
+    "confidence_high": 7678,
+    "confidence_medium": 2280,
+    "held_unresolved_complex": 5606,
+    "role_optional_connector": 656,
+    "associated": 11883,
+    "unassociated": 6285
+  },
+  "dedup_rules": {
+    "apartment_units": "Each address point is one dwelling unit. Unit-level points (APT/UNIT/LOT/BLDG) are counted individually and never also counted as their parent building address.",
+    "duplicate_addresses": "Households are keyed on a normalized composite address (number + directional + street + type + post-dir + unit). Collisions are dropped and reported.",
+    "corner_properties": "A household has exactly one primary_segment_id. Secondary associations are recorded for admin inspection but never counted.",
+    "buildings_multiple_segments": "Association is one-to-one from the household side, so a building fronting two streets contributes to one segment only.",
+    "repeated_route_segments": "Route-level totals sum distinct household ids, not per-segment counts, so revisiting a segment cannot double-count it."
+  },
+  "ownership_conflicts": {
+    "count": 38,
+    "rule": "RD_MAINT primary",
+    "file": "review/ownership-conflicts.json"
+  },
+  "complexes": {
+    "profiled": 105,
+    "held_entirely": 32,
+    "held_partially": 13,
+    "accepted": 60,
+    "units_held_entirely": 5606,
+    "rule_version": "v2 (recalibrated against Terrace View / Hunters Ridge / The Mill)",
+    "changed_by_recalibration": 28,
+    "file": "review/apartment-complexes.json"
+  },
+  "review_queue": {
+    "NEEDS_REVIEW": 1045,
+    "reason::Trail not on the D2 curated list; connector until reviewed.": 383,
+    "reason::SYNTHETIC: derived connector stitching a disconnected pedestrian compo": 265,
+    "reason::Sidewalk with no matching street segment \u2014 may be a genuine connector ": 284,
+    "reason::Public per RD_MAINT but midpoint falls inside an HOA/privately-owned o": 4,
+    "reason::RD_MAINT=Private conflicts with ROAD_CLASS=Local": 38,
+    "reason::Campus path: D1b requires a curated selection, not blanket inclusion. ": 12,
+    "reason::Campus walkway, unmatched to any street. D1b candidate; held for revie": 29,
+    "reason::Path Type='Alley' not covered by an automatic rule.": 30
+  },
+  "corrections": {
+    "name_fixes": 24,
+    "value_fixes": 2,
+    "anomalies": 32,
+    "file": "review/corrections.json"
+  },
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "no_zero_length_segments",
+        "passed": true,
+        "fatal": true,
+        "detail": "0 segments <= 5 cm"
+      },
+      {
+        "name": "segment_ids_unique",
+        "passed": true,
+        "fatal": true,
+        "detail": "3019 ids, 3019 distinct"
+      },
+      {
+        "name": "household_keys_unique",
+        "passed": true,
+        "fatal": true,
+        "detail": "18168 households, 18168 distinct keys"
+      },
+      {
+        "name": "one_primary_segment_per_household",
+        "passed": true,
+        "fatal": true,
+        "detail": "11883 links, 11883 distinct households"
+      },
+      {
+        "name": "required_segments_connected",
+        "passed": false,
+        "fatal": false,
+        "detail": "98 REQUIRED segments off the main component (117 components total)"
+      },
+      {
+        "name": "housing_units_plausible",
+        "passed": true,
+        "fatal": false,
+        "detail": "18168 estimated housing units (plausible band 12,000-24,000; compared against housing units, not the ~13,800 occupied-household figure)"
+      },
+      {
+        "name": "association_rate",
+        "passed": false,
+        "fatal": false,
+        "detail": "34.6% of housing units unassociated"
+      }
+    ],
+    "stranded_components": 116
+  },
+  "blocked_sources": [
+    {
+      "url": "https://services5.arcgis.com/IZ8QFYP84iubFqmi/arcgis/rest/services/Parcels_Open_Data/FeatureServer/0",
+      "title": "Montgomery County \u2014 Parcels Open Data",
+      "publisher": "Montgomery County, VA",
+      "role": "Residential cross-check; EX_CLASSD property class",
+      "blocked_host": "services5.arcgis.com",
+      "license_status": "DISCLAIMER_ONLY",
+      "note": "egress policy denied this host from the build environment; no data retrieved, no schema inferred"
+    },
+    {
+      "url": "https://vginmaps.vdem.virginia.gov/arcgis/rest/services/VA_Base_Layers/VBMP_RCL/FeatureServer",
+      "title": "VGIN \u2014 Virginia Road Centerlines (RCL)",
+      "publisher": "Virginia Geographic Information Network",
+      "role": "VT campus street candidate source; statewide cross-check",
+      "blocked_host": "vginmaps.vdem.virginia.gov",
+      "license_status": "DISCLAIMER_ONLY",
+      "note": "egress policy denied this host from the build environment; no data retrieved, no schema inferred"
+    },
+    {
+      "url": "https://vginmaps.vdem.virginia.gov/arcgis/rest/services/VA_Base_Layers/VA_Address_Points/FeatureServer",
+      "title": "VGIN \u2014 Virginia Address Points",
+      "publisher": "Virginia Geographic Information Network",
+      "role": "Address cross-check; campus address candidate source",
+      "blocked_host": "vginmaps.vdem.virginia.gov",
+      "license_status": "DISCLAIMER_ONLY",
+      "note": "egress policy denied this host from the build environment; no data retrieved, no schema inferred"
+    }
+  ]
+}
